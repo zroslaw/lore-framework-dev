@@ -1,6 +1,6 @@
 ---
 description: Lore agents dedicated to lore framework development
-version: "9"
+version: "10"
 ---
 
 # Lore Framework Agents

@@ -11,7 +11,18 @@ The **domain directory** is the parent containing all repos. The user runs Claud
 
 ## Design Principles
 
-**Foundational framing:** lore agents are team-shared knowledge containers, not personal notebooks. This frames every principle below. See `team-shared-knowledge-principle.md`.
+**Foundational framings (identity-layer trio):**
+- Lore agents are **team-shared knowledge containers**, not personal notebooks — `team-shared-knowledge-principle.md` (outcome layer).
+- LRF is the **engine/environment/tooling for self-improving Lore Agents**, not a knowledge base — `framework-as-engine-not-kb.md` (identity layer). KB is a *consequence* of how agents persist state, not the framework's identity.
+- Agents are **executors first, advisors second** — primary value is getting things done; conversational use is a secondary affordance. `agents-are-executors-first.md`.
+
+These three frame every principle below.
+
+**Persisted-state distinction:** what each agent carries is **knowledge** (markdown — what it knows) plus **skills** (tools + instructions — what it can do). Two distinct, growing assets with distinct growth mechanisms — knowledge accrues passively via reflection, skills evolve actively via in-flight teaching. Don't collapse them. See `knowledge-vs-skills-distinction.md`, `in-flight-skill-teaching-pattern.md`.
+
+**Self-sustaining dynamic:** the user's incentive (work faster) is the same activity that feeds the agent's growth — a **positive feedback loop between usage and learning**. Loop only spins under executor-first framing; advisor-only use breaks it. See `positive-feedback-loop-framing.md`.
+
+**Positioning:** the agent is increasingly the **universal working environment** — unified interface to git, JIRA, Confluence, Grafana, Slack. Lore Agents specialize this generic environment with area-specific knowledge and skills. See `agent-as-universal-working-environment.md`.
 
 Directory-driven, plain markdown (frontmatter only for descriptor files), git-as-metadata, delete-don't-mark, knowledge graph via filename references. Decoupled framework, agent-driven operations, concise context with detailed docs on demand, explicit (repo-level) versioning, skill/doc separation. **Framework-scope vs agent-scope:** framework owns what is universal; agents own repo/host/workflow specifics — isolate the universal core first, push specifics to agent lore or specialist agents reached via `/lr:consult` / `/lr:attach`. See `system-design-principles.md`, `framework-scope-vs-agent-scope.md`.
 
@@ -91,6 +102,18 @@ User-triggered, **four-phase**: `/lr:reflect` → `/lr:merge` → `/lr:summarize
 
 See `conventions.md` in `lore-framework/docs/`.
 
+## Onboarding Doc Authoring
+
+Co-authoring framework onboarding docs for individual teams adopting Lore Agents is part of the role (see `role.md`). The accumulated toolkit:
+
+- **Identity-layer framings** (load before drafting): `framework-as-engine-not-kb.md`, `agents-are-executors-first.md`, `team-shared-knowledge-principle.md`.
+- **What agents persist**: `knowledge-vs-skills-distinction.md`, `in-flight-skill-teaching-pattern.md`.
+- **Dynamic + positioning**: `positive-feedback-loop-framing.md`, `agent-as-universal-working-environment.md`.
+- **Reusable structure**: `onboarding-doc-narrative-pattern.md` — §1 four-beat narrative (status quo → why obvious fix fails → Lore Agents alternative → universal working environment), §4 grouped command reference, tone rules (blockquote headlines, no "your X" for reader-state, terminology hygiene).
+- **Terminology hygiene**: `terminology-domain-collision-trap.md` — "Domain" is the LRF term *only*; use "area"/"subsystem"/"project" for the loose-English sense. Same applies to "Agent", "Skill", "Lore" — qualify on first use, watch adjacent occurrences.
+
+When a team requests help, recall these and draft from them. First instance: Activities team's `LORE_AGENTS_INTRO.md` (~3 days of iteration), which surfaced this cluster.
+
 ## Current State
 
 Three repos now exist in this domain:
@@ -98,7 +121,7 @@ Three repos now exist in this domain:
 - `lore-framework-agents/` — **new this session** — dedicated agent repo for framework development; currently houses just `lore-architect`. Carved out from `lore-agents/` to keep framework design knowledge team-shared and the plugin distribution slim. Currently nested at `lore-framework/lore-framework-agents/` as a temporary placement; intent is to extract to its own GitHub repository on a different account and place it at the domain root. Stamped at `version: "9"`. See `plugin-vs-agent-repo-separation.md`, `agent-discovery-nesting-constraint.md`.
 - `lore-agents/` — two personal agents remain: masschallenge-judge, tax-advisor. Stamped at `version: "9"`.
 
-Forty lore topics: `architecture-overview.md`, `system-design-principles.md`, `finalization-process.md`, `lore-topic-format.md`, `slash-command-system.md`, `domain-directory-concept.md`, `consistency-checks.md`, `plugin-distribution.md`, `pull-domain-utility.md`, `workdir-as-reference-library.md`, `update-process.md`, `skill-doc-pattern.md`, `versioning-release-types.md`, `lore-search-pattern.md`, `attach-pattern.md`, `consult-pattern.md`, `design-doc-before-implement.md`, `vector-db-search-parked.md`, `tooling-cwd-safety.md`, `plugin-compat-template-audit.md`, `placeholder-vocabulary.md`, `migration-ownership.md`, `session-summaries-feature.md`, `jsonl-session-files-investigation.md`, `merge-in-booted-subagents.md`, `reflect-merge-execution-asymmetry.md`, `push-conflict-resolution.md`, `framework-scope-vs-agent-scope.md`, `worktrees-convention.md`, `lr-init-feature.md`, `finalize-autopush.md`, `framework-improvements-backlog.md`, `autonomous-agents-vision.md`, `autonomous-agents-substrate.md`, `spawn-teammate-feature.md`, `team-shared-knowledge-principle.md`, **`naming-foundational-principles.md`**, **`plugin-vs-agent-repo-separation.md`**, **`agent-discovery-nesting-constraint.md`**, **`sonnet-subagent-review-pattern.md`**.
+Forty-eight lore topics: `architecture-overview.md`, `system-design-principles.md`, `finalization-process.md`, `lore-topic-format.md`, `slash-command-system.md`, `domain-directory-concept.md`, `consistency-checks.md`, `plugin-distribution.md`, `pull-domain-utility.md`, `workdir-as-reference-library.md`, `update-process.md`, `skill-doc-pattern.md`, `versioning-release-types.md`, `lore-search-pattern.md`, `attach-pattern.md`, `consult-pattern.md`, `design-doc-before-implement.md`, `vector-db-search-parked.md`, `tooling-cwd-safety.md`, `plugin-compat-template-audit.md`, `placeholder-vocabulary.md`, `migration-ownership.md`, `session-summaries-feature.md`, `jsonl-session-files-investigation.md`, `merge-in-booted-subagents.md`, `reflect-merge-execution-asymmetry.md`, `push-conflict-resolution.md`, `framework-scope-vs-agent-scope.md`, `worktrees-convention.md`, `lr-init-feature.md`, `finalize-autopush.md`, `framework-improvements-backlog.md`, `autonomous-agents-vision.md`, `autonomous-agents-substrate.md`, `spawn-teammate-feature.md`, `team-shared-knowledge-principle.md`, `naming-foundational-principles.md`, `plugin-vs-agent-repo-separation.md`, `agent-discovery-nesting-constraint.md`, `sonnet-subagent-review-pattern.md`, **`framework-as-engine-not-kb.md`**, **`agents-are-executors-first.md`**, **`knowledge-vs-skills-distinction.md`**, **`positive-feedback-loop-framing.md`**, **`agent-as-universal-working-environment.md`**, **`onboarding-doc-narrative-pattern.md`**, **`terminology-domain-collision-trap.md`**, **`in-flight-skill-teaching-pattern.md`**.
 
 ## Active Design Explorations
 
