@@ -19,9 +19,31 @@ Four-beat narrative, each beat a **headline phrase as a blockquote** followed by
 
 Concrete examples grounded in the team's actual use. Skipped in v1 of the doc.
 
+**Authoring approach (v2):** fan `/lr:consult` calls out in parallel to the agents that actually did the work — the host (lore-architect) doesn't have the operational detail; the working agents do. See `use-cases-via-parallel-consult-pattern.md` for the full procedure (mapping, parallel dispatch, brief shape, weaving returns, caveats).
+
+**Meta closer subsection.** End the use-cases list with a final subsection titled along the lines of *"And — meta — this very document — `<host>` + `<N>` agents"*. Two short paragraphs:
+
+1. **Naming the agents.** State that the doc was co-authored with the host agent and list the consultants that fed each section by name. Reference back to specific lore topics that drove specific sections (e.g., "§1's narrative came from `onboarding-doc-narrative-pattern.md`").
+2. **Naming the loop.** Close with the self-referential payoff: the agents that did the work are the ones writing the doc about the work, and the doc itself becomes a referenced session in their lore next time someone boots them.
+
+Why it works: the reader has just walked through N use cases; the (N+1)th is the doc they're holding — self-illustrating proof. Closes the positive-feedback-loop framing from §1: §1 *asserts* the loop; the meta subsection *demonstrates* it. Skip for strict reference manuals — keep it for narrative/showcase docs.
+
 ## Section 3 — The Anatomy
 
-How the moving parts fit together. Skipped in v1.
+Demystification, not specification. Lead with "A Lore Agent is, mechanically, just a directory of plain markdown files…" Same blockquote-headline pattern as §1 — visual rhythm carries across. "Deliberately boring" works as a tone marker.
+
+A short `tree`-style code block between the lead-in and the bullet list helps enormously — readers grasp the structure visually before parsing prose. Keep it ≤20 lines, abbreviate long lists with `…`, use real example agent names from the target repo (not generic placeholders). Show one agent expanded, one or two siblings collapsed to communicate "many agents per repo." Include `sessions/YYYY/MM/` even though it's not in the four-piece list — it's visible on disk and readers will ask.
+
+Three blockquote beats, in this order:
+
+1. **"A role, a context, a body of lore, and a workdir."** — the four pieces of an agent. One bullet per piece (`role.md`, `lore-context.md`, `lore/`, `workdir/`), each ≤2 sentences: what it is, when it's loaded, what it's for. Mention the ≤50K-token budget on `lore-context.md` as a concrete constraint.
+2. **"Boot → work → finalize."** — the session lifecycle. Three sub-bullets (Boot / Work / Finalize), with Finalize expanded to the v9 four phases (Reflect → Merge → Summarize → Commit+push) as a numbered list. This is where the doc earns its keep — readers see how growth actually happens.
+3. **"Plain markdown, in Git, by design."** — the closing framing. Why the boring choice matters: reviewable, portable, durable, team-trustable. Pre-empts "why not a database / vector store / proprietary format" without arguing the point head-on.
+
+What to skip in §3:
+- Reflection/merge internals (how reflection extracts, how merge integrates) — the four-phase enumeration is enough for onboarding.
+- File-format details beyond "plain markdown" — `lore-context.md` token budget is the only number worth surfacing.
+- Cross-agent mechanisms (`/lr:recall`, `/lr:consult`, `/lr:attach`) — these belong in §4 Features and the use-cases section, not Anatomy. Mentioning them in §3 dilutes the focus on a single agent's structure.
 
 ## Section 4 — Features
 
@@ -66,4 +88,10 @@ The §1 narrative depends on these — don't draft without them loaded:
 - `agent-as-universal-working-environment.md` — the positioning.
 - `terminology-domain-collision-trap.md` — terminology hygiene.
 
-Source session: Activities team's intro doc, ~3 days of iteration with the user. The user's revisions converged on this structure after several reorderings; preserved here so the next onboarding doc starts closer to the right shape.
+Source session: Activities team's intro doc, ~3 days of iteration with the user. The user's revisions converged on this structure after several reorderings; preserved here so the next onboarding doc starts closer to the right shape. v2 (May 2026) added §3 Anatomy and the §2 meta-closer/parallel-consult patterns from a follow-up authoring session.
+
+## See also
+
+- `use-cases-via-parallel-consult-pattern.md` — how to populate §2 by fanning consults to the working agents.
+- `sonnet-subagent-review-pattern.md` — pre-publication review step for high-stakes onboarding drafts.
+- `framework-as-engine-not-kb.md` — the "boring by design" framing §3 pulls from.
