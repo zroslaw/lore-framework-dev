@@ -3,12 +3,16 @@ When shipping a substantive change (script, skill, doc set), run **three paralle
 ## Triggers
 
 Use this when shipping:
+
 - A new script that processes user-controlled input.
 - A skill rename or hard-rename of an existing one.
 - A doc sweep across many files.
 - A vocabulary or schema change.
+- **Doc-only edits that ship as a `VERSION` bump** (added in v12) — release notes, new skill docs, conventions changes. The pattern's overhead is fine; the catch rate justifies it.
 
-Don't use this for trivial commits — overhead isn't worth it. Reach for it when the change has meaningful blast radius.
+Don't use this for trivial commits — overhead isn't worth it. Reach for it when the change has meaningful blast radius: anything that gets a version stamp, anything that hits production users.
+
+For routine edits (single-file polish, lore topic additions inside an agent's own knowledge), still skip — overhead isn't worth it. For lore additions, prefer `sonnet-subagent-review-pattern.md` (single-lens role-perspective).
 
 ## Lens choice — pick three that don't overlap
 
@@ -16,17 +20,20 @@ Round 1 of v11 used: **correctness/bash semantics**, **security/parser robustnes
 
 Round 2 of v11 used: **terminology coherence**, **newcomer experience**, **release readiness/disclosure**.
 
+Round 1 of v12 (doc-only ship) used: **UX/newcomer/discoverability**, **framework architectural consistency**, **correctness/safety/accuracy with filesystem verification**.
+
 The lens choice should be deliberate per ship. Lenses that worked well:
 
 - **Correctness / bash semantics** — bugs, races, edge cases, idiomatic shell. Catches array-handling, trap bugs, locale issues.
 - **Security / parser robustness** — adversarial input, command injection, path traversal, hostile content. Critical when user-controlled data drives execution.
-- **UX / output quality** — does the user see actionable error messages? Is output scannable? Are exit codes consistent?
+- **UX / output quality / discoverability** — does the user see actionable error messages? Is output scannable? Are exit codes consistent? For doc edits: will a real user hitting a real problem find this skill, understand it, apply the fix?
 - **Terminology coherence** — when a vocabulary change sweeps multiple files, did the migration actually hold together? Are there half-migrated contradictions?
 - **Newcomer experience** — walk through the docs as a first-time user. Where does the path break down? What's missing? What's mis-routed?
 - **Release readiness / disclosure** — are breaking changes mentioned? Is auto-upgrade safe? Are version stamps consistent? Is the backlog updated?
-- **Framework fit / architecture** — does the change compose cleanly with existing patterns? Does it violate any framework principles?
+- **Framework architectural consistency** — does the change compose with the three-layer model, skill-doc pattern, framework-scope-vs-agent-scope, naming-foundational-principles meta-rule, sibling-skill non-overlap? Especially powerful when the architecture reviewer is given the architect's own `lore-context.md` as a baseline — applies the architect's stated meta-rules to the change being reviewed.
+- **Correctness with filesystem verification** — for doc edits that promise commands, paths, or behaviors, the correctness reviewer should run actual bash commands (`ls ~/.claude/plugins/cache/`, `cat .../VERSION`, `find ...`) and ground every finding in observed state. Catches defects pure prose review misses.
 
-**Rule:** the lenses should be *mutually exclusive* — if two reviewers are likely to find the same issues, you've wasted a slot.
+**Rule:** the lenses should be *mutually exclusive* — if two reviewers are likely to find the same issues, you've wasted a slot. Tell each lens explicitly what to skip (what the others will catch).
 
 ## Brief structure for each reviewer
 
@@ -35,9 +42,10 @@ Effective briefs share this shape:
 1. **Context** — what's shipping, what changed.
 2. **Files to review** — concrete absolute paths. Include "files NOT in scope but might still need a check" — that's where misses hide.
 3. **What to look for** — explicit list under each lens's specialty. Examples of failure modes you want them to consider.
-4. **What to skip** — generic advice ("use set -e"), nits, low-confidence findings.
-5. **Output format** — severity (BLOCKER / HIGH / MEDIUM / LOW), file:line, issue, one-sentence fix, final verdict.
-6. **Cap on length** — ~600 words per reviewer. Keeps reports digestible.
+4. **What to skip** — generic advice ("use set -e"), nits, low-confidence findings, *and what the other lenses will catch*.
+5. **Anchor docs** — for architectural review, point at `lore-architect/lore-context.md`. For correctness review, list internal claims to verify with filesystem checks.
+6. **Output format** — severity (BLOCKER / HIGH / MEDIUM / LOW), file:line, issue, one-sentence fix, final verdict.
+7. **Cap on length** — ~600 words per reviewer. Keeps reports digestible.
 
 ## How to apply findings
 
@@ -51,7 +59,7 @@ After the fan-out completes:
 
 ## Cost
 
-Three parallel agents typically run 30s–3min. Cost is real but not prohibitive — appropriate for substantive ships. Don't over-use; reserve for changes that warrant the scrutiny.
+Three parallel agents typically run 30s–3min. Cost is real but not prohibitive — appropriate for substantive ships including doc-only `VERSION` bumps. Don't over-use; reserve for changes that warrant the scrutiny.
 
 ## When the reviewers disagree
 
@@ -59,14 +67,42 @@ Trust your own judgment after reading the actual code/docs. Reviewers operate fr
 
 ## Two rounds, not one, when the change is large
 
-v11 used two rounds: round 1 caught script-level issues (security, correctness, basic UX); round 2 (after a sweep was added) caught terminology coherence, newcomer experience, and release readiness — issues that didn't exist when round 1 ran. Each round was tightly scoped to its phase of work.
+Two rounds proved valuable in both v11 and v12 ships:
+
+- **v11**: round 1 caught script-level issues (security, correctness, basic UX); round 2 (after a sweep was added) caught terminology coherence, newcomer experience, and release readiness.
+- **v12**: round 1 (three lenses, ~25 findings) caught the targeted vs broader cache-wipe scoping (filesystem-verified by correctness reviewer), broken cross-references (architecture reviewer), and the bootstrap-note chicken-and-egg case (UX reviewer). Round 2 (single reviewer, narrow scope) confirmed shipping with one nit. The verdict-grade ("ship as-is" vs "more rounds") was the actual value of round 2, not new findings.
+
+Each round was tightly scoped to its phase of work.
+
+## Filesystem-grounded correctness — the v12 escalation
+
+For doc edits that promise concrete commands, paths, or behaviors, the correctness reviewer should ground every finding in **actually run bash commands** rather than prose evaluation:
+
+- `ls ~/.claude/plugins/cache/` to verify path layout
+- `cat .../VERSION` to confirm version stamps
+- `diff -r ...` to verify file equivalence
+- `find ~/.claude/plugins -maxdepth 2 -type l` to map symlink structure
+
+The v12 ship's targeted-vs-broader cache-wipe defect (40MB of unrelated plugin state at risk) was caught only because the correctness reviewer ran ~12 actual filesystem commands. Pure prose review would have shipped the broader command as the default.
+
+Builds into the brief: list the claims; ask the reviewer to run commands proving each.
+
+## Architecture lens reading the architect's own lore
+
+For framework-architectural review, point the architecture reviewer at `lore-architect/lore-context.md` as a baseline. This lets it apply the architect's own meta-rules ("name foundational principles as their own topics", three-layer model, framework-scope-vs-agent-scope) to the change being reviewed.
+
+Several v12 findings traced directly back to architect-authored principles, which the architect would have applied if reviewing solo — but the gap between authoring a principle and applying it consistently is exactly what an outside lens catches.
 
 ## Composition with `sonnet-subagent-review-pattern.md`
 
-That pattern is **single-lens role-as-perspective** — one reviewer booted as the agent itself, used for principle-class lore additions and structural changes within an agent's own knowledge. This pattern is **multi-lens adversarial fan-out** — three reviewers with disjoint specialty lenses, used for shipped framework artifacts (scripts, skills, doc sweeps, schema changes). Often complementary: use sonnet-subagent for the lore-side polish; use parallel-reviewer for the public-facing ship.
+That pattern is **single-lens role-as-perspective** — one reviewer booted as the agent itself, used for principle-class lore additions and structural changes within an agent's own knowledge. This pattern is **multi-lens adversarial fan-out** — three reviewers with disjoint specialty lenses, used for shipped framework artifacts (scripts, skills, doc sweeps, schema changes, doc-only `VERSION` bumps).
+
+Often complementary: use sonnet-subagent for the lore-side polish; use parallel-reviewer for the public-facing ship.
 
 ## See Also
 
 - `sonnet-subagent-review-pattern.md` — single-lens role-as-perspective review (different shape, often complementary).
 - `use-cases-via-parallel-consult-pattern.md` — adjacent: parallel fan-out for *content gathering*, not review.
 - `yaml-parser-shell-hardening-checklist.md` — operational distillation of the security lens; pre-applies what reviewers would otherwise catch.
+- `feedback-don-t-defer-completable-scope.md` — applied during triage (don't defer fixes that fit in current session).
+- `ailment-catalog-pattern.md` — the v12 ship that validated this pattern's application to doc-only edits.

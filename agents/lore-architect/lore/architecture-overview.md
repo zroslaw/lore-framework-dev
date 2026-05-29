@@ -9,12 +9,12 @@ When extending the framework, identify which layer a change belongs to before to
 **Plugin** (`lore-framework` — installed as `lr`):
 - `.claude-plugin/plugin.json` — plugin manifest
 - `.claude-plugin/marketplace.json` — self-hosted marketplace manifest
-- `skills/<name>/SKILL.md` — skill definitions (boot, reflect, merge, summarize, finalize, register-repo, unregister-repo, create-repo, create-agent, list-agents, list-repos, check, workspace-sync, update, recall, attach, consult, init, spawn-teammate)
-- `docs/` — detailed instructions referenced by skills via `${CLAUDE_PLUGIN_ROOT}/docs/`
+- `skills/<name>/SKILL.md` — skill definitions (boot, reflect, merge, summarize, finalize, register-repo, unregister-repo, create-repo, create-agent, list-agents, list-repos, check, workspace-sync, update, recall, attach, consult, init, spawn-teammate, **doctor** [v12])
+- `docs/` — detailed instructions referenced by skills via `${CLAUDE_PLUGIN_ROOT}/docs/`. Includes `doctor.md` (orchestrator) and `doctor-<slug>.md` ailment topics (catalog members, see `ailment-catalog-pattern.md`). `conventions.md` carries the v12 cache-clear footer convention (see `cache-clear-footer-convention.md`).
 - `scripts/workspace-sync` — workspace clone+pull orchestration (parallel)
 - `migrations/<N>.md` — per-version migration instructions consumed by `/lr:update`
-- `release-notes/<N>.md` — per-version informational release notes
-- `VERSION` — single source of truth for the current framework version (currently `11`)
+- `release-notes/<N>.md` — per-version informational release notes; cache-affecting versions must include the Clear Plugin Cache footer
+- `VERSION` — single source of truth for the current framework version (currently `12`)
 
 **Agent repo** (e.g., `lore-agents/`):
 - `lore-repo.md` — repo descriptor at the root; marks the directory as a lore agent repo. YAML frontmatter: `description` and `version` (framework version string). This is the **only** place a framework version is stamped.

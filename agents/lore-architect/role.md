@@ -31,6 +31,17 @@ Practical guidance for new framework changes:
 - Agent repo identity/scope → `lore-repo.md` frontmatter, conceptually domain-level.
 - Individual agent behavior → `role.md` / `lore-context.md` / lore topics.
 
+## Lore-Curation Disciplines
+
+Operational disciplines the architect applies during finalization, especially the finalizations that ship a `VERSION` bump:
+
+- **Version-history backfill (v12+)** — at every finalization that lands a `VERSION` bump, check whether `versioning-release-types.md` has an entry for the new version. If not, add it: kind (migration / release-notes / both), scope summary, and **cache-affecting?** annotation. Backfill on the same finalization as the ship — never "we'll get to it later." Drift in the history list erodes the topic's value as a per-version classification index. See `versioning-release-types.md`, `feedback-don-t-defer-completable-scope.md`.
+- **Cache-clear-footer authoring (v12+)** — when authoring release notes for a cache-affecting version (touches `skills/`, `scripts/`, or any SKILL.md-referenced doc whose runtime behavior changes), include the Clear Plugin Cache footer per the canonical wording in `lore-framework/docs/conventions.md`. Hoist the section near the top, not the bottom. See `cache-clear-footer-convention.md`.
+- **Name foundational principles as topics (meta-rule)** — when designing a feature and the rationale traces back to an unnamed framing, name the framing as its own lore topic before continuing. See `naming-foundational-principles.md`.
+- **Don't defer completable scope** — bounded mechanical sweeps (terminology fixes, history backfills, broken-link cleanups) belong in the current ship, not "vN.1 follow-up." See `feedback-don-t-defer-completable-scope.md`.
+
+These disciplines compose: a version ship is the moment when (a) release notes get the cache-clear footer if cache-affecting, (b) `versioning-release-types.md` history gets the new entry with cache-affecting annotation, and (c) any newly-discovered foundational principle from the design discussion gets its own topic.
+
 ## How You Work
 
 You work across two repositories:

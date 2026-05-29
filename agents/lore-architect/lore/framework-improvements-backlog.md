@@ -24,6 +24,7 @@ Items are grouped by area. Each has a one-line what + why + rough trigger or sta
 ## Documentation / Meta
 
 - ~~**README skills table sync**~~ — done in v11. Table now lists all skills, grouped by purpose (workspace setup / working with agents / session lifecycle / authoring / maintenance), with `/lr:finalize` description corrected to the four-phase form. Quick Start was also restructured to lead with the team-joining path.
+- **README skill table refresh for v12** — verify `/lr:doctor` is added to the skills table (Maintenance group is the natural home). Trigger: next time the README is touched, or sooner if asked.
 - **Markdown-renderer compatibility for HTML-comment markers** — `/lr:init` uses `<!-- lr:init:start -->` markers. Some renderers strip HTML comments. If any user's tooling bites on this, switch to visible sentinel headings. No action until observed.
 - **Consolidated "framework conventions" doc** — there's `conventions.md`, `worktrees.md`, `skill-doc-pattern.md`-type rules scattered. At some size, a single index or "start here" doc could help. Not urgent.
 - **Broken `contributions-feature.md` reference in `framework-scope-vs-agent-scope.md`** — its See Also points to `contributions-feature.md` which doesn't exist in `lore/`. Pre-existing dangling link; worth a cleanup pass on See Also sections across topics. Open sub-question: `/lr:check` claims reference integrity (checks 9–10 per `consistency-checks.md`) but this dangling link persists — either the check covers something narrower or it has a gap. Investigate during a future framework-maintenance session.
@@ -65,6 +66,12 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 ## Process
 
 - **Reflect-merge ergonomics** — writing reflections then merging them has overhead for single-agent sessions with trivial deltas. Inline shortcut for "just write to lore directly" is sometimes more pragmatic. Document when to shortcut vs when to go through the full flow.
+
+## Ailment Catalog (`/lr:doctor`, v12)
+
+- **Accretion candidates** — additional ailments to capture when real-world cases surface: workspace-sync conflict shapes, common merge-conflict reconciliation recipes, onboarding-doc anti-patterns (terminology/framing traps), agent boot failures from missing `lore-repo.md`/`role.md` files, registered command desynced from agent name. Add as cases distill from real usage; do not pre-populate. See `ailment-catalog-pattern.md`.
+- **Ailment-discovery hook in finalization** — when a session diagnoses an issue not yet in the catalog, the finalize flow should prompt: "Was this an ailment? Add a `doctor-<slug>.md` topic?" Lightweight discipline cue. Trigger: after enough sessions where catalog gaps were noticed only after the fact.
+- **`/lr:check` cross-reference to `/lr:doctor`** — already added in v12 (one-line cross-ref in `check.md` and `update.md`). If users discover further gaps where `/lr:check` reports clean but a runtime issue persists, that's the signal to add a new ailment.
 
 ## Workspace-Sync (`/lr:workspace-sync`, v11)
 

@@ -10,18 +10,31 @@ Starting with v3, framework version bumps can carry two kinds of artifacts:
 - Feature/doc additions only → create only `release-notes/<N>.md`
 - Large release with both → create both
 - **At least one must exist** — the update process treats a gap as a framework packaging bug
+- **If the version is cache-affecting** (touches `skills/`, `scripts/`, or any `docs/<name>.md` referenced by a SKILL.md whose runtime behavior changes), include the **Clear Plugin Cache** footer per `cache-clear-footer-convention.md`. The cache-affecting axis is **orthogonal** to the migration-vs-release-notes axis.
 
 ## History
 
-- v1, v2 — migration-only (both required user-side schema changes)
-- v3 — first release-notes-only bump (added /lr:recall, subagent-scan, auto boot version check; no user-side file changes needed)
-- v4 — release-notes-only (added /lr:attach, /lr:consult; additive)
-- v5 — both (migration regenerating legacy sibling-path boot commands, plus release notes)
-- v6 — both (migration, plus release notes)
-- v7 — release-notes-only (session summaries feature; `sessions/` dirs created on demand, no schema change)
-- v8 — **release-notes-only** (v8 is purely behavioral: merge moves to uniform subagents, guest summaries in phase 3, commit+push centralized into phase 4, conflict-resolution subagent procedure. None of this touches user-side files — only framework docs/skills change.)
-- v9 — release-notes-only (worktree convention, `/lr:init`, fully automated finalization).
-- v10 — release-notes-only (`/lr:spawn-teammate` BETA — Agent Teams integration).
+Each entry annotates: kind (migration / release-notes / both), and as of v12, **cache-affecting?** (yes/no). Cache-affecting determines whether the v12 cache-clear footer is mandatory in the release notes.
+
+- v1, v2 — migration-only (both required user-side schema changes). Cache-affecting status pre-dates the convention.
+- v3 — release-notes-only (added /lr:recall, subagent-scan, auto boot version check; no user-side file changes needed). Cache-affecting (added skill).
+- v4 — release-notes-only (added /lr:attach, /lr:consult; additive). Cache-affecting (added skills).
+- v5 — both (migration regenerating legacy sibling-path boot commands, plus release notes). Cache-affecting.
+- v6 — both (migration, plus release notes). Cache-affecting.
+- v7 — release-notes-only (session summaries feature; `sessions/` dirs created on demand, no schema change). Cache-affecting (touched summarize/finalize docs).
+- v8 — release-notes-only (purely behavioral: merge moves to uniform subagents, guest summaries in phase 3, commit+push centralized into phase 4, conflict-resolution subagent procedure). Cache-affecting (touched process-merge.md, finalize.md, summarize.md — all SKILL.md-referenced).
+- v9 — release-notes-only (worktree convention, `/lr:init`, fully automated finalization). Cache-affecting (added /lr:init skill, touched finalize.md).
+- v10 — release-notes-only (`/lr:spawn-teammate` BETA — Agent Teams integration). Cache-affecting (added skill).
+- **v11 — release-notes-only**; added `/lr:workspace-sync` (hard rename of `/lr:pull-domain`), `repos:` field in `lore-repo.md`, full vocabulary sweep `<workspace>` vs domain. **Cache-affecting** — the hard rename triggered the very failure mode that motivated v12 (users still seeing `/lr:pull-domain` from stale cache).
+- **v12 — release-notes-only**; added `/lr:doctor` skill with the ailment catalog pattern (see `ailment-catalog-pattern.md`); codified the cache-clear authoring convention in `docs/conventions.md` (see `cache-clear-footer-convention.md`). **Cache-affecting** — adds new skill; the chicken-and-egg case where the skill needed to fix stale-cache *is* the skill being added.
+
+## Backfill discipline
+
+Every finalization that lands a `VERSION` bump must check whether `versioning-release-types.md` has an entry for the new version. If not, add it — including kind, scope summary, and cache-affecting annotation. Backfill at the same finalization that ships the version is the principled timing — not "we'll get to it later." Drift in the history list erodes the topic's value as a per-version classification index.
+
+This discipline composes with the deferral-discipline rule (`feedback-don-t-defer-completable-scope.md`): the backfill is a bounded mechanical task that fits in the current ship's scope. It also composes with the cache-clear-footer convention: the same finalization should both (a) ensure the release-notes has the footer if applicable, and (b) record the cache-affecting status in this history list.
+
+The role.md responsibilities call this out explicitly — see `role.md` § Lore-Curation Disciplines.
 
 ## In-band BETA refinement (post-v10 observation)
 
@@ -42,4 +55,8 @@ When the feature graduates from BETA, the graduation release notes describe the 
 
 First observed instance: spawn-teammate post-v10 boot-prompt reframe (see `spawn-teammate-feature.md`). If more BETA refinements accumulate and the playbook stays stable, this section should be promoted to a standalone topic (`beta-refinement-workflow.md`).
 
-See `update-process.md` for how the update flow applies both types.
+## See Also
+
+- `cache-clear-footer-convention.md` — the v12 authoring convention this topic's cache-affecting axis tracks.
+- `update-process.md` — how the update flow applies migration + release-notes artifacts.
+- `feedback-don-t-defer-completable-scope.md` — discipline that the backfill rule applies to itself.
