@@ -67,12 +67,31 @@ Trust your own judgment after reading the actual code/docs. Reviewers operate fr
 
 ## Two rounds, not one, when the change is large
 
-Two rounds proved valuable in both v11 and v12 ships:
+Two rounds proved valuable in v11, v12, and v13 ships:
 
 - **v11**: round 1 caught script-level issues (security, correctness, basic UX); round 2 (after a sweep was added) caught terminology coherence, newcomer experience, and release readiness.
 - **v12**: round 1 (three lenses, ~25 findings) caught the targeted vs broader cache-wipe scoping (filesystem-verified by correctness reviewer), broken cross-references (architecture reviewer), and the bootstrap-note chicken-and-egg case (UX reviewer). Round 2 (single reviewer, narrow scope) confirmed shipping with one nit. The verdict-grade ("ship as-is" vs "more rounds") was the actual value of round 2, not new findings.
+- **v13**: round 1 (correctness, architecture, UX in parallel) had two reviewers stall after partial returns; the third (UX) returned a full report with 19 findings. Round 2 (single focused reviewer with filesystem verification) caught cross-doc contradictions round 1 structurally couldn't, plus verified the dirty-tree-no-gate decision live in `/tmp`.
 
 Each round was tightly scoped to its phase of work.
+
+**Refinement (v13):** plan round 2 deliberately as **a single focused reviewer with filesystem access and the full diff in scope** — not just "more rounds if needed." Round 1 is "find issues per lens" (breadth, parallel, lens-isolated). Round 2 is "verify fixes and catch cross-doc drift" (depth, sequential, full diff). Two distinct jobs.
+
+## Graceful degradation when a parallel reviewer stalls
+
+Parallel reviewer fan-out can stall on individual reviewers — Claude's stream-watchdog timeouts, network blips, model errors. The pattern degrades gracefully if you treat partial returns as additive evidence rather than failed runs.
+
+**v13 instance:** two of three round-1 reviewers (correctness + architecture) timed out after 600s. Each returned a partial finding before stalling — both genuine: correctness caught a stale `Step 3` reference; architecture caught a missing boot-ordering rationale gap. The UX reviewer returned a full 19-finding report. **The pattern still produced enough material to ship safely.** Round 2 then verified the fixes plus surfaced two more contradictions.
+
+**Operational rules when reviewers stall:**
+
+1. **Don't abort on partial returns.** A stalled reviewer that returned even one finding before timing out has done useful work. Treat it as additive evidence, not a discarded run. Read what came back; act on it.
+2. **A single non-stalled reviewer is often enough breadth.** If at least one of N reviewers returned a full report, you have a baseline. The stalled reviewers' partials supplement.
+3. **Round 2 closes the gap.** A focused single-reviewer round 2 with the full diff in scope catches cross-doc drift round 1's per-doc reviewers structurally cannot. Especially valuable when round 1 had stalls — round 2 is the consistency check.
+4. **Internal contradictions across docs are the highest-yield round-2 finding.** Round 1's per-doc reviewers each see one slice; round 2 with the full diff catches drift like "doc A says X, doc B references the now-removed X."
+5. **Filesystem verification beats prose review.** Round 2 should run actual bash commands (constructing scenarios in `/tmp`, `ls`/`cat`/`diff` against the real cache or repo). The v13 dirty-tree-no-gate decision was *verified live* by setting up dirty-tree scenarios and observing git's actual behavior — irreplaceable evidence vs prose claims.
+
+**Don't mistake graceful degradation for tolerance of broken reviewers.** If reviewers are stalling consistently across runs, that's a workflow signal — the brief may be too long, the model may be wrong-sized, or the prompt may be triggering the watchdog. Investigate. Graceful degradation is the safety net, not the design goal.
 
 ## Filesystem-grounded correctness — the v12 escalation
 

@@ -51,3 +51,4 @@ The principle's guarantees apply to the standard finalization flow (sequential s
 - `session-summaries-feature.md` — session summary mechanics; the narrative-for-future-readers artifact this principle relies on
 - `framework-scope-vs-agent-scope.md` — universal vs specific boundary (different axis, related concern)
 - `plugin-vs-agent-repo-separation.md` — downstream consequence: framework design knowledge gets its own team-shared agent repo, not a personal one
+- `freshness-contracts-at-session-boundaries.md` — staleness in a team-shared repo is the primary read-side failure mode; v13's auto-pull mechanism crystallized this into a named principle

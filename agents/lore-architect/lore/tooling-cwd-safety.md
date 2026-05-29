@@ -19,3 +19,7 @@ Any new framework doc touching filesystems across repo boundaries must follow th
 ## Scope
 
 This is a domain-specific operational rule for agents that work across multiple sibling repos in a single domain — the entire reason lore-architect exists. Agents scoped to a single repo can ignore it.
+
+## See Also
+
+- `dirty-tree-gates-write-vs-read-distinction.md` — adjacent "name what the gate is protecting against" git-discipline. CWD safety and dirty-tree gates are both cases of **articulating the hazard precisely** rather than reflexively applying defensive boilerplate.
