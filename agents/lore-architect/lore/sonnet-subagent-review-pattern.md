@@ -54,3 +54,4 @@ All three exploit the same `role.md` + `lore-context.md` boot to give the subage
 - `consult-pattern.md` — same boot mechanism, applied to one-shot consultation
 - `reflect-merge-execution-asymmetry.md` — when to delegate vs run inline
 - `design-doc-before-implement.md` — composes naturally: review the design draft before publishing
+- `parallel-reviewer-fanout-pattern.md` — the **multi-lens** counterpart: three reviewers with disjoint lenses for shipped framework artifacts (scripts, doc sweeps, schema changes). Different shape, often complementary.

@@ -1,19 +1,19 @@
-Framework convention (v9+) for working with non-default branches of repos inside a domain.
+Framework convention (v9+) for working with non-default branches of repos inside a workspace.
 
 ## Invariant
 
-Top-level directories in `<domain>/` that are repo checkouts stay on their default branch (whatever that branch is named — `main`, `master`, `trunk`, etc.; git tracks it per-repo). The framework does not maintain its own list of default branches.
+Top-level directories in `<workspace>/` that are repo checkouts stay on their default branch (whatever that branch is named — `main`, `master`, `trunk`, etc.; git tracks it per-repo). The framework does not maintain its own list of default branches.
 
 The invariant preserves three things:
-- The domain as a snapshot of current production state across all its repos.
+- The workspace as a snapshot of current production state across all its repos.
 - Agent lore that references "this repo's code" — drift from the invariant quietly corrupts that lore.
-- `/lr:pull-domain` semantics (refreshes all top-level repos; ambiguous if any is on a feature branch).
+- `/lr:workspace-sync` semantics (refreshes all top-level repos; ambiguous if any is on a feature branch).
 
 ## Rule
 
-Non-default-branch work — new features, bug fixes, or inspecting someone else's branch — happens in a git worktree at `<domain>/.worktrees/<repo>/<slug>/`. Both contribution and inspection cases use the same mechanism. Standard git worktree commands; no framework wrappers.
+Non-default-branch work — new features, bug fixes, or inspecting someone else's branch — happens in a git worktree at `<workspace>/.worktrees/<repo>/<slug>/`. Both contribution and inspection cases use the same mechanism. Standard git worktree commands; no framework wrappers.
 
-Branch naming `<agent-name>/<slug>` is a suggestion for signaling ownership in multi-agent domains, not enforced.
+Branch naming `<agent-name>/<slug>` is a suggestion for signaling ownership in multi-agent workspaces, not enforced.
 
 ## Optional Per-Agent Notes
 
@@ -38,6 +38,6 @@ Replaces the earlier contributions-feature design (v8-era draft, not shipped). K
 
 ## See Also
 
-- `lr-init-feature.md` — writes the compact convention into the domain's CLAUDE.md
+- `lr-init-feature.md` — writes the compact convention into the workspace's CLAUDE.md
 - `framework-improvements-backlog.md` — tracks deferred extensions
 - `framework-scope-vs-agent-scope.md` — the principle this convention applies

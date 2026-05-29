@@ -18,4 +18,6 @@ This is a specific instance of the broader principle: **terminology hygiene matt
 
 When introducing any LRF term that has a natural-English homonym, name the collision explicitly in the definition and pick a different word for the natural-English sense. Better awkward phrasing than reader confusion.
 
+**v11 vocabulary update:** "domain" was further refined — "Domain" now refers specifically to the *conceptual scope* of a single agent repo, while the *filesystem* sense (the dir Claude runs from) is now called **workspace**. The split matters because the framework now has skills (`/lr:workspace-sync`) and schemas (`repos:`) that operate at the filesystem level — calling that "domain" would have collided with both the agent-repo-scope sense and the loose-English sense. See `workspace-vs-domain-vocabulary.md` for the full split and disambiguation rules.
+
 Companion of `onboarding-doc-narrative-pattern.md` — terminology hygiene is one of its tone rules, surfaced here as its own topic because the failure mode is independent and recurrent.

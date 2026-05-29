@@ -9,12 +9,12 @@ Docs mixed `<repo>`, `<repo-path>`, `<agent-repo>` inconsistently. Two real fail
 1. **Ambiguity with unrelated domain repos.** A domain may contain a product codebase, a docs site, vendor repos — any number of git repos besides the lore agent repo. A placeholder named `<repo>` is too generic; an agent reading the doc could plausibly substitute the wrong one.
 2. **Single-repo assumption.** `<repo>` quietly implies exactly one, making multi-lore-agent-repo domains a corner case rather than a first-class shape.
 
-## v5 vocabulary
+## v5 vocabulary (refined in v11)
 
 - `<lore-agent-repo>` — an agent repo being operated on (contains `lore-repo.md` at its root)
 - `<guest-lore-agent-repo>` — the repo of a guest agent, when `/lr:attach` crosses a repo boundary
 - `<agent-name>` — kebab-case directory under `agents/`
-- `<domain>` — parent directory containing all repos
+- `<workspace>` — the top-level working directory Claude is launched from (filesystem parent of agent repos). **Renamed from `<domain>` in v11.** "Domain" is now reserved for the *conceptual* scope of a single agent repo (used in prose only). See `workspace-vs-domain-vocabulary.md`.
 - `${CLAUDE_PLUGIN_ROOT}` — literal; resolved by Claude Code to the installed plugin path
 
 ## Core principle: placeholder is a slot, not an identity

@@ -1,12 +1,20 @@
-The lore system is split across a plugin and one or more agent repos within a domain directory.
+The lore system is split across a plugin and one or more agent repos within a workspace. As of v11, three discrete layers are explicit and named:
+
+1. **Plugin layer** (`lore-framework/`) — what's distributed via the marketplace. Universal across all installs.
+2. **Domain layer** (each agent repo) — the conceptual scope of a single agent repo. `lore-repo.md` carries its descriptor + `repos:` declarations.
+3. **Workspace layer** (the filesystem parent) — the dir Claude is run from. May host one or more agent repos plus their declared sibling repos.
+
+When extending the framework, identify which layer a change belongs to before touching files. See `workspace-vs-domain-vocabulary.md`.
 
 **Plugin** (`lore-framework` — installed as `lr`):
 - `.claude-plugin/plugin.json` — plugin manifest
 - `.claude-plugin/marketplace.json` — self-hosted marketplace manifest
-- `skills/<name>/SKILL.md` — 13 skill definitions (boot, reflect, merge, finalize, register-repo, unregister-repo, create-repo, create-agent, list-agents, list-repos, check, pull-domain, update)
+- `skills/<name>/SKILL.md` — skill definitions (boot, reflect, merge, summarize, finalize, register-repo, unregister-repo, create-repo, create-agent, list-agents, list-repos, check, workspace-sync, update, recall, attach, consult, init, spawn-teammate)
 - `docs/` — detailed instructions referenced by skills via `${CLAUDE_PLUGIN_ROOT}/docs/`
+- `scripts/workspace-sync` — workspace clone+pull orchestration (parallel)
 - `migrations/<N>.md` — per-version migration instructions consumed by `/lr:update`
-- `VERSION` — single source of truth for the current framework version (currently `2`)
+- `release-notes/<N>.md` — per-version informational release notes
+- `VERSION` — single source of truth for the current framework version (currently `11`)
 
 **Agent repo** (e.g., `lore-agents/`):
 - `lore-repo.md` — repo descriptor at the root; marks the directory as a lore agent repo. YAML frontmatter: `description` and `version` (framework version string). This is the **only** place a framework version is stamped.

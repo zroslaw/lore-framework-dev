@@ -2,12 +2,12 @@ Running backlog of framework-level improvements, deferred items, and open questi
 
 Items are grouped by area. Each has a one-line what + why + rough trigger or status. Promote an item into its own lore topic (and its own design draft in `workdir/`) when it becomes active.
 
-## Init / Domain Bootstrap
+## Init / Workspace Bootstrap
 
-- **Domain creation automation** — a scaffolding command or flow that creates a new domain directory, optionally with an agent repo initialized, a `README.md` carrying setup instructions, and an auto-invocation of `/lr:init`. Separate, larger project; the "instructions-to-init-runner" idea from v9 lands here. Status: deferred; revisit when we have more than one hand-built domain.
-- **Richer `/lr:init` payloads** — v1 payload is only the worktree convention. Future additions planned: domain intro, list of registered agents, invocation tips (`/lr-<agent>-agent` shortcuts), links to framework docs. All extend the same `<!-- lr:init -->` marker block; mechanism unchanged. Trigger: user feedback on what's missing from the domain CLAUDE.md; framework features that want visibility at session start.
-- **Sync CLAUDE.md on framework version bump** — when a future version updates the canonical payload, existing domains' CLAUDE.md goes stale. Options: user reruns `/lr:init` manually; `/lr:update` chains it; boot checks payload version and prompts. Design when adding the first payload-changing version after v9.
-- **Booted-agent nudge for un-initialized domain** — originally proposed: at boot, check for `<!-- lr:init -->` markers; if absent, emit a one-line suggestion to run `/lr:init`. Dropped in v9 as too complicated. User prefers the future domain-creation-automation path to solve discovery.
+- **Workspace creation automation** — a scaffolding command or flow that creates a new workspace, optionally with an agent repo initialized, a `README.md` carrying setup instructions, and an auto-invocation of `/lr:init`. Status: partially addressed by v11's `/lr:workspace-sync` (the *consumer* side — bootstrap an existing workspace from one cloned agent repo). The *producer* side (initial scaffolding from nothing) is still deferred; revisit when we have more than one hand-built workspace.
+- **Richer `/lr:init` payloads** — v1 payload was only the worktree convention; v11 renamed the header from "Lore Framework Domain" to "Lore Framework Workspace" but didn't grow the body. Future additions planned: workspace intro, list of registered agents, invocation tips (`/lr-<agent>-agent` shortcuts), links to framework docs. All extend the same `<!-- lr:init -->` marker block; mechanism unchanged. Trigger: user feedback on what's missing from the workspace CLAUDE.md; framework features that want visibility at session start.
+- **Sync CLAUDE.md on framework version bump** — v11 changed the payload header; users have to rerun `/lr:init` manually to refresh. Options for future: `/lr:update` chains `/lr:init`; boot checks payload version and prompts. Decide when the next payload-changing version lands.
+- **Booted-agent nudge for un-initialized workspace** — originally proposed: at boot, check for `<!-- lr:init -->` markers; if absent, emit a one-line suggestion to run `/lr:init`. Dropped in v9 as too complicated. User prefers the future workspace-creation-automation path to solve discovery.
 
 ## Worktree Convention
 
@@ -23,7 +23,7 @@ Items are grouped by area. Each has a one-line what + why + rough trigger or sta
 
 ## Documentation / Meta
 
-- **README skills table sync** — `lore-framework/README.md` skills table is stale. Missing: `/lr:update`, `/lr:pull-domain`, `/lr:recall`, `/lr:attach`, `/lr:consult`, `/lr:summarize`, `/lr:init`. Small task; do in a dedicated docs-only commit. Related: stale `/lr:finalize` description in the same table — says "Reflect + merge in one step" but it's been four phases since v9 (reflect + merge + summarize + commit+push). One-line fix; explicitly held back from a previous session's edit to keep commit scope clean.
+- ~~**README skills table sync**~~ — done in v11. Table now lists all skills, grouped by purpose (workspace setup / working with agents / session lifecycle / authoring / maintenance), with `/lr:finalize` description corrected to the four-phase form. Quick Start was also restructured to lead with the team-joining path.
 - **Markdown-renderer compatibility for HTML-comment markers** — `/lr:init` uses `<!-- lr:init:start -->` markers. Some renderers strip HTML comments. If any user's tooling bites on this, switch to visible sentinel headings. No action until observed.
 - **Consolidated "framework conventions" doc** — there's `conventions.md`, `worktrees.md`, `skill-doc-pattern.md`-type rules scattered. At some size, a single index or "start here" doc could help. Not urgent.
 - **Broken `contributions-feature.md` reference in `framework-scope-vs-agent-scope.md`** — its See Also points to `contributions-feature.md` which doesn't exist in `lore/`. Pre-existing dangling link; worth a cleanup pass on See Also sections across topics. Open sub-question: `/lr:check` claims reference integrity (checks 9–10 per `consistency-checks.md`) but this dangling link persists — either the check covers something narrower or it has a gap. Investigate during a future framework-maintenance session.
@@ -66,9 +66,16 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 
 - **Reflect-merge ergonomics** — writing reflections then merging them has overhead for single-agent sessions with trivial deltas. Inline shortcut for "just write to lore directly" is sometimes more pragmatic. Document when to shortcut vs when to go through the full flow.
 
-## Domain Topology
+## Workspace-Sync (`/lr:workspace-sync`, v11)
 
-- **Discovery gap for nested agent repos** — domain discovery scans direct subdirectories of cwd only; nested agent repos are invisible to `/lr:list-*`, `/lr:check`, `/lr:recall`, `/lr:pull-domain`, `/lr:spawn-teammate`, `/lr:boot`. Currently `lore-framework-agents/` is nested inside `lore-framework/` as a temporary placement, reachable only via the registered `/lr-lore-architect-agent` shortcut. User will extract to a domain-root sibling on its own GitHub repo. Tracked here for the eventual move; deeper question of whether discovery should walk one level (or accept a config-file hint) is open if nested layouts become a recurring pattern. See `agent-discovery-nesting-constraint.md`, `plugin-vs-agent-repo-separation.md`.
+- **`repos:` validators in `/lr:check`** — verify URL syntax (parseable, has scheme), reachability (probe with `git ls-remote`, run sparingly because network), dir-name collision (two declared URLs deriving the same dir name across descriptors). Not added in v11 by design — wait until usage shows what to check. Trigger: user reports stale or broken URL lists; multi-domain workspaces accumulate friction. See `workspace-sync-utility.md`.
+- **Undeclared-top-level-repo nudge** — when `/lr:workspace-sync` finishes and there are top-level git repos in the workspace that aren't declared in any `repos:` field, print a one-liner: *"N undeclared top-level repos: foo, bar, baz. Add to a lore-repo.md `repos:` block to share workspace structure."* Contextual nudge, not a guide. Cheap to add. Trigger: real adopters with multi-domain workspaces want their setups to bootstrap for teammates.
+- **Per-entry overrides in `repos:`** — schema currently is a flat URL list. Branch pinning, custom dir name, depth, etc. would need an object-form entry: `{ url: ..., branch: ..., dir: ... }`. Defer until real-world usage demands it; v11 schema is deliberately tight. See `workspace-sync.md` Limitations.
+- **Inline-flow form (`repos: [a, b]`)** — deliberately not supported in v11 to keep the awk parser surface small. Reconsider only if users complain.
+
+## Workspace Topology
+
+- **Discovery gap for nested agent repos** — workspace discovery scans direct subdirectories of cwd only; nested agent repos are invisible to `/lr:list-*`, `/lr:check`, `/lr:recall`, `/lr:workspace-sync`, `/lr:spawn-teammate`, `/lr:boot`. Currently `lore-framework-dev/` is nested inside `lore-framework/` as a temporary placement, reachable only via the registered `/lr-lore-architect-agent` shortcut. User will extract to a workspace-root sibling on its own GitHub repo. Tracked here for the eventual move; deeper question of whether discovery should walk one level (or accept a config-file hint) is open if nested layouts become a recurring pattern. See `agent-discovery-nesting-constraint.md`, `plugin-vs-agent-repo-separation.md`.
 
 ## Agent Teams / Spawn-Teammate (additions)
 
@@ -86,3 +93,4 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 - `workdir/draft-lr-init-feature.md` — design session that established the v9 deferred list (many items above originate there)
 - `design-doc-before-implement.md` — why active items get a workdir draft before framework-file edits
 - `framework-scope-vs-agent-scope.md` — test for whether a proposed framework item belongs here or in agent-owned territory
+- `feedback-don-t-defer-completable-scope.md` — when *not* to add to this backlog: bounded mechanical sweeps belong in the current ship, not deferred

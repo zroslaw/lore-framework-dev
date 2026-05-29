@@ -11,7 +11,7 @@ Domain discovery (the procedure in `agent-boot.md` and the various skills below)
 - `/lr:list-agents`, `/lr:list-repos`
 - `/lr:check` (descriptor validation, structural checks)
 - `/lr:recall` fan-out across active agents
-- `/lr:pull-domain`
+- `/lr:workspace-sync`
 - `/lr:spawn-teammate` agent enumeration
 - `/lr:boot <name>` discovery path
 

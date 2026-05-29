@@ -48,7 +48,7 @@ What to skip in §3:
 ## Section 4 — Features
 
 Full command reference grouped by purpose:
-- Day-to-day (boot, finalize, list-agents, list-repos, pull-domain)
+- Day-to-day (boot, finalize, list-agents, list-repos, workspace-sync)
 - Cross-agent collaboration (recall, consult, attach, spawn-teammate)
 - Finalization sub-steps (reflect, merge, summarize)
 - One-time / setup (init, register-repo, unregister-repo)
