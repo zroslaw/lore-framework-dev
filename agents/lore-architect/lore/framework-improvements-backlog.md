@@ -45,6 +45,15 @@ Items are grouped by area. Each has a one-line what + why + rough trigger or sta
 - **Autonomous background agents** — re-frame lore agents from session-bound interactive workers to always-on collaborators with persistent task state, asking for input only when needed. Implications across process model (daemonization), state model (task state, not just lore), communication model (agent → user channels), reflection model (autonomous reflect triggering), and multi-agent surface (switchboard for N parallel agents). Status: parked vision, no design doc yet. Concrete first step: `/lr:spawn-teammate` via Agent Teams. See `autonomous-agents-vision.md`.
 - **Autonomous-agents substrate findings** — concrete macOS building blocks identified: tmux for the process layer, iTerm2 Python API for GUI control, Claude Code hooks (`Stop`, `Notification`, etc.) as the signal source (strictly superior to regex triggers), escape sequences for status surface (tab color/title), `terminal-notifier` for click-actionable notifications, and a Python switchboard daemon under `launchd` for orchestration. Security: never bind `0.0.0.0` without auth — RCE risk; prefer narrow HTTP API in front of the iTerm2 socket over raw socket exposure. Parked while Agent Teams experiment runs. See `autonomous-agents-substrate.md`.
 
+## lr-dev (SDLC Extension — major direction)
+
+New module/mode for development & SDLC automation; first feature is bug-finding & test-coverage. Anchor topic: `lr-dev-direction.md`. Full design in `workdir/draft-lr-dev.md` + `workdir/draft-lr-dev-quality.md` (active exploration). North star: autonomous "dark-factory" SDLC (see `autonomous-agents-vision.md`).
+
+- **Migrations must walk the new repo kind** — `dev-repo-lore.md` repo-lore stores carry a framework `version` in frontmatter, so `/lr:update`, boot auto-upgrade, and version-check/auto-pull need to recognize, migrate, and stamp them too — not just agent repos. Falls out of the descriptor decision. Trigger: when lr-dev moves from draft to first implementation. See `workdir/draft-lr-dev.md` §4, §9.
+- **Three-tier knowledge model + repo lore** — framework / repo / agent tiers; repo lore (product + technical + artifact) is agent-agnostic, stored repo-side, write-gated to lr-dev-enabled agents on lr-dev-enabled repos; product/tech stored separately (no cross-duplication) with `product-`/`tech-lore-context` entry points. Promote framings to lore topics at finalization. See draft §2, §4, §11.
+- **Reusable multi-lens review skill** — promote `parallel-reviewer-fanout-pattern.md` to an lr-dev skill (`lr:dev-review`) usable for any code change. See draft §6.
+- **Open seams** — mode-switch mechanism, skill namespacing, scenario→code binding, per-artifact staleness, generated-vs-human de-dup. Tracked in draft §9.
+
 ## `/lr:spawn-teammate` Beta Graduation
 
 - **Lore-write serialization** — concurrent teammates write last-write-wins. Is file-lock/queued-merge needed or is "defer lore-changing work to finalization" sufficient?
