@@ -16,8 +16,22 @@ Single source of truth: `lore-framework/docs/auto-pull.md`. Four invocation site
 `auto-pull.md` defines:
 
 1. Skip cleanly if not a git repo or no `origin` remote (returns success — degraded mode).
-2. `GIT_TERMINAL_PROMPT=0 git -C <repo> pull --ff-only` with a 60-second timeout.
+2. `git -C <repo> pull --ff-only`, bounded against hangs (see the transport-aware hang model below).
 3. Report per-site verbosity: boot/attach/merge are quiet on no-op (silent on `already up to date`, silent on skip); `/lr:pull-lore` is always verbose because user-invoked.
+
+## Transport-aware hang model (v14)
+
+v14 corrected the hang-prevention model. v13 had said "with a short timeout (60s)", which invited `timeout 60 git …` — but `timeout`/`gtimeout` are GNU coreutils, **absent on stock macOS/BSD** → exit 127 → auto-pull aborted → **v13 auto-pull silently never ran on macOS**, the primary dev platform (see `portable-shell-in-framework-docs.md`). The corrected framing:
+
+- **The Bash-tool timeout is the transport-agnostic backstop** — it kills any stall (SSH, HTTPS, future transport) so boot can never hang indefinitely regardless of how the remote authenticates. The universal no-hang guarantee. Apply it via the **Bash tool's own timeout parameter**, NOT a `timeout` binary.
+- The git env vars are per-transport **fast-fail niceties** layered on top (error out in seconds rather than waiting out the backstop):
+  - `GIT_TERMINAL_PROMPT=0` — HTTP(S) credential terminal prompt (its original purpose; verified ~0.5s fail on a no-credential HTTPS pull). Does NOT cover SSH, and does NOT suppress a GUI credential helper (e.g. Git Credential Manager) — those fall to the backstop.
+  - `GIT_SSH_COMMAND='ssh -o BatchMode=yes -o ConnectTimeout=10'` (SSH only) — BatchMode turns unknown-host-key / passphrase prompts into immediate failure; ConnectTimeout bounds the connect.
+  - (optional, HTTPS) `-c http.lowSpeedLimit=1000 -c http.lowSpeedTime=15` BEFORE the `pull` subcommand — aborts a stalled transfer; the backstop already covers it.
+
+HTTPS was already safe since v13 (`GIT_TERMINAL_PROMPT=0` + backstop); v14's `GIT_SSH_COMMAND` is SSH-only and additive. The same hardening went into `scripts/workspace-sync`, but as a **persistent script it uses the env-var route** (no Bash-tool timeout available) — see `portable-shell-in-framework-docs.md`.
+
+The v14 fix validated `shared-procedure-doc-pattern.md`: the change lived in ONE doc (`auto-pull.md`); `agent-boot`/`attach`/`process-merge` just point at it — a single edit site fixed every caller.
 
 **No dirty-tree gate** — `--ff-only` is non-writing in spirit (advances `HEAD`, refuses if it would clobber working-tree edits). Different from `version-check.md`'s gate, which *does* refuse on dirty because version-check writes to `lore-repo.md`.
 
@@ -59,7 +73,7 @@ Documented at `auto-pull.md` § Worktrees.
 
 ## Cache-affecting
 
-v13 is release-notes-only + cache-affecting (new skill, modified SKILL.md-referenced docs). Release notes carry the Clear Plugin Cache footer hoisted near top, with the disambiguation phrasing per `cache-clear-footer-convention.md`.
+v13 is release-notes-only + cache-affecting (new skill, modified SKILL.md-referenced docs). Release notes carry the Clear Plugin Cache footer hoisted near top, with the disambiguation phrasing per `cache-clear-footer-convention.md`. **v14** then re-touched `auto-pull.md` (the portability fix above) — also release-notes-only + cache-affecting — and additionally bumped the plugin manifest to `1.14.0` (`plugin-manifest-versioning.md`), the new cache-detection lever.
 
 ## See Also
 
@@ -72,3 +86,5 @@ v13 is release-notes-only + cache-affecting (new skill, modified SKILL.md-refere
 - `cache-clear-footer-convention.md` — applied here in release-notes/13.md
 - `team-shared-knowledge-principle.md` — the underlying motivation: shared agent repos accumulate team knowledge; staleness is the failure mode auto-pull prevents
 - `tooling-cwd-safety.md` — companion topic on `git -C` discipline (the auto-pull procedure follows this throughout)
+- `portable-shell-in-framework-docs.md` — the v14 portability rule the timeout fix produced; carries the BSD/macOS shell rules and the rationale for the Bash-tool-timeout backstop vs a `timeout` binary
+- `plugin-manifest-versioning.md` — the other half of the v14 ship (manifest `1.<VERSION>.0` bump, the cache-detection lever)

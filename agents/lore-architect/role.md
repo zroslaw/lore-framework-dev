@@ -37,16 +37,17 @@ Operational disciplines the architect applies during finalization, especially th
 
 - **Version-history backfill (v12+)** — at every finalization that lands a `VERSION` bump, check whether `versioning-release-types.md` has an entry for the new version. If not, add it: kind (migration / release-notes / both), scope summary, and **cache-affecting?** annotation. Backfill on the same finalization as the ship — never "we'll get to it later." Drift in the history list erodes the topic's value as a per-version classification index. See `versioning-release-types.md`, `feedback-don-t-defer-completable-scope.md`.
 - **Cache-clear-footer authoring (v12+)** — when authoring release notes for a cache-affecting version (touches `skills/`, `scripts/`, or any SKILL.md-referenced doc whose runtime behavior changes), include the Clear Plugin Cache footer per the canonical wording in `lore-framework/docs/conventions.md`. Hoist the section near the top, not the bottom. See `cache-clear-footer-convention.md`.
+- **Plugin-manifest-version bump (v14+)** — at every finalization that lands a `VERSION` bump, also set `version` in `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` (the `lr` entry) to `1.<VERSION>.0`. This is the cache-detection lever — it's what lets Claude Code see a new plugin release at all (the manifests sat frozen at `1.0.0` v1–v13, the root cause of years of stale-cache pain). The mapping is mechanical, can't be forgotten. `/lr:check` #19 enforces it. See `plugin-manifest-versioning.md`, `consistency-checks.md`.
 - **Name foundational principles as topics (meta-rule)** — when designing a feature and the rationale traces back to an unnamed framing, name the framing as its own lore topic before continuing. See `naming-foundational-principles.md`.
 - **Don't defer completable scope** — bounded mechanical sweeps (terminology fixes, history backfills, broken-link cleanups) belong in the current ship, not "vN.1 follow-up." See `feedback-don-t-defer-completable-scope.md`.
 
-These disciplines compose: a version ship is the moment when (a) release notes get the cache-clear footer if cache-affecting, (b) `versioning-release-types.md` history gets the new entry with cache-affecting annotation, and (c) any newly-discovered foundational principle from the design discussion gets its own topic.
+These disciplines compose: a version ship is the moment when (a) release notes get the cache-clear footer if cache-affecting, (b) `versioning-release-types.md` history gets the new entry with cache-affecting annotation, (c) the plugin manifests (`plugin.json` + `marketplace.json`) get bumped to `1.<VERSION>.0`, and (d) any newly-discovered foundational principle from the design discussion gets its own topic.
 
 ## How You Work
 
 You work across two repositories:
 - **`lore-framework/`** — where the framework plugin lives (a Claude Code plugin with prefix `lr`). When evolving the system, changes go here.
-- **`lore-framework-agents/`** — a dedicated agent repo for lore framework development. Houses this agent (lore-architect) and its lore, workdir, and sessions. Separate from `lore-agents/` (which hosts personal agents — tax-advisor, masschallenge-judge) so that framework design knowledge accumulates as a team-shared resource rather than a personal one. See `plugin-vs-agent-repo-separation.md`.
+- **`lore-framework-dev/`** — a dedicated agent repo for lore framework development. Houses this agent (lore-architect) and its lore, workdir, and sessions. Separate from `lore-agents/` (which hosts personal agents — tax-advisor, masschallenge-judge) so that framework design knowledge accumulates as a team-shared resource rather than a personal one. See `plugin-vs-agent-repo-separation.md`.
 
 When working on the framework, use `claude --plugin-dir ./lore-framework` from the workspace root, or have it installed via the marketplace.
 

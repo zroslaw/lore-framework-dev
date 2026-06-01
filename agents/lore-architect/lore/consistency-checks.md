@@ -1,4 +1,6 @@
-`/lr:check` runs 18 consistency checks. Defined in `${CLAUDE_PLUGIN_ROOT}/docs/check.md`.
+`/lr:check` runs 19 consistency checks. Defined in `${CLAUDE_PLUGIN_ROOT}/docs/check.md`.
+
+> **Naming note (a v14 near-miss — see `verify-before-acting-on-suspected-bugs.md`):** the plugin catalog doc is **`docs/check.md`**, NOT `consistency-checks.md`. `consistency-checks.md` is *this lore topic's* name only. `skills/check/SKILL.md` correctly points at `docs/check.md`. Don't "fix" the skill to repoint it — verify on disk first.
 
 **Descriptor validation (1–5):**
 1. Agent repo discovery — scan for `lore-repo.md` at root; flag if no lore agent repos found
@@ -30,6 +32,17 @@
 17. Orphaned pre-plugin skill commands — flags `.claude/commands/lr-<name>.md` files where `<name>` collides with a current framework skill (e.g., `lr-boot.md`, `lr-reflect.md`). These are pre-plugin local duplicates that shadow or duplicate the installed plugin skill; framework no longer emits them. Informational — user decides to keep or delete. See `migration-ownership.md`.
 18. Legacy sibling-path per-agent boot commands — scans `lr-*-agent.md` for `lore-framework/docs/agent-boot.md` pattern (pre-v5 emission form). These break on plugin installs. Triggers `/lr:update` (migration 5 regenerates them). See `plugin-compat-template-audit.md`.
 
-**History:** originally 17 checks. Migration 2 dropped the agent-level version check (old check 6) because `role.md` no longer carries a `version` field — subsequent checks renumbered down by one, leaving 16. Migration 5 added checks 17 and 18 for drift detection.
+**Plugin manifest (19, added v14):**
+19. Plugin manifest version — reads framework `VERSION` (N) and the `version` of both `.claude-plugin/plugin.json` and the `lr` entry in `.claude-plugin/marketplace.json` (under `${CLAUDE_PLUGIN_ROOT}`); asserts both `== 1.<N>.0`. Errors on a mismatch or on the two manifests disagreeing with each other. Enforces the cache-detection lever in `plugin-manifest-versioning.md`. Has teeth mainly in plugin-dev context (`claude --plugin-dir ./lore-framework`); for a marketplace install it confirms the shipped manifest is internally consistent. Sits alongside check #3 (repo-level `lore-repo.md` vs `VERSION`) — complementary version-consistency checks at different layers (domain vs plugin). Known follow-up: skip a missing `marketplace.json` gracefully rather than erroring (`framework-improvements-backlog.md`).
+
+**History:** originally 17 checks. Migration 2 dropped the agent-level version check (old check 6) because `role.md` no longer carries a `version` field — subsequent checks renumbered down by one, leaving 16. Migration 5 added checks 17 and 18 for drift detection. v14 added check 19 (plugin manifest version) — the first non-migration check addition (release-notes-only ship).
 
 Key principle: git history is the metadata layer for temporal checks — no embedded timestamps in files.
+
+## See Also
+
+- `plugin-manifest-versioning.md` — check #19 enforces the `1.<VERSION>.0` manifest rule
+- `verify-before-acting-on-suspected-bugs.md` — the `check.md` vs `consistency-checks.md` near-miss that the naming note above guards against
+- `migration-ownership.md` — checks 17/18 drift-detection rationale
+- `plugin-compat-template-audit.md` — check 18 (legacy sibling-path boot commands)
+- `framework-improvements-backlog.md` — check #19 graceful-skip-on-missing-`marketplace.json` follow-up

@@ -12,6 +12,15 @@ Starting with v3, framework version bumps can carry two kinds of artifacts:
 - **At least one must exist** — the update process treats a gap as a framework packaging bug
 - **If the version is cache-affecting** (touches `skills/`, `scripts/`, or any `docs/<name>.md` referenced by a SKILL.md whose runtime behavior changes), include the **Clear Plugin Cache** footer per `cache-clear-footer-convention.md`. The cache-affecting axis is **orthogonal** to the migration-vs-release-notes axis.
 
+## Cache-propagation levers (two, as of v14)
+
+Two distinct, complementary mechanisms make the platform pick up a cache-affecting release — orthogonal to both the migration-vs-release-notes axis and the cache-affecting flag:
+
+1. **Plugin manifest version bump (v14+)** — set `version` to `1.<VERSION>.0` in `plugin.json` + `marketplace.json`. This is what lets Claude Code *detect* a new release at all (the manifests sat frozen at `1.0.0` v1–v13, so the platform never saw a new release — the root cause of years of cache pain). See `plugin-manifest-versioning.md`.
+2. **Clear Plugin Cache footer (v12+)** — the manual belt-and-suspenders fallback in the release notes. See `cache-clear-footer-convention.md`.
+
+Every cache-affecting release should now do BOTH: bump the manifest AND carry the footer. (Open question: whether a manifest bump alone auto-invalidates the cache, which would make the footer optional — tracked in `framework-improvements-backlog.md`.)
+
 ## History
 
 Each entry annotates: kind (migration / release-notes / both), and as of v12, **cache-affecting?** (yes/no). Cache-affecting determines whether the v12 cache-clear footer is mandatory in the release notes.
@@ -28,6 +37,7 @@ Each entry annotates: kind (migration / release-notes / both), and as of v12, **
 - **v11 — release-notes-only**; added `/lr:workspace-sync` (hard rename of `/lr:pull-domain`), `repos:` field in `lore-repo.md`, full vocabulary sweep `<workspace>` vs domain. **Cache-affecting** — the hard rename triggered the very failure mode that motivated v12 (users still seeing `/lr:pull-domain` from stale cache).
 - **v12 — release-notes-only**; added `/lr:doctor` skill with the ailment catalog pattern (see `ailment-catalog-pattern.md`); codified the cache-clear authoring convention in `docs/conventions.md` (see `cache-clear-footer-convention.md`). **Cache-affecting** — adds new skill; the chicken-and-egg case where the skill needed to fix stale-cache *is* the skill being added.
 - **v13 — release-notes-only**; added auto-pull at boot/attach/pre-merge plus user-invoked `/lr:pull-lore` skill. New `docs/auto-pull.md` is the shared per-repo procedure (single source of truth across all four sites); new `skills/pull-lore/SKILL.md` + `docs/pull-lore.md` orchestrate it across active agents. `agent-boot.md`, `attach.md`, and `process-merge.md` modified to call into auto-pull. **Cache-affecting** — adds new skill; modifies SKILL.md-referenced docs (boot/attach/merge). Motivated by team-shared agent repos: a teammate pushing lore between sessions could leave the host booting from days-stale state, with finalize-merge re-introducing already-revised decisions. See `auto-pull-mechanism.md`.
+- **v14 — release-notes-only** (no migration). **Cache-affecting: yes** (modifies SKILL.md-referenced docs `auto-pull.md` + `check.md`, the `workspace-sync` script, and `conventions.md`). Scope: portable auto-pull timeout fix (the macOS `timeout`-binary bug that had silently disabled v13 auto-pull on macOS — `portable-shell-in-framework-docs.md`) + transport-symmetric hang hardening (auto-pull + workspace-sync) + plugin manifest versioning bump to `1.<VERSION>.0` (`plugin-manifest-versioning.md`) + new `/lr:check` #19 (`consistency-checks.md`) + conventions §§ Portable Shell and Plugin Manifest Versioning + cache-footer placement fix ("near the end" → "near the top"). **First release to bump the plugin manifest** (`1.0.0` → `1.14.0`). See `auto-pull-mechanism.md`, `plugin-manifest-versioning.md`, `portable-shell-in-framework-docs.md`.
 
 ## Backfill discipline
 
@@ -58,6 +68,8 @@ First observed instance: spawn-teammate post-v10 boot-prompt reframe (see `spawn
 
 ## See Also
 
-- `cache-clear-footer-convention.md` — the v12 authoring convention this topic's cache-affecting axis tracks.
+- `cache-clear-footer-convention.md` — the v12 authoring convention this topic's cache-affecting axis tracks; the manual cache-propagation lever.
+- `plugin-manifest-versioning.md` — the v14 cache-propagation lever (manifest `1.<VERSION>.0` bump); the primary release-detection mechanism.
 - `update-process.md` — how the update flow applies migration + release-notes artifacts.
 - `feedback-don-t-defer-completable-scope.md` — discipline that the backfill rule applies to itself.
+- `portable-shell-in-framework-docs.md` — the v14 portability rule; the bug that made v13 auto-pull a macOS no-op.
