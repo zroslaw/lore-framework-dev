@@ -32,6 +32,7 @@ This composes with `design-doc-before-implement.md`: first draft what universal 
 ## See Also
 
 - `system-design-principles.md` — "minimal and essential" principle; this rule sharpens the universality test
+- `agent-split-only-when-forced.md` — applies this rule to *agent granularity*: don't pre-fragment a coherent scope into multiple agents; let a concrete pressure reveal the seam
 - `plugin-vs-agent-repo-separation.md` — the **repo-topology axis** of the same scope question (this topic is the content axis)
 - `contributions-feature.md` — the design debate where this rule crystallized *(note: dangling reference — pre-existing draft never landed in `lore/`; tracked in `framework-improvements-backlog.md`)*
 - `consult-pattern.md`, `attach-pattern.md` — the mechanisms that make specialist-agent knowledge a first-class alternative to framework machinery

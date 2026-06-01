@@ -1,6 +1,8 @@
 # Draft — `lr-dev`: SDLC Extension for the Lore Framework (general concept)
 
 > **Status: active exploration, not decided.** Opened 2026-05-31 with the user (zroslaw). This is the design home for the *general* lr-dev concept. The first feature — bug-finding & test-coverage, plus the standardized bug/scenario/report formats — has its own companion draft: **`draft-lr-dev-quality.md`**. Foundational framings flagged in §10 get promoted to standalone lore topics at finalization (per `naming-foundational-principles.md`).
+>
+> **⮕ 2026-06-01 REFRAME — read §1A first.** The current **leading direction** simplifies the knowledge model below: express per-repo artifact knowledge as an ordinary tailored **context agent** on existing primitives, rather than a new knowledge *tier* (§2) + new repo kind + two-gate capability (§§3–4). §§2–4 are **preserved as the heavier alternative** — the reasoning trail for what we considered and why we moved off it. See **§1A**.
 
 ## 1. North star & where this fits
 
@@ -10,7 +12,86 @@
 
 **Why QA is the correct beachhead (not just an easy one):** a dark factory needs *trustable autonomy*; trustable autonomy needs *cheap, automatic verification*. QA is the one SDLC activity that carries its own verification oracle — a test compiles or doesn't, passes or fails, coverage moves or doesn't, a bug reproduces or doesn't. Plus near-zero blast radius: generated tests are additive, bug reports advisory; neither mutates production behavior. So this slice lets us practice autonomy + the learning loop on safe, self-checking ground before pointing agents at code that *changes* behavior.
 
+## 1A. Reframe (2026-06-01) — context agents on existing primitives **[LEADING DIRECTION]**
+
+> Supersedes the three-tier / new-repo-kind / two-gate design in §§2–4 (preserved below as the heavier alternative). Worked out with the user 2026-06-01. The reframe **keeps every outcome the original wanted and drops the bespoke machinery**, by expressing the middle knowledge tier as ordinary tailored agents on primitives the framework already has.
+
+### The move
+
+Don't introduce repo lore as a new knowledge *tier* with its own repo kind and write-capability gate. Express per-repo artifact knowledge as an **ordinary tailored agent** — the **context agent**, one per source repo — joined to worker agents via `/lr:attach` and `/lr:consult`.
+
+### What it dissolves (and why it legitimately can)
+
+The original's most expensive parts existed *only because* repo lore was a new tier outside the agent-ownership model:
+- the **two-gate write capability** (repo-enabled ∧ agent-in-lr-dev-mode → else read-only),
+- the **`dev-repo-lore.md` descriptor + new repo kind**,
+- the **cross-cutting migration work** (teaching `/lr:update`, boot auto-upgrade, version-check, auto-pull to walk a second repo kind),
+- the **`role.md` schema bump** (`extensions: [lr-dev]`) + a new `/lr:check` validator,
+- **Gate A's bespoke resolution logic**.
+
+Pivotal realization: **the two-gate capability was reinventing, for the new tier, the write-isolation agents already have natively.** An agent's lore is written only by that agent via reflect/merge; nobody else scribbles on it. Drop the new tier and express the knowledge as an agent → the gate isn't simplified, it's *unnecessary*. This is `framework-scope-vs-agent-scope.md` in action. And the migration item deletes itself: a per-repo agent repo carries a normal `lore-repo.md` with a `version`, so migrations/version-check/auto-pull **already walk it — zero new code.**
+
+### Why it's more *on-identity*
+
+"Repo lore" was a **passive knowledge base bound to a repo** — in tension with `framework-as-engine-not-kb.md` and `agents-are-executors-first.md`. A context agent is an **executor that carries knowledge** — consulted, attached, reasoned-with. The reframe pulls lr-dev *toward* the framework's identity, not away.
+
+### The team-shared property — preserved by housing, not by a new tier
+
+The one property worth protecting from the original: repo knowledge was **agent-agnostic** (survives onboarding a fresh agent; eventually merges into the source repo so even non-LRF devs benefit). Bind knowledge to a *worker* agent and it dies with the worker. Recovered via **housing**: the context agent lives in a **per-source-repo agent repo (a domain)** — team-shared, cloned by anyone working on the repo, declared via `repos:` + pulled by `/lr:workspace-sync`. The agent *repo* is the artifact's agent-agnostic knowledge container — the original "repo-lore repo" rebuilt from existing agent-repo machinery. **Condition:** a *shared* per-repo agent repo, not someone's personal collection.
+
+**Discovery/enablement signal** stays a soft pointer in the source repo's `CLAUDE.md`, but now points at the **context agent's repo remote** (declared in `repos:`, cloned by `/lr:workspace-sync`) — reusing existing machinery instead of Gate A's bespoke resolution.
+
+### One agent per repo, not two
+
+Product and technical are **filing categories, not identities.** A senior engineer holds both; we don't split them into two brains. So: **one context agent per repo**, with `product/` and `technical/` (+ file mirror) as category dirs inside its single `lore/`, interlinked but separated (one home per fact; cross-link, don't duplicate) — exactly the original's "one store, two categories" instinct, just housed in an agent. **Split only when a concrete budget (≤50K `lore-context.md`) or role pressure forces it, along the axis the pressure reveals** — don't pre-split on a guess. (The ≤50K limit is a *router-not-payload* problem: `lore-context.md` is a thin index into deep lore loaded on demand.)
+
+### Activity breadth lives in separate specialist agents
+
+The context agent is **pure knowledge custody — not a workflow orchestrator.** The QA/coverage/bug-finding/review *workflows* travel with **separate specialist agents** (skills travel with them, per `knowledge-vs-skills-distinction.md`); ephemeral file/unit quality-analyst subagents do the per-run labor. Worker/specialist agents **attach the context agent** for repo understanding, do their work, and **feed discoveries back** into it.
+
+### Name & role triad
+
+- **Name:** `<repo>-context` (e.g. `turbo-boost-context`). "**Context agent**" is the lr-dev kind-name. Harmonizes with existing `lore-context.md` / `product-lore-context.md` vocabulary; the `<repo>-` prefix disambiguates from the LLM-context sense.
+- **Role triad — hold / provide / learn:**
+  1. **Hold** context from its perspectives — product meaning + value, technical implementation, architecture→file.
+  2. **Provide** it to agents that attach/consult.
+  3. **Learn** from them — **free**: when a worker agent attaches the context agent, finalization already iterates *per active agent*, so the context agent reflects+merges its own session learnings. No new mechanism.
+- **Goal line:** *"Holds the full context of `<repo>` — product meaning and value, technical implementation, architecture down to individual files — provides it to agents that attach or consult it, and absorbs what they discover back into that context."*
+
+### The objective/subjective cut survives — as discipline, not a wall
+
+The original's most valuable idea (artifact-knowledge vs worker-experience) is **kept**, but enforced by **reflection discipline** instead of a tier/gate: at finalization the **context agent reflects what it learned about the artifact**; **worker agents reflect what they learned doing the work.** Same line, drawn by each agent's role rather than by a permission boundary. Kept the distinction, dropped the apparatus.
+
+### Standardization & reproducibility — the context agent is the framework's first *framework-defined role*
+
+The reproducibility problem the user raised: the context-agent role recurs across many repos and must be **standardized yet centrally updatable** — an instance baking the standard into itself would *freeze* it. Solved with the framework's own **thin-pointer pattern**, applied to a *role* for the first time:
+
+- Standardized behavior lives in **one plugin doc** — `lore-framework/docs/context-agent.md` — **versioned on `lore-framework/VERSION`**, distributed via marketplace. (New application of `shared-procedure-doc-pattern.md`: one plugin doc referenced from many instances, authored once.)
+- Each instance gets a **thin `role.md`**: repo-specific identity + a pointer — *"operate per `${CLAUDE_PLUGIN_ROOT}/docs/context-agent.md`."* Resolves at boot exactly as `agent-boot.md` references its sibling docs.
+- **Updates ride plugin distribution:** edit the doc, bump VERSION (cache-clear footer), every context agent picks up the current version at **next boot**. **Zero per-instance churn; no migration for behavior changes** — the instance only ever held a pointer.
+- **`role.md` vs `lore-context.md` split:** `role.md` = pointer to central behavior + repo identity; `lore-context.md` = *content only*, conforming to the standard structure the plugin doc defines. **Discipline: behavior + structure central, content local** — never let behavioral instructions leak into instance lore (that re-freezes the standard). Genuine deviations → a small "repo-specific overrides" section in the thin role (99% inherited / 1% local).
+- **Reproducibility:** instances are **generated from a template** (a flag on `/lr:create-agent`, or a dedicated `/lr:dev-context <repo>`), the same way `/lr:register-repo` emits boot commands from `agent-boot.md`. Template + thin-pointer = reproducible *and* updatable — the two properties that felt in tension.
+
+### Reframing "mode": keep the good quarter
+
+The original "lr-dev mode" conflated four things. The reframe **decomposes** them:
+1. unlock repo-lore writes → **dropped** (native per-agent ownership),
+2. extend finalization → **dropped** (becomes the context agent's normal reflect/merge, guided by its role),
+3. expose feature skills → **moved** (skills travel with the separate specialist agents),
+4. **a centralized, loaded operating doc → KEPT** — exactly `docs/context-agent.md`, which the thin role points at.
+
+The valuable quarter was (4); the reframe keeps it and drops 1–3.
+
+### Open threads (carry forward)
+
+- What actually goes *inside* `docs/context-agent.md` — the standard operating manual for the role (hold/provide/learn disciplines, the `product/`÷`technical/`÷file-mirror structure standard, reflection discipline, overrides convention).
+- The generator surface: flag on `/lr:create-agent` vs dedicated `/lr:dev-context <repo>`; what the template emits.
+- How the per-repo agent repo relates to the source repo at maturity (extract the context agent's `lore/` into the source repo's root, stripping agent scaffolding — the messier end-state noted earlier).
+- Cross-references from file-level lore *up* to product intent now live within one agent's graph (good) — confirm the `[[...]]` convention spans the `product/`÷`technical/` category dirs cleanly.
+
 ## 2. The spine: a three-tier knowledge model
+
+> **⚠️ Heavier alternative (superseded by §1A, 2026-06-01).** §§2–4 are the original three-tier / new-repo-kind / two-gate design, kept for the reasoning trail. The leading direction (§1A) keeps these *outcomes* but drops the bespoke *machinery* by using ordinary tailored agents.
 
 The framework today has two knowledge tiers (universal framework + per-agent). `lr-dev` introduces a **middle tier**, and that's the unlock.
 
@@ -111,6 +192,8 @@ The user's three-subagent independent review (lenses chosen by the orchestrator;
 
 ## 9. Seams
 
+> **Under the reframe (§1A) several of these dissolve** — the `dev-repo-lore.md` repo kind, migrations-over-a-new-repo-kind, and the `role.md` `extensions` schema bump are all replaced by ordinary agent-repo machinery + the thin-role-points-at-plugin-doc model. Retained below for the heavier-alternative reasoning.
+
 **Resolved:**
 - **Repo-lore descriptor** — `dev-repo-lore.md` (§4). Frontmatter: `version`, `source-repo` remote, `description`. Local clone path NOT committed — resolved at runtime.
 - **Repo-enabled signal** — soft notion in the **source repo's `CLAUDE.md`** pointing to the repo-lore remote, with a "this repo itself" form for the merged end-state (§3 Gate A).
@@ -133,6 +216,14 @@ Per `naming-foundational-principles.md`:
 - **repo-lore structure** (separate-repo-now → mergeable `lore/` later; 2-level product/technical taxonomy with separated categories — no cross-duplication — and `product-`/`tech-lore-context` entry points; `dev-repo-lore.md` descriptor).
 - **per-artifact lore mirror** (sparse `.lore.md` shadow tree; finalization-on-touch freshness).
 - **multi-lens review as a reusable skill** (promotion of `parallel-reviewer-fanout-pattern.md` into lr-dev).
+
+**Reframe-derived (2026-06-01) — these supersede several above:**
+- **context agent — per-repo knowledge as a tailored agent** (one per repo; `product/`÷`technical/`÷file-mirror as category dirs in one `lore/`; housed in a per-repo agent repo for the team-shared/agent-agnostic property; named `<repo>-context`). Replaces "three-tier knowledge model" + "repo lore vs agent lore" + "repo-lore structure" as *machinery* while keeping their *content cut*.
+- **framework-defined role + thin-role-pointer pattern** — a role whose standardized behavior lives in a versioned plugin doc (`docs/context-agent.md`); each instance's `role.md` is a thin pointer to it; updates ride plugin distribution, no per-instance migration. The skill-doc / boot-delegation thin-pointer pattern applied to a *role* for the first time; new application of `shared-procedure-doc-pattern.md`.
+- **objective/subjective cut as reflection discipline, not a tier/gate** — context agent reflects artifact-facts, worker agents reflect work-experience; same line drawn by role, not by a permission boundary.
+- **decomposing "mode"** — the original lr-dev "mode" conflated four things (unlock writes / extend finalization / expose skills / centralized operating doc); keep only the centralized operating doc, drop the rest.
+- **split-only-when-forced** — start with one agent per repo; split product/technical (or by subsystem) only when a concrete ≤50K-budget or role pressure forces it, along the axis the pressure reveals.
+- *(supersedes, from the heavier alternative: "lr-dev as mode + capability gate".)*
 - *(quality-feature framings live in `draft-lr-dev-quality.md`.)*
 
 ## 11. See also

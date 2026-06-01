@@ -47,5 +47,6 @@ Both keep logic in `docs/`. Both keep the calling layer thin. The difference is 
 ## See Also
 
 - `skill-doc-pattern.md` — the broader pattern this refines (skills as thin pointers to docs).
+- `framework-defined-role-pattern.md` — sibling: one versioned plugin doc authored once and referenced from many *instances*, with each instance's `role.md` a thin pointer. Same "central body, thin callers/instances" shape, applied to roles.
 - `auto-pull-mechanism.md` — v13's canonical worked example: one procedure doc, four call sites.
 - `slash-command-system.md` — how skill files relate to docs at the top level.

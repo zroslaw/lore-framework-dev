@@ -1,6 +1,8 @@
 # Draft — lr-dev Feature: Bug-Finding & Test-Coverage (+ standardization)
 
 > **Status: active exploration, not decided.** Companion to **`draft-lr-dev.md`** (the general lr-dev concept — knowledge model, mode/capability gate, repo lore, reusable review skill). This file covers the **first lr-dev feature**: automatically finding bugs/inconsistencies and raising unit-test coverage, plus the **standardized bug / scenario / report formats** the feature produces. Opened 2026-05-31 with the user (zroslaw).
+>
+> **⮕ 2026-06-01 reframe alignment (see `draft-lr-dev.md` §1A).** Terminology shift under the reframe: "**repo lore**" → **the context agent's lore**; the "**repo-lore repo**" → **the per-repo agent repo housing the `<repo>-context` agent**. The file/unit quality analysts here are **ephemeral subagents** spawned by a **separate specialist (worker) agent**, which **attaches the `<repo>-context` agent** for repo understanding and **feeds discoveries back** into it at finalization (per-agent reflection). The **capability-gate** framing referenced below is **superseded** — repo knowledge is just the context agent's own lore, governed by native per-agent write-ownership.
 
 ## 1. The feature
 

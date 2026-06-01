@@ -40,3 +40,9 @@ Not a replacement of the skill-doc pattern — a refinement for orchestration ca
 - Putting logic in skill frontmatter bodies beyond the delegation line.
 - Having the skill doc duplicate content that already exists in another doc — prefer cross-reference.
 - Letting an orchestrator skill accumulate phase-by-phase content in its SKILL.md — extract to a dedicated `docs/<skill>.md` as soon as it crosses beyond the thin pointer.
+
+## See Also
+
+- `shared-procedure-doc-pattern.md` — sibling refinement for *non-skill* procedures invoked from multiple sites (the body lives in `docs/<procedure>.md` with no matching skill).
+- `framework-defined-role-pattern.md` — the same thin-pointer mechanism applied to a *role*: `role.md` becomes a thin pointer to a central versioned behavior doc.
+- `slash-command-system.md` — how skill files relate to their docs at the top level.
