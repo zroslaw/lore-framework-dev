@@ -72,10 +72,21 @@ Two rounds proved valuable in v11, v12, and v13 ships:
 - **v11**: round 1 caught script-level issues (security, correctness, basic UX); round 2 (after a sweep was added) caught terminology coherence, newcomer experience, and release readiness.
 - **v12**: round 1 (three lenses, ~25 findings) caught the targeted vs broader cache-wipe scoping (filesystem-verified by correctness reviewer), broken cross-references (architecture reviewer), and the bootstrap-note chicken-and-egg case (UX reviewer). Round 2 (single reviewer, narrow scope) confirmed shipping with one nit. The verdict-grade ("ship as-is" vs "more rounds") was the actual value of round 2, not new findings.
 - **v13**: round 1 (correctness, architecture, UX in parallel) had two reviewers stall after partial returns; the third (UX) returned a full report with 19 findings. Round 2 (single focused reviewer with filesystem verification) caught cross-doc contradictions round 1 structurally couldn't, plus verified the dirty-tree-no-gate decision live in `/tmp`.
+- **v15**: **seven rounds** to convergence — exceptional, due to combined four-task scope (write-aware gate + spawn-teammate Step 7 + Step 7c verification + teammate-conventions anchoring). R1 (12 findings, max-effort recall-mode) surfaced latent invariants the new gate exposed; R2 (8) caught self-contradictions and dangling references; R3 (12, parallel multi-lens with role-as-perspective) caught `(none)` sentinel grammar drift across 3 sites and `/lr:check` #20 missing entirely; R4 (9) the parser's fenced-body-terminator bug; R5 (6) Glob token grammar narrower in conventions than parser; R6 (2) Glob example violating its own grammar (`agents/!(legacy)` parens not in declared char class); R7 clean → SHIP. Findings clustered around the previous round's edits ("fix-the-fixes" surface). Convergence by progressively smaller findings count is the ship signal.
 
 Each round was tightly scoped to its phase of work.
 
 **Refinement (v13):** plan round 2 deliberately as **a single focused reviewer with filesystem access and the full diff in scope** — not just "more rounds if needed." Round 1 is "find issues per lens" (breadth, parallel, lens-isolated). Round 2 is "verify fixes and catch cross-doc drift" (depth, sequential, full diff). Two distinct jobs.
+
+## v15 operational lessons — multi-round convergence
+
+v15 went through **seven rounds** before shipping. Each round caught real issues; convergence was the ship signal. Operational lessons:
+
+- **"Pointer-AND-restatement" is the dominant drift pattern.** Multiple v15 rounds caught the same shape: a fix declares one site canonical, but other sites still inline the rule "for clarity." Discipline: pointer-only, no inline summary. The restatement still drifts. See `single-canonical-source-discipline.md`.
+- **Lens 3's "construct in /tmp and run" is load-bearing.** Lens 1 (UX) and Lens 2 (architectural) tend to trust the doc's framing; Lens 3 reads with adversarial intent — *what would an LLM following this literally produce?* — and the bash verification is the load-bearing part. Without it, Lens 3 collapses into another prose review. v15's parser body-terminator bug (which would have silently let migration 2's prose paragraph slip into the write-set) was caught only because Lens 3 constructed migration variations in `/tmp` and ran the parser shape against them.
+- **Self-contradicting examples are worth grepping for.** R6 caught conventions.md's Glob token example using parens that violated its own declared character class. Useful sanity check: every time you write a "valid" example, mechanically verify each character against the spec.
+- **Multi-round terminates predictably.** Round N findings cluster around round N-1's edits — the "fix-the-fixes" surface is real. When round N finds only cosmetic issues, the next round is the ship gate. Don't keep adding rounds for diminishing returns; convergence is the signal.
+- **For doc-only releases**, expect 2–3 rounds typical, 5+ for releases that re-shape multiple cross-cutting docs (v15 took 7 — exceptional, due to combined four-task scope). Single-pass review is insufficient when the patch reshapes shared procedural infrastructure; multi-round convergence is now the architect's default discipline (`role.md` § Lore-Curation Disciplines).
 
 ## Graceful degradation when a parallel reviewer stalls
 
@@ -125,3 +136,5 @@ Often complementary: use sonnet-subagent for the lore-side polish; use parallel-
 - `yaml-parser-shell-hardening-checklist.md` — operational distillation of the security lens; pre-applies what reviewers would otherwise catch.
 - `feedback-don-t-defer-completable-scope.md` — applied during triage (don't defer fixes that fit in current session).
 - `ailment-catalog-pattern.md` — the v12 ship that validated this pattern's application to doc-only edits.
+- `single-canonical-source-discipline.md` — the dominant drift pattern multi-round review catches; pointer-only, no inline restatement.
+- `graduated-verification-confidence.md` — partial returns from stalled reviewers as additive evidence is one instance of this principle.

@@ -32,6 +32,37 @@ Either way, edits are safe. The gate would have prevented case (1) for no benefi
 
 This kind of filesystem-grounded verification is exactly what `parallel-reviewer-fanout-pattern.md`'s correctness lens was designed to catch — the v12 ship's targeted-vs-broader cache-wipe defect was caught the same way.
 
+## v15 refinement — gate on collision with the write-set, not blanket-dirty
+
+The v13 distinction was binary: writes get gates, reads don't. v15 refines the write-side a notch further: even on a write operation, the gate should refuse only on **collisions with what the operation will actually write**, not on every dirty file.
+
+The motivating bug: agent repos routinely carry uncommitted runtime state from other agents (`workdir/*` pulse logs, watch markers). The v14 boot-time auto-upgrade gate refused on *any* dirty file, so it overfired on every boot — friction without benefit, because the dirty files weren't in the migration's write paths.
+
+**The split:** every write operation has a **write-set** — the concrete paths it will touch. The gate's job is `dirty ∩ write-set`:
+
+- **Empty intersection** → proceed. The operation can't collide with anything dirty.
+- **Non-empty** → defer with a file-naming actionable message ("would clobber `path/X`; commit, stash, or revert").
+
+For migrations, the write-set is declared in `## Write Paths` in the migration doc (one fenced block per version). For other future write operations, the same shape applies: declare what you'll write, the gate intersects against dirty.
+
+**Operational rules that fall out:**
+
+- **Write-sets must be declared.** Undeclared = unknown = fall back to conservative blanket-dirty for safety. Backward-compatible, but creates real friction; authors are nudged to always declare. `/lr:check` #20 enforces declaration presence + body shape (section / fenced body / sentinel-or-glob), all error-severity.
+- **Sentinels matter.** An explicit empty write-set (`(none)`, optionally followed by space/hyphen/em-dash + prose, or an empty fenced block) is meaningfully different from an absent declaration. Same data on disk could mean either; the convention disambiguates by treating absent-section as unknown and present-with-empty-body as explicit-empty.
+- **Conflict markers are orthogonal.** They're a structural-inconsistency hard-defer regardless of write-set scope, because git itself can't merge through them safely. Step 1a handles them before the collision check runs.
+- **Workspace-root paths are a known gap.** The boot-time gate is per-repo and cannot see workspace-root files (`.claude/commands/lr-*-agent.md`); migrations 2/5/6 don't declare those paths because the declaration would be decorative — the per-repo gate can't intersect against them. Protection there is the in-migration three-way merge (`update.md` § Handling Manual Edits to Generated Files), not the gate. Documented in `conventions.md` § Known gap: workspace-root paths.
+
+## The principle generalized: minimum-blast-radius refusal
+
+Both v13's read-vs-write split AND v15's collision check follow the same shape: **identify what the operation actually does, gate exactly on conflicts with that, accept incidental noise.** The gate's job is *minimum-blast-radius refusal* — refuse exactly when refusal prevents data loss, not preemptively.
+
+- v13 instance — auto-pull is a *read* (advances refs, git refuses cleanly on real collision). No gate; "uncommitted in unrelated files" is incidental noise.
+- v15 instance — boot-time auto-upgrade is a *write*, but only against its declared paths. Gate on `dirty ∩ write-set`; "dirty in `workdir/`" is incidental noise.
+
+Both refute reflexive "uncommitted = unsafe" reasoning. The hazard is *collision with the operation's actual effects*, nothing else. Future framework operations should design for the same shape: name the effect set, gate on intersection, accept everything else.
+
+**Open future application:** `/lr:update` is interactive-by-design and currently writes through dirty files unconditionally; bringing the v15 collision-check gate to it would make the principle universal across automatic and user-invoked write paths. Tracked in `framework-improvements-backlog.md`.
+
 ## Generalization Beyond Auto-Pull
 
 The principle composes with existing tooling/safety topics:
@@ -75,3 +106,5 @@ When designing a new framework operation:
 - `tooling-cwd-safety.md` — adjacent "name what the gate is protecting against" git-discipline topic.
 - `parallel-reviewer-fanout-pattern.md` — the correctness/filesystem-verification lens that catches mis-applied gates.
 - `freshness-contracts-at-session-boundaries.md` — adjacent: when the operation *is* a read, the freshness question dominates the gate question.
+- `consistency-checks.md` — `/lr:check` #20 enforces write-set declaration shape (section / fenced body / sentinel-or-glob).
+- `graduated-verification-confidence.md` — sibling principle covering how gate *outcomes* are reported (binary vs. graduated by confidence/blast-radius).

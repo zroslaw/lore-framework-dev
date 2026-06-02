@@ -5,10 +5,12 @@ Added in v10. Spawns one or more lore agents as Claude Code Agent Teams teammate
 ## Implementation files
 
 - `skills/spawn-teammate/SKILL.md` — thin one-line pointer (standard skill pattern)
-- `docs/spawn-teammate.md` — 8-step procedure
-- `release-notes/10.md` — release notes (release-notes-only bump, no migration)
-- `VERSION` bumped 9 → 10
-- `README.md` — skills table row added with **BETA** marking
+- `docs/spawn-teammate.md` — multi-step procedure (v15: Step 7 disambiguated, Step 7c verification added, Step 8 surfaces four-state outcome)
+- `docs/teammate-conventions.md` — v15: single canonical source for the four standing teammate input-direction RULES, anchored at boot via `agent-boot.md` Step 5
+- `release-notes/10.md` — initial release notes (release-notes-only bump, no migration)
+- `release-notes/15.md` — v15 fixes: write-aware gate (orthogonal to spawn-teammate), Step 7 disambiguation, Step 7c verification, teammate-conventions anchored at boot
+- `VERSION` bumped 9 → 10 (initial); v15 doesn't touch VERSION semantics for spawn-teammate but bundles fixes into VERSION 15
+- `README.md` — skills table row with **BETA** marking
 
 ## Design decisions
 
@@ -27,6 +29,22 @@ The post-boot paragraph does two things: it stops the teammate after the boot pr
 **Refinement workflow** — this change was made in-band on the BETA feature: edit `docs/spawn-teammate.md`, leave `release-notes/10.md` historical (it documents the v10 initial release), no `VERSION` bump. The BETA caveat in the release notes ("internal procedure and presentation may evolve based on real-world usage") is the contract that licenses post-release evolution without ceremony. See `versioning-release-types.md` for the general pattern.
 
 **Operational lesson** — for BETA features, the spawn prompt / first-message framing is a high-leverage place to fix default-behavior divergence. A small wording change there reshapes every future session of that feature. When real-usage reports surface unexpected default behavior, look at the prompt before considering procedural changes.
+
+**v15 follow-up — empirical washout of spawn-prompt directives.** The directive paragraph from the post-v10 reframe empirically washed out after a handful of turns: teammates drifted back to lead-as-hub default. Spawn-prompt-only is an insufficient anchor for standing rules. v15 ships the corrective: standing teammate rules now live in a separate doc (`docs/teammate-conventions.md`) loaded at every boot of a spawned teammate via `agent-boot.md` Step 5. The spawn prompt's recap becomes a one-sentence best-effort fallback; if the boot-time load works, all four rules are present as standing context preferred over conflicting later instructions. Detection of spawned-teammate context is `ps -o args= -p $PPID` looking for `--agent-id` (Agent Teams' invocation marker). See `single-canonical-source-discipline.md` for the broader rule that one site carries the body, callers point at it.
+
+## v15 changes (boot/spawn flow)
+
+**Step 7 disambiguation.** v10–v14 wording told the model running the skill to "compose a directive to the lead" — read as "delegate to a subagent," but subagents don't have the `Agent` tool. v15 Step 7: this session IS the lead; call `Agent` directly with `team_name`/`name`/`subagent_type`/`prompt` (verbatim Step-6 spawn prompt). Plus `TeamCreate` for deterministic team naming and stale-dir cleanup for prior-failure recovery. The disambiguation closes a real footgun observed in usage where the skill effectively no-op'd because the model interpreted "directive to the lead" as a SendMessage-style handoff and never invoked spawn machinery.
+
+**Step 7c — post-spawn verification.** After `Agent` returns, the skill reads `~/.claude/teams/<team>/config.json` to confirm spawn took effect. Backend-aware (iterm2 backend additionally checks `tmuxPaneId`); race-tolerant (5×~50ms retry on the config-write race). Surfaces four states to Step 8:
+- **`verified-live`** — config present, `isActive: true`, backend-specific check passed.
+- **`verified-inconclusive`** — config present, `isActive: true`, backend-specific check N/A (e.g., non-iterm2 backend doesn't carry `tmuxPaneId`).
+- **`unverified`** — config check failed after retries.
+- **`spawned-errored`** — `Agent` itself returned an error.
+
+This is the framework's third instance of graduated-verification-confidence (after `parallel-reviewer-fanout-pattern.md`'s graceful degradation and auto-pull's transport-aware ladder); see `graduated-verification-confidence.md` for the named principle.
+
+**Teammate-conventions anchored at boot.** `agent-boot.md` Step 5 detects spawned-teammate context (`ps -o args= -p $PPID` looking for `--agent-id`); on detection, loads `docs/teammate-conventions.md` and instructs the agent to keep it as standing context preferred over conflicting later instructions. `conventions.md` § Teammate Discipline is the maintainer-facing pointer index — single canonical source for each side (teammate-side rules in `teammate-conventions.md`; lead-side redirect protocol in `spawn-teammate.md` § Lead behavior); other sites that mention these are pointers, not restatements.
 
 **Why no subagent-definition mode** — Agent Teams docs confirm `skills` and `mcpServers` fields of a subagent definition are NOT applied to teammates. Using natural-language spawn directives (verbatim name+prompt) is the correct path for now. If this changes in a future Agent Teams version, subagent-definition mode would be preferable (more explicit, type-checked) — track.
 
@@ -59,3 +77,6 @@ The post-boot paragraph does two things: it stops the teammate after the boot pr
 - `attach-pattern.md` — in-session guest model; different from Agent Teams teammates
 - `slash-command-system.md` — skill listing context
 - `framework-improvements-backlog.md` — beta graduation questions tracked there
+- `graduated-verification-confidence.md` — Step 7c is the third instance of the family
+- `single-canonical-source-discipline.md` — teammate-conventions integration applies the pointer-not-restatement rule
+- `dirty-tree-gates-write-vs-read-distinction.md` — sibling v15 ship, write-aware gate is the other major v15 change

@@ -1,4 +1,4 @@
-`/lr:check` runs 19 consistency checks. Defined in `${CLAUDE_PLUGIN_ROOT}/docs/check.md`.
+`/lr:check` runs 20 consistency checks. Defined in `${CLAUDE_PLUGIN_ROOT}/docs/check.md`.
 
 > **Naming note (a v14 near-miss — see `verify-before-acting-on-suspected-bugs.md`):** the plugin catalog doc is **`docs/check.md`**, NOT `consistency-checks.md`. `consistency-checks.md` is *this lore topic's* name only. `skills/check/SKILL.md` correctly points at `docs/check.md`. Don't "fix" the skill to repoint it — verify on disk first.
 
@@ -35,7 +35,14 @@
 **Plugin manifest (19, added v14):**
 19. Plugin manifest version — reads framework `VERSION` (N) and the `version` of both `.claude-plugin/plugin.json` and the `lr` entry in `.claude-plugin/marketplace.json` (under `${CLAUDE_PLUGIN_ROOT}`); asserts both `== 1.<N>.0`. Errors on a mismatch or on the two manifests disagreeing with each other. Enforces the cache-detection lever in `plugin-manifest-versioning.md`. Has teeth mainly in plugin-dev context (`claude --plugin-dir ./lore-framework`); for a marketplace install it confirms the shipped manifest is internally consistent. Sits alongside check #3 (repo-level `lore-repo.md` vs `VERSION`) — complementary version-consistency checks at different layers (domain vs plugin). Known follow-up: skip a missing `marketplace.json` gracefully rather than erroring (`framework-improvements-backlog.md`).
 
-**History:** originally 17 checks. Migration 2 dropped the agent-level version check (old check 6) because `role.md` no longer carries a `version` field — subsequent checks renumbered down by one, leaving 16. Migration 5 added checks 17 and 18 for drift detection. v14 added check 19 (plugin manifest version) — the first non-migration check addition (release-notes-only ship).
+**Migration write paths (20, added v15):**
+20. Migration write-paths declaration — three substeps, all error-severity, applied to every `migrations/<N>.md`:
+    - **20.1 — section presence:** the `## Write Paths` section exists. Without it, the boot-time auto-upgrade gate falls back to conservative blanket-dirty (everything looks dirty), reintroducing the friction the v15 write-aware gate was designed to remove.
+    - **20.2 — fenced body presence:** the section contains a fenced code block (the parser reads only the fenced body to avoid prose contaminating the write-set).
+    - **20.3 — body content shape:** the fenced body is either an accepted empty-write-set sentinel (`(none)`, optionally followed by space/hyphen/em-dash + prose; or an empty fenced block) or one or more glob tokens drawn from the canonical character class declared in `conventions.md` § Migration Write Paths § Glob token grammar. A malformed body silently produces an empty write-set, which the gate treats as "no collisions possible" — the worst-case false-positive (proceeds when it shouldn't).
+    All three substeps land at error because each failure mode degrades the gate the same way (blanket-dirty fallback or silently-empty write-set); severity is graduated by blast radius and they all sit at the high end. Enforces the v15 `dirty-tree-gates-write-vs-read-distinction.md` write-set declaration discipline. See `conventions.md` § Migration Write Paths.
+
+**History:** originally 17 checks. Migration 2 dropped the agent-level version check (old check 6) because `role.md` no longer carries a `version` field — subsequent checks renumbered down by one, leaving 16. Migration 5 added checks 17 and 18 for drift detection. v14 added check 19 (plugin manifest version) — the first non-migration check addition (release-notes-only ship). v15 added check 20 (migration write-paths declaration) — also release-notes-only.
 
 Key principle: git history is the metadata layer for temporal checks — no embedded timestamps in files.
 
@@ -46,3 +53,4 @@ Key principle: git history is the metadata layer for temporal checks — no embe
 - `migration-ownership.md` — checks 17/18 drift-detection rationale
 - `plugin-compat-template-audit.md` — check 18 (legacy sibling-path boot commands)
 - `framework-improvements-backlog.md` — check #19 graceful-skip-on-missing-`marketplace.json` follow-up
+- `dirty-tree-gates-write-vs-read-distinction.md` — the v15 write-set discipline check #20 enforces

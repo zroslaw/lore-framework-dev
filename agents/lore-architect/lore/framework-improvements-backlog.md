@@ -93,10 +93,16 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 - **Inline-flow form (`repos: [a, b]`)** — deliberately not supported in v11 to keep the awk parser surface small. Reconsider only if users complain.
 - **workspace-sync BatchMode behavior-change note (v14, doc follow-up)** — v14 added `GIT_SSH_COMMAND` `BatchMode=yes` to `scripts/workspace-sync`; SSH keys needing an interactive passphrase (not in an ssh-agent), or unknown host keys, now fail-fast instead of prompting. Correct for parallel jobs, but currently undocumented — add a one-line note to `release-notes/14.md` § workspace-sync (or a future release-notes). Low-severity `/code-review` finding, shipped as-is. See `portable-shell-in-framework-docs.md`.
 
-## Consistency Checks (`/lr:check`) & Plugin Manifest (v14)
+## Consistency Checks (`/lr:check`) & Plugin Manifest (v14, v15)
 
 - **check #19 — skip a missing `marketplace.json` gracefully.** Check #19 reads `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/marketplace.json` unconditionally. It's co-located for this plugin (source `"./"`), but co-location isn't guaranteed for all install/cache layouts (a marketplace-install cache may carry only `plugin.json`). Make the `marketplace.json` half conditional on the file existing, rather than erroring. Low-severity `/code-review` finding, shipped as-is. See `consistency-checks.md`, `plugin-manifest-versioning.md`. (`docs/check.md`)
 - **Verify whether a manifest-version bump alone triggers Claude Code cache auto-invalidation.** If a `1.<VERSION>.0` manifest bump *alone* makes the platform refresh its cache (not merely *detect* the release), the manual Clear Plugin Cache footer could become optional. Test with a real marketplace install + restart — verify empirically before dropping the footer (`verify-before-acting-on-suspected-bugs.md`). Open question from `plugin-manifest-versioning.md`.
+
+## Write-Aware Gate / Migration Write Paths (v15)
+
+- **Bring the v15 collision-check gate to `/lr:update`.** Currently `/lr:update` is interactive-by-design and writes through dirty files unconditionally. Bringing the `dirty ∩ write-set` gate to it would make the principle universal across automatic and user-invoked write paths. Trade-off: `/lr:update` is interactive so the friction trade is different (the user is already at the keyboard), but a same-shape gate would still prevent accidental overwrites. See `dirty-tree-gates-write-vs-read-distinction.md`.
+- **A3-arch deferred to v16.** The architecture-lens finding from a late v15 review round, deferred so v15 could ship. Carry forward to v16 design discussions; the specific finding is in the v15 review notes (round-by-round summary in `parallel-reviewer-fanout-pattern.md` § v15 operational lessons).
+- **Workspace-root paths gap (documented, not fixed).** The boot-time gate is per-repo and cannot see workspace-root files (`.claude/commands/lr-*-agent.md`). v15 documents this in `conventions.md` § Known gap; protection there is the in-migration three-way merge, not the gate. Fix would require a workspace-aware gate layer; defer until a real bug surfaces.
 
 ## Workspace Topology
 
