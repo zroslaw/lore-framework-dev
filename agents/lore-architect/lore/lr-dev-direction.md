@@ -2,7 +2,9 @@
 
 Opened 2026-05-31 with the user. A major new direction: **`lr-dev`**, a module/mode of the `lr` plugin dedicated to development & SDLC automation. North star (user): convert the SDLC into a **dark factory** — software built internally and autonomously by lore agents, fed only inputs plus occasional follow-ups. Same family as `autonomous-agents-vision.md`: autonomous-agents is the *substrate/process* direction (always-on background workers); lr-dev is the *what-they-do-in-software-development* direction. They converge on the dark-factory end state.
 
-**Status: active exploration, not shipped.** This topic is an orienting pointer. The detailed design lives in the drafts and backlog listed under *Where the detail lives* — do not duplicate that detail here. This file is the anchor (analogous to how `autonomous-agents-vision.md` anchors the parked autonomous direction).
+**Status: active exploration, first prototype validated 2026-06-02.** This topic is an orienting pointer. The detailed design lives in the drafts and backlog listed under *Where the detail lives* — do not duplicate that detail here. This file is the anchor (analogous to how `autonomous-agents-vision.md` anchors the parked autonomous direction).
+
+**Prototype milestone (2026-06-02):** the §2 file-by-file quality workflow ran end-to-end against a real source file as a Claude Code dynamic Workflow script (`workdir/draft-lr-dev-file-quality-workflow.js`). Two iterations confirmed the pipeline shape and produced the §4 schema-conformant artifacts. Operational case validating the reframe: lore-aware bug verifiers killed 3 of 9 bugs as false-positives — including a "typo" that was actually a non-standard supplier-specific code — by tracing the actual caller graph. Without booting the per-repo context agent inside workflow subagents, the workflow would have generated "fixes" that broke real integration. Context-agent attach is therefore **not a nice-to-have**. Full lessons in `workflow-primitive-operational-notes.md` and `quality-repo-architecture.md`.
 
 ## Leading direction (2026-06-01 reframe): context agents on existing primitives
 
@@ -43,6 +45,16 @@ The original framing, now demoted. Kept for the reasoning trail and because indi
 
 Surviving framings that are *not* superseded (carried into the leading direction): **test scenarios as a bidirectional IR** (what-to-test decoupled from how; coverage ≠ meaningfulness — every "expected" must cite product-lore intent or tests merely canonize current/buggy behavior); **lr-dev as a growing feature catalog** (accretion discipline, same shape as `ailment-catalog-pattern.md`); **multi-lens review promoted to a reusable skill** (`lr:dev-review`, the user independently reinvented `parallel-reviewer-fanout-pattern.md`); **standardized deliverable-format rules** (stable IDs, `class: product|technical`, intent-source citation, confidence/status, real dry-run counts not zeros).
 
+## Three-repo architecture (artifact side)
+
+The reframe places the **knowledge** side cleanly (a context agent in a per-source-repo agent repo, attached by workers). The artifact side — File Reports, bug catalog, scenario catalog, gap analyses, AI-generated tests, manifest — needs its own home, especially when the source repo is under a strict review/compliance regime that can't accept AI-authored content directly. The clean shape is **three repos**:
+
+1. **Source repo** — system under analysis; untouched.
+2. **Per-repo context agent's agent repo** — the knowledge custodian (this is the reframe).
+3. **Quality repo** — a new, separate, non-restricted repo for all quality artifacts. Composite-builds against the source so generated tests can exercise real code without copying it.
+
+Generated tests live **permanently** in the quality repo, not migrated into the source suite — drift between the two suites is information (missing human test or AI hallucination). The compliance bottleneck applies to *fixes*, not analysis. Resumability via per-file manifest with `lastAnalyzedSha`. Full pattern: **`quality-repo-architecture.md`**.
+
 ## Where the detail lives
 
 - `workdir/draft-lr-dev.md` — general concept. **§1A carries the leading-direction reframe** (context agents on existing primitives); the rest carries the superseded knowledge model, mode/capability mechanism, review skill, integration seams.
@@ -65,6 +77,8 @@ The user has a **second, concurrent idea** to explore in a separate session that
 
 - `framework-defined-role-pattern.md` — the recurring-role / thin-role-pointer pattern the context agent is the first application of.
 - `agent-split-only-when-forced.md` — why one context agent per repo (product/technical are filing categories, not identities).
+- `quality-repo-architecture.md` — the three-repo separation for the artifact side (source / context-agent-repo / quality repo).
+- `workflow-primitive-operational-notes.md` — operational lessons from the first working file-by-file quality prototype (boot-not-attach in workflow subagents, right-size the verify fan-out, persistence is parent's job).
 - `autonomous-agents-vision.md` — sibling major direction; same dark-factory end state, different axis (process/substrate vs SDLC activity).
 - `framework-scope-vs-agent-scope.md` — the rule the reframe applies (reach for existing agent primitives before minting framework machinery).
 - `framework-as-engine-not-kb.md`, `agents-are-executors-first.md` — why a context agent (executor carrying knowledge) is more on-identity than a repo-bound passive KB.

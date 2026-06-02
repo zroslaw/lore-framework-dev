@@ -123,6 +123,14 @@ For framework-architectural review, point the architecture reviewer at `lore-arc
 
 Several v12 findings traced directly back to architect-authored principles, which the architect would have applied if reviewing solo — but the gap between authoring a principle and applying it consistently is exactly what an outside lens catches.
 
+## When NOT to fan out — the per-item-uniformity test
+
+The pattern's strength is **independent claims under independent adversarial framing**. Its inverse failure is fanning out across items that share a uniform property a single agent could audit in bulk — e.g., "every scenario cites a real intent source," "every entry has a stable ID." A dedicated agent per item adds parallel cost without adding rejection power.
+
+**Default question before any fan-out:** *"Would a single agent looking at all N items at once produce the same verdicts as N separate agents?"* If yes, batch.
+
+Worked example from the lr-dev quality workflow prototype: v1 spent 19 parallel agents on per-scenario intent-citation verification → zero scenarios dropped (the schema constraint already enforced it). v2 dropped that stage entirely and kept per-item adversarial verify only for *bugs* (which really are independent claims). See `workflow-primitive-operational-notes.md` § Right-size the verify fan-out — the same principle, codified for the Workflow primitive.
+
 ## Composition with `sonnet-subagent-review-pattern.md`
 
 That pattern is **single-lens role-as-perspective** — one reviewer booted as the agent itself, used for principle-class lore additions and structural changes within an agent's own knowledge. This pattern is **multi-lens adversarial fan-out** — three reviewers with disjoint specialty lenses, used for shipped framework artifacts (scripts, skills, doc sweeps, schema changes, doc-only `VERSION` bumps).
@@ -138,3 +146,4 @@ Often complementary: use sonnet-subagent for the lore-side polish; use parallel-
 - `ailment-catalog-pattern.md` — the v12 ship that validated this pattern's application to doc-only edits.
 - `single-canonical-source-discipline.md` — the dominant drift pattern multi-round review catches; pointer-only, no inline restatement.
 - `graduated-verification-confidence.md` — partial returns from stalled reviewers as additive evidence is one instance of this principle.
+- `workflow-primitive-operational-notes.md` — the right-size-the-fan-out rule codified for the dynamic Workflow tool; complementary inverse case.

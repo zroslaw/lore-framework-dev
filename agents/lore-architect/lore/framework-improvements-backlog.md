@@ -56,6 +56,9 @@ New module/mode for development & SDLC automation; first feature is bug-finding 
 - **Reusable multi-lens review skill** — promote `parallel-reviewer-fanout-pattern.md` to an lr-dev skill (`lr:dev-review`) usable for any code change. *Survives the reframe.* See draft §6.
 - **Context-agent generator** — a flag on `/lr:create-agent` or a dedicated generator skill that emits a context agent from a template + thin role pointer (`framework-defined-role-pattern.md`). New item from the reframe.
 - **Open seams** — file-mirror placement inside the context agent's `lore/` + staleness between non-lr-dev touches; specialist÷context attach/consult ergonomics; scenario→code binding; generated-vs-human de-dup. Tracked in `lr-dev-direction.md` § Open decisions and draft §9.
+- **Quality-repo conventions** — file/dir layout (`reports/`, `bugs/`, `scenarios/`, `tests/`, `manifest.yaml`), composite-build template, retention/pruning policy, manifest schema (per-file `path` / `lastAnalyzedSha` / `status` / `lastRunId`). New item from `quality-repo-architecture.md`. May graduate into a generator skill (`/lr:dev-quality-init <source-repo>`).
+- **Promote the file-quality workflow script** — the prototype lives in `workdir/draft-lr-dev-file-quality-workflow.js`. When stable, move to the plugin's `workflows/` dir (or a `lore-dev` sibling plugin) so it's invokable as `Workflow({ name })` rather than `Workflow({ scriptPath })`. New item from the prototype.
+- **Whole-repo sweep skill** — `lr:dev-quality-sweep`: orchestrator that reads the manifest, picks N stale files, runs the per-file workflow on each, persists File Reports, updates the manifest. Daily-cron-friendly (budgeted bottom-N rolling). Sits on top of the per-file workflow; depends on quality-repo conventions.
 
 ## `/lr:spawn-teammate` Beta Graduation
 

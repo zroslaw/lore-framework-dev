@@ -82,6 +82,18 @@ The original "lr-dev mode" conflated four things. The reframe **decomposes** the
 
 The valuable quarter was (4); the reframe keeps it and drops 1–3.
 
+### Prototype validation (2026-06-02)
+
+The first feature's file-by-file workflow ran end-to-end against a real source file as a Claude Code dynamic Workflow script — see `workdir/draft-lr-dev-file-quality-workflow.js` and `draft-lr-dev-quality.md` §2 (now updated with the validated five-phase shape). Key validations of this reframe:
+
+- **Boot inside workflow subagents works.** Workflow subagents booted as the per-repo context agent and returned populated `loreTopicsConsulted` arrays — the boot procedure runs cleanly inside a subagent context. Confirms that worker agents can spawn ephemeral subagents that *become* the context agent. (See `workflow-primitive-operational-notes.md`.)
+- **Context flips verdicts.** Lore-aware bug verifiers killed 3 of 9 bugs as false-positives by tracing the real caller graph; one "typo" turned out to be a non-standard supplier-specific code. Without booting the context agent, the workflow would have generated "fixes" that broke real integration. Context-agent attach is **operationally necessary**, not nice-to-have.
+- **Reflection-discipline cut works in practice.** The context agent's session learnings (caller patterns, supplier idioms, bug verdicts as known-correct patterns or known issues) reflect+merge cleanly through the agent's normal finalization — no permission boundary needed. The objective/subjective cut survives as discipline.
+
+### Three-repo architecture (artifact side) — see `quality-repo-architecture.md`
+
+The reframe handles the **knowledge** side cleanly. The **artifact** side (File Reports, bug catalog, scenario catalog, gap analyses, AI-generated tests, manifest) needs its own home, especially under strict review/compliance regimes that can't accept AI-authored content. Resolution: **three repos** — source / per-repo context agent's agent repo / quality repo. The quality repo is just a regular non-lore repo (composite-builds against the source). Generated tests live there permanently; drift between the AI and human suites is information. The compliance bottleneck applies to *fixes*, not analysis.
+
 ### Open threads (carry forward)
 
 - What actually goes *inside* `docs/context-agent.md` — the standard operating manual for the role (hold/provide/learn disciplines, the `product/`÷`technical/`÷file-mirror structure standard, reflection discipline, overrides convention).
@@ -238,4 +250,6 @@ Per `naming-foundational-principles.md`:
 - `terminology-domain-collision-trap.md` — terminology hygiene.
 - `freshness-contracts-at-session-boundaries.md` — extends to per-artifact staleness.
 - `design-doc-before-implement.md` — why this draft exists before any framework edits.
+- `quality-repo-architecture.md` — the three-repo separation (source / context-agent-repo / quality repo) for the artifact side.
+- `workflow-primitive-operational-notes.md` — operational lessons from the first working prototype (boot-not-attach, right-size verify fan-out, persistence-is-parent's-job).
 - `framework-improvements-backlog.md` § lr-dev — backlog home.
