@@ -2,7 +2,7 @@
 
 Opened 2026-05-31 with the user. A major new direction: **`lr-dev`**, a module/mode of the `lr` plugin dedicated to development & SDLC automation. North star (user): convert the SDLC into a **dark factory** — software built internally and autonomously by lore agents, fed only inputs plus occasional follow-ups. Same family as `autonomous-agents-vision.md`: autonomous-agents is the *substrate/process* direction (always-on background workers); lr-dev is the *what-they-do-in-software-development* direction. They converge on the dark-factory end state.
 
-**Status: active exploration, first prototype validated 2026-06-02.** This topic is an orienting pointer. The detailed design lives in the drafts and backlog listed under *Where the detail lives* — do not duplicate that detail here. This file is the anchor (analogous to how `autonomous-agents-vision.md` anchors the parked autonomous direction).
+**Status: active exploration; first prototype validated 2026-06-02; first in-plugin BETA feature shipped 2026-06-03 (AIQA/ULA, local commit `2f1e788` — v16 ship deferred).** This topic is an orienting pointer. The detailed design lives in the drafts and backlog listed under *Where the detail lives* — do not duplicate that detail here. This file is the anchor (analogous to how `autonomous-agents-vision.md` anchors the parked autonomous direction).
 
 **Prototype milestone (2026-06-02):** the §2 file-by-file quality workflow ran end-to-end against a real source file as a Claude Code dynamic Workflow script (`workdir/draft-lr-dev-file-quality-workflow.js`). Two iterations confirmed the pipeline shape and produced the §4 schema-conformant artifacts. Operational case validating the reframe: lore-aware bug verifiers killed 3 of 9 bugs as false-positives — including a "typo" that was actually a non-standard supplier-specific code — by tracing the actual caller graph. Without booting the per-repo context agent inside workflow subagents, the workflow would have generated "fixes" that broke real integration. Context-agent attach is therefore **not a nice-to-have**. Full lessons in `workflow-primitive-operational-notes.md` and `quality-repo-architecture.md`.
 
@@ -72,6 +72,14 @@ Generated tests live **permanently** in the quality repo, not migrated into the 
 ## Operational note
 
 The user has a **second, concurrent idea** to explore in a separate session that should carry the essential points from this one — these drafts + this topic are that carry-forward. Next natural concrete move on *this* thread: ground the test-scenario schema on the `My-Turbo-Boost-Switcher` mouse repo, using its context agent as the knowledge custodian.
+
+## First In-Plugin BETA Feature: AIQA/ULA (2026-06-03)
+
+Two BETA skills committed to `lore-framework` locally (`2f1e788`; v16 ship deferred):
+- `/lr:dev-aiqa-repo-init` — creates a sibling `<repo>-aiqa` quality repo.
+- `/lr:dev-ula-file <file>` — single-file unit-level analysis: split → find bugs (step A) → generate scenarios clean-room (step B) → gap analysis (step C).
+
+Key design decisions: `dev-` skill prefix required (not just grouping); module subtree layout (`dev/aiqa/` for docs/prompts/schemas/workflows) rather than global `docs/`; artifacts are machine-readable YAML; single-source discipline — schemas enforce structure, prompts enforce semantics, `artifact-specs.md` is a pointer only. See `aiqa-ula-feature.md`, `dev-module-conventions.md`.
 
 ## See Also
 

@@ -57,6 +57,28 @@ The script can live anywhere on disk. Edit-and-rerun via `Workflow({ scriptPath 
 
 For draft iteration, keep the script in the agent's `workdir/`. When stable and reusable, move to `~/.claude/workflows/` or the plugin's `workflows/` dir to make it a named workflow invokable as `Workflow({ name })`. Same iteration loop as drafts in markdown — workflow script in `workdir/` ≈ markdown draft in `workdir/`; both graduate by moving out.
 
+## Dynamic Workflow Runtime Availability
+
+The Claude Code dynamic Workflow primitive (`agent()`/`phase()`/`parallel()` JS runtime) is **not present in every session's toolset**. Verify rather than assume: check the session's deferred-tool list and run `ToolSearch` for workflow/orchestration/phases — if only Team/Task/Cron/Monitor come back, the runtime is absent.
+
+**Fallback that works:** simulate orchestration with the `Agent` tool directly — one splitter subagent, then one unit-pass subagent per unit. Prompts and schemas designed for the workflow runtime are portable to this fallback without rewriting.
+
+Also note: **no JS runtime (node/deno/bun) on the primary dev machine** — workflow JS can't be syntax-checked locally. Eyeball-review the JS or rely on the runtime's own parse.
+
+Composes with `graduated-verification-confidence.md` (state confidence, plan for "unavailable") and `verify-before-acting-on-suspected-bugs.md`.
+
+## Reviewing AI-Generated Workflow Code
+
+AI-generated orchestration code needs the same adversarial review as any code. Running `/code-review` (max effort) on freshly-authored workflow JS surfaced **real correctness bugs**. Recurring defect classes worth watching:
+
+- **Result/unit misalignment:** zipping `parallel()` results back to inputs by array index assumes order preservation. Fix: match each result to its item via an identity the result *carries itself* (a slug, an id) via a Map — never by index. Drop redundant outer identity stamps that can contradict the artifact.
+- **Silent drops:** a `.filter(r => r.a && r.b)` that removes incomplete results loses items with no trace. Always collect and **name** dropped items, surface them (return a `dropped: []`, log a WARNING).
+- **Inject-then-undefined:** when prompts/schemas are injected via `args` and referenced as `prompts.stepA` etc., a missing/mis-mapped key embeds the literal `"undefined"` into an agent prompt or builds a malformed schema. Fix: **fail loud** — validate all required keys up front and throw; document the file→key mapping explicitly (a table) so it can't be guessed wrong.
+- **Schema strictness coupling:** a composite schema validating N sub-artifacts at once is all-or-nothing — one over-strict constraint (e.g. `minItems:1`) on one sub-item fails the whole unit. Principle: **schema enforces structure, prompt enforces quality/semantics.** Don't push quality bars into the schema where a single miss nukes a batch.
+- **Per-unit full-file embedding:** embedding the whole file in every parallel unit prompt = O(units×filesize) tokens. Prefer letting the agent self-read the file (also aligns with "agent gathers its own context"); keep full embed only where genuinely needed (e.g., the split step).
+
+Process lesson: the **review→fix→re-review loop converged** — round 2 confirmed fixes held and found only lower-severity residuals (e.g., unit-id uniqueness assumed but not enforced). This mirrors the multi-round-until-convergence discipline. See `parallel-reviewer-fanout-pattern.md`.
+
 ## See Also
 
 - `parallel-reviewer-fanout-pattern.md` — per-lens fan-out is the inverse case (genuinely independent perspectives); pairs with the right-size-the-verify rule above.

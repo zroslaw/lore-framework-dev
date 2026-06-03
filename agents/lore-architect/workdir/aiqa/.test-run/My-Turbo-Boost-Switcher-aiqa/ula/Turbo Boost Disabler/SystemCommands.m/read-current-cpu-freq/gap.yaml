@@ -1,0 +1,32 @@
+unit: read-current-cpu-freq
+signature: "+ (float) readCurrentCpuFreq"
+
+summary:
+  totalUlaScenarios: 9
+  totalImplementedTests: 0
+  ulaNotImplemented: 9
+  ulaMissed: 0
+
+considered-tests: []
+
+not-implemented:
+  - scenario: nil-output-returns-zero
+    note: No test verifies the nil-output early-return guard.
+  - scenario: system-average-not-found-returns-zero
+    note: No test verifies the 'System Average' not-found early-return.
+  - scenario: open-paren-not-found-returns-zero
+    note: No test verifies the missing '(' fallthrough to 0.0f.
+  - scenario: close-paren-not-found-returns-zero
+    note: No test verifies the missing ')' fallthrough to 0.0f.
+  - scenario: valid-frequency-parsed-correctly
+    note: No test covers the full happy-path parse and GHz conversion.
+  - scenario: frequency-value-is-zero-inside-parens
+    note: No test checks the zero-frequency boundary on the happy path.
+  - scenario: large-frequency-value
+    note: No test exercises division with a high-end CPU frequency value.
+  - scenario: system-average-appears-multiple-times
+    note: No test verifies first-occurrence semantics when the header repeats.
+  - scenario: powermetrics-invoked-with-correct-args
+    note: No test asserts that the correct binary path and flags are passed to sudo.
+
+ula-missed: []

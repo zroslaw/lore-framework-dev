@@ -1,0 +1,52 @@
+unit: read-current-cpu-freq
+signature: "+ (float) readCurrentCpuFreq"
+
+bugs:
+  - id: nsrange-length-includes-closing-paren
+    title: "NSMakeRange length is off-by-one — closing ')' is included in the extracted substring"
+    description: >
+      The range is constructed as
+      NSMakeRange(startRange.location + 1, endRange.location - startRange.location).
+      The length should be (endRange.location - startRange.location - 1) to exclude the
+      closing ')'. As written, substr ends with ')'. NSString's floatValue stops parsing
+      at the ')' so the numeric result is not corrupted in practice, but the trailing
+      character means any whitespace-split token that contains it could return wrong
+      data if the format ever changes, and any caller that logs or forwards substr will
+      see the spurious ')'. Trigger: any successful powermetrics output where "System
+      Average" contains a parenthesised frequency value, e.g.
+      "System Average frequency: 1500 MHz (1500 MHz)".
+
+  - id: end-before-start-crashes-nsrange
+    title: "No guard against ')' appearing before '(' — NSMakeRange underflows and crashes"
+    description: >
+      If the substring starting at "System Average" contains a ')' before a '(' (e.g.
+      malformed or unexpected powermetrics output), endRange.location <
+      startRange.location. The length argument to NSMakeRange is computed as
+      (endRange.location - startRange.location), which underflows to a huge NSUInteger
+      (both are NSUInteger). The subsequent substringWithRange: call raises an
+      NSRangeException and crashes the app. No guard or assertion prevents this.
+      Trigger: feed any string where the first ')' precedes the first '(' after the
+      "System Average" anchor.
+
+  - id: empty-substr-index-zero-crash
+    title: "componentsSeparatedByString:[0] on empty or whitespace-only substr can return empty token and panic"
+    description: >
+      If the extracted substr (between '(' and ')') is an empty string or contains
+      only spaces, componentsSeparatedByString:@" " returns an array whose first element
+      is @"". Calling [array objectAtIndex:0] is safe (no crash), but floatValue on @""
+      returns 0.0f which silently masks the parse failure. More critically, if substr is
+      nil (impossible via substringWithRange: but reachable by code change), the message
+      send would crash. The real risk today: if powermetrics emits "()" or "( )" the
+      method returns 0.0f with no diagnostic, silently hiding a parse error.
+
+  - id: sudo-failure-not-propagated
+    title: "runTaskWithSudo return value ignored — sudo failure treated as success"
+    description: >
+      runTaskWithSudo:andArgs:output: returns NO when the sudo task fails (non-zero
+      exit status or exception). readCurrentCpuFreq discards this return value. If
+      /usr/bin/powermetrics cannot be run (sudo not configured for NOPASSWD, binary
+      missing, or permission denied), the method may receive a partial or empty output
+      but still proceeds to parse it, returning 0.0f with no error signal to the
+      caller. The caller has no way to distinguish "measurement succeeded and returned
+      0 GHz" from "command failed". Trigger: run without a sudo NOPASSWD rule for
+      powermetrics, or on a system where powermetrics is absent.

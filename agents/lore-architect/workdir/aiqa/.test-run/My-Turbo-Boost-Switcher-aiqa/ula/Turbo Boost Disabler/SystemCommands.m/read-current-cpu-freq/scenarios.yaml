@@ -1,0 +1,133 @@
+unit: read-current-cpu-freq
+signature: "+ (float) readCurrentCpuFreq"
+
+scenarios:
+  - id: nil-output-returns-zero
+    title: "Returns 0.0 when runTaskWithSudo produces nil output"
+    description: >
+      Precondition: stub runTaskWithSudo:andArgs:output: so that it leaves the output
+      pointer unchanged (i.e., *output remains nil).
+      Action: call +readCurrentCpuFreq.
+      Expected: returns exactly 0.0f.
+      Assert: return value == 0.0f.
+    coverage-intent:
+      - kind: branch
+        target: "early-return when output is nil"
+
+  - id: system-average-not-found-returns-zero
+    title: "Returns 0.0 when output does not contain 'System Average'"
+    description: >
+      Precondition: stub runTaskWithSudo:andArgs:output: to set *output to an NSString
+      that does NOT contain the substring "System Average" (e.g. arbitrary powermetrics
+      lines without that header).
+      Action: call +readCurrentCpuFreq.
+      Expected: returns exactly 0.0f.
+      Assert: return value == 0.0f.
+    coverage-intent:
+      - kind: branch
+        target: "early-return when 'System Average' is not found in output"
+      - kind: condition
+        target: "range.location == NSNotFound is true"
+
+  - id: open-paren-not-found-returns-zero
+    title: "Returns 0.0 when 'System Average' line contains no '('"
+    description: >
+      Precondition: stub runTaskWithSudo:andArgs:output: to set *output to a string
+      containing "System Average" but no '(' character anywhere after it, e.g.
+      "System Average frequency: 1500 MHz".
+      Action: call +readCurrentCpuFreq.
+      Expected: returns exactly 0.0f.
+      Assert: return value == 0.0f.
+    coverage-intent:
+      - kind: branch
+        target: "fallthrough to final return 0.0f when startRange.location == NSNotFound"
+      - kind: condition
+        target: "startRange.location == NSNotFound is true"
+
+  - id: close-paren-not-found-returns-zero
+    title: "Returns 0.0 when 'System Average' segment has '(' but no ')'"
+    description: >
+      Precondition: stub runTaskWithSudo:andArgs:output: to set *output to a string
+      containing "System Average (" but no closing ')'.
+      Action: call +readCurrentCpuFreq.
+      Expected: returns exactly 0.0f.
+      Assert: return value == 0.0f.
+    coverage-intent:
+      - kind: branch
+        target: "fallthrough to final return 0.0f when endRange.location == NSNotFound"
+      - kind: condition
+        target: "endRange.location == NSNotFound is true"
+
+  - id: valid-frequency-parsed-correctly
+    title: "Parses a well-formed 'System Average' line and returns frequency in GHz"
+    description: >
+      Precondition: stub runTaskWithSudo:andArgs:output: to set *output to a realistic
+      powermetrics snippet, e.g.:
+        "CPU 0 frequency: 2400 MHz\nSystem Average frequency: 2400 MHz (2400 MHz)\n"
+      The value inside parens is "2400 MHz"; the first space-separated token is "2400".
+      Action: call +readCurrentCpuFreq.
+      Expected: returns 2400.0f / 1000.0f == 2.4f.
+      Assert: fabsf(result - 2.4f) < 0.001f.
+    coverage-intent:
+      - kind: path
+        target: "full happy path: output non-nil, System Average found, both parens found, numeric token extracted, divided by 1000"
+      - kind: statement
+        target: "NSMakeRange construction and substringWithRange: execution"
+      - kind: statement
+        target: "componentsSeparatedByString:@\" \"[0] token extraction"
+      - kind: statement
+        target: "floatValue / 1000.0f return statement"
+
+  - id: frequency-value-is-zero-inside-parens
+    title: "Returns 0.0 when the frequency token inside parens is '0'"
+    description: >
+      Precondition: stub runTaskWithSudo:andArgs:output: to set *output to a string
+      like "System Average frequency: 0 MHz (0 MHz)".
+      Action: call +readCurrentCpuFreq.
+      Expected: returns 0.0f / 1000.0f == 0.0f.
+      Assert: return value == 0.0f.
+      This tests the zero-frequency boundary without involving a nil-output or
+      not-found branch.
+    coverage-intent:
+      - kind: condition
+        target: "floatValue returns 0.0 for a '0' token (boundary value)"
+
+  - id: large-frequency-value
+    title: "Handles a high-frequency value (e.g. 4500 MHz) without overflow"
+    description: >
+      Precondition: stub output to contain "System Average frequency: 4500 MHz (4500 MHz)".
+      Action: call +readCurrentCpuFreq.
+      Expected: returns 4500.0f / 1000.0f == 4.5f.
+      Assert: fabsf(result - 4.5f) < 0.001f.
+      This exercises the division path with a value representative of modern high-boost
+      CPU frequencies.
+    coverage-intent:
+      - kind: statement
+        target: "floatValue / 1000.0f with large numeric input"
+
+  - id: system-average-appears-multiple-times
+    title: "Uses the first occurrence of 'System Average' when it appears more than once"
+    description: >
+      Precondition: stub output to a string with "System Average" appearing twice, each
+      with different frequency values in parens, e.g.
+        "System Average frequency: 1200 MHz (1200 MHz)\n...System Average frequency: 3000 MHz (3000 MHz)\n"
+      Action: call +readCurrentCpuFreq.
+      Expected: returns 1200.0f / 1000.0f == 1.2f (the first occurrence).
+      This tests that rangeOfString: uses the first match and that substringFromIndex
+      anchors correctly on it.
+      Assert: fabsf(result - 1.2f) < 0.001f.
+    coverage-intent:
+      - kind: branch
+        target: "rangeOfString: returns the first 'System Average' location when multiple exist"
+
+  - id: powermetrics-invoked-with-correct-args
+    title: "runTaskWithSudo is called with the correct path and arguments"
+    description: >
+      Precondition: spy/mock runTaskWithSudo:andArgs:output: to capture the path and
+      args it is called with.
+      Action: call +readCurrentCpuFreq (output irrelevant).
+      Expected: path == "/usr/bin/powermetrics", args == @[@"-n", @"1", @"-i", @"10"].
+      Assert: captured path and args match exactly.
+    coverage-intent:
+      - kind: statement
+        target: "runTaskWithSudo call site with hardcoded path /usr/bin/powermetrics and flags -n 1 -i 10"
