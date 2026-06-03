@@ -67,6 +67,16 @@ Also note: **no JS runtime (node/deno/bun) on the primary dev machine** — work
 
 Composes with `graduated-verification-confidence.md` (state confidence, plan for "unavailable") and `verify-before-acting-on-suspected-bugs.md`.
 
+## `args` can arrive as a string — destructuring fails
+
+Passing a JSON object as the Workflow tool's `args` failed **twice** with `Error: args must include { … }`, because the value reached the script as a *string* rather than a parsed object — so `const { filePath } = args` yielded `undefined` and the guard threw. The Workflow tool docs warn about exactly this: a stringified list/object breaks `args.map`/destructuring.
+
+**Workaround that worked:** for a one-off run, stop relying on `args` injection — **hardcode the inputs directly in the workflow script** (filePath, sourceRepoPath, the unit list, and the prompts/schemas as inline JS constants). Self-contained script, no args coupling. For a single-shot scoped run this is simpler and more robust than fighting the args encoding. (Note this trades away the inject-then-undefined fail-loud discipline below — acceptable only because the script is self-contained and disposable.) If args injection *is* needed, ensure the value is passed as an actual JSON value, not a pre-stringified blob.
+
+## Single-unit scoping = bypass the splitter
+
+The stock ULA workflow's phase 1 splits the file into *all* units, then fans out. To scope a run to a chosen subset (or a single unit) cheaply, **skip the split phase and feed the explicit `{id, signature}` unit(s) straight into the Unit Pass.** Clean, no framework edits, honors "only this unit." Worked first try once the args encoding was sorted. This is how the single-unit validation in `ula-validated-turbo-boost-switcher.md` was run.
+
 ## Reviewing AI-Generated Workflow Code
 
 AI-generated orchestration code needs the same adversarial review as any code. Running `/code-review` (max effort) on freshly-authored workflow JS surfaced **real correctness bugs**. Recurring defect classes worth watching:
@@ -86,3 +96,4 @@ Process lesson: the **review→fix→re-review loop converged** — round 2 conf
 - `graduated-verification-confidence.md` — verdict states from verify stages should be a graded surface, not a boolean — workflows make this concrete (real / false-positive / inconclusive).
 - `quality-repo-architecture.md` — the manifest-driven resumability pattern that composes with workflow output persistence.
 - `knowledge-vs-skills-distinction.md` — workflow scripts are *skills* (instrumental); their structured outputs are *artifacts*, not knowledge.
+- `ula-validated-turbo-boost-switcher.md` — the single-unit ULA run these args/scoping lessons came from.

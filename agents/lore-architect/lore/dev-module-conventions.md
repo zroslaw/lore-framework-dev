@@ -33,4 +33,5 @@ Skills are discovered locally via `claude --plugin-dir ./lore-framework` without
 
 - `skill-doc-pattern.md` — the base thin-pointer pattern; this is its module-subtree variant.
 - `aiqa-ula-feature.md` — the first module to use this layout.
+- `codex-per-repo-mirror.md` — the per-repo codex these dev skills write into; AIQA is one aspect, and `dev-aiqa-repo-init` becomes (or is joined by) an aspect-agnostic codex-init.
 - `versioning-release-types.md` — v16 will be the formal ship with history backfill.

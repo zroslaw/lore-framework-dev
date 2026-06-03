@@ -2,6 +2,8 @@
 
 **AIQA** = umbrella for AI-based quality assurance, organized by testing *level*. First level shipped: **ULA = Unit-Level Analysis**. Future levels: integration (ILA), e2e, feature/flow. Committed locally to `lore-framework` as commit `2f1e788`; v16 ship deferred while AIQA is in BETA.
 
+**Codex framing (2026-06-03):** AIQA is now positioned as **one aspect** of the per-repo codex — its structured artifacts live under `<repo>-codex/<file>/aiqa/ula/<unit>/`, alongside (eventually) other aspects and the per-file narrative `index.md`. `dev-aiqa-repo-init` becomes (or is joined by) an aspect-agnostic codex-init. The skills/workflows stay; the framing generalizes. See `codex-per-repo-mirror.md`.
+
 ## Two BETA Skills
 
 `dev-` prefix is required for all lr-dev/SDLC tools — `lr:init` already exists, so `dev-` is not just grouping, it's necessary disambiguation.
@@ -34,6 +36,8 @@ Simulated via Sonnet subagents (dynamic Workflow runtime not available in this s
 - 9 scenarios, consistent gap analysis.
 - Bug/scenario separation held: no scenario encoded buggy behavior as expected.
 
+A second single-unit pass on the same file's `run-task-as-admin` unit surfaced **six bugs** (incl. an always-returns-YES error-swallowing chain and a macOS-14+ deprecated-API break) and demonstrated the narrative-vs-structured output split firsthand. Full account: **`ula-validated-turbo-boost-switcher.md`**; the narrative-output insight: **`ula-narrative-vs-structured-output.md`**. Takeaway: a single well-chosen unit is already worth a pass.
+
 ## Plugin Layout
 
 `lore-framework/dev/aiqa/`: README, `repo-init.md`, `ula-file.md`, `artifact-specs.md`, `prompts/`, `schemas/`, `workflows/ula-file-pass.js`. See `dev-module-conventions.md` for the structural pattern.
@@ -43,5 +47,8 @@ Simulated via Sonnet subagents (dynamic Workflow runtime not available in this s
 - `dev-module-conventions.md` — how `dev/` modules are structured in the plugin.
 - `lr-dev-direction.md` — the broader SDLC direction this is the first shipped feature of.
 - `workflow-primitive-operational-notes.md` — operational lessons from the ULA prototype; dynamic Workflow availability caveat.
-- `quality-repo-architecture.md` — the three-repo artifact side (source / context-agent-repo / quality repo).
+- `codex-per-repo-mirror.md` — the per-repo codex; AIQA is one aspect (`aiqa/`) of it.
+- `ula-validated-turbo-boost-switcher.md` — real single-unit validation (six bugs).
+- `ula-narrative-vs-structured-output.md` — the two ULA output kinds; narrative motivates `index.md`.
+- `quality-repo-architecture.md` — the three-repo artifact side; the quality repo is now generalized into the codex.
 - `skill-doc-pattern.md` — the base pattern; `dev-module-conventions.md` adds the module-subtree variant.

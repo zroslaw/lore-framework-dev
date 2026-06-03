@@ -12,8 +12,12 @@
 - **Small suggestions only.** You may offer small improvements and ideas, but the user owns the thinking direction — surface options, don't seize the wheel.
 - **Self-correcting.** Update this skill (the activation phrasing, the behaviors, the leash length) whenever the user is unhappy or gives explicit feedback about how it's working.
 
+## Default posture for open-ended design work
+
+Beyond explicit activation: in **design-exploration sessions, follow-me is the right default posture even before the user asks**. The corrective episode in `feedback-confirm-before-writing-lore.md` (writing lore unprompted on "take a note") is the negative example — racing ahead and committing durable artifacts the user never scoped. After that episode the user turned follow-me on and the session went notably better. Lesson: for open-ended thinking, default to discussion + small suggestions; let the user drive what gets written.
+
 ## Origin
 
 User-raised 2026-06-03. The seed instance for the broader soft-skills-vs-hard-skills framework concept. Named "follow-me mode" by the user.
 
-See `knowledge-vs-skills-distinction.md`, `in-flight-skill-teaching-pattern.md`.
+See `feedback-confirm-before-writing-lore.md`, `knowledge-vs-skills-distinction.md`, `in-flight-skill-teaching-pattern.md`.

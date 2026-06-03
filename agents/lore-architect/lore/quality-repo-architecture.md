@@ -1,6 +1,8 @@
 # Quality Repo as a Distinct Companion to the Source Repo
 
-When automated quality artifacts (per-file analysis reports, bug catalogs, scenario catalogs, AI-generated tests) cannot land in the source repo — typical causes are strict review/compliance regimes (SOX-style mandatory human review, audit trails), code-ownership constraints, package-publishing constraints, or third-party code — the clean separation is a **three-repo architecture**:
+> **Evolved 2026-06-03 — see `codex-per-repo-mirror.md`.** This topic's "quality repo" (repo #3 below) generalized into the per-repo **codex** (`<repo>-codex`): a per-file-directory mirror holding *all* artifact aspects (quality under `aiqa/`, narrative context in `index.md`), not just quality. And the separate "context agent" (repo #2 below) was **dissolved** — its knowledge moved into the codex `index.md`, custodied by aspect-scoped *skills* rather than an agent. So the live shape is **two repos** (source + codex), not three. The two-vs-three reasoning below remains useful background — but read it knowing the artifact side and the knowledge side now co-locate in the one codex.
+
+When automated quality artifacts (per-file analysis reports, bug catalogs, scenario catalogs, AI-generated tests) cannot land in the source repo — typical causes are strict review/compliance regimes (SOX-style mandatory human review, audit trails), code-ownership constraints, package-publishing constraints, or third-party code — the original separation was a **three-repo architecture**:
 
 1. **Source repo** — the system under analysis. Untouched by lr-dev. Has its own human-written tests.
 2. **Per-repo context agent** — lives in a shared per-source-repo agent repo (a domain), housed alongside its peers per `plugin-vs-agent-repo-separation.md`. Holds accumulated knowledge about the source repo: caller patterns, supplier/integration quirks, known issues, test conventions, lessons from prior sweeps. (See `lr-dev-direction.md`, `framework-defined-role-pattern.md`.)
@@ -52,8 +54,8 @@ The pattern is not specific to one regime. Any time the source repo cannot accep
 
 ## See Also
 
-- `lr-dev-direction.md` — anchor; this is the artifact-side complement to the context-agent reframe.
+- `codex-per-repo-mirror.md` — **the evolution of this topic**: the quality repo generalizes into the codex, the context agent dissolves into skills + `index.md`.
+- `lr-dev-direction.md` — anchor; the artifact side now lives in the codex.
 - `plugin-vs-agent-repo-separation.md` — parallel separation-by-lifecycle principle, different axis.
-- `framework-defined-role-pattern.md` — the context agent (one of the three repos) is the first application.
 - `workflow-primitive-operational-notes.md` — the workflow shape this architecture composes with.
-- `team-shared-knowledge-principle.md` — the quality repo is also team-shared, but as artifacts not knowledge.
+- `team-shared-knowledge-principle.md` — the codex is also team-shared, but as artifacts not knowledge.
