@@ -2,7 +2,7 @@
 
 **AIQA** = umbrella for AI-based quality assurance, organized by testing *level*. First level shipped: **ULA = Unit-Level Analysis**. Future levels: integration (ILA), e2e, feature/flow. Committed locally to `lore-framework` as commit `2f1e788`; v16 ship deferred while AIQA is in BETA.
 
-**Codex framing (2026-06-03):** AIQA is now positioned as **one aspect** of the per-repo codex — its structured artifacts live under `<repo>-codex/<file>/aiqa/ula/<unit>/`, alongside (eventually) other aspects and the per-file narrative `index.md`. `dev-aiqa-repo-init` becomes (or is joined by) an aspect-agnostic codex-init. The skills/workflows stay; the framing generalizes. See `codex-per-repo-mirror.md`.
+**DF-backbone framing (2026-06-03, renamed 2026-06-05):** AIQA is now positioned as **one aspect** of the per-repo DF backbone (`<repo>-df`) — its structured artifacts live under `<repo>-df/artifacts/<file>/ula/…` (the `aiqa/` dir level was flattened away 2026-06-05), alongside (eventually) other aspects and the per-file narrative `index.md`. `dev-aiqa-repo-init` becomes (or is joined by) an aspect-agnostic DF-repo-init. The skills/workflows stay; the framing generalizes. See `df-per-repo-backbone.md`.
 
 ## Two BETA Skills
 
@@ -47,8 +47,9 @@ A second single-unit pass on the same file's `run-task-as-admin` unit surfaced *
 - `dev-module-conventions.md` — how `dev/` modules are structured in the plugin.
 - `lr-dev-direction.md` — the broader SDLC direction this is the first shipped feature of.
 - `workflow-primitive-operational-notes.md` — operational lessons from the ULA prototype; dynamic Workflow availability caveat.
-- `codex-per-repo-mirror.md` — the per-repo codex; AIQA is one aspect (`aiqa/`) of it.
+- `df-per-repo-backbone.md` — the per-repo DF backbone; AIQA/ULA is one aspect (`ula/`) of it.
 - `ula-validated-turbo-boost-switcher.md` — real single-unit validation (six bugs).
 - `ula-narrative-vs-structured-output.md` — the two ULA output kinds; narrative motivates `index.md`.
-- `quality-repo-architecture.md` — the three-repo artifact side; the quality repo is now generalized into the codex.
+- `ula-designed-for-multiple-runs.md`, `provenance-header-concept.md`, `ula-artifact-granularity.md` — the ULA-as-repeated design (self-describing artifacts, git-history run store, granularity lean).
+- `quality-repo-architecture.md` — the three-repo artifact side; the quality repo is now generalized into the DF repo.
 - `skill-doc-pattern.md` — the base pattern; `dev-module-conventions.md` adds the module-subtree variant.

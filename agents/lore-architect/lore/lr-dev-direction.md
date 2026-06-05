@@ -2,17 +2,17 @@
 
 Opened 2026-05-31 with the user. A major new direction: **`lr-dev`**, a module/mode of the `lr` plugin dedicated to development & SDLC automation. North star (user): convert the SDLC into a **dark factory** — software built internally and autonomously by lore agents, fed only inputs plus occasional follow-ups. Same family as `autonomous-agents-vision.md`: autonomous-agents is the *substrate/process* direction (always-on background workers); lr-dev is the *what-they-do-in-software-development* direction. They converge on the dark-factory end state.
 
-**Status: active exploration; first prototype validated 2026-06-02; first in-plugin BETA feature shipped 2026-06-03 (AIQA/ULA, local commit `2f1e788` — v16 ship deferred); artifact-store direction evolved to the per-repo codex 2026-06-03.** This topic is an orienting pointer. The detailed design lives in the drafts and backlog listed under *Where the detail lives* — do not duplicate that detail here. This file is the anchor (analogous to how `autonomous-agents-vision.md` anchors the parked autonomous direction).
+**Status: active exploration; first prototype validated 2026-06-02; first in-plugin BETA feature shipped 2026-06-03 (AIQA/ULA, local commit `2f1e788` — v16 ship deferred); artifact-store direction evolved to the per-repo codex 2026-06-03, then renamed + purpose-elevated to the per-repo DF backbone 2026-06-05. The DF/ULA design thread is currently IN PROGRESS, held for continuation (see Open decisions and `df-ula-design-in-progress.md`).** This topic is an orienting pointer. The detailed design lives in the drafts and backlog listed under *Where the detail lives* — do not duplicate that detail here. This file is the anchor (analogous to how `autonomous-agents-vision.md` anchors the parked autonomous direction).
 
-## Current leading direction (2026-06-03): the per-repo codex, skills not agents
+## Current leading direction (2026-06-05): the per-repo DF backbone, skills not agents
 
-The artifact + knowledge store for a source repo is a **`<repo>-codex`** repo — a per-file-directory mirror of the source tree, lazily created (an absent dir means "not yet analyzed," so the tree is a sparse coverage map). Each file dir holds a narrative `index.md` (the "context" aspect) plus structured aspect subdirs (`aiqa/ula/<unit>/…` today). **No agent** — persistence is external (the codex) and procedures live in framework-level, aspect-scoped skills; an agent would have nothing of its own to custody. lr-dev standardizes the codex layout + the procedures; the per-repo "instance" is the codex repo + its small config, not an agent instance. Full design: **`codex-per-repo-mirror.md`**, with `ula-narrative-vs-structured-output.md` (why `index.md` exists). This **demotes the context-agent framing below** (now a prior step in the reasoning trail) and generalizes `quality-repo-architecture.md`'s quality repo into the codex.
+The artifact + knowledge store for a source repo is a **`<repo>-df`** repo (DF = **Dark Factory**) — the backbone/storage layer the Dark Factory runs on, holding *all* the context/knowledge/artifacts the DF needs that aren't in the source repo. It is a per-file-directory mirror of the source tree under a top-level **`artifacts/`** dir, lazily created (an absent dir means "not yet analyzed," so the tree is a sparse coverage map). Each file dir holds a narrative `index.md` (the "context" aspect) plus flat structured aspect subdirs (`ula/…` today — `aiqa/` is no longer a dir level). **No agent** — persistence is external (the DF repo) and procedures live in framework-level, aspect-scoped skills; an agent would have nothing of its own to custody. lr-dev standardizes the DF-repo layout + the procedures; the per-repo "instance" is the DF repo + its small config, not an agent instance. Full design: **`df-per-repo-backbone.md`**, with `ula-narrative-vs-structured-output.md` (why `index.md` exists). This **demotes the context-agent framing below** (now a prior step in the reasoning trail) and generalizes `quality-repo-architecture.md`'s quality repo into the DF repo. (The `<repo>-codex` name from 2026-06-03 is superseded by `<repo>-df`; design unchanged, only name + framing.)
 
 **Prototype milestone (2026-06-02):** the §2 file-by-file quality workflow ran end-to-end against a real source file as a Claude Code dynamic Workflow script (`workdir/draft-lr-dev-file-quality-workflow.js`). Two iterations confirmed the pipeline shape and produced the §4 schema-conformant artifacts. Operational case validating the reframe: lore-aware bug verifiers killed 3 of 9 bugs as false-positives — including a "typo" that was actually a non-standard supplier-specific code — by tracing the actual caller graph. Without booting the per-repo context agent inside workflow subagents, the workflow would have generated "fixes" that broke real integration. Context-agent attach is therefore **not a nice-to-have**. Full lessons in `workflow-primitive-operational-notes.md` and `quality-repo-architecture.md`.
 
 ## Prior framing (2026-06-01 reframe): context agents on existing primitives — now demoted
 
-> **Demoted 2026-06-03** by the codex direction above. The context-agent framing was a step in the reasoning, not the destination: once persistence is externalized to the codex and procedures live in skills, the agent has nothing of its own to custody (see `codex-per-repo-mirror.md` § No agent — skills only, and `agent-split-only-when-forced.md`). Kept here for the trail and because several of its framings survive (objective/subjective cut as reflection-vs-skill discipline; one-store-per-repo; the QA-as-beachhead rationale below is unaffected). `framework-defined-role-pattern.md` stands as a pattern; lr-dev simply no longer instantiates it.
+> **Demoted 2026-06-03** by the DF-backbone direction above (then `codex`). The context-agent framing was a step in the reasoning, not the destination: once persistence is externalized to the DF repo and procedures live in skills, the agent has nothing of its own to custody (see `df-per-repo-backbone.md` § No agent — skills only, and `agent-split-only-when-forced.md`). Kept here for the trail and because several of its framings survive (objective/subjective cut as reflection-vs-skill discipline; one-store-per-repo; the QA-as-beachhead rationale below is unaffected). `framework-defined-role-pattern.md` stands as a pattern; lr-dev simply no longer instantiates it.
 
 This 2026-06-01 reframe **expressed per-repo artifact knowledge as ordinary tailored agents — context agents — built entirely on primitives the framework already had.** It superseded the original three-tier / new-repo-kind / two-gate design (kept below as a labeled heavier alternative). Full detail: `workdir/draft-lr-dev.md` §1A; quality-feature alignment in `workdir/draft-lr-dev-quality.md`.
 
@@ -51,16 +51,16 @@ The original framing, now demoted. Kept for the reasoning trail and because indi
 
 Surviving framings that are *not* superseded (carried into the leading direction): **test scenarios as a bidirectional IR** (what-to-test decoupled from how; coverage ≠ meaningfulness — every "expected" must cite product-lore intent or tests merely canonize current/buggy behavior); **lr-dev as a growing feature catalog** (accretion discipline, same shape as `ailment-catalog-pattern.md`); **multi-lens review promoted to a reusable skill** (`lr:dev-review`, the user independently reinvented `parallel-reviewer-fanout-pattern.md`); **standardized deliverable-format rules** (stable IDs, `class: product|technical`, intent-source citation, confidence/status, real dry-run counts not zeros).
 
-## Artifact + knowledge store: the codex (was three-repo, now two)
+## Artifact + knowledge store: the DF repo (was three-repo, now two)
 
-Under the codex direction the artifact side and the knowledge side **co-locate in one `<repo>-codex` repo**, so the shape collapses to **two repos**:
+Under the DF-backbone direction the artifact side and the knowledge side **co-locate in one `<repo>-df` repo**, so the shape collapses to **two repos**:
 
 1. **Source repo** — system under analysis; untouched.
-2. **`<repo>-codex`** — the per-file-directory mirror holding both the narrative `index.md` (knowledge/context aspect) and structured artifact aspects (`aiqa/`, future aspects). Composite-builds against the source so generated tests can exercise real code without copying it. Full pattern: **`codex-per-repo-mirror.md`**.
+2. **`<repo>-df`** — the per-file-directory mirror (under `artifacts/`) holding both the narrative `index.md` (knowledge/context aspect) and structured artifact aspects (`ula/`, future aspects). Composite-builds against the source so generated tests can exercise real code without copying it. Full pattern: **`df-per-repo-backbone.md`**.
 
-(The earlier three-repo split — source / context-agent-repo / quality repo — is the prior framing; the context-agent repo dissolved and the quality repo generalized into the codex. Reasoning trail: **`quality-repo-architecture.md`**.)
+(The earlier three-repo split — source / context-agent-repo / quality repo — is the prior framing; the context-agent repo dissolved and the quality repo generalized into the DF repo. Reasoning trail: **`quality-repo-architecture.md`**.)
 
-Generated tests live **permanently** in the codex, not migrated into the source suite — drift between the two suites is information (missing human test or AI hallucination). The compliance bottleneck applies to *fixes*, not analysis. Resumability: lazy per-file dirs as a coverage map (codex), or a per-file manifest with `lastAnalyzedSha` (quality-repo pattern).
+Generated tests live **permanently** in the DF repo, not migrated into the source suite — drift between the two suites is information (missing human test or AI hallucination). The compliance bottleneck applies to *fixes*, not analysis. Resumability: lazy per-file dirs as a coverage map (the DF repo), or a per-file manifest with `lastAnalyzedSha` (quality-repo pattern).
 
 ## Where the detail lives
 
@@ -72,9 +72,16 @@ Generated tests live **permanently** in the codex, not migrated into the source 
 
 ## Open decisions (carry to next session)
 
-- Generator path for context agents — a flag on `/lr:create-agent` vs a dedicated generator skill (template + thin role pointer, per `framework-defined-role-pattern.md`).
-- Exactly where the file-mirror sits inside the context agent's `lore/` and how staleness is kept between non-lr-dev touches of an artifact.
-- Specialist-agent ÷ context-agent attach/consult ergonomics; scenario→code binding; generated-vs-human de-dup.
+**DF/ULA thread (IN PROGRESS, 2026-06-05 — held for continuation; full state in `df-ula-design-in-progress.md`):**
+- **Provenance Header field set** — mostly decided, not yet locked into a schema. Next: lock it (into the JSON Schema). See `provenance-header-concept.md`.
+- **Incremental run algorithm** — SHA-compare + per-unit merge flow sketched, not detailed. See `ula-designed-for-multiple-runs.md`.
+- **ULA artifact granularity** — leaning per-file (unit as a field), user said "not sure." Decide next time. See `ula-artifact-granularity.md`.
+- **Plugin-side naming ripple** — `dev/aiqa/` module + `/lr:dev-aiqa-repo-init` skill name now out of step with the flattened `ula/` tree and the `-df` repo rename. Parked. See `df-per-repo-backbone.md`.
+- **DF glossary persistence** — `workdir/draft-df-glossary.md` proposed as the working home but **not created** (user held approval); starter glossary kept in `df-ula-design-in-progress.md` for now.
+
+**Carried from the demoted context-agent framing (mostly moot under the DF direction, kept for the trail):**
+- ~~Generator path for context agents~~ — moot; no context agent. The per-repo instance is a DF repo + config, emitted by an aspect-agnostic DF-repo-init skill.
+- Scenario→code binding; generated-vs-human test de-dup — still open under any framing.
 
 ## Operational note
 
@@ -90,11 +97,13 @@ Key design decisions: `dev-` skill prefix required (not just grouping); module s
 
 ## See Also
 
-- `codex-per-repo-mirror.md` — **current leading direction** for the artifact + knowledge store; skills not agents.
-- `ula-narrative-vs-structured-output.md` — the two ULA output kinds; the narrative kind is the codex `index.md` aspect.
-- `framework-defined-role-pattern.md` — the recurring-role / thin-role-pointer pattern; stands, but lr-dev no longer instantiates it (codex needs no agent).
-- `agent-split-only-when-forced.md` — the "no agent" landing is an instance: no forcing pressure once persistence is in the codex.
-- `quality-repo-architecture.md` — prior three-repo framing; the quality repo generalized into the codex, the context-agent repo dissolved.
+- `df-per-repo-backbone.md` — **current leading direction** for the artifact + knowledge store; the DF backbone, skills not agents.
+- `df-ula-design-in-progress.md` — the DF/ULA thread's in-progress continuation state + working glossary.
+- `provenance-header-concept.md`, `ula-designed-for-multiple-runs.md`, `ula-artifact-granularity.md` — the 2026-06-05 ULA design findings (self-describing artifacts, git-history run store, per-file granularity lean).
+- `ula-narrative-vs-structured-output.md` — the two ULA output kinds; the narrative kind is the DF repo's `index.md` aspect.
+- `framework-defined-role-pattern.md` — the recurring-role / thin-role-pointer pattern; stands, but lr-dev no longer instantiates it (the DF repo needs no agent).
+- `agent-split-only-when-forced.md` — the "no agent" landing is an instance: no forcing pressure once persistence is in the DF repo.
+- `quality-repo-architecture.md` — prior three-repo framing; the quality repo generalized into the DF repo, the context-agent repo dissolved.
 - `workflow-primitive-operational-notes.md` — operational lessons from the first working file-by-file quality prototype (boot-not-attach in workflow subagents, right-size the verify fan-out, persistence is parent's job).
 - `autonomous-agents-vision.md` — sibling major direction; same dark-factory end state, different axis (process/substrate vs SDLC activity).
 - `framework-scope-vs-agent-scope.md` — the rule the reframe applies (reach for existing agent primitives before minting framework machinery).

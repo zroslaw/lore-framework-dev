@@ -15,10 +15,10 @@ Ran a ULA pass on **`My-Turbo-Boost-Switcher`** (a macOS menu-bar Objective-C ap
 ## Why this matters (for the framework)
 
 - **A single-unit pass is already worth running.** You don't need a whole-file or whole-repo sweep to get value — even one well-chosen unit yields real, actionable findings. Good evidence for ULA's per-unit granularity and for cheap exploratory passes. (Mechanics of scoping to one unit: bypass the splitter, see `workflow-args-string-coercion-and-single-unit-scoping` notes folded into `workflow-primitive-operational-notes.md`.)
-- It produced exactly the narrative-vs-structured split (see `ula-narrative-vs-structured-output.md`) that motivated the codex `index.md`.
+- It produced exactly the narrative-vs-structured split (see `ula-narrative-vs-structured-output.md`) that motivated the DF repo's `index.md`.
 
 ## How to apply
 
 When demoing or smoke-testing ULA, pick **one important-but-small unit** in a behaviorally-rich file (privileged ops, branching on OS/arch/state) rather than a trivial getter. `run-task-as-admin` was ideal: short, central, multiple failure modes.
 
-Related: `aiqa-ula-feature.md`, `codex-per-repo-mirror.md`, `ula-narrative-vs-structured-output.md`, `workflow-primitive-operational-notes.md`.
+Related: `aiqa-ula-feature.md`, `df-per-repo-backbone.md`, `ula-narrative-vs-structured-output.md`, `workflow-primitive-operational-notes.md`.

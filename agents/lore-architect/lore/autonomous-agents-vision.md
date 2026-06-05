@@ -40,7 +40,8 @@ Likely to compose well with:
 
 ## See Also
 
-- `lr-dev-direction.md` — sibling major direction (active exploration). Same dark-factory end state; lr-dev is the *SDLC-activity* axis (what autonomous agents do in software development), this topic is the *process/substrate* axis (always-on background workers).
+- `lr-dev-direction.md` — sibling major direction (active exploration). Same **Dark Factory (DF)** end state; lr-dev is the *SDLC-activity* axis (what autonomous agents do in software development), this topic is the *process/substrate* axis (always-on background workers). The DF north star is named here jointly with lr-dev.
+- `df-per-repo-backbone.md` — the per-repo `<repo>-df` backbone the Dark Factory runs on; the storage/state layer this autonomous-substrate direction will eventually accrete run/task state onto (the parked "above-file layers").
 - `autonomous-agents-substrate.md` — concrete substrate findings (tmux, iTerm2 Python API, Claude Code hooks, escape sequences, switchboard daemon, security boundaries)
 - `workdir-as-reference-library.md` — another parked exploration; composes with this direction
 - `attach-pattern.md` — current cross-agent collaboration mechanism that autonomous mode will need to extend
