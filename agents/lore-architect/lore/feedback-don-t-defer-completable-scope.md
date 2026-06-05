@@ -40,3 +40,5 @@ The user's earlier "too complex, simpler, wording and ideas" cue earlier in the 
 
 - `framework-improvements-backlog.md` — the legitimate backlog. Use it for genuinely-future work, not for procrastination. Items there pass the three-question test (open-ended / needs feedback / future capability) — bounded mechanical sweeps do not.
 - `parallel-reviewer-fanout-pattern.md` — the half-migration was caught by review, but should have been avoided in the first place.
+- `parked-design-preservation-pattern.md` — the inverse: *legitimate* deferral of an open-ended design surface that needs its own ship slot. The smell that distinguishes them: bounded mechanical fits inside an already-ongoing ship; parked-design starts a new ship.
+- `feedback-too-many-words.md` — adjacent precision-discipline feedback: over-listing and under-shipping are different sides of the same imprecision.

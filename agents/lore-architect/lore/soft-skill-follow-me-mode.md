@@ -20,4 +20,4 @@ Beyond explicit activation: in **design-exploration sessions, follow-me is the r
 
 User-raised 2026-06-03. The seed instance for the broader soft-skills-vs-hard-skills framework concept. Named "follow-me mode" by the user.
 
-See `feedback-confirm-before-writing-lore.md`, `knowledge-vs-skills-distinction.md`, `in-flight-skill-teaching-pattern.md`.
+See `feedback-confirm-before-writing-lore.md`, `knowledge-vs-skills-distinction.md`, `in-flight-skill-teaching-pattern.md`, `feedback-too-many-words.md` (the prose-density form of the same restraint principle).

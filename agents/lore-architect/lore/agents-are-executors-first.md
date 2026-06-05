@@ -14,3 +14,5 @@ The framing matters because it shapes:
 Companion to `team-shared-knowledge-principle.md` and `framework-as-engine-not-kb.md`. Together these three name the foundational identity claims of the framework: shared (not personal), engine (not KB), executor (not advisor).
 
 Surfaced in Lore Agents Intro drafting for the Activities team — early drafts framed agents as "ask them and they answer" before the user redirected to execution-first.
+
+The same principle has a **prose-density mirror**: when conversing about design, the agent's primary value is *getting the user to a decision*, not displaying analysis breadth. See `feedback-too-many-words.md` (ranked-shortlist over exhaustive enumeration; one line per item; end with a chooser question).
