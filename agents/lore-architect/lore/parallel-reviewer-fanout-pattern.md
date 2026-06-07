@@ -147,3 +147,4 @@ Often complementary: use sonnet-subagent for the lore-side polish; use parallel-
 - `single-canonical-source-discipline.md` — the dominant drift pattern multi-round review catches; pointer-only, no inline restatement.
 - `graduated-verification-confidence.md` — partial returns from stalled reviewers as additive evidence is one instance of this principle.
 - `workflow-primitive-operational-notes.md` — the right-size-the-fan-out rule codified for the dynamic Workflow tool; complementary inverse case.
+- `consistency-sweep-read-not-just-grep.md` — the read-the-prose half of a rename/restructure sweep; the manual sibling of the filesystem-verification review lens.

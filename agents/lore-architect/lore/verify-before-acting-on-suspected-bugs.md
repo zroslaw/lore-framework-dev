@@ -8,11 +8,18 @@ While wiring `/lr:check` #19, I issued two parallel Read calls (`consistency-che
 
 Root of the confusion: `consistency-checks.md` is a **lore-topic name**; the plugin doc is `check.md`. Two similarly-purposed names for different-layer artifacts. (See `consistency-checks.md` for the standing reminder.)
 
+## Verify *which* bug, not just *whether* it's a bug (2026-06-07)
+
+The discipline extends to **diagnosis among competing causes**, not just confirming a bug exists. The ULA workflow failed at an args guard with **two** plausible causes: payload **size** (a huge `args`) vs **string-coercion** (`args` arriving as a JSON string). The size fix was implemented first — and did **not** fix it; the cause was coercion, proven afterward by a 3-line repro (a one-line `JSON.parse` guard was the real fix).
+
+Rule: **when a failure has ≥2 plausible causes and one is cheap to confirm (a minimal repro, or just inspecting the actual call/inputs), confirm before implementing the more invasive candidate.** Flagging the invasive fix's uncertainty up front is good; a repro first is better — it saves the round-trip. (The size fix wasn't wasted here — it unified the split-vs-unit read path and made `source-sha` honest — but that was luck, "good change, wrong bug.") See `workflow-primitive-operational-notes.md` § `args` can arrive as a string.
+
 ## Operational rules
 
 - **Verify state directly before mutating it.** `ls`, `cat`, `git` the thing you think is broken before any edit/delete/repoint. An inference is a hypothesis, not a fact.
 - **Attribute parallel tool-call results carefully.** When one of N parallel reads errors (or returns empty), confirm *which* path failed before reasoning from it. Empty-result-from-wrong-path is a classic false "missing file" (same trap as `tooling-cwd-safety.md`'s empty-Glob).
 - **Diagnosis is cheap, action is not.** When about to fix a "bug" in code you did not author this session, re-verify first. Asymmetric cost: a wrong claim costs a sentence; a wrong fix costs a regression plus the debugging to find it.
+- **Confirm the *right* cause before the invasive fix** (see section above) — verification is about *which* bug, not only *whether*.
 
 ## Composition
 
@@ -25,3 +32,6 @@ Same spirit as the review/verification disciplines: look before you assert, and 
 - `parallel-reviewer-fanout-pattern.md` — the correctness lens runs real bash (filesystem verification) precisely to catch what prose review infers wrongly
 - `sonnet-subagent-review-pattern.md` — second-pair-of-eyes discipline for high-stakes changes
 - `plugin-manifest-versioning.md` — its open auto-invalidation question is a "verify before acting" candidate (test empirically before dropping the cache-clear footer)
+- `consistency-sweep-read-not-just-grep.md` — sibling: a grep sweep verifies tokens; only *reading the prose* verifies semantics (a rename sweep near-miss)
+- `canonicalize-testbed-fixes.md` — sibling: verify what actually persisted to disk from a testbed session before declaring a fix done
+- `workflow-primitive-operational-notes.md` — the size-vs-coercion misdiagnosis this session's "which bug" lesson came from

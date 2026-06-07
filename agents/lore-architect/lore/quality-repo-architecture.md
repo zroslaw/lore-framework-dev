@@ -1,6 +1,6 @@
 # Quality Repo as a Distinct Companion to the Source Repo
 
-> **Evolved 2026-06-03, renamed + elevated 2026-06-05 — see `df-per-repo-backbone.md`.** This topic's "quality repo" (repo #3 below) generalized into the per-repo **DF backbone** (`<repo>-df`, DF = Dark Factory; interim name `<repo>-codex`): a per-file-directory mirror (under `artifacts/`) holding *all* artifact aspects (quality under `ula/`, narrative context in `index.md`), not just quality, and framed as the storage layer the Dark Factory runs on. And the separate "context agent" (repo #2 below) was **dissolved** — its knowledge moved into the DF repo's `index.md`, custodied by aspect-scoped *skills* rather than an agent. So the live shape is **two repos** (source + DF repo), not three. The two-vs-three reasoning below remains useful background — but read it knowing the artifact side and the knowledge side now co-locate in the one DF repo.
+> **Evolved 2026-06-03, renamed + elevated 2026-06-05, layout locked 2026-06-07 — see `df-per-repo-backbone.md`.** This topic's "quality repo" (repo #3 below) generalized into the per-repo **DF backbone** (`<repo>-df`, DF = Dark Factory; interim name `<repo>-codex`): a per-file-directory mirror (under `repo-lore/`) holding *all* artifact aspects (quality under `ula/`, narrative context in the per-file `file-lore.md`), not just quality, and framed as the storage layer the Dark Factory runs on. And the separate "context agent" (repo #2 below) was **dissolved** — its knowledge moved into the DF repo's `file-lore.md`, custodied by aspect-scoped *skills* rather than an agent. So the live shape is **two repos** (source + DF repo), not three. The two-vs-three reasoning below remains useful background — but read it knowing the artifact side and the knowledge side now co-locate in the one DF repo.
 
 When automated quality artifacts (per-file analysis reports, bug catalogs, scenario catalogs, AI-generated tests) cannot land in the source repo — typical causes are strict review/compliance regimes (SOX-style mandatory human review, audit trails), code-ownership constraints, package-publishing constraints, or third-party code — the original separation was a **three-repo architecture**:
 
@@ -54,7 +54,7 @@ The pattern is not specific to one regime. Any time the source repo cannot accep
 
 ## See Also
 
-- `df-per-repo-backbone.md` — **the evolution of this topic**: the quality repo generalizes into the DF backbone, the context agent dissolves into skills + `index.md`.
+- `df-per-repo-backbone.md` — **the evolution of this topic**: the quality repo generalizes into the DF backbone, the context agent dissolves into skills + `file-lore.md`.
 - `lr-dev-direction.md` — anchor; the artifact side now lives in the DF repo.
 - `plugin-vs-agent-repo-separation.md` — parallel separation-by-lifecycle principle, different axis.
 - `workflow-primitive-operational-notes.md` — the workflow shape this architecture composes with.

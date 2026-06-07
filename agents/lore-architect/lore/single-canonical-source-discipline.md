@@ -68,3 +68,4 @@ In framework code/docs, default to pointer-only. The bootstrap-recap exception i
 - `naming-foundational-principles.md` — the meta-rule licensing this topic's promotion.
 - `framework-defined-role-pattern.md` — adjacent: same "central body, thin per-instance role.md" shape applied to roles.
 - `spawn-teammate-feature.md` — v15 teammate-conventions integration is one worked instance.
+- `consistency-sweep-read-not-just-grep.md` — detecting restatement drift after the fact: grep finds tokens, only reading the prose finds the false restatement.

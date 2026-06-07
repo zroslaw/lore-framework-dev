@@ -1,6 +1,6 @@
 # ULA Produces Two Output Kinds — Structured + Narrative
 
-Realization that motivated the DF repo's `index.md` aspect (2026-06-03).
+Realization that motivated the DF repo's `file-lore.md` aspect (2026-06-03; landing file named `file-lore.md` as of the 2026-06-07 naming lock — see `df-per-repo-backbone.md`).
 
 A ULA unit pass yields **two distinct kinds of output**:
 
@@ -13,4 +13,4 @@ The second kind **does not fit any of the three schemas** — it is not a bug en
 
 **Where it comes from:** the narrative emerges from the *interpretive conversation* around the pass, not from the A→B→C agent output. A fully automated pipeline would drop it; an interactive session is where it is richest.
 
-**Resolution:** this is the "context" aspect, captured in the per-file `index.md` in the DF repo. See `df-per-repo-backbone.md`. Related: `aiqa-ula-feature.md`, `ula-validated-turbo-boost-switcher.md`.
+**Resolution:** this is the "context" aspect, captured in the per-file `file-lore.md` in the DF repo. See `df-per-repo-backbone.md`. Related: `aiqa-ula-feature.md`, `ula-validated-turbo-boost-switcher.md`.

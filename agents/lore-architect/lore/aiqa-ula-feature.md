@@ -1,19 +1,29 @@
 # AIQA / ULA — First In-Plugin lr-dev Module
 
-**AIQA** = umbrella for AI-based quality assurance, organized by testing *level*. First level shipped: **ULA = Unit-Level Analysis**. Future levels: integration (ILA), e2e, feature/flow. Committed locally to `lore-framework` as commit `2f1e788`; v16 ship deferred while AIQA is in BETA.
+**AIQA** = umbrella for AI-based quality assurance, organized by testing *level*. First level shipped: **ULA = Unit-Level Analysis**. Future levels: integration (ILA), e2e, feature/flow. The module is a **BETA** in `lore-framework` (built on local commit `2f1e788`, then fully renamed to DF — see below; v16 ship still deferred while it iterates).
 
-**DF-backbone framing (2026-06-03, renamed 2026-06-05):** AIQA is now positioned as **one aspect** of the per-repo DF backbone (`<repo>-df`) — its structured artifacts live under `<repo>-df/artifacts/<file>/ula/…` (the `aiqa/` dir level was flattened away 2026-06-05), alongside (eventually) other aspects and the per-file narrative `index.md`. `dev-aiqa-repo-init` becomes (or is joined by) an aspect-agnostic DF-repo-init. The skills/workflows stay; the framing generalizes. See `df-per-repo-backbone.md`.
+**DF-backbone framing (2026-06-03, rename landed 2026-06-07):** AIQA is **one aspect** of the per-repo DF backbone (`<repo>-df`, DF = Dark Factory) — its structured artifacts live under `<repo>-df/repo-lore/<file>/ula/…` (the `aiqa/` dir level was flattened away 2026-06-05; top dir is now `repo-lore/` not `artifacts/`), alongside (eventually) other aspects and the per-file narrative landing `file-lore.md`. The skills/workflows stay; the framing generalizes. See `df-per-repo-backbone.md`.
+
+## DF Rename (landed in the plugin, 2026-06-07, staged BETA)
+
+The whole module was rebranded to the **DF (Dark Factory)** north star — staged in `lore-framework/`, not yet committed, still v16-pending:
+
+- module dir **`dev/` → `df/`**; skill prefix **`df-`** supersedes `dev-` (still disambiguates from `lr:init`). See `df-module-conventions.md`.
+- skills: `/lr:dev-aiqa-repo-init` → **`/lr:df-repo-init`**; `/lr:dev-ula-file` → **`/lr:df-ula-file`**.
+- output repo `<repo>-aiqa` → **`<repo>-df`**; config `aiqa.config.yaml` → **`df.config.yaml`**.
+- **`repo-init` graduated** out of `aiqa/` to `df/repo-init.md` — it stands up the *whole* `<repo>-df` backbone (config + `repo-lore/` with `.gitkeep` + `README.md`), not just QA, so it's DF-core and aspect-agnostic.
+- **AIQA stays** as the umbrella concept and the aspect subdir `df/aiqa/` (DF ⊃ AIQA ⊃ ULA). Only the repo + skills + module dir went `df-`.
 
 ## Two BETA Skills
 
-`dev-` prefix is required for all lr-dev/SDLC tools — `lr:init` already exists, so `dev-` is not just grouping, it's necessary disambiguation.
+`df-` prefix is required for all lr-dev/SDLC tools — `lr:init` already exists, so the prefix is not just grouping, it's necessary disambiguation.
 
-- **`/lr:dev-aiqa-repo-init`** — creates a sibling `<repo>-aiqa` repo (config + `ula/` tree). Asks before creating. Holds all AIQA config, artifacts, and AI-generated tests.
-- **`/lr:dev-ula-file <file>`** — the ULA single-file pass.
+- **`/lr:df-repo-init`** — scaffolds the sibling `<repo>-df` backbone repo (`df.config.yaml` + `README.md` + empty `repo-lore/`). Asks before creating. Aspect-agnostic (DF-core, not QA-specific).
+- **`/lr:df-ula-file <file>`** — the ULA single-file pass.
 
 ## ULA Single-File Pass Flow
 
-Split file → units (unit = unit-of-testing, e.g. a method; slug id fixed at split, becomes its dir) → per unit, **one agent** runs three ordered steps:
+Split file → units (unit = unit-of-testing, e.g. a method; slug id fixed at split — it *tags each unit's entry* in the per-file artifacts, it is NOT a directory) → per unit, **one agent** runs three ordered steps:
 
 - **Step A — Find bugs** → `bugs.yaml`. Fields: id / title (what+impact) / description (repro + components). Excludes bugs encoded as "expected" behavior (those land in gap analysis).
 - **Step B — Generate scenarios** (CLEAN-ROOM — must not read existing tests; excludes any behavior tied to a step-A bug) → `scenarios.yaml`. Fields: id / title / description / `coverage-intent[]` of `{kind∈statement|branch|condition|path, target}`.
@@ -24,9 +34,10 @@ Steps are ordered (B needs A's bug list to exclude; C needs B's scenarios). One 
 ## Artifact Conventions
 
 - Format: YAML, machine-readable.
-- No SHAs or line ranges (dropped deliberately; coarse resumability for now).
-- No file-level manifest — the directory tree IS the record (`file→dir`, `unit-slug→subdir`). Reports carry their own `unit`+`signature` header.
-- Single-source discipline: structure → `schemas/*.json` (JSON Schema, machine-enforced); authoring semantics → `prompts/*.md`; `artifact-specs.md` is a pointer only — no restating, no drift.
+- **Per-file, grouped (LOCKED 2026-06-07):** one `bugs.yaml` / `scenarios.yaml` / `gap.yaml` per *file*, each a `{ source-sha, config, units: [ {unit, signature, …} ] }` shape — the unit is a *field*, not a folder. One Provenance Header per file (see `provenance-header-concept.md`). No per-unit directories. See `ula-artifact-granularity.md`.
+- **Provenance Header atop each artifact** — `source-sha` (= `git hash-object` of the analyzed working-tree bytes) + extensible `config` bag. Replaces the earlier per-report `unit`+`signature` header. Makes git-history-as-run-store work; see `provenance-header-concept.md`, `ula-designed-for-multiple-runs.md`.
+- No file-level manifest — the lazy per-file directory tree under `repo-lore/` IS the coverage map.
+- Single-source discipline: structure → `schemas/*.json` (JSON Schema, machine-enforced — incl. `provenance.schema.json`); authoring semantics → `prompts/*.md`; `artifact-specs.md` is a pointer only — no restating, no drift.
 
 ## End-to-End Validation (2026-06-03)
 
@@ -38,18 +49,22 @@ Simulated via Sonnet subagents (dynamic Workflow runtime not available in this s
 
 A second single-unit pass on the same file's `run-task-as-admin` unit surfaced **six bugs** (incl. an always-returns-YES error-swallowing chain and a macOS-14+ deprecated-API break) and demonstrated the narrative-vs-structured output split firsthand. Full account: **`ula-validated-turbo-boost-switcher.md`**; the narrative-output insight: **`ula-narrative-vs-structured-output.md`**. Takeaway: a single well-chosen unit is already worth a pass.
 
+**Real end-to-end run (2026-06-07, post-restructure):** the actual `df-ula-file` workflow (not simulated) ran clean on `My-Turbo-Boost-Switcher/CheckUpdatesHelper.m` after the two workflow fixes, producing the exact `repo-lore/<file>/ula/{bugs,scenarios,gap}.yaml` per-file/grouped layout with valid Provenance Headers (`source-sha` == live `git hash-object`). 5 units, ~20 Objective-C bugs. Caveat: that file has *no existing tests*, so gap Direction B (`ula-missed`) and the clean-room comparison path are still unstressed — re-validate on a file with tests. See `ula-validated-turbo-boost-switcher.md`.
+
 ## Plugin Layout
 
-`lore-framework/dev/aiqa/`: README, `repo-init.md`, `ula-file.md`, `artifact-specs.md`, `prompts/`, `schemas/`, `workflows/ula-file-pass.js`. See `dev-module-conventions.md` for the structural pattern.
+`lore-framework/df/`: `repo-init.md` (DF-core), `README.md`, and the `aiqa/` aspect subtree — `df/aiqa/`: README, `ula-file.md`, `artifact-specs.md`, `prompts/`, `schemas/` (incl. `provenance.schema.json`), `workflows/ula-file-pass.js`. See `df-module-conventions.md` for the structural pattern.
+
+**Workflow runtime gotchas baked into `ula-file-pass.js`:** the `args`-string parse guard and the `$schema`-strip (`noMeta`) — see `df-module-conventions.md` § DF Workflow-Authoring Checklist and `workflow-primitive-operational-notes.md`.
 
 ## See Also
 
-- `dev-module-conventions.md` — how `dev/` modules are structured in the plugin.
+- `df-module-conventions.md` — how `df/` modules are structured in the plugin (+ DF workflow-authoring checklist).
 - `lr-dev-direction.md` — the broader SDLC direction this is the first shipped feature of.
 - `workflow-primitive-operational-notes.md` — operational lessons from the ULA prototype; dynamic Workflow availability caveat.
 - `df-per-repo-backbone.md` — the per-repo DF backbone; AIQA/ULA is one aspect (`ula/`) of it.
-- `ula-validated-turbo-boost-switcher.md` — real single-unit validation (six bugs).
-- `ula-narrative-vs-structured-output.md` — the two ULA output kinds; narrative motivates `index.md`.
-- `ula-designed-for-multiple-runs.md`, `provenance-header-concept.md`, `ula-artifact-granularity.md` — the ULA-as-repeated design (self-describing artifacts, git-history run store, granularity lean).
+- `ula-validated-turbo-boost-switcher.md` — real single-unit + end-to-end validation.
+- `ula-narrative-vs-structured-output.md` — the two ULA output kinds; narrative motivates `file-lore.md`.
+- `ula-designed-for-multiple-runs.md`, `provenance-header-concept.md`, `ula-artifact-granularity.md` — the ULA-as-repeated design (self-describing artifacts, git-history run store, per-file granularity LOCKED).
 - `quality-repo-architecture.md` — the three-repo artifact side; the quality repo is now generalized into the DF repo.
-- `skill-doc-pattern.md` — the base pattern; `dev-module-conventions.md` adds the module-subtree variant.
+- `skill-doc-pattern.md` — the base pattern; `df-module-conventions.md` adds the module-subtree variant.

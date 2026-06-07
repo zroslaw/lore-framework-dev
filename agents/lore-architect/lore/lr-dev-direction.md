@@ -2,11 +2,11 @@
 
 Opened 2026-05-31 with the user. A major new direction: **`lr-dev`**, a module/mode of the `lr` plugin dedicated to development & SDLC automation. North star (user): convert the SDLC into a **dark factory** — software built internally and autonomously by lore agents, fed only inputs plus occasional follow-ups. Same family as `autonomous-agents-vision.md`: autonomous-agents is the *substrate/process* direction (always-on background workers); lr-dev is the *what-they-do-in-software-development* direction. They converge on the dark-factory end state.
 
-**Status: active exploration; first prototype validated 2026-06-02; first in-plugin BETA feature shipped 2026-06-03 (AIQA/ULA, local commit `2f1e788` — v16 ship deferred); artifact-store direction evolved to the per-repo codex 2026-06-03, then renamed + purpose-elevated to the per-repo DF backbone 2026-06-05. The DF/ULA design thread is currently IN PROGRESS, held for continuation (see Open decisions and `df-ula-design-in-progress.md`).** This topic is an orienting pointer. The detailed design lives in the drafts and backlog listed under *Where the detail lives* — do not duplicate that detail here. This file is the anchor (analogous to how `autonomous-agents-vision.md` anchors the parked autonomous direction).
+**Status: active exploration; first prototype validated 2026-06-02; first in-plugin BETA feature 2026-06-03 (AIQA/ULA, built on local commit `2f1e788` — v16 ship deferred); artifact-store direction evolved to the per-repo codex 2026-06-03, renamed + purpose-elevated to the per-repo DF backbone 2026-06-05; DF/ULA design thread CLOSED + full DF rename landed in the plugin (staged BETA) + ULA validated end-to-end 2026-06-07.** This topic is an orienting pointer. The detailed design lives in the drafts, the DF lore topics, and the backlog listed under *Where the detail lives* — do not duplicate that detail here. This file is the anchor (analogous to how `autonomous-agents-vision.md` anchors the parked autonomous direction).
 
-## Current leading direction (2026-06-05): the per-repo DF backbone, skills not agents
+## Current leading direction (locked 2026-06-07): the per-repo DF backbone, skills not agents
 
-The artifact + knowledge store for a source repo is a **`<repo>-df`** repo (DF = **Dark Factory**) — the backbone/storage layer the Dark Factory runs on, holding *all* the context/knowledge/artifacts the DF needs that aren't in the source repo. It is a per-file-directory mirror of the source tree under a top-level **`artifacts/`** dir, lazily created (an absent dir means "not yet analyzed," so the tree is a sparse coverage map). Each file dir holds a narrative `index.md` (the "context" aspect) plus flat structured aspect subdirs (`ula/…` today — `aiqa/` is no longer a dir level). **No agent** — persistence is external (the DF repo) and procedures live in framework-level, aspect-scoped skills; an agent would have nothing of its own to custody. lr-dev standardizes the DF-repo layout + the procedures; the per-repo "instance" is the DF repo + its small config, not an agent instance. Full design: **`df-per-repo-backbone.md`**, with `ula-narrative-vs-structured-output.md` (why `index.md` exists). This **demotes the context-agent framing below** (now a prior step in the reasoning trail) and generalizes `quality-repo-architecture.md`'s quality repo into the DF repo. (The `<repo>-codex` name from 2026-06-03 is superseded by `<repo>-df`; design unchanged, only name + framing.)
+The artifact + knowledge store for a source repo is a **`<repo>-df`** repo (DF = **Dark Factory**) — the backbone/storage layer the Dark Factory runs on, holding *all* the context/knowledge/artifacts the DF needs that aren't in the source repo. It is a per-file-directory mirror of the source tree under a top-level **`repo-lore/`** dir, lazily created (an absent dir means "not yet analyzed," so the tree is a sparse coverage map). Each "Source File Lore" dir holds a narrative landing **`file-lore.md`** (the "context" aspect; the file-level analogue of an agent's `lore-context.md`) plus flat structured aspect subdirs (`ula/…` today — `aiqa/` is no longer a dir level). **No agent** — persistence is external (the DF repo) and procedures live in framework-level, aspect-scoped skills; an agent would have nothing of its own to custody. lr-dev standardizes the DF-repo layout + the procedures; the per-repo "instance" is the DF repo + its small config (`df.config.yaml`), not an agent instance. Naming/layout were **locked 2026-06-07** and the full DF rename **landed in the plugin** (staged BETA). Full design: **`df-per-repo-backbone.md`**, with `ula-narrative-vs-structured-output.md` (why `file-lore.md` exists). This **demotes the context-agent framing below** (now a prior step in the reasoning trail) and generalizes `quality-repo-architecture.md`'s quality repo into the DF repo. (The `<repo>-codex` name from 2026-06-03 is superseded by `<repo>-df`; design unchanged, only name + framing.)
 
 **Prototype milestone (2026-06-02):** the §2 file-by-file quality workflow ran end-to-end against a real source file as a Claude Code dynamic Workflow script (`workdir/draft-lr-dev-file-quality-workflow.js`). Two iterations confirmed the pipeline shape and produced the §4 schema-conformant artifacts. Operational case validating the reframe: lore-aware bug verifiers killed 3 of 9 bugs as false-positives — including a "typo" that was actually a non-standard supplier-specific code — by tracing the actual caller graph. Without booting the per-repo context agent inside workflow subagents, the workflow would have generated "fixes" that broke real integration. Context-agent attach is therefore **not a nice-to-have**. Full lessons in `workflow-primitive-operational-notes.md` and `quality-repo-architecture.md`.
 
@@ -56,7 +56,7 @@ Surviving framings that are *not* superseded (carried into the leading direction
 Under the DF-backbone direction the artifact side and the knowledge side **co-locate in one `<repo>-df` repo**, so the shape collapses to **two repos**:
 
 1. **Source repo** — system under analysis; untouched.
-2. **`<repo>-df`** — the per-file-directory mirror (under `artifacts/`) holding both the narrative `index.md` (knowledge/context aspect) and structured artifact aspects (`ula/`, future aspects). Composite-builds against the source so generated tests can exercise real code without copying it. Full pattern: **`df-per-repo-backbone.md`**.
+2. **`<repo>-df`** — the per-file-directory mirror (under `repo-lore/`) holding both the narrative `file-lore.md` (knowledge/context aspect) and structured artifact aspects (`ula/`, future aspects). Composite-builds against the source so generated tests can exercise real code without copying it. Full pattern: **`df-per-repo-backbone.md`**.
 
 (The earlier three-repo split — source / context-agent-repo / quality repo — is the prior framing; the context-agent repo dissolved and the quality repo generalized into the DF repo. Reasoning trail: **`quality-repo-architecture.md`**.)
 
@@ -70,37 +70,39 @@ Generated tests live **permanently** in the DF repo, not migrated into the sourc
 
 > Note (2026-06-01): the drafts were updated this session with the reframe — `lr-dev-direction.md` references them, it does not restate them.
 
-## Open decisions (carry to next session)
+## Open decisions
 
-**DF/ULA thread (IN PROGRESS, 2026-06-05 — held for continuation; full state in `df-ula-design-in-progress.md`):**
-- **Provenance Header field set** — mostly decided, not yet locked into a schema. Next: lock it (into the JSON Schema). See `provenance-header-concept.md`.
-- **Incremental run algorithm** — SHA-compare + per-unit merge flow sketched, not detailed. See `ula-designed-for-multiple-runs.md`.
-- **ULA artifact granularity** — leaning per-file (unit as a field), user said "not sure." Decide next time. See `ula-artifact-granularity.md`.
-- **Plugin-side naming ripple** — `dev/aiqa/` module + `/lr:dev-aiqa-repo-init` skill name now out of step with the flattened `ula/` tree and the `-df` repo rename. Parked. See `df-per-repo-backbone.md`.
-- **DF glossary persistence** — `workdir/draft-df-glossary.md` proposed as the working home but **not created** (user held approval); starter glossary kept in `df-ula-design-in-progress.md` for now.
+**DF/ULA thread — CLOSED 2026-06-07.** All five formerly-open items are resolved:
+- **Provenance Header field set** — LOCKED into `df/aiqa/schemas/provenance.schema.json`; `source-sha` corrected to `git hash-object`. See `provenance-header-concept.md`.
+- **ULA artifact granularity** — LOCKED per-file, grouped (`units: []`), unit-as-a-field. See `ula-artifact-granularity.md`.
+- **Layout/naming** — LOCKED: top dir `repo-lore/`, per-file `file-lore.md` landing, "Source File Lore" dir, aspect = a category of file lore. See `df-per-repo-backbone.md`.
+- **Plugin-side naming ripple** — DONE: full DF rename landed (`df/` module, `df-repo-init` + `df-ula-file` skills, `repo-lore/` tree). See `aiqa-ula-feature.md`, `df-module-conventions.md`.
+- **DF glossary persistence** — DONE: `workdir/draft-df-glossary.md` created, current with the locked decisions.
+- *Incremental run algorithm* — the storage/identity model (git-history run store, dedupe key) is locked; the detailed SHA-compare + per-unit *merge* algorithm remains implementation-level work for when whole-repo incremental sweeps are built. See `ula-designed-for-multiple-runs.md`.
 
-**Carried from the demoted context-agent framing (mostly moot under the DF direction, kept for the trail):**
-- ~~Generator path for context agents~~ — moot; no context agent. The per-repo instance is a DF repo + config, emitted by an aspect-agnostic DF-repo-init skill.
-- Scenario→code binding; generated-vs-human test de-dup — still open under any framing.
+**Still open (under any framing):**
+- ~~Generator path for context agents~~ — moot; no context agent. The per-repo instance is a DF repo + config, emitted by the aspect-agnostic `df-repo-init` skill.
+- Scenario→code binding; generated-vs-human test de-dup.
+- **Re-validate ULA gap analysis on a file that HAS tests** — the end-to-end run was on a test-less file, so the `ula-missed` direction is unexercised. See `ula-validated-turbo-boost-switcher.md`.
 
 ## Operational note
 
 The user has a **second, concurrent idea** to explore in a separate session that should carry the essential points from this one — these drafts + this topic are that carry-forward. Next natural concrete move on *this* thread: ground the test-scenario schema on the `My-Turbo-Boost-Switcher` mouse repo, using its context agent as the knowledge custodian.
 
-## First In-Plugin BETA Feature: AIQA/ULA (2026-06-03)
+## First In-Plugin BETA Feature: AIQA/ULA (2026-06-03; DF-renamed 2026-06-07)
 
-Two BETA skills committed to `lore-framework` locally (`2f1e788`; v16 ship deferred):
-- `/lr:dev-aiqa-repo-init` — creates a sibling `<repo>-aiqa` quality repo.
-- `/lr:dev-ula-file <file>` — single-file unit-level analysis: split → find bugs (step A) → generate scenarios clean-room (step B) → gap analysis (step C).
+Two BETA skills in `lore-framework` (built on local commit `2f1e788`, then DF-renamed; v16 ship deferred):
+- `/lr:df-repo-init` — scaffolds the sibling `<repo>-df` backbone repo (config + `repo-lore/`). Aspect-agnostic (was `/lr:dev-aiqa-repo-init`).
+- `/lr:df-ula-file <file>` — single-file unit-level analysis: split → find bugs (step A) → generate scenarios clean-room (step B) → gap analysis (step C). (Was `/lr:dev-ula-file`.)
 
-Key design decisions: `dev-` skill prefix required (not just grouping); module subtree layout (`dev/aiqa/` for docs/prompts/schemas/workflows) rather than global `docs/`; artifacts are machine-readable YAML; single-source discipline — schemas enforce structure, prompts enforce semantics, `artifact-specs.md` is a pointer only. See `aiqa-ula-feature.md`, `dev-module-conventions.md`.
+Key design decisions: `df-` skill prefix required (supersedes `dev-`; not just grouping); module subtree layout (`df/` + `df/aiqa/` for docs/prompts/schemas/workflows) rather than global `docs/`; artifacts are machine-readable YAML, per-file/grouped with a Provenance Header; single-source discipline — schemas enforce structure, prompts enforce semantics, `artifact-specs.md` is a pointer only. See `aiqa-ula-feature.md`, `df-module-conventions.md`.
 
 ## See Also
 
 - `df-per-repo-backbone.md` — **current leading direction** for the artifact + knowledge store; the DF backbone, skills not agents.
-- `df-ula-design-in-progress.md` — the DF/ULA thread's in-progress continuation state + working glossary.
+- `df-module-conventions.md` — the plugin-side `df/` module layout + DF workflow-authoring checklist; working glossary at `workdir/draft-df-glossary.md`.
 - `provenance-header-concept.md`, `ula-designed-for-multiple-runs.md`, `ula-artifact-granularity.md` — the 2026-06-05 ULA design findings (self-describing artifacts, git-history run store, per-file granularity lean).
-- `ula-narrative-vs-structured-output.md` — the two ULA output kinds; the narrative kind is the DF repo's `index.md` aspect.
+- `ula-narrative-vs-structured-output.md` — the two ULA output kinds; the narrative kind is the DF repo's `file-lore.md` aspect.
 - `framework-defined-role-pattern.md` — the recurring-role / thin-role-pointer pattern; stands, but lr-dev no longer instantiates it (the DF repo needs no agent).
 - `agent-split-only-when-forced.md` — the "no agent" landing is an instance: no forcing pressure once persistence is in the DF repo.
 - `quality-repo-architecture.md` — prior three-repo framing; the quality repo generalized into the DF repo, the context-agent repo dissolved.

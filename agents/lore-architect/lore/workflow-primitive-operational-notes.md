@@ -67,11 +67,29 @@ Also note: **no JS runtime (node/deno/bun) on the primary dev machine** — work
 
 Composes with `graduated-verification-confidence.md` (state confidence, plan for "unavailable") and `verify-before-acting-on-suspected-bugs.md`.
 
-## `args` can arrive as a string — destructuring fails
+## `args` can arrive as a string — destructuring fails (CONFIRMED + guard)
 
-Passing a JSON object as the Workflow tool's `args` failed **twice** with `Error: args must include { … }`, because the value reached the script as a *string* rather than a parsed object — so `const { filePath } = args` yielded `undefined` and the guard threw. The Workflow tool docs warn about exactly this: a stringified list/object breaks `args.map`/destructuring.
+**Confirmed 2026-06-07** (was "suspected"): the Workflow tool's `args` can reach the script as a *JSON string* rather than a parsed object — `const { filePath } = args` then yields `undefined` and the input guard throws `Error: args must include { … }`. A 3-line repro workflow showed `args` arriving as the escaped JSON string. (It failed this way *twice* in the ULA workflow before the cause was pinned down.)
 
-**Workaround that worked:** for a one-off run, stop relying on `args` injection — **hardcode the inputs directly in the workflow script** (filePath, sourceRepoPath, the unit list, and the prompts/schemas as inline JS constants). Self-contained script, no args coupling. For a single-shot scoped run this is simpler and more robust than fighting the args encoding. (Note this trades away the inject-then-undefined fail-loud discipline below — acceptable only because the script is self-contained and disposable.) If args injection *is* needed, ensure the value is passed as an actual JSON value, not a pre-stringified blob.
+**Canonical guard — parse at the top of every workflow:**
+```js
+const { filePath, sourceRepoPath, /* … */ } =
+  (typeof args === 'string' ? JSON.parse(args) : args) ?? {}
+```
+This is now baked into `df/aiqa/workflows/ula-file-pass.js`. **It is the fix** — preferred over the older hardcode workaround.
+
+**Diagnosis lesson (load-bearing):** the failure had *two* plausible causes — payload **size** (a huge `args` carrying the whole file + prompts + schemas) vs **string-coercion**. The size fix was implemented first (drop `fileContents`, have the split agent read the file itself) and did **NOT** fix it; the cause was coercion, proven only afterward by the repro. When a failure has ≥2 plausible causes and one is cheap to confirm (a minimal repro / inspecting the actual inputs), **confirm before** implementing the more invasive candidate. See `verify-before-acting-on-suspected-bugs.md` (sharpened: verification applies to *which* bug, not just *whether* it's a bug). The size fix wasn't wasted — it unified the split-vs-unit read approach and made `source-sha` honest (every agent + the hash now read the same on-disk file).
+
+**Fallback (one-off only):** for a disposable single-shot run you can sidestep `args` entirely by **hardcoding the inputs as inline JS constants**. Self-contained, no args coupling — but it trades away the inject-then-undefined fail-loud discipline, so use it only for throwaway scripts. The parse-guard above is the durable answer.
+
+## `agent({schema})` rejects the draft-2020-12 `$schema` — strip it
+
+**Confirmed 2026-06-07.** `agent({ schema })` rejects a schema whose `$schema` is the draft-2020-12 meta-URL (`.../draft/2020-12/schema`) — the runtime's validator is **draft-07-era** and can't resolve that meta-URL (`Error: no schema with key or ref …`). **Strip `$schema` at the `agent()` boundary:**
+```js
+const noMeta = (s) => { const { $schema, ...rest } = s; return rest }
+// … agent({ schema: noMeta(schemas.bugs) })
+```
+Keep `$schema` in the `.json` files (editor/tooling autocompletion) but keep the schemas **draft-07-compatible** (no 2020-12-only keywords) so stripping the meta-URL is all that's needed. Baked into `ula-file-pass.js` (every `agent()` call wraps its schema in `noMeta`). Both this and the args-guard are in the DF workflow-authoring checklist — see `df-module-conventions.md`.
 
 ## Single-unit scoping = bypass the splitter
 
@@ -96,4 +114,6 @@ Process lesson: the **review→fix→re-review loop converged** — round 2 conf
 - `graduated-verification-confidence.md` — verdict states from verify stages should be a graded surface, not a boolean — workflows make this concrete (real / false-positive / inconclusive).
 - `quality-repo-architecture.md` — the manifest-driven resumability pattern that composes with workflow output persistence.
 - `knowledge-vs-skills-distinction.md` — workflow scripts are *skills* (instrumental); their structured outputs are *artifacts*, not knowledge.
-- `ula-validated-turbo-boost-switcher.md` — the single-unit ULA run these args/scoping lessons came from.
+- `ula-validated-turbo-boost-switcher.md` — the single-unit + end-to-end ULA runs these args/scoping/$schema lessons came from.
+- `df-module-conventions.md` — the DF workflow-authoring checklist that distills the args-guard + `$schema`-strip into a per-workflow checklist.
+- `verify-before-acting-on-suspected-bugs.md` — confirm *which* bug before betting on the invasive fix (the size-vs-coercion misdiagnosis).

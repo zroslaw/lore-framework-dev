@@ -4,7 +4,7 @@ Core reframe for ULA (2026-06-05): in DF mode it **runs many times** as developm
 
 ## Two kinds of repeated run
 
-1. **Incremental over time** — re-run as the source evolves. Decide "should we (re)run ULA for this file?" by the file's **content signature** (git blob SHA), not the head commit id: blob SHA changes only when the file's bytes change, so commits that don't touch the file correctly read as "no rerun." Get it with `git rev-parse HEAD:<path>`. See `provenance-header-concept.md` for `source-sha`.
+1. **Incremental over time** — re-run as the source evolves. Decide "should we (re)run ULA for this file?" by the file's **content signature** (git blob SHA), not the head commit id: blob SHA changes only when the file's bytes change, so commits that don't touch the file correctly read as "no rerun." Get it with **`git hash-object <path>`** (the working-tree bytes — *not* `rev-parse HEAD:<path>`, which records the committed version and lies when the tree is dirty). See `provenance-header-concept.md` for `source-sha`.
 2. **Different configs on the same version** — run ULA with different params (model, approach) on the *same* file version, to compare which model/approach is better. A dev/experimentation activity; in production this is rare.
 
 ## No run-folders — git history is the run store
@@ -24,11 +24,11 @@ On-disk header answers the common production case; git history answers dev-time 
 
 ## Status
 
-In progress: the SHA-compare + per-unit merge flow (the incremental run *algorithm*) was sketched, not detailed — an open item to resume with. See `df-ula-design-in-progress.md`.
+Design **locked 2026-06-07** (no run-folders, git history is the run store, dedupe key = source-sha × config-id). The detailed SHA-compare + per-unit *merge* algorithm is still implementation-level work for when whole-repo incremental sweeps are built, but the storage/identity model it runs on is settled. Tracking-grain ≠ storage-grain (`ula-artifact-granularity.md`) is what lets it rerun per unit while storing per file.
 
 ## See Also
 
-- `provenance-header-concept.md` — the mechanism (self-describing header) that makes git-history-as-run-store work.
+- `provenance-header-concept.md` — the mechanism (self-describing header) that makes git-history-as-run-store work; `source-sha` = `git hash-object`.
 - `ula-artifact-granularity.md` — per-file vs per-unit storage; tracking-grain ≠ storage-grain (you can track/rerun per unit while storing per file).
 - `df-per-repo-backbone.md` — the DF repo holding the artifacts; git history of that repo is the run store.
 - `aiqa-ula-feature.md` — the ULA pass (A→B→C); note earlier "no SHAs" was about code-pointer SHAs, distinct from `source-sha` provenance.
