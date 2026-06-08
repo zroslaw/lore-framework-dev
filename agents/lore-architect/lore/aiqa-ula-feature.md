@@ -1,12 +1,12 @@
 # AIQA / ULA — First In-Plugin lr-dev Module
 
-**AIQA** = umbrella for AI-based quality assurance, organized by testing *level*. First level shipped: **ULA = Unit-Level Analysis**. Future levels: integration (ILA), e2e, feature/flow. The module is a **BETA** in `lore-framework` (built on local commit `2f1e788`, then fully renamed to DF — see below; v16 ship still deferred while it iterates).
+**AIQA** = umbrella for AI-based quality assurance, organized by testing *level*. First level shipped: **ULA = Unit-Level Analysis**. Future levels: integration (ILA), e2e, feature/flow. The module is a **BETA** in `lore-framework` (built on local commit `2f1e788`, renamed dev→df, then **shipped in v16**, 2026-06-08, manifests `1.16.0`). Still BETA — schemas may change without migration.
 
 **DF-backbone framing (2026-06-03, rename landed 2026-06-07):** AIQA is **one aspect** of the per-repo DF backbone (`<repo>-df`, DF = Dark Factory) — its structured artifacts live under `<repo>-df/repo-lore/<file>/ula/…` (the `aiqa/` dir level was flattened away 2026-06-05; top dir is now `repo-lore/` not `artifacts/`), alongside (eventually) other aspects and the per-file narrative landing `file-lore.md`. The skills/workflows stay; the framing generalizes. See `df-per-repo-backbone.md`.
 
-## DF Rename (landed in the plugin, 2026-06-07, staged BETA)
+## DF Rename (shipped in v16, 2026-06-08)
 
-The whole module was rebranded to the **DF (Dark Factory)** north star — staged in `lore-framework/`, not yet committed, still v16-pending:
+The whole module was rebranded to the **DF (Dark Factory)** north star, shipped in v16 (`lore-framework` commit `005f18a`):
 
 - module dir **`dev/` → `df/`**; skill prefix **`df-`** supersedes `dev-` (still disambiguates from `lr:init`). See `df-module-conventions.md`.
 - skills: `/lr:dev-aiqa-repo-init` → **`/lr:df-repo-init`**; `/lr:dev-ula-file` → **`/lr:df-ula-file`**.
@@ -23,13 +23,17 @@ The whole module was rebranded to the **DF (Dark Factory)** north star — stage
 
 ## ULA Single-File Pass Flow
 
-Split file → units (unit = unit-of-testing, e.g. a method; slug id fixed at split — it *tags each unit's entry* in the per-file artifacts, it is NOT a directory) → per unit, **one agent** runs three ordered steps:
+Split file → units (unit = unit-of-testing, e.g. a method; slug id fixed at split — it *tags each unit's entry* in the per-file artifacts, it is NOT a directory) → per unit, **one agent** runs five ordered steps (A→B→C→D→E):
 
-- **Step A — Find bugs** → `bugs.yaml`. Fields: id / title (what+impact) / description (repro + components). Excludes bugs encoded as "expected" behavior (those land in gap analysis).
+- **Step A — Find bugs** → `bugs.yaml`. Per finding: `id` / `title` / `impact-summary` (plain-language) / `description` (deep technical) / `nature` (product|technical) / `severity` / `confidence` (+ optional `category`/`tags`); plus `crossUnit[]` for bugs noticed in other units/interactions. Excludes bugs encoded as "expected" behavior (those land in gap analysis). Full model: `ula-finding-schema.md`.
 - **Step B — Generate scenarios** (CLEAN-ROOM — must not read existing tests; excludes any behavior tied to a step-A bug) → `scenarios.yaml`. Fields: id / title / description / `coverage-intent[]` of `{kind∈statement|branch|condition|path, target}`.
 - **Step C — Gap analysis** (may read tests now) → `gap.yaml`. Two-directional: `not-implemented` = ULA scenarios with no matching test; `ula-missed` = existing tests no scenario anticipated. **The mismatch is the quality signal, not the match.** `considered-tests` lists what was scanned.
+- **Step D — Verify bugs** (v16; past clean-room, may read the whole repo). Re-investigate each Step A bug for real-ness + *real system impact*; revise `severity` (→ `negligible` if real-but-harmless), or move non-bugs to `dismissed[]` (never delete).
+- **Step E — Verification guardrail** (v16). Confirm every Step A bug ended up in exactly one of `bugs[]` / `dismissed[]`.
 
-Steps are ordered (B needs A's bug list to exclude; C needs B's scenarios). One agent for cost control, but written as three separable prompt blocks (`prompts/step-{a,b,c}-*.md`) so they split into independent parallel agents trivially — the seam is "steps communicate only via written artifacts, never in-context memory."
+After persist, the skill runs an **independent aggregation-level re-verification**: a fresh subagent re-applies D/E across all units with whole-file context; rejects move to `dismissed[]` with `dismissed-by: aggregator`. See `ula-bug-verification-track.md`.
+
+Steps are ordered (B needs A's bug list to exclude; C needs B's scenarios). One agent for cost control, but written as five separable prompt blocks (`prompts/step-{a,b,c,d,e}-*.md`) so they split into independent parallel agents trivially — the seam is "steps communicate only via written artifacts, never in-context memory."
 
 ## Artifact Conventions
 

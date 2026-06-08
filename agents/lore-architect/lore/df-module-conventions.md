@@ -26,7 +26,7 @@ Follows the `spawn-teammate` precedent:
 
 ## Ship Discipline: Plugin ≠ VERSION Bump
 
-Moving a feature into the plugin **does not require cutting a VERSION**. The v16 ship (VERSION 15→16, manifests→`1.16.0`, `release-notes/16.md`, history backfill) is deferred while DF/AIQA is BETA/iterating — and the whole DF rename landed *inside* that same pre-ship BETA window (built on local commit `2f1e788`, then renamed; the rename itself needs no separate version).
+Moving a feature into the plugin **does not require cutting a VERSION**. The v16 ship (VERSION 15→16, manifests→`1.16.0`, `release-notes/16.md`, history backfill) **landed 2026-06-08** — but only after DF/AIQA iterated as a BETA *inside* the plugin with no version bump, and the whole dev→df rename rode in that same window (built on local commit `2f1e788`, then renamed; the rename needed no separate version).
 
 Skills are discovered locally via `claude --plugin-dir ./lore-framework` without a manifest bump — the manifest bump only matters for marketplace propagation. So: a BETA module can live in the plugin, be locally usable, and iterate (including a wholesale rename) before its formal version ship.
 
@@ -43,6 +43,7 @@ Authoring rules for any dynamic-Workflow script under `df/<aspect>/workflows/` t
 3. **Don't inject the file contents.** Let each subagent (split + units) read the target file itself, so `args` stays small (large-payload was a separate failure mode) *and* every agent + the `source-sha` hash read the same on-disk bytes → honest provenance.
 4. **`source-sha` = `git hash-object <path>`**, not `rev-parse HEAD:<path>` — the working-tree bytes actually analyzed (see `provenance-header-concept.md`).
 5. The general workflow defect classes still apply — see `workflow-primitive-operational-notes.md` § Reviewing AI-Generated Workflow Code (result/unit misalignment, silent drops, inject-then-undefined, schema strictness coupling, per-unit full-file embedding).
+6. **Pass `args` from the skill as a structured object, never a hand-serialized JSON string.** Complements item 1 (the workflow's *receiving* guard): a hand-built arg string lets a single typo (e.g. a missing `:` in an injected schema) crash the run at the `JSON.parse(args)` guard *before any agent starts*. The runtime serializes a real object correctly every time. **Symptom→cause:** a parse error at that guard means a hand-serialized arg string was passed. Codified in `df/aiqa/ula-file.md` step 4 (confirmed by a real v16-era run failure).
 
 ## See Also
 
@@ -51,4 +52,4 @@ Authoring rules for any dynamic-Workflow script under `df/<aspect>/workflows/` t
 - `df-per-repo-backbone.md` — the per-repo DF backbone these skills write into; `df-repo-init` scaffolds it, AIQA/ULA is one aspect.
 - `workflow-primitive-operational-notes.md` — the full operational catalog the checklist above distills the DF-specific rules from.
 - `provenance-header-concept.md` — `source-sha` via `git hash-object`.
-- `versioning-release-types.md` — v16 will be the formal ship with history backfill.
+- `versioning-release-types.md` — v16 shipped 2026-06-08 (history backfilled).

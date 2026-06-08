@@ -14,6 +14,15 @@ The discipline extends to **diagnosis among competing causes**, not just confirm
 
 Rule: **when a failure has ≥2 plausible causes and one is cheap to confirm (a minimal repro, or just inspecting the actual call/inputs), confirm before implementing the more invasive candidate.** Flagging the invasive fix's uncertainty up front is good; a repro first is better — it saves the round-trip. (The size fix wasn't wasted here — it unified the split-vs-unit read path and made `source-sha` honest — but that was luck, "good change, wrong bug.") See `workflow-primitive-operational-notes.md` § `args` can arrive as a string.
 
+## Verify what the code/prompt says before answering "did we implement X" (2026-06-08)
+
+Asked whether a behaviour is implemented — especially in code/prompts you didn't just write, or wrote across sessions — **read the actual artifact before answering**; don't answer from memory of the design intent. Two v16 instances:
+
+1. I claimed ULA's bug-finding step was "clean-room / context-blind" — **wrong**. Clean-room is a Step B (scenarios) property = "don't peek at existing tests"; the bug step (A) is explicitly context-*aware* (reads callers/callees). I'd conflated two adjacent concepts. Caught only by reading the step prompts when the user challenged "did you miss this?".
+2. The user asking "did we implement the context-aware finding I requested?" is a *factual* question about the prompts — answered by reading them, not by recalling the design.
+
+Distinguish adjacent concepts before asserting (clean-room-vs-tests ≠ context-blind). Don't reflexively agree OR defend — verify. Sibling: `consistency-sweep-read-not-just-grep.md`.
+
 ## Operational rules
 
 - **Verify state directly before mutating it.** `ls`, `cat`, `git` the thing you think is broken before any edit/delete/repoint. An inference is a hypothesis, not a fact.
