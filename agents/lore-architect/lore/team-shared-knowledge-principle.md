@@ -6,6 +6,8 @@ An agent's `lore/`, `lore-context.md`, `role.md`, `workdir/`, and `sessions/` al
 
 This is the value proposition. Not "Claude remembers things for me" — but "the team's tribal knowledge is no longer trapped in individuals."
 
+**Affirmed as foundational (2026-06-13 architecture review).** When the review probed whether team-shared / multi-author should be the framework's foundational framing, the user affirmed it as a *deliberate current decision*, not an open question — multi-author lore (with its accepted voice drift) is a chosen property, not a coherence defect to engineer away. Do not re-raise "should this be single-author?" as a problem. See `architecture-review-dispositions.md`.
+
 ## Why It Matters
 
 - **Frames every design decision.** Almost every framework mechanism makes sense only under the shared-knowledge lens. Directory-driven storage exists so git can be the medium. Plain markdown exists so any contributor can read and edit. Push-conflict-resolution exists because concurrent contributors are expected, not exceptional.
@@ -52,3 +54,4 @@ The principle's guarantees apply to the standard finalization flow (sequential s
 - `framework-scope-vs-agent-scope.md` — universal vs specific boundary (different axis, related concern)
 - `plugin-vs-agent-repo-separation.md` — downstream consequence: framework design knowledge gets its own team-shared agent repo, not a personal one
 - `freshness-contracts-at-session-boundaries.md` — staleness in a team-shared repo is the primary read-side failure mode; v13's auto-pull mechanism crystallized this into a named principle
+- `architecture-review-dispositions.md` — the 2026-06-13 review affirmed this principle (and multi-author voice) as a deliberate current decision, not an open question

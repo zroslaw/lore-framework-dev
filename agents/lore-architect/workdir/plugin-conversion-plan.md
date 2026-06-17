@@ -30,7 +30,7 @@ Create `.claude-plugin/plugin.json`:
   "description": "Lore — persistent knowledge system for AI agents",
   "version": "1.0.0",
   "author": {
-    "name": "Yaroslav Roslaw"
+    "name": "Yaroslav Panasyuk"
   },
   "repository": "https://github.com/zroslaw/lore-framework"
 }

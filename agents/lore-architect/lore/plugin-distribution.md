@@ -9,7 +9,7 @@ The `lr` plugin is distributed via a self-hosted Claude Code marketplace on GitH
   "version": "1.0.0",
   "repository": "https://github.com/zroslaw/lore-framework",
   "license": "MIT",
-  "owner": { "name": "Yaroslav Roslaw" },
+  "owner": { "name": "Yaroslav Panasyuk" },
   "plugins": [
     {
       "name": "lr",

@@ -14,6 +14,14 @@ The discipline extends to **diagnosis among competing causes**, not just confirm
 
 Rule: **when a failure has ≥2 plausible causes and one is cheap to confirm (a minimal repro, or just inspecting the actual call/inputs), confirm before implementing the more invasive candidate.** Flagging the invasive fix's uncertainty up front is good; a repro first is better — it saves the round-trip. (The size fix wasn't wasted here — it unified the split-vs-unit read path and made `source-sha` honest — but that was luck, "good change, wrong bug.") See `workflow-primitive-operational-notes.md` § `args` can arrive as a string.
 
+## Diagnose the *mechanism* before naming a weakness (2026-06-13)
+
+The "verify *which*, not just *whether*" rule extends to **architectural critique**: name the problem from the *verified mechanism*, not a plausible-sounding label — a wrong label misdiagnoses the fix.
+
+In the 2026-06-13 architecture review I called `lore-context.md` "a hand-maintained denormalized index / two-write problem." The user corrected it: `lore-context.md` is **agent-maintained at merge** (not by hand), and the intended design (compacted working-knowledge + summary-topic references) has no denormalization at all. The real defect was **drift** — the actual file had accreted a full topic index + version-history narrative against its own design intent. Same surface symptom (bloat), different mechanism, different fix: a *shape discipline* in merge (`lore-context-shape-discipline.md`, shipped v17), not de-duplication of an index. Had I acted on the "denormalized index" label, I'd have built the wrong mechanism.
+
+Rule: **before naming a weakness, read the real implementation and confirm the mechanism that produces the symptom.** A plausible label for a real symptom is still a hypothesis; the fix follows the mechanism, not the label. This is the critique-time face of "verify which bug" — adjacent to `lore-context-shape-discipline.md`.
+
 ## Verify what the code/prompt says before answering "did we implement X" (2026-06-08)
 
 Asked whether a behaviour is implemented — especially in code/prompts you didn't just write, or wrote across sessions — **read the actual artifact before answering**; don't answer from memory of the design intent. Two v16 instances:
@@ -44,3 +52,4 @@ Same spirit as the review/verification disciplines: look before you assert, and 
 - `consistency-sweep-read-not-just-grep.md` — sibling: a grep sweep verifies tokens; only *reading the prose* verifies semantics (a rename sweep near-miss)
 - `canonicalize-testbed-fixes.md` — sibling: verify what actually persisted to disk from a testbed session before declaring a fix done
 - `workflow-primitive-operational-notes.md` — the size-vs-coercion misdiagnosis this session's "which bug" lesson came from
+- `lore-context-shape-discipline.md` — the v17 fix that followed from diagnosing the *drift* mechanism (not the mislabeled "denormalized index"); the architectural-critique instance above
