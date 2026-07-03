@@ -1,0 +1,6 @@
+# Transient lr-wait event inboxes (see lore-framework docs/wait.md)
+.lr-wait/
+
+# Python bytecode cache
+__pycache__/
+*.pyc
