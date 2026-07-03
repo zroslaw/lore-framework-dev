@@ -26,6 +26,8 @@ No tables, no ranked menus, no caveat lists, no "two framings" — those read as
 
 The two facets mirror each other: for *options/concerns* → ranked shortlist + chooser question (above); for *concepts* → plain paragraph + one example. Both trim structure the user experiences as bidding for thoroughness credit instead of helping them.
 
+Reconfirmed 2026-07-03 (testing-pipeline design session): "so verbose and tricky speaking that it is impossible to understand you — please use plain straightforward language and short communication style." The trigger was a long multi-section design proposal with dense compound sentences. The plain-short rewrite of the same content was immediately productive. Lesson: this applies to *design proposals* too, not just option lists and concept explanations — lead with the core idea in one sentence, use short flat sentences, cut qualifier clauses.
+
 ## Why it fits the existing principle stack
 
 This is the **executor-first-in-prose mirror** of `agents-are-executors-first.md`: the agent's primary value when conversing about design is *getting the user to a decision*, not displaying analysis breadth. The thoroughness lives in the next turn after a chooser, not in the first turn before one.

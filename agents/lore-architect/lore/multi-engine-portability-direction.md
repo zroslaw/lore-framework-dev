@@ -26,6 +26,8 @@ The knowledge substrate itself — agent repos, `lore-repo.md`, `role.md`, `lore
 
 Both drafts converge on the same top risk: **the framework is prose executed by the model.** Merge alone is a 96-line procedure (`process-merge.md`) assuming faithful multi-step instruction-following. Fidelity on non-Claude models is unverified. Both plans end their phased work with an empirical fidelity report, explicitly framed as feeding the already-parked simplification/subtraction theme (`framework-improvements-backlog.md` § Architecture-Review Follow-Ups) — if a procedure degrades badly on another engine's models, that's a signal to simplify the procedure itself, not just to patch around it per-engine.
 
+The Phase 0.5 harness already turned this from a theoretical risk into an observed one — see `agent-boot-doc-fidelity-fixes.md` for the first concrete instance (on Claude Code itself, before any port), and `execution-testing-catches-blind-ambiguity.md` for why prose review structurally can't catch this bug class.
+
 ## Positioning implication
 
 Every surveyed competitor is bound to one engine (Claude Code) or to a vendor-hosted service — none federate knowledge across *different* coding agents sharing one git substrate. Once a port ships, "a team with members on different AI coding tools shares one knowledge base" becomes a differentiator no surveyed competitor can match, because they're all engine-bound by construction. This is the sharpest answer yet to "how do we stand out" and should inform README/positioning language once a port ships. See `similar-projects-landscape.md`.
@@ -34,9 +36,16 @@ Every surveyed competitor is bound to one engine (Claude Code) or to a vendor-ho
 
 Parked vision with two full workdir drafts, not yet started. Each port is intended as its own dedicated design session. See `workdir/draft-port-codex.md`, `workdir/draft-port-cursor.md`.
 
+Phase 0.5 — the shared automated testing pipeline designed in a third companion draft (2026-07-03), `workdir/draft-testing-pipeline.md` — is now **built and real**, not just designed: one engine-neutral scenario catalog (fixture + prompt + assertions per scenario) run headless per engine via thin drivers, graded pass-rates as the fidelity scorecard, built on Claude Code first as the baseline. It mechanizes the Phase-3 "model-fidelity report" both port drafts call for. 19 of 21 Tier-1 scenarios pass on Claude Code. See `lifecycle-testing-harness.md` for the implementation; `workdir/draft-testing-pipeline.md` remains the original design doc.
+
+The harness's first real use already found two genuine doc-fidelity bugs in `agent-boot.md` — before either port started — concrete first-hand evidence for the "framework is prose" risk below. See `agent-boot-doc-fidelity-fixes.md` and the general principle `execution-testing-catches-blind-ambiguity.md`.
+
 ## See Also
 
 - `workdir/draft-port-codex.md`, `workdir/draft-port-cursor.md` — the phased per-engine plans; this topic is the anchor, not a restatement.
+- `workdir/draft-testing-pipeline.md` — the shared multi-engine testing pipeline (Phase 0.5) original design doc; scenario catalog + per-engine drivers + fidelity scorecard.
+- `lifecycle-testing-harness.md` — the built implementation of Phase 0.5, its coverage, and cost/gating.
+- `agent-boot-doc-fidelity-fixes.md`, `execution-testing-catches-blind-ambiguity.md` — the harness's first real find and the general principle behind it.
 - `similar-projects-landscape.md` — the competitive survey this direction's positioning case rests on.
 - `wait-primitive-feature.md` — the MCP-based primitive that ports with no redesign, evidence for "packaging not redesign."
 - `framework-scope-vs-agent-scope.md` — the layer-ownership test the `docs/engines/` adapter lever will need to pass.

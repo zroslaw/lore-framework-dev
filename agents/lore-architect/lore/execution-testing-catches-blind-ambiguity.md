@@ -1,0 +1,30 @@
+**Doc wording that a strong model resolves correctly by inference can still be genuinely ambiguous — and prose review alone won't catch it, because the reviewer is itself a strong model exercising the same charitable inference the doc's author relied on.** Only running the literal text against a weaker (or just different) model surfaces the gap.
+
+## Why This Matters
+
+The framework's core mechanism is prose executed by a model (see `multi-engine-portability-direction.md` § Dominant shared risk). Pre-ship review — `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md` — is powerful for structural and reasoning issues, but structurally blind to this specific bug class: a strong-model reviewer reading ambiguous instructions will resolve the ambiguity the same charitable way a strong-model executor would, and see nothing wrong. The two failure modes require two different catches — review catches "is this reasoning sound," execution testing catches "does this literal text produce the intended tool calls on the model that will actually run it."
+
+## The Concrete Instance
+
+`agent-boot.md` had already been through multiple rounds of `parallel-reviewer-fanout-pattern.md` review across several version ships. Neither bug below was ever flagged by prose review. Both were found the first time the lifecycle testing harness (`lifecycle-testing-harness.md`) ran haiku against the doc and the run failed:
+
+- Step 1's "search all directories in the current working directory" read as unambiguous to every sonnet run, but haiku anchored to the plugin directory it had just read the doc from, then escalated to a filesystem-wide `find` — which is what triggered spurious macOS TCC permission prompts the user noticed.
+- Step 2's "best-effort... never blocks boot" was over-generalized by haiku into "skippable," so it skipped auto-pull outright.
+
+Full case study, fixes, and the debugging technique that pinpointed both (tracing actual tool calls via `--output-format stream-json --verbose` rather than reading only final text output): `agent-boot-doc-fidelity-fixes.md`.
+
+## Operational Guidance
+
+This is why the lifecycle testing harness has standing value **before** either engine port ships, not just as a port-readiness gate — it's a live doc-fidelity check on Claude Code's own procedures. It is now the second, empirical leg of pre-ship review discipline: for any release that changes a procedure doc the harness covers, run the relevant lifecycle scenarios against real engine execution (ideally at more than one model tier) before shipping, in addition to — not instead of — multi-lens prose review. See `role.md` § Lore-Curation Disciplines.
+
+## Diagnostic
+
+When a procedure doc has been reviewed multiple times and still ships with an execution bug, don't conclude review failed — conclude the bug was in the blind spot review structurally can't see. The fix isn't a fourth review round; it's running the doc through an actual weaker/different-model execution and watching what it does.
+
+## See Also
+
+- `agent-boot-doc-fidelity-fixes.md` — the concrete case study this principle generalizes from.
+- `lifecycle-testing-harness.md` — the tool that operationalizes execution testing.
+- `multi-engine-portability-direction.md` — the "framework is prose executed by the model" risk this is direct first-hand evidence for.
+- `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md` — the prose-review disciplines this complements, not replaces.
+- `naming-foundational-principles.md` — the meta-rule this topic's own existence follows.
