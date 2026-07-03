@@ -16,6 +16,14 @@ The technical argument for fusing them was real: `.claude-plugin/` and `lore-rep
 - **Reflective writes interleave with framework-code changes** in git history — they happen frequently during sessions and clutter the release-relevant history.
 - **Distribution stories blur** — "install the plugin" and "clone the agent repo" are different operations for different audiences.
 
+## Corollary: Dev-Only Artifacts (tests, benchmarks)
+
+A build-side corollary (v18, user-driven): **tests, benchmarks, and other development-only artifacts do not ship in the plugin repo** — it is the distributed marketplace artifact and stays slim. They live in the **framework-dev repo** (`lore-framework-dev/`, e.g. `tests/`), referencing the plugin as a workspace sibling (default `../lore-framework`, override `$LR_FRAMEWORK_DIR`). Codified in `lore-framework/docs/conventions.md` § Dev-Only Artifacts.
+
+This sharpens the whole axis: **plugin repo = *what's distributed*; dev repo = *how it's built and verified*.** User framing: "it is not right to have tests in the same repo as the plugin one."
+
+First instance: `lore-framework-dev/tests/test_wait.py` — stdlib `unittest` (no pytest, matching the zero-dependency ethos; loads the hyphenated `wait-server.py` via `importlib`), 23 unit + integration tests, green. See `wait-primitive-feature.md`, `plugin-mcp-server-convention.md`.
+
 ## Concrete Decision (this session)
 
 `lore-framework/` (plugin) stays slim. `lore-framework-agents/` (a separate agent repo) was carved out to host `lore-architect` — and any future agents whose work is *about* the framework. Currently nested at `lore-framework/lore-framework-agents/` as a temporary placement; intent is to extract to a domain-root sibling on its own GitHub repository. See `agent-discovery-nesting-constraint.md` for the temporary trade-off.

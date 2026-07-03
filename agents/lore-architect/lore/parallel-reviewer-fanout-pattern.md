@@ -47,6 +47,17 @@ Effective briefs share this shape:
 6. **Output format** — severity (BLOCKER / HIGH / MEDIUM / LOW), file:line, issue, one-sentence fix, final verdict.
 7. **Cap on length** — ~600 words per reviewer. Keeps reports digestible.
 
+## Result delivery differs by spawn kind (named teammate vs background subagent)
+
+The v18 `lr-wait` ship validated this pattern on **feature code**, not just doc releases: a 3-lens fan-out (correctness / framework-fit / product-UX) over the script + MCP server surfaced a genuine MUST-FIX (an `lr-emit` infinite-loop hang, empirically reproduced by the reviewer) plus several should-fixes; all three verdicts were ship-with-fixes.
+
+That run also exposed a spawn-mechanics gotcha — **how a reviewer's report comes back depends on how you spawned it:**
+
+- **Plain background subagents (no `name`)** — the subagent's final message *is* returned to you as the `Agent` tool result. This is the default for review fan-out; reach for it when you just want findings back.
+- **Named teammates (given a `name`, so they run as Agent-Teams teammates)** — do **not** auto-return their final report to the lead. In the v18 run one teammate proactively `SendMessage`'d its findings; the other two only sent idle notifications and each had to be `SendMessage`'d to request the report. If you use named teammates for review, **explicitly instruct them in the spawn prompt to `SendMessage` their full findings to the lead before going idle.**
+
+Either way, the downstream discipline is unchanged — distinct lens + exact file paths + "read-only, report don't edit," then synthesize per "How to apply findings" below.
+
 ## How to apply findings
 
 After the fan-out completes:

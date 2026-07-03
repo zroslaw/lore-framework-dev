@@ -28,6 +28,7 @@ Concrete building blocks identified during the 2026-04-26 brainstorm for running
 - This is **strictly superior** to regex-matching Claude's output (iTerm2 triggers, watching logs) — real signal vs. pattern-guessing on rendered text.
 - For a switchboard: `Notification` hook → set tab yellow + post macOS notification; `Stop` hook → set tab green + post notification. No regex, no plist surgery.
 - iTerm2 triggers remain useful for non-Claude processes inside the session (build output, etc.) where there are no hooks.
+- **Inbound counterpart (shipped v18):** the hooks above are the *outbound* signal (agent → user/watcher). The `lr-wait` primitive is the *inbound* signal (external event → agent) — a running agent blocks on `wait_for_event` and any file-writer (`lr-emit`, cron, CI, webhook, human) wakes it with text. This is the **first concrete piece of this substrate to actually ship**. See `wait-primitive-feature.md`.
 
 ## Status surface — escape sequences
 
@@ -86,4 +87,5 @@ This substrate design remains valid as a fallback or deeper integration path if 
 
 - `autonomous-agents-vision.md` — the framework-direction vision this substrate would implement
 - `spawn-teammate-feature.md` — the Agent Teams path chosen experimentally over this substrate
+- `wait-primitive-feature.md` — the v18 `lr-wait` primitive; first shipped inbound-signal building block of this substrate
 - `framework-improvements-backlog.md` — running backlog tracking this direction

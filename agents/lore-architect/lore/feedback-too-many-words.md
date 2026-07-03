@@ -13,6 +13,19 @@ The user is doing executive-style triage — they want to see the topology, pick
 - **End with a chooser question, not a summary.** "Which first?" beats "Want me to dig into any of these?" — the chooser shape signals "I expect you to pick one."
 - **Exception: when no triage is needed.** If the user asked a single specific question, answer it directly — don't pre-empt with a list of alternatives they didn't ask about.
 
+## Explaining a concept (not listing options): plain paragraph + one example
+
+Listing and explaining are two facets of the same lesson. Emphatic, repeated feedback (2026-07-02, building the wait primitive: "so fucking verbose"; "you are awful at explaining things in a simple way") landed when I explained a *concept* with structured, option-laden, multi-section answers.
+
+For an explanatory (non-action) question — "what is X / how does it work / how do I use it / what should I type" — the user wants:
+
+- **One plain-language paragraph** that conveys the core idea, then
+- **one concrete example.**
+
+No tables, no ranked menus, no caveat lists, no "two framings" — those read as noise, even as *evasion of a direct answer*, when someone is trying to understand something. Answer the exact question asked; add detail only when they ask the next one. **When they ask the same thing again, the previous answer was still too complex — simplify further, don't re-explain.** The payoff is compressed time-to-understanding, which is the whole point of an explanation.
+
+The two facets mirror each other: for *options/concerns* → ranked shortlist + chooser question (above); for *concepts* → plain paragraph + one example. Both trim structure the user experiences as bidding for thoroughness credit instead of helping them.
+
 ## Why it fits the existing principle stack
 
 This is the **executor-first-in-prose mirror** of `agents-are-executors-first.md`: the agent's primary value when conversing about design is *getting the user to a decision*, not displaying analysis breadth. The thoroughness lives in the next turn after a chooser, not in the first turn before one.

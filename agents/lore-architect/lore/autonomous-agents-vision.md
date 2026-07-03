@@ -25,6 +25,8 @@ Parked exploration. Substrate findings (tools, APIs, protocols) captured separat
 
 **Concrete first step taken (v10):** `/lr:spawn-teammate` uses Claude Code's Agent Teams feature as the initial multi-agent substrate. The user framing: "I'll use that command for some time and check how it fits our needs." The custom tmux/iTerm2 substrate is parked but remains valid if Agent Teams proves insufficient. See `spawn-teammate-feature.md` and `autonomous-agents-substrate.md`.
 
+**First inbound-signal step (v18):** the `lr-wait` primitive gives a running agent an *inbound* channel — it blocks on an event and resumes when an external actor (cron / CI / webhook / human, via `lr-emit`) drops a text-carrying event file. This is the concrete first piece of the **communication model** (external → agent, the direction that didn't exist before) and the **always-on** shape: an agent can now pause mid-task and be woken with new instructions or data, rather than only ever running to a stop. See `wait-primitive-feature.md`.
+
 Likely to compose well with:
 - **Workdir-as-reference-library** (parked) — autonomous agents will accumulate workdir artifacts heavily. See `workdir-as-reference-library.md`.
 - **Attach pattern** (v4+) — sustained co-work across agents is even more valuable when agents are long-lived. See `attach-pattern.md`.
@@ -43,6 +45,7 @@ Likely to compose well with:
 - `lr-dev-direction.md` — sibling major direction (active exploration). Same **Dark Factory (DF)** end state; lr-dev is the *SDLC-activity* axis (what autonomous agents do in software development), this topic is the *process/substrate* axis (always-on background workers). The DF north star is named here jointly with lr-dev.
 - `df-per-repo-backbone.md` — the per-repo `<repo>-df` backbone the Dark Factory runs on; the storage/state layer this autonomous-substrate direction will eventually accrete run/task state onto (the parked "above-file layers").
 - `autonomous-agents-substrate.md` — concrete substrate findings (tmux, iTerm2 Python API, Claude Code hooks, escape sequences, switchboard daemon, security boundaries)
+- `wait-primitive-feature.md` — the v18 `lr-wait` primitive; the first concrete inbound-signal step of this direction
 - `workdir-as-reference-library.md` — another parked exploration; composes with this direction
 - `attach-pattern.md` — current cross-agent collaboration mechanism that autonomous mode will need to extend
 - `framework-improvements-backlog.md` — running backlog where this direction is tracked
