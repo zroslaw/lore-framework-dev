@@ -33,6 +33,9 @@ Gated behind `LR_LIFECYCLE=1` (real API cost, ~$0.10–1.35 per scenario on sonn
 
 - Tests 14 and 15 are specced in the catalog but not implemented.
 - Not yet run: a full pass on `opus`, to complete the three-model baseline before either port session starts.
+- **Codex**: `run_engine()` has no codex branch yet. A manual smoke test outside the suite (2026-07-03) already got a first PASS on the boot happy-path — see `codex-cli-plugin-loading-findings.md`. Next step is wiring an actual `codex` branch (incl. the one-time marketplace/plugin-install setup codex needs, unlike Claude Code's per-invocation `--plugin-dir`) and running the full `test_boot.py` suite against it.
+- **Cursor**: blocked before any scenario could run — an account-level usage-limit quota, not a tooling problem. See `cursor-agent-cli-probe-findings.md`.
+- Manual engine probes done outside the harness should be backgrounded and polled, not foreground-run with a hard kill timeout — see `headless-cli-smoke-testing-discipline.md` (the lesson that produced this note).
 
 ## Why this has value now, not just at port time
 
@@ -45,3 +48,5 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `execution-testing-catches-blind-ambiguity.md` — the general principle: prose ambiguity invisible to a strong model only surfaces via execution testing.
 - `multi-engine-portability-direction.md` — the anchor topic this harness serves (Phase 0.5).
 - `parallel-reviewer-fanout-pattern.md` — the model-review pre-ship discipline this complements with empirical regression testing.
+- `codex-cli-plugin-loading-findings.md`, `cursor-agent-cli-probe-findings.md` — first empirical per-engine probes, ahead of wiring either into `run_engine()`.
+- `headless-cli-smoke-testing-discipline.md` — how to run manual engine probes without a hard-kill timeout destroying the evidence.

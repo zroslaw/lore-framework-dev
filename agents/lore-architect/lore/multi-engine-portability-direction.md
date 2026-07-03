@@ -19,8 +19,8 @@ The knowledge substrate itself — agent repos, `lore-repo.md`, `role.md`, `lore
 
 ## Per-engine specifics (detail lives in the drafts)
 
-- **Codex** — default sandbox denies network by default, which directly threatens the freshness contracts (auto-pull, finalize push, workspace-sync are all network operations). Mitigated by the framework's existing degraded-mode design, but needs explicit setup documentation. Subagents are explicit-request-only (no declarative agent files) — merge fan-out likely needs a `codex exec`-based script fallback if prose-triggered subagent requests prove unreliable. See `workdir/draft-port-codex.md`.
-- **Cursor** — the best-equipped target of the two. `disable-model-invocation: true` in skill frontmatter gives exact slash-command semantics for lifecycle skills. Declarative `.cursor/agents/*.md` subagent definitions map onto the merge-in-booted-subagents pattern *more cleanly* than Claude Code's own prompt-assembled general-purpose subagent — flagged as a possible back-port candidate once validated. One real risk to verify before advertising Cursor's parallel-agent support: Cursor auto-manages its own git worktrees for parallel agents, which may interact with the framework's existing worktree convention (`worktrees-convention.md`) in ways that aren't yet checked. See `workdir/draft-port-cursor.md`.
+- **Codex** — default sandbox denies network by default, which directly threatens the freshness contracts (auto-pull, finalize push, workspace-sync are all network operations). Mitigated by the framework's existing degraded-mode design, but needs explicit setup documentation. Subagents are explicit-request-only (no declarative agent files) — merge fan-out likely needs a `codex exec`-based script fallback if prose-triggered subagent requests prove unreliable. Plugin loading is a persistent local install (`codex plugin marketplace add` + `codex plugin add`), not a per-invocation flag — unlike Claude Code and Cursor, both of which take `--plugin-dir`. First empirical probe (2026-07-03) confirmed the marketplace.json parses natively with zero adaptation and got a first PASS on a boot-happy-path smoke test outside the harness. See `workdir/draft-port-codex.md`, `codex-cli-plugin-loading-findings.md`.
+- **Cursor** — on paper the best-equipped target of the two. `disable-model-invocation: true` in skill frontmatter gives exact slash-command semantics for lifecycle skills. Declarative `.cursor/agents/*.md` subagent definitions map onto the merge-in-booted-subagents pattern *more cleanly* than Claude Code's own prompt-assembled general-purpose subagent — flagged as a possible back-port candidate once validated. One real risk to verify before advertising Cursor's parallel-agent support: Cursor auto-manages its own git worktrees for parallel agents, which may interact with the framework's existing worktree convention (`worktrees-convention.md`) in ways that aren't yet checked. First probe (2026-07-03) confirmed `--plugin-dir` parity and healthy login, but hit an account-level Cursor usage-limit block before any scenario could run — parked until quota resets, not a tooling problem. See `workdir/draft-port-cursor.md`, `cursor-agent-cli-probe-findings.md`.
 
 ## Dominant shared risk
 
@@ -34,7 +34,7 @@ Every surveyed competitor is bound to one engine (Claude Code) or to a vendor-ho
 
 ## Status
 
-Parked vision with two full workdir drafts, not yet started. Each port is intended as its own dedicated design session. See `workdir/draft-port-codex.md`, `workdir/draft-port-cursor.md`.
+Parked vision with two full workdir drafts; each port is intended as its own dedicated design session. First empirical probes have begun ahead of that (2026-07-03): codex got a real boot-happy-path PASS (`codex-cli-plugin-loading-findings.md`), cursor is blocked on an account usage-limit quota before any scenario could run (`cursor-agent-cli-probe-findings.md`). See `workdir/draft-port-codex.md`, `workdir/draft-port-cursor.md`.
 
 Phase 0.5 — the shared automated testing pipeline designed in a third companion draft (2026-07-03), `workdir/draft-testing-pipeline.md` — is now **built and real**, not just designed: one engine-neutral scenario catalog (fixture + prompt + assertions per scenario) run headless per engine via thin drivers, graded pass-rates as the fidelity scorecard, built on Claude Code first as the baseline. It mechanizes the Phase-3 "model-fidelity report" both port drafts call for. 19 of 21 Tier-1 scenarios pass on Claude Code. See `lifecycle-testing-harness.md` for the implementation; `workdir/draft-testing-pipeline.md` remains the original design doc.
 
@@ -50,6 +50,8 @@ The harness's first real use already found two genuine doc-fidelity bugs in `age
 - `wait-primitive-feature.md` — the MCP-based primitive that ports with no redesign, evidence for "packaging not redesign."
 - `framework-scope-vs-agent-scope.md` — the layer-ownership test the `docs/engines/` adapter lever will need to pass.
 - `worktrees-convention.md` — the Cursor auto-worktree interplay flagged to verify.
+- `codex-cli-plugin-loading-findings.md`, `cursor-agent-cli-probe-findings.md` — the first empirical per-engine probes.
+- `headless-cli-smoke-testing-discipline.md` — the operational lesson those probes produced (don't hard-kill a headless CLI run).
 - `skill-doc-pattern.md` — what the thin-pointer skill/doc packaging maps onto per engine.
 - `plugin-mcp-server-convention.md` — the MCP registration convention that ports unchanged.
 - `framework-improvements-backlog.md` § Architecture-Review Follow-Ups — the simplification/subtraction theme this direction's fidelity report feeds.
