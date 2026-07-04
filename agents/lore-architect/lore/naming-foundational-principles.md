@@ -52,6 +52,7 @@ This rule composes with:
 ## See Also
 
 - `team-shared-knowledge-principle.md` — the topic born from this lesson; the canonical example
+- `haiku-ambiguity-detector.md` — a later principle named per this meta-rule (surfaced by a concrete harness result rather than a missing-topic gap)
 - `system-design-principles.md` — where new named principles get indexed
 - `lore-topic-format.md` — mechanics of topic structure
 - `framework-scope-vs-agent-scope.md` — another principle that crystallized only when named

@@ -17,9 +17,13 @@ Full case study, fixes, and the debugging technique that pinpointed both (tracin
 
 This is why the lifecycle testing harness has standing value **before** either engine port ships, not just as a port-readiness gate — it's a live doc-fidelity check on Claude Code's own procedures. It is now the second, empirical leg of pre-ship review discipline: for any release that changes a procedure doc the harness covers, run the relevant lifecycle scenarios against real engine execution (ideally at more than one model tier) before shipping, in addition to — not instead of — multi-lens prose review. See `role.md` § Lore-Curation Disciplines.
 
+## The weak-model sharpening
+
+The execution-fidelity leg of this principle has a named, sharper form: **the weakest available model (haiku) is an *ambiguity detector*.** Where it stumbles, the doc is usually under-specified — a stronger model silently resolves the gap. The operative bar is therefore not "works on sonnet" but "explanatory enough that even haiku executes it faithfully," which doubles as a port-readiness bar (non-Claude engines are also not top-tier). See `haiku-ambiguity-detector.md` for the principle, its concrete instance (the defer-clarity fix), and the generalizable "put reassurance adjacent to the alarming message" rule.
+
 ## Diagnostic
 
-When a procedure doc has been reviewed multiple times and still ships with an execution bug, don't conclude review failed — conclude the bug was in the blind spot review structurally can't see. The fix isn't a fourth review round; it's running the doc through an actual weaker/different-model execution and watching what it does.
+When a procedure doc has been reviewed multiple times and still ships with an execution bug, don't conclude review failed — conclude the bug was in the blind spot review structurally can't see. The fix isn't a fourth review round; it's running the doc through an actual weaker/different-model execution and watching what it does. A failure on haiku that passes on sonnet is a pointer to the exact sentence to fix, not a reason to dismiss the run.
 
 ## See Also
 
@@ -27,4 +31,5 @@ When a procedure doc has been reviewed multiple times and still ships with an ex
 - `lifecycle-testing-harness.md` — the tool that operationalizes execution testing.
 - `multi-engine-portability-direction.md` — the "framework is prose executed by the model" risk this is direct first-hand evidence for.
 - `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md` — the prose-review disciplines this complements, not replaces.
+- `haiku-ambiguity-detector.md` — the sharpened weak-model form of the execution-fidelity leg.
 - `naming-foundational-principles.md` — the meta-rule this topic's own existence follows.

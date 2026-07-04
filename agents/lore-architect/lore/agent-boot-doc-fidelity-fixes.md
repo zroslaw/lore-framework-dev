@@ -20,8 +20,13 @@ Before fixes: haiku boot pass rate was roughly 50% across the 3 original boot sc
 
 When a lifecycle scenario fails, don't just read the final text output — rerun manually with `--output-format stream-json --verbose` piped through a small Python filter that prints each `tool_use` block. That's what pinpointed both bugs precisely instead of guessing from symptoms (e.g. the permission-prompt reports).
 
+## A third, later instance (defer-clarity)
+
+A subsequent harness run (2026-07-04, haiku) surfaced a third `agent-boot.md` fidelity issue of the same shape: haiku conflated a *deferred* version upgrade with *boot failure*, because the alarming "cannot auto-upgrade" message sat inline while the "this isn't a failure, keep going" reassurance was buried. The fix hoists the reassurance adjacent to the alarming message (`agent-boot.md` step 3 + `version-check.md` defer points). Full write-up and the generalizable rule live in `haiku-ambiguity-detector.md`; that fix is staged, not yet applied to the real framework (`port-landing-next-steps.md`).
+
 ## See Also
 
 - `execution-testing-catches-blind-ambiguity.md` — the general principle this is a case study for.
+- `haiku-ambiguity-detector.md` — the sharpened weak-model form + the third (defer-clarity) instance.
 - `lifecycle-testing-harness.md` — the harness that found these.
 - `multi-engine-portability-direction.md` — the "framework is prose" risk this is direct evidence for.

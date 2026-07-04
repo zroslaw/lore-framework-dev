@@ -37,15 +37,22 @@ Gated behind `LR_LIFECYCLE=1` (real API cost, ~$0.10–1.35 per scenario on sonn
 - **Cursor**: blocked before any scenario could run — an account-level usage-limit quota, not a tooling problem. See `cursor-agent-cli-probe-findings.md`.
 - Manual engine probes done outside the harness should be backgrounded and polled, not foreground-run with a hard kill timeout — see `headless-cli-smoke-testing-discipline.md` (the lesson that produced this note).
 
+## Doc-change validation loop (`LR_FRAMEWORK_DIR` + `LR_TEST_MODEL`)
+
+Point `LR_FRAMEWORK_DIR` at a modified *copy* of the framework and set `LR_TEST_MODEL=haiku`; together with the canary mechanism this makes a clean "does a doc change break or clarify execution?" loop — no new test code needed. This is how the framework-root port and defer-clarity fixes were validated (2026-07-04): the `<framework-root>` self-location conversion ran **18/19 first pass on haiku**, with every subagent fan-out scenario passing, and a `stream-json` trace confirmed haiku resolved the root by Reading the `VERSION` file rather than leaning on env-var expansion. See `framework-root-self-location-validated.md`. Running at the **haiku tier deliberately** is what turns the harness into an ambiguity detector — see `haiku-ambiguity-detector.md`.
+
 ## Why this has value now, not just at port time
 
-The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but its first real use (see `agent-boot-doc-fidelity-fixes.md`) found two genuine bugs in `agent-boot.md` on Claude Code itself — before either port started. It's a live doc-fidelity check on Claude Code's own procedures, not just a port-readiness gate. See `execution-testing-catches-blind-ambiguity.md` for the general principle this demonstrates, and `role.md` § Responsibilities / Lore-Curation Disciplines for the operating discipline it now backs.
+The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but its first real use (see `agent-boot-doc-fidelity-fixes.md`) found two genuine bugs in `agent-boot.md` on Claude Code itself — before either port started, and a later run surfaced a third (the defer-clarity issue in `haiku-ambiguity-detector.md`). It's a live doc-fidelity check on Claude Code's own procedures, not just a port-readiness gate. See `execution-testing-catches-blind-ambiguity.md` for the general principle this demonstrates, and `role.md` § Responsibilities / Lore-Curation Disciplines for the operating discipline it now backs.
 
 ## See Also
 
 - `workdir/draft-testing-pipeline.md` — the original design doc; scenario catalog, sequencing, open questions. Don't duplicate here.
 - `agent-boot-doc-fidelity-fixes.md` — the concrete bugs this harness found on its very first real use.
 - `execution-testing-catches-blind-ambiguity.md` — the general principle: prose ambiguity invisible to a strong model only surfaces via execution testing.
+- `haiku-ambiguity-detector.md` — why running at the haiku tier is the point, not a caveat; the defer-clarity fix this harness surfaced.
+- `framework-root-self-location-validated.md` — the `<framework-root>` port change set validated via the `LR_FRAMEWORK_DIR` loop.
+- `port-landing-next-steps.md` — the staged change sets awaiting application to the real framework.
 - `multi-engine-portability-direction.md` — the anchor topic this harness serves (Phase 0.5).
 - `parallel-reviewer-fanout-pattern.md` — the model-review pre-ship discipline this complements with empirical regression testing.
 - `codex-cli-plugin-loading-findings.md`, `cursor-agent-cli-probe-findings.md` — first empirical per-engine probes, ahead of wiring either into `run_engine()`.

@@ -13,7 +13,7 @@ The knowledge substrate itself — agent repos, `lore-repo.md`, `role.md`, `lore
 ## Architectural levers (apply to both ports, and to Claude Code doc hygiene now)
 
 - **`docs/engines/` adapter convention** — one file per engine declaring exactly five bindings: skill-invocation syntax, how to spawn a subagent (or "inline fallback"), how to bound a command's runtime, the memory-file target, and framework-root resolution. Procedure docs stop hardcoding Claude-specific phrases ("your Bash tool's timeout parameter," "spawn a `general-purpose` subagent") and reference the adapter instead. This is a **now-visible category of Claude-Code-specific leakage in otherwise-portable prose**, worth fixing even before any port ships, purely for doc hygiene — roughly 10-15 sites found by grep.
-- **`<framework-root>`** replaces `${CLAUDE_PLUGIN_ROOT}` as the doc-level term; each engine adapter binds it to whatever that engine calls its equivalent (Claude: the plugin install path; Codex/Cursor: the skill-tree checkout location).
+- **`<framework-root>`** replaces `${CLAUDE_PLUGIN_ROOT}` as the doc-level term; each engine adapter binds it to whatever that engine calls its equivalent (Claude: the plugin install path; Codex/Cursor: the skill-tree checkout location). **Empirically validated on Claude/haiku (2026-07-04)** via self-location ("the directory containing the `VERSION` file," resolved by a one-line rule at the top of each `SKILL.md`) — 18/19 lifecycle first pass, subagent fan-out clean, `stream-json` trace confirming haiku resolved the root by Reading `VERSION` rather than leaning on env-var expansion. This is the biggest single coupling (~55% of hits) and now the most de-risked. See `framework-root-self-location-validated.md`, `claude-coupling-inventory-and-port-tiers.md`.
 - **AGENTS.md becomes the canonical `/lr:init` target** (all three engines read it); CLAUDE.md compatibility for Claude Code decided per-session, likely a thin pointer.
 - **Explicit Tier 1 / Tier 2 split** — Tier 1 portable core: boot, recall, consult, reflect, merge, summarize, finalize, check, update, workspace-sync, list-*, create-*, init, pull-lore. Tier 2 Claude-first: attach (verify per-engine before promising), spawn-teammate, wait, df-*, register-repo shortcuts. Agent Teams, the Workflow primitive (DF/ULA), and hooks stay Claude-only for now — no redesign attempted there.
 
@@ -34,7 +34,14 @@ Every surveyed competitor is bound to one engine (Claude Code) or to a vendor-ho
 
 ## Status
 
-Parked vision with two full workdir drafts; each port is intended as its own dedicated design session. First empirical probes have begun ahead of that (2026-07-03): codex got a real boot-happy-path PASS (`codex-cli-plugin-loading-findings.md`), cursor is blocked on an account usage-limit quota before any scenario could run (`cursor-agent-cli-probe-findings.md`). See `workdir/draft-port-codex.md`, `workdir/draft-port-cursor.md`.
+Two full workdir drafts; each port is intended as its own dedicated design session. First empirical probes began 2026-07-03 (codex: real boot-happy-path PASS, `codex-cli-plugin-loading-findings.md`; cursor: blocked on an account usage-limit quota, `cursor-agent-cli-probe-findings.md`). Then 2026-07-04 the first mechanical port work was **built and validated on Claude/haiku but staged, not applied** to the live plugin (deliberate — land the whole port as one reviewed change set):
+
+- **Coupling inventory + tiering complete** — the full "real list" (5 adapter bindings; Tier A/B/C) exists in `claude-coupling-inventory-and-port-tiers.md` (durable summary) and `workdir/claude-specific-inventory.md` (full per-site).
+- **Two change sets staged in an isolated copy** (`LR_FRAMEWORK_DIR`): framework-root-full (`${CLAUDE_PLUGIN_ROOT}` → `<framework-root>`, validated — `framework-root-self-location-validated.md`) and an orthogonal defer-clarity robustness fix (`haiku-ambiguity-detector.md`). Neither touches the real `lore-framework` yet.
+- **Next dedicated session = the subagent-adapter pass** (the Tier B nucleus: `docs/engines/` spawn binding + `CLAUDE.md`→`AGENTS.md` with `test_18_init` updated in lockstep), then apply everything to the real framework and run the full suite against it. Concrete resume point: `port-landing-next-steps.md`.
+- **Manual trial guides in workdir**: `workdir/first-steps-codex.md` (verified) and `workdir/first-steps-cursor.md` (should-work, unconfirmed — quota-blocked).
+
+See `workdir/draft-port-codex.md`, `workdir/draft-port-cursor.md`, `port-landing-next-steps.md`.
 
 Phase 0.5 — the shared automated testing pipeline designed in a third companion draft (2026-07-03), `workdir/draft-testing-pipeline.md` — is now **built and real**, not just designed: one engine-neutral scenario catalog (fixture + prompt + assertions per scenario) run headless per engine via thin drivers, graded pass-rates as the fidelity scorecard, built on Claude Code first as the baseline. It mechanizes the Phase-3 "model-fidelity report" both port drafts call for. 19 of 21 Tier-1 scenarios pass on Claude Code. See `lifecycle-testing-harness.md` for the implementation; `workdir/draft-testing-pipeline.md` remains the original design doc.
 
@@ -45,7 +52,10 @@ The harness's first real use already found two genuine doc-fidelity bugs in `age
 - `workdir/draft-port-codex.md`, `workdir/draft-port-cursor.md` — the phased per-engine plans; this topic is the anchor, not a restatement.
 - `workdir/draft-testing-pipeline.md` — the shared multi-engine testing pipeline (Phase 0.5) original design doc; scenario catalog + per-engine drivers + fidelity scorecard.
 - `lifecycle-testing-harness.md` — the built implementation of Phase 0.5, its coverage, and cost/gating.
-- `agent-boot-doc-fidelity-fixes.md`, `execution-testing-catches-blind-ambiguity.md` — the harness's first real find and the general principle behind it.
+- `agent-boot-doc-fidelity-fixes.md`, `execution-testing-catches-blind-ambiguity.md`, `haiku-ambiguity-detector.md` — the harness's real finds and the general/weak-model principles behind them.
+- `claude-coupling-inventory-and-port-tiers.md` — the full coupling inventory + Tier A/B/C map.
+- `framework-root-self-location-validated.md` — the biggest Tier A slice, validated on Claude/haiku.
+- `port-landing-next-steps.md` — the staged change sets and the next subagent-adapter session plan.
 - `similar-projects-landscape.md` — the competitive survey this direction's positioning case rests on.
 - `wait-primitive-feature.md` — the MCP-based primitive that ports with no redesign, evidence for "packaging not redesign."
 - `framework-scope-vs-agent-scope.md` — the layer-ownership test the `docs/engines/` adapter lever will need to pass.
