@@ -17,6 +17,16 @@ Items are grouped by area. Each has a one-line what + why + rough trigger or sta
 
 ## Finalization / Autopush
 
+- **Codex lifecycle-fidelity hardening** — the first real Codex session exposed
+  lossy-compaction state loss, interrupted finalize, inline merge, dependency
+  races, inconsistent network escalation, and test blind spots. Prioritize
+  transcript-backed state recovery, a Codex adapter, explicit sequencing,
+  checkpointed/resumable finalize, deterministic Phase 4, and trace-level
+  lifecycle tests. Automatically disable auto-compaction when an engine
+  supports it; otherwise recommend disabling it for long Lore sessions, but do
+  not treat that as the correctness mechanism. See
+  `codex-first-real-session-lifecycle-findings.md` and the detailed local note
+  `workdir/codex-first-session-audit.md`.
 - **Audit log of pushed summaries** — since the user no longer sees summaries pre-commit, a local audit trail (e.g., a `sessions-index.md` at the host repo root, appended to on each finalize) could help spot issues faster than browsing git history. Trigger: user reports missing a problematic summary.
 - **Per-session opt-in gate flag** — `/lr:finalize --review` that restores the old approval flow for sensitive sessions. Cheap to add. Trigger: user asks for it at least twice.
 - **Narrative-safety linter** — lightweight check on composed summary text before write (secrets regex, etc.). Adds machinery; currently relying on agent judgment per v9 design. Defer unless a real privacy incident occurs.

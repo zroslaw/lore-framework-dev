@@ -13,7 +13,15 @@ Introduced in framework v4 alongside `/lr:consult`. See `consult-pattern.md` for
 - **Host-wins on conflicts.** When guest lore contradicts host lore, host governs. Guest perspective is visible and informs judgment, but the host's identity and rules stay stable — no silent harmonization.
 - **No token-budget cap.** Each guest's `lore-context.md` can be up to 50K. Multiple guests visibly shrink the host's working budget. Cost is the user's responsibility, not a framework check.
 - **Version reconcile in a subagent.** If the guest repo's `version` differs from framework `VERSION`, attach dispatches a subagent to execute `docs/version-check.md` scoped to the guest repo. Subagent absorbs migration tool output and returns only a compact report + release notes text. Host relays release notes to the user. Reuses existing version-check machinery — no parallel migration pipeline.
-- **State in conversation, not disk.** The `/lr:attach` confirmation message is the record. No session-state file. Host enumerates active agents from conversation history on every operation (recall, reflect, merge).
+- **Current state is conversation-only, which is not compaction-safe.** The
+  `/lr:attach` confirmation message is currently the sole record; the host
+  enumerates active agents from conversation history on every operation
+  (recall, reflect, merge). The first real Codex session proved this is unsafe
+  on engines with lossy compaction: a successful attachment disappeared from
+  compacted history and was repeated. Future engine adapters should recover a
+  normalized lifecycle-state capsule from the raw transcript; disabling
+  auto-compaction, where supported, is only a secondary mitigation. See
+  `codex-first-real-session-lifecycle-findings.md`.
 - **No detach in v1.** Once attached, stays attached through the session and participates in finalization. Avoids edge cases around partial-session participation. Can be revisited later if needed.
 - **Workdir writes default to host's.** Guest workdirs are readable via domain visibility; writes during the session go to host's workdir unless clearly guest material. Ownership resolves at reflection time.
 
@@ -45,5 +53,7 @@ Escalation path: if a consult reveals deeper engagement is needed, `/lr:attach <
 - `consult-pattern.md` — the one-shot sibling
 - `lore-search-pattern.md` — search brief structure and fan-out mechanics
 - `finalization-process.md` — per-agent iteration in reflect/merge
+- `codex-first-real-session-lifecycle-findings.md` — real compaction failure and
+  transcript-backed state direction
 - `skill-doc-pattern.md` — thin-skill + detailed-doc convention followed here
 - `versioning-release-types.md` — why v4 is release-notes-only (additive feature, no migration needed)

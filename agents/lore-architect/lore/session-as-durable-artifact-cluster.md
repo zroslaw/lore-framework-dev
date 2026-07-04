@@ -13,6 +13,15 @@ Four backlog entries landed in the 2026-06-05 session, none coincidental — the
 
 **Session-shaped state today is volatile** — only the *summary* is durable, and only at finalize time. Each entry takes a different volatile aspect (the upgrade-just-applied, the boot-context-just-loaded, the in-flight conversation, the raw transcript) and asks "what if this were durable?"
 
+The first real Codex session turned this from an archival concern into a
+correctness concern: compaction removed a successful guest attachment from the
+model-visible history while the raw JSONL retained it. Transcript-backed
+lifecycle recovery should therefore extract a small normalized state capsule
+for active agents and finalize checkpoints. This is distinct from committing a
+full transcript archive: raw logs remain local by default, and automatically
+disabling auto-compaction is only a risk-reduction measure. See
+`codex-first-real-session-lifecycle-findings.md`.
+
 ## How they compose
 
 - **Suspend (#3) and JSONL-archive (#4) are tightly coupled.** The suspend doc could be a thin pointer at the JSONL plus prose highlights, rather than a hand-composed seed. Solving #4 reshapes #3.
@@ -33,4 +42,6 @@ The pattern is emergent from the backlog, not driving any current ship. Promote 
 - `autonomous-agents-vision.md` — the autonomous sibling family.
 - `session-summaries-feature.md` — current state of session durability (composed summary at finalize only).
 - `jsonl-session-files-investigation.md` — prior work on the raw-transcript side; starting point for #4.
+- `codex-first-real-session-lifecycle-findings.md` — real compaction failure and
+  the engine-neutral state-capsule direction.
 - `parked-design-preservation-pattern.md` — methodology for capturing #1's design without shipping (the drill itself was a session output).
