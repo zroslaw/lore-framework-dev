@@ -9,6 +9,19 @@ The detailed evidence is preserved in
 `workdir/codex-first-session-audit.md`. This topic keeps the durable
 architectural conclusions and work order.
 
+> **Update (2026-07-05) — several gaps now closed by the validated `docs/engines/` build.** A
+> later end-to-end Codex run with the engine-profile binding in place **resolved the
+> merge-execution-contract gap**: merge ran in a native `spawn_agent` worker (not inline), because
+> the `docs/engines/codex.md` subagent-spawn binding instructed the spawn — the earlier inline merge
+> was an *un-instructed* model, not an absent capability, and Codex in fact has a native multi-agent
+> subsystem (`codex-native-multi-agent-subsystem.md`). Work-order item 2 (Codex adapter bindings for
+> subagents / runtime bounds / memory files / invocation syntax) is likewise **built and validated**
+> — see `docs-engines-convention.md`, `codex-port-validated-end-to-end.md`. Still open from the list
+> below: transcript-backed lifecycle-state recovery (compaction), atomic/resumable finalize,
+> explicit sequencing barriers, the network/sandbox escalation policy, and the automated harness
+> driver with trace-level assertions. The `.git`-sandbox block is now a named constraint
+> (`codex-git-sandbox-blocks-dotgit.md`).
+
 ## Confirmed gaps
 
 - **Compaction changed lifecycle state.** Codex's compacted replacement history
@@ -80,3 +93,7 @@ transcript source to the same normalized representation.
 - `lifecycle-testing-harness.md` — current engine and assertion coverage
 - `session-as-durable-artifact-cluster.md` — transcript and session durability
 - `session-summaries-feature.md` — existing compaction-sensitive finalization
+- `docs-engines-convention.md` — the engine-profile build that closed the subagent/binding gaps
+- `codex-port-validated-end-to-end.md` — the later run where merge ran in a spawned worker
+- `codex-native-multi-agent-subsystem.md` — Codex's native subagent tools
+- `codex-git-sandbox-blocks-dotgit.md` — the named `.git`-write sandbox constraint

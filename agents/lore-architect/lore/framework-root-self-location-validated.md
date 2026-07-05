@@ -16,6 +16,10 @@ The Phase-0 lever for multi-engine portability — replacing the Claude-only `${
 - Verbose (`stream-json`) trace proved **self-location, not env-var crutch**: haiku read `<framework-root>/docs/agent-boot.md` at the real copy path and **Read the `VERSION` file to anchor the root** — exactly what the wording pointed to. Clean proof: `${CLAUDE_PLUGIN_ROOT}` only auto-expands when that literal token appears in a path; the converted files never contain it, so the Read tool never received it — haiku *had* to reason out the resolution, and did.
 - The only run-time regression seen was a *separate* doc-clarity issue (see `haiku-ambiguity-detector.md`), not a framework-root failure.
 
+## Also validated on real Codex (2026-07-05)
+
+Independently re-confirmed on the second engine: in the `lore-framework-codex` end-to-end run, Boot Step-0 self-located `<framework-root>` and the whole lifecycle executed with **zero `${CLAUDE_PLUGIN_ROOT}` leak** — on Codex the env var is genuinely empty (not just avoided), so self-location was the only path that could work, and it did. Two engines, two model families now agree. See `codex-port-validated-end-to-end.md`, `docs-engines-convention.md`.
+
 ## Operational guidance
 
 - Mechanical scale: `${CLAUDE_PLUGIN_ROOT}` was 103 sites (~55% of all Claude coupling — see `claude-coupling-inventory-and-port-tiers.md`) but is the *easiest* coupling to neutralize. 41 files swapped + self-location line into 22 `SKILL.md`.
@@ -27,4 +31,5 @@ The Phase-0 lever for multi-engine portability — replacing the Claude-only `${
 - `lifecycle-testing-harness.md` — the harness that validated this (via `LR_FRAMEWORK_DIR` + `LR_TEST_MODEL=haiku`).
 - `claude-coupling-inventory-and-port-tiers.md` — the full coupling inventory this framework-root work is the biggest slice of.
 - `haiku-ambiguity-detector.md` — the separate doc-clarity regression the same run surfaced.
+- `docs-engines-convention.md`, `codex-port-validated-end-to-end.md` — the Codex re-validation of this binding.
 - `port-landing-next-steps.md` — the staged-but-unapplied change set and how it lands.

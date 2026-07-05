@@ -46,6 +46,8 @@ This is the framework's third instance of graduated-verification-confidence (aft
 
 **Teammate-conventions anchored at boot.** `agent-boot.md` Step 5 detects spawned-teammate context (`ps -o args= -p $PPID` looking for `--agent-id`); on detection, loads `docs/teammate-conventions.md` and instructs the agent to keep it as standing context preferred over conflicting later instructions. `conventions.md` § Teammate Discipline is the maintainer-facing pointer index — single canonical source for each side (teammate-side rules in `teammate-conventions.md`; lead-side redirect protocol in `spawn-teammate.md` § Lead behavior); other sites that mention these are pointers, not restatements.
 
+**Codex sandbox note.** In Codex, the `ps -o args= -p $PPID` probe is blocked with `operation not permitted`, so the boot procedure must treat teammate detection as unavailable and fall back to a non-teammate host session.
+
 **Why no subagent-definition mode** — Agent Teams docs confirm `skills` and `mcpServers` fields of a subagent definition are NOT applied to teammates. Using natural-language spawn directives (verbatim name+prompt) is the correct path for now. If this changes in a future Agent Teams version, subagent-definition mode would be preferable (more explicit, type-checked) — track.
 
 **Invocation layer** — the skill composes a single natural-language directive to Agent Teams asking it to create-or-extend the team with exact names and verbatim spawn prompts. Agent Teams owns the spawn lifecycle; the skill does not poll afterward.

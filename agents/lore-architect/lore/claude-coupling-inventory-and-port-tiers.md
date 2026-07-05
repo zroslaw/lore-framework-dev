@@ -19,12 +19,13 @@ Tier A = mechanical find/replace or near-it. Tier B = semantic binding where mod
 
 ## The load-bearing insight
 
-The whole port surface is **5 adapter bindings** (framework-root, subagent-spawn, runtime-bounding, memory-file, invocation-syntax — the same five listed in `multi-engine-portability-direction.md` § Architectural levers). The *count* is dominated by Tier A mechanical work (framework-root alone ≈55% of hits) plus **one hard Tier B nucleus: subagent spawning.** That nucleus is where model fidelity actually lives (the ~96-line merge fan-out in `process-merge.md`) and it's not a find-replace — Claude fires N parallel Agent calls, Codex is explicit-request-only, Cursor uses declarative `.cursor/agents/`.
+The whole port surface is **5 adapter bindings** (framework-root, subagent-spawn, runtime-bounding, memory-file, invocation-syntax — the same five listed in `multi-engine-portability-direction.md` § Architectural levers). The *count* is dominated by Tier A mechanical work (framework-root alone ≈55% of hits) plus **one hard Tier B nucleus: subagent spawning.** That nucleus is where model fidelity actually lives (the ~96-line merge fan-out in `process-merge.md`) and it's not a find-replace — Claude fires N parallel Agent calls; Codex spawns via **native in-session `spawn_agent`** tools (ad-hoc, inline message + `agent_type` — a first-class multi-agent subsystem, *not* the "no native subagents" earlier read; see `codex-native-multi-agent-subsystem.md`); Cursor uses declarative `.cursor/agents/`. The `docs/engines/` layer binds each (see `docs-engines-convention.md`).
 
 ## De-risking already done
 
 - **Framework-root (Tier A): validated** — see `framework-root-self-location-validated.md`.
-- **Subagent path-substitution: validated on haiku** — the fan-out docs embed `<framework-root>/docs/agent-boot.md` inside the subagent brief and haiku correctly substitutes the resolved absolute path. So the *path* half of Tier B is fine; the remaining Tier B work is purely the **spawn-mechanism binding** (`docs/engines/`).
+- **Subagent path-substitution: validated on haiku** — the fan-out docs embed `<framework-root>/docs/agent-boot.md` inside the subagent brief and haiku correctly substitutes the resolved absolute path. So the *path* half of Tier B is fine.
+- **Subagent spawn-mechanism binding (the hard half): validated end-to-end on Codex (2026-07-05)** — the `docs/engines/codex.md` subagent-spawn binding drove native `spawn_agent` fan-out for both recall and merge (host-reads-steps override) on real `codex exec`, ground-truthed in rollout logs. The Tier B nucleus is therefore no longer purely open — it is *built and proven* on Codex; what's open is folding that binding back into the canonical framework and doing the equivalent for Cursor. See `docs-engines-convention.md`, `codex-port-validated-end-to-end.md`.
 
 ## Entanglement found
 
@@ -34,6 +35,9 @@ The whole port surface is **5 adapter bindings** (framework-root, subagent-spawn
 
 - `multi-engine-portability-direction.md` — the anchor direction; § Architectural levers names the same five bindings.
 - `framework-root-self-location-validated.md` — the biggest Tier A slice, already validated.
+- `docs-engines-convention.md` — the implemented five-binding adapter layer.
+- `codex-native-multi-agent-subsystem.md` — the Codex spawn mechanism the Tier-B binding targets.
+- `codex-port-validated-end-to-end.md` — the Tier-B nucleus proven end-to-end on Codex.
 - `port-landing-next-steps.md` — how the tiered work lands across the next sessions.
 - `workdir/claude-specific-inventory.md` — the full per-site inventory.
 - `workdir/draft-port-codex.md`, `workdir/draft-port-cursor.md` — the per-engine phased plans the tiering feeds.

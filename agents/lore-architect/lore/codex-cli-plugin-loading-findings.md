@@ -29,6 +29,22 @@ installed plugin's doc file directly (`find`/`sed` against
 improvisation, not a resolved binding. Don't count on this generalizing; it's exactly the kind of
 ambiguity the `docs/engines/` adapter lever is meant to remove.
 
+> **Resolved (2026-07-05).** The `docs/engines/` framework-root binding + Boot Step-0 self-location
+> now closes this deterministically — validated end-to-end on real Codex with **zero
+> `${CLAUDE_PLUGIN_ROOT}` leak**. See `docs-engines-convention.md`,
+> `framework-root-self-location-validated.md`, `codex-port-validated-end-to-end.md`.
+
+## Skill invocation falls through to shell
+
+Inside `codex exec`, `/lr:recall` is not dispatched as a lore skill. It is treated as a shell
+command and fails, so the slash-command layer is not reliably active in this engine path.
+
+Operational fallback on Codex is to read `docs/<skill>.md` directly and scan the relevant lore
+topics manually. That preserves the knowledge-layer behavior even when the invocation layer is
+not wired up — and this is exactly what the `docs/engines/codex.md` **invocation-syntax binding**
+now codifies ("skills invoked by reading `docs/<skill>.md` directly when agent-initiated"). See
+`docs-engines-convention.md`.
+
 ## CLI quirks for the harness driver
 
 - `codex exec` always reads stdin, appending it as a `<stdin>` block even when the prompt is
@@ -59,3 +75,7 @@ marketplace/plugin-install setup) and run the full `test_boot.py` suite (6 scena
 - `lifecycle-testing-harness.md` — the harness these findings feed into once wired.
 - `cursor-agent-cli-probe-findings.md` — the sibling probe for the other port target.
 - `headless-cli-smoke-testing-discipline.md` — the general debugging lesson from this session.
+- `docs-engines-convention.md` — the engine-profile layer that resolves the framework-root and invocation-syntax gaps above.
+- `codex-port-validated-end-to-end.md` — the later full-lifecycle Codex validation these probes led to.
+- `codex-native-multi-agent-subsystem.md` — Codex's native subagent tools (found after these early probes).
+- `codex-testing-methodology.md` — the rollout-log ground-truthing method built on top of these CLI recipes.

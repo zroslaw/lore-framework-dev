@@ -33,7 +33,7 @@ Gated behind `LR_LIFECYCLE=1` (real API cost, ~$0.10–1.35 per scenario on sonn
 
 - Tests 14 and 15 are specced in the catalog but not implemented.
 - Not yet run: a full pass on `opus`, to complete the three-model baseline before either port session starts.
-- **Codex**: `run_engine()` has no codex branch yet. A manual smoke test outside the suite (2026-07-03) already got a first PASS on the boot happy-path — see `codex-cli-plugin-loading-findings.md`. Next step is wiring an actual `codex` branch (incl. the one-time marketplace/plugin-install setup codex needs, unlike Claude Code's per-invocation `--plugin-dir`) and running the full `test_boot.py` suite against it.
+- **Codex**: `run_engine()` still has no codex branch. But the framework has now been **manually validated end-to-end on real Codex** (2026-07-05) — the full boot→recall→merge lifecycle, including native `spawn_agent` fan-out, via the `docs/engines/` build; see `codex-port-validated-end-to-end.md`. The ground-truthing method (rollout-log verification of spawn claims, not model self-report) is in `codex-testing-methodology.md`. Wiring an automated `codex` branch (incl. the one-time marketplace/plugin-install setup codex needs, unlike Claude Code's per-invocation `--plugin-dir`, and rollout-log spawn assertions) so this is in the suite rather than manual is still open — see `port-landing-next-steps.md`.
 - **Cursor**: blocked before any scenario could run — an account-level usage-limit quota, not a tooling problem. See `cursor-agent-cli-probe-findings.md`.
 - Manual engine probes done outside the harness should be backgrounded and polled, not foreground-run with a hard kill timeout — see `headless-cli-smoke-testing-discipline.md` (the lesson that produced this note).
 
@@ -56,4 +56,5 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `multi-engine-portability-direction.md` — the anchor topic this harness serves (Phase 0.5).
 - `parallel-reviewer-fanout-pattern.md` — the model-review pre-ship discipline this complements with empirical regression testing.
 - `codex-cli-plugin-loading-findings.md`, `cursor-agent-cli-probe-findings.md` — first empirical per-engine probes, ahead of wiring either into `run_engine()`.
+- `codex-port-validated-end-to-end.md`, `codex-testing-methodology.md` — the manual end-to-end Codex validation and its rollout-log ground-truthing (what the automated codex driver must replicate).
 - `headless-cli-smoke-testing-discipline.md` — how to run manual engine probes without a hard-kill timeout destroying the evidence.
