@@ -1,8 +1,8 @@
 # Codex Sandbox Blocks `.git/` Writes
 
 Operational finding, Codex `workspace-write` sandbox (`codex exec --full-auto`), 2026-07-05. This
-is the **sole remaining gap** in the otherwise end-to-end-validated Codex port (see
-`codex-port-validated-end-to-end.md`).
+is a launch/configuration requirement around the otherwise end-to-end-validated Codex port (see
+`codex-port-validated-end-to-end.md`), not a behavior the plugin can change itself.
 
 Even with the repo inside the writable cwd, Codex **blocks writes under `.git/`**:
 `Operation not permitted` on `.git/index.lock`, `.git/FETCH_HEAD`, etc. Consequences for the
@@ -12,14 +12,15 @@ framework:
 - **finalize's commit** and any framework `git commit` / `git pull` cannot run under the default
   sandbox.
 
-Handling (documented in `docs/engines/codex.md` — see `docs-engines-convention.md`): to allow git,
-run Codex with `.git` writable (`--sandbox danger-full-access` for a trusted local run, or add
-`.git` to `sandbox_workspace_write.writable_roots`); otherwise leave the merged changes
-**uncommitted for the user to commit by hand**, and report it as a sandbox gate — **not** a merge
-failure. Merge work completes on disk regardless.
+Product decision (documented in `docs/engines/codex.md` — see `docs-engines-convention.md`):
+Lore's supported Codex finalization path requires `.git` to be writable. Run a trusted local
+session with `--sandbox danger-full-access`, or add the repository's `.git` directory to
+`sandbox_workspace_write.writable_roots`. The plugin cannot widen the sandbox, so this permission
+must come from Codex launch/configuration.
 
-Open question for the port: whether interactive Codex (with approvals) lets git through more
-gracefully than headless `--full-auto`. Untested.
+The default sandbox can still let reflect and merge write lore files before blocking commit.
+Treat that state as a degraded fallback, not the intended handoff and not a merge failure. Manual
+user commit is recovery from the sandbox gate, not a co-equal supported finalization path.
 
 ## See Also
 

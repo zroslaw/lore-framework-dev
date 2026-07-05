@@ -108,6 +108,11 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   tree. The hard Tier-B subagent nucleus is proven, not feared; Codex has a **native in-session
   multi-agent subsystem** (`spawn_agent`/`wait_agent`, `multi_agent_v1`). Trust rests on
   ground-truthing tool use in Codex's rollout logs, not model self-report. The
+  supported Codex finalization path requires `.git` writable through launch/configuration; the
+  default sandbox can leave reflect/merge output on disk but block commit, which is a degraded
+  fallback rather than a merge failure. Codex per-agent shortcuts use personal skills
+  (`~/.codex/skills/lr-<agent>-agent/SKILL.md`, `$lr-<agent>-agent`), but register/unregister/list
+  support remains an explicit implementation gap until lifecycle-tested. The
   `lore-framework-codex` staging sibling is now superseded and deletable. **The Cursor engine
   profile SHIPPED in v20** (canonical `lore-framework`, commit `5cbb967`, manifests `1.20.0`,
   `release-notes/20.md`): `docs/engines/cursor.md`, Boot Step-0 detection for `cursor-agent` /
@@ -118,8 +123,8 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   (`19/19`) before landing. The separate `lore-framework-cursor/` sibling is now superseded and
   deletable. Matching lifecycle-harness support in `lore-framework-dev/tests/` remains a separate
   dev-repo change outside finalize's `agents/` commit scope. Remaining deferred Claude-first
-  surfaces: `lr-wait` `.mcp.json`, DF/AIQA + `migrations/*`, codex automated harness driver,
-  Codex `.git` sandbox policy, and any stronger Cursor-native parallel story. The dominant
+  surfaces: `lr-wait` `.mcp.json`, DF/AIQA + `migrations/*`, Codex automated harness driver,
+  Codex shortcut lifecycle validation, and any stronger Cursor-native parallel story. The dominant
   "framework is prose" risk is empirically retired for the Codex path and materially reduced for
   Cursor's implemented Tier-1 path. Anchor: `multi-engine-portability-direction.md`; see
   `docs-engines-convention.md`, `codex-port-validated-end-to-end.md`,

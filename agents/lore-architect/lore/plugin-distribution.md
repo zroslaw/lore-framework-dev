@@ -1,4 +1,5 @@
-The `lr` plugin is distributed via a self-hosted Claude Code marketplace on GitHub.
+The `lr` plugin is distributed from its GitHub repository through marketplace metadata that both
+Claude Code and Codex consume.
 
 ## Marketplace setup
 
@@ -27,12 +28,27 @@ Critical details:
 - `source` must be `"./"` not `"."` — the trailing slash is required
 - `version`, `repository`, `license` are required in the plugin entry (not just top-level)
 
-## Installation (user)
+## Claude Code installation
 
 ```
 /plugin marketplace add zroslaw/lore-framework
 /plugin install lr@lore-framework
 ```
+
+## Codex installation
+
+Codex uses a persistent plugin install rather than a per-invocation plugin directory:
+
+```bash
+codex plugin marketplace add zroslaw/lore-framework
+codex plugin add lr@lore-framework
+```
+
+The repository README is also an agent-facing install contract: when a user gives Codex the repo
+URL and asks it to install Lore, Codex should run these commands itself, request only necessary
+permissions, and ask the user to restart Codex. A local checkout path can replace the GitHub
+marketplace identifier. See `codex-cli-plugin-loading-findings.md`; updating an existing local
+source install is covered by `codex-local-plugin-update.md`.
 
 ## Local development
 

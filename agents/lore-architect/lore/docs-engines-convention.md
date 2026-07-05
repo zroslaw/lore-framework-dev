@@ -53,6 +53,13 @@ well as a native-fan-out one — "engine profile" does not imply parallel subage
 - **Capability gate:** the boot-time `ps -o args= -p $PPID` teammate probe is sandbox-blocked
   (`operation not permitted`) → degrade to host-session assumption. `.git/`-writes are also
   sandbox-blocked (see `codex-git-sandbox-blocks-dotgit.md`).
+- **Finalization contract:** the supported path requires `.git` writable through Codex
+  launch/configuration. The default sandbox may let reflect/merge land before commit is blocked;
+  that is a degraded fallback, not a merge failure or the intended handoff.
+- **Per-agent shortcut shape:** personal skills under
+  `~/.codex/skills/lr-<agent-name>-agent/SKILL.md`, invoked as `$lr-<agent-name>-agent`. The
+  register/unregister/list implementation remains unvalidated until lifecycle-tested; see
+  `slash-command-system.md`.
 
 ## Where it lives
 

@@ -20,6 +20,17 @@ First hands-on investigation of `codex` (0.142.5) as a port target, ahead of the
   (incl. `boot`) under the installed path. Concrete evidence for the "packaging, not redesign"
   framing in `multi-engine-portability-direction.md`.
 
+## Repo-driven onboarding contract
+
+Codex onboarding is agent-driven. If a user gives Codex the Lore Framework repository URL and
+asks it to install, the agent reads the repository README, runs
+`codex plugin marketplace add zroslaw/lore-framework` followed by
+`codex plugin add lr@lore-framework`, requests only permissions the commands actually need, and
+asks the user to restart Codex after installation. For a local checkout, use its path instead of
+the GitHub marketplace identifier. The README must keep this contract short and easy for an agent
+to discover; the user should not have to execute a manual setup guide. See
+`plugin-distribution.md`.
+
 ## Confirmed gap: `${CLAUDE_PLUGIN_ROOT}`
 
 `printf '%s' "$CLAUDE_PLUGIN_ROOT"` returns empty inside a codex exec run — confirms the
@@ -80,3 +91,4 @@ marketplace/plugin-install setup) and run the full `test_boot.py` suite (6 scena
 - `codex-native-multi-agent-subsystem.md` — Codex's native subagent tools (found after these early probes).
 - `codex-testing-methodology.md` — the rollout-log ground-truthing method built on top of these CLI recipes.
 - `codex-local-plugin-update.md` — how to update a **local-source** marketplace install to a new plugin version (remove + re-add; `upgrade` is Git-only).
+- `plugin-distribution.md` — the cross-engine installation entry point and repo-driven Codex contract.

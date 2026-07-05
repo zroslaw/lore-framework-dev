@@ -20,11 +20,13 @@ into canonical `lore-framework` as v19** (commit `72b1b2a`; see `port-landing-ne
   override working exactly as designed. On disk: 5 lore topics updated, 1 new topic created,
   `reflections/` cleaned up. Merge lore quality was good.
 
-## The one gap
+## Observed environment gate
 
 `git commit` blocked by Codex's `.git`-sandbox (see `codex-git-sandbox-blocks-dotgit.md`). This is
 **not** a design fault: merge *work* completed on disk; only the commit couldn't run under the
-default sandbox. Handling is a documented sandbox gate, not a merge failure.
+default sandbox. The supported product path now requires `.git` writable through Codex
+launch/configuration; default-sandbox output that stops before commit is a degraded fallback, not
+a merge failure.
 
 ## Why this is trustworthy
 
@@ -39,7 +41,7 @@ profile's subagent-spawn instruction fixed it.) Full methodology in `codex-testi
 
 - `docs-engines-convention.md` — the build that this validates.
 - `codex-native-multi-agent-subsystem.md` — the `spawn_agent` mechanism proven here.
-- `codex-git-sandbox-blocks-dotgit.md` — the sole remaining gap.
+- `codex-git-sandbox-blocks-dotgit.md` — the observed gate and supported finalization contract.
 - `codex-testing-methodology.md` — the rollout-log ground-truthing that made this credible.
 - `framework-root-self-location-validated.md` — the framework-root binding, now also codex-proven.
 - `claude-coupling-inventory-and-port-tiers.md` — the Tier-B nucleus this closes empirically.
