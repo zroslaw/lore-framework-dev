@@ -1,4 +1,4 @@
-# The `docs/engines/` Engine-Profile Convention — Shipped in v19
+# The `docs/engines/` Engine-Profile Convention — Shipped in v19, Extended in v20
 
 The multi-engine port's adapter layer is **shipped in canonical `lore-framework` as v19** (commit
 `72b1b2a`) — folded in from the `lore-framework-codex` sibling build where it was first built and
@@ -8,10 +8,10 @@ concrete realization of the "`docs/engines/` adapter" lever named in
 
 ## Shape
 
-- One profile per engine: canonical v19 ships `docs/engines/claude.md` (reference) +
-  `docs/engines/codex.md`; a validated local near-landing Cursor build adds `docs/engines/cursor.md`.
-  Every profile fills the **same five bindings** — framework-root, invocation-syntax,
-  subagent-spawn, memory-file, runtime-bounding — plus capability gates. Only the values differ.
+- One profile per engine: canonical v20 ships `docs/engines/claude.md` (reference),
+  `docs/engines/codex.md`, and `docs/engines/cursor.md`. Every profile fills the **same five
+  bindings** — framework-root, invocation-syntax, subagent-spawn, memory-file, runtime-bounding —
+  plus capability gates. Only the values differ.
 - **Boot Step-0** (new, top of `agent-boot.md`): (1) resolve `<framework-root>` by self-location
   (the dir containing `VERSION`); (2) infer the engine — strongest signal first: non-empty
   `${CLAUDE_PLUGIN_ROOT}` → claude; else `~/.codex/` present or root under it → codex; else
@@ -21,9 +21,10 @@ concrete realization of the "`docs/engines/` adapter" lever named in
   site (merge/recall/lore-search/consult) carries a one-line "Engine note" pointing at the
   profile's subagent-spawn override. Low churn, and the override wins at execution time.
 
-## Cursor status (validated locally, not yet landed)
+## Cursor binding values (`docs/engines/cursor.md`)
 
-The local near-landing Cursor build validated a third profile:
+The third profile is now **shipped in canonical `lore-framework` as v20** (commit `5cbb967`,
+manifests `1.20.0`). The local sibling build proved the shape before landing:
 
 - **framework-root:** self-location, `${CLAUDE_PLUGIN_ROOT}` empty
 - **invocation-syntax:** slash skills work under `cursor-agent --plugin-dir`
@@ -55,13 +56,13 @@ well as a native-fan-out one — "engine profile" does not imply parallel subage
 
 ## Where it lives
 
-Canonical `lore-framework/docs/engines/{claude,codex}.md` shipped in v19. The Codex profile was
-first built in the `lore-framework-codex` sibling build (no git remote) — now **superseded and
-deletable**, its work folded into canonical v19. The Cursor profile currently lives in a separate
-local near-landing build (`lore-framework-cursor/`), validated but not yet landed. Design record:
-workdir `codex-binding-design.md`. Still deferred (carry `${CLAUDE_PLUGIN_ROOT}`, out of core
-scope): `.mcp.json` / lr-wait, `migrations/*`, `df`/`aiqa` — see `port-landing-next-steps.md`
-§ Remaining follow-ups.
+Canonical `lore-framework/docs/engines/{claude,codex}.md` shipped in v19; `cursor.md` joined them
+in v20. The Codex profile was first built in the `lore-framework-codex` sibling build (no git
+remote) — now **superseded and deletable**, its work folded into canonical v19. The Cursor
+profile followed the same pattern: first validated in `lore-framework-cursor/`, now **superseded
+and deletable** after the v20 landing. Design record: workdir `codex-binding-design.md`. Still
+deferred (carry `${CLAUDE_PLUGIN_ROOT}`, out of core scope): `.mcp.json` / lr-wait,
+`migrations/*`, `df`/`aiqa` — see `port-landing-next-steps.md` § Remaining follow-ups.
 
 ## See Also
 
@@ -72,4 +73,4 @@ scope): `.mcp.json` / lr-wait, `migrations/*`, `df`/`aiqa` — see `port-landing
 - `codex-git-sandbox-blocks-dotgit.md` — the `.git`-write capability gate.
 - `framework-root-self-location-validated.md` — the framework-root binding, validated separately.
 - `claude-coupling-inventory-and-port-tiers.md` — the five bindings as the whole port surface.
-- `port-landing-next-steps.md` — landing this build onto the real `lore-framework`.
+- `port-landing-next-steps.md` — the landing record and remaining Claude-first follow-ups.

@@ -57,7 +57,7 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` (currently **19** — shipped & pushed) is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. See `versioning-release-types.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
+`lore-framework/VERSION` (currently **20** — shipped & pushed) is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. See `versioning-release-types.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
 
 ## Consistency & Diagnostics
 
@@ -108,46 +108,50 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   tree. The hard Tier-B subagent nucleus is proven, not feared; Codex has a **native in-session
   multi-agent subsystem** (`spawn_agent`/`wait_agent`, `multi_agent_v1`). Trust rests on
   ground-truthing tool use in Codex's rollout logs, not model self-report. The
-  `lore-framework-codex` staging sibling is now superseded and deletable. **Cursor is now
-  validated locally as a near-landing build**: separate `lore-framework-cursor/`, explicit
-  `docs/engines/cursor.md`, strong Step-0 detection via the parent `cursor-agent` process, and a
-  conservative **serial host-side** profile rather than an unverified native fan-out claim. That
-  smaller claim was enough for the real local Cursor installation to pass the full implemented
-  lifecycle catalog (`19/19`) through the harness. Remaining work is landing discipline (copy the
-  validated diff into canonical `lore-framework/`, carry the harness changes in
-  `lore-framework-dev/`, cut release notes) plus the still-deferred Claude-first surfaces:
-  `lr-wait` `.mcp.json`, DF/AIQA + `migrations/*`, codex automated harness driver, and Codex
-  `.git` sandbox policy. The dominant "framework is prose" risk is empirically retired for the
-  Codex path and materially reduced for Cursor's implemented Tier-1 path. Anchor:
-  `multi-engine-portability-direction.md`; see `docs-engines-convention.md`,
-  `codex-port-validated-end-to-end.md`, `cursor-port-validated-end-to-end.md`,
-  `cursor-cli-and-harness-operational-notes.md`, `landing-via-working-tree-diff.md`,
-  `codex-native-multi-agent-subsystem.md`, `codex-git-sandbox-blocks-dotgit.md`,
-  `codex-testing-methodology.md`, `framework-root-self-location-validated.md`,
-  `claude-coupling-inventory-and-port-tiers.md`, `lifecycle-testing-harness.md`,
-  `codex-cli-plugin-loading-findings.md`, `codex-local-plugin-update.md`,
-  `cursor-agent-cli-probe-findings.md`, `headless-cli-smoke-testing-discipline.md`,
-  `haiku-ambiguity-detector.md`, and `similar-projects-landscape.md` (the positioning case — no
-  surveyed competitor federates knowledge across different coding engines).
+  `lore-framework-codex` staging sibling is now superseded and deletable. **The Cursor engine
+  profile SHIPPED in v20** (canonical `lore-framework`, commit `5cbb967`, manifests `1.20.0`,
+  `release-notes/20.md`): `docs/engines/cursor.md`, Boot Step-0 detection for `cursor-agent` /
+  `~/.cursor`, and Cursor engine notes in `docs/attach.md`, `docs/init.md`, and
+  `docs/resolve-conflicts.md`. The shipped Cursor profile stays intentionally conservative: a
+  **serial host-side** override rather than an unverified native fan-out claim. That smaller claim
+  was enough for the real local Cursor installation to pass the full implemented lifecycle catalog
+  (`19/19`) before landing. The separate `lore-framework-cursor/` sibling is now superseded and
+  deletable. Matching lifecycle-harness support in `lore-framework-dev/tests/` remains a separate
+  dev-repo change outside finalize's `agents/` commit scope. Remaining deferred Claude-first
+  surfaces: `lr-wait` `.mcp.json`, DF/AIQA + `migrations/*`, codex automated harness driver,
+  Codex `.git` sandbox policy, and any stronger Cursor-native parallel story. The dominant
+  "framework is prose" risk is empirically retired for the Codex path and materially reduced for
+  Cursor's implemented Tier-1 path. Anchor: `multi-engine-portability-direction.md`; see
+  `docs-engines-convention.md`, `codex-port-validated-end-to-end.md`,
+  `cursor-port-validated-end-to-end.md`, `cursor-cli-and-harness-operational-notes.md`,
+  `landing-via-working-tree-diff.md`, `codex-native-multi-agent-subsystem.md`,
+  `codex-git-sandbox-blocks-dotgit.md`, `codex-testing-methodology.md`,
+  `framework-root-self-location-validated.md`, `claude-coupling-inventory-and-port-tiers.md`,
+  `lifecycle-testing-harness.md`, `codex-cli-plugin-loading-findings.md`,
+  `codex-local-plugin-update.md`, `cursor-agent-cli-probe-findings.md`,
+  `headless-cli-smoke-testing-discipline.md`, `haiku-ambiguity-detector.md`, and
+  `similar-projects-landscape.md` (the positioning case — no surveyed competitor federates
+  knowledge across different coding engines).
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** review item — active follow-ups from the 2026-06-13 architecture review; see `framework-improvements-backlog.md`. That review's settled dispositions (incl. DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in `architecture-review-dispositions.md`. A newer 2026-07-02 review added two further backlog items (post-merge diff verification, recall-time staleness surfacing) — see `framework-improvements-backlog.md` § Merge Quality, § Search / Scaling.
 - Parked: workdir-as-reference-library; vector-DB search (until >100 topics/agent); the session-as-durable-artifact cluster (boot auto-push, boot-context cache, suspend/resume, JSONL archive). All in `framework-improvements-backlog.md`.
 
 ## Current State
 
-Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 19 — shipped &
-pushed**; public at github.com/zroslaw/lore-framework), **`lore-framework-dev/`** (this repo —
-framework-dev agents; a workspace-root sibling at github.com/zroslaw/lore-framework-dev), and
+Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 20 — shipped &
+  pushed**; public at github.com/zroslaw/lore-framework), **`lore-framework-dev/`** (this repo —
+  framework-dev agents; a workspace-root sibling at github.com/zroslaw/lore-framework-dev), and
 **`lore-agents/`** (personal agents: tax-advisor, masschallenge-judge). The multi-engine port that
 was staged in the no-remote **`lore-framework-codex/`** sibling landed in canonical v19 — that
-sibling is now **superseded and deletable** (see `port-landing-next-steps.md`). There is now also
-a separate local near-landing **`lore-framework-cursor/`** sibling: validated on the real local
-Cursor engine, not yet landed into canonical. The plugin bundles its first MCP server (`lr-wait`,
-v18) and carries its first `python3` dependency; v19 shipped the Codex port (`docs/engines/`,
-`<framework-root>` self-location) + three style skills. Dev-only tests live here in
-`lore-framework-dev/tests/`, not in the plugin — including the multi-engine lifecycle testing
-harness (`tests/lifecycle/`, 19/21 Tier-1 scenarios on Claude Code, 19/19 implemented scenarios on
-the local Cursor run, and 6/6 boot on haiku against v19, gated behind `LR_LIFECYCLE=1`; see
-`lifecycle-testing-harness.md`). ~103 lore topics.
+sibling is now **superseded and deletable** (see `port-landing-next-steps.md`). The separate
+**`lore-framework-cursor/`** sibling likewise landed in canonical v20 and is now **superseded and
+deletable**. The plugin bundles its first MCP server (`lr-wait`, v18) and carries its first
+`python3` dependency; v19 shipped the Codex port (`docs/engines/`, `<framework-root>`
+self-location) and three style skills, and v20 shipped the Cursor engine profile. Dev-only tests
+live here in `lore-framework-dev/tests/`, not in the plugin — including the multi-engine lifecycle
+testing harness (`tests/lifecycle/`, 19/21 Tier-1 scenarios on Claude Code, 19/19 implemented
+scenarios on the real local Cursor run that fed the v20 ship, and 6/6 boot on haiku against v19,
+gated behind `LR_LIFECYCLE=1`; see `lifecycle-testing-harness.md`). Matching harness changes are a
+separate dev-repo concern outside finalize's `agents/` commit scope. ~103 lore topics.
 
 ## Running Backlog
 

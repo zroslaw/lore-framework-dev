@@ -1,9 +1,13 @@
-# Port Landing — Landed in v19 (retrospective + remaining follow-ups)
+# Port Landing — Codex in v19, Cursor in v20
 
-The multi-engine (Codex) port **landed in canonical `lore-framework` as v19** (commit `72b1b2a`,
-manifests `1.19.0`, pushed 2026-07-05). The "next dedicated session" landing plan this topic used to
-hold is **done**. What follows is the completion record plus the follow-ups that remain
-Claude-first. Anchor: `multi-engine-portability-direction.md`.
+The multi-engine port is now landed in canonical `lore-framework` across two ships:
+
+- **v19** — Codex port (commit `72b1b2a`, manifests `1.19.0`)
+- **v20** — Cursor engine profile (commit `5cbb967`, manifests `1.20.0`)
+
+The "next dedicated session" landing plan this topic used to hold is **done**. What follows is
+the completion record plus the follow-ups that remain Claude-first. Anchor:
+`multi-engine-portability-direction.md`.
 
 ## What landed in v19
 
@@ -19,6 +23,16 @@ Claude-first. Anchor: `multi-engine-portability-direction.md`.
 - **Style skills** — `/lr:plain-language`, `/lr:dialogue`, `/lr:follow-me` rode along, as planned
   (deliberately pulled out of v18). See `style-skills.md`.
 - `auto-pull.md` timeout prose got a one-line Engine note (runtime-bounding), not a rewrite.
+
+## What landed in v20
+
+- **Cursor engine profile** — `docs/engines/cursor.md` joined the canonical plugin after local
+  validation proved the conservative serial host-side profile was sufficient.
+- **Boot Step-0 Cursor detection** — `docs/agent-boot.md` now detects `cursor-agent` /
+  `~/.cursor` explicitly.
+- **Cursor engine notes at the relevant call sites** — `docs/attach.md`, `docs/init.md`, and
+  `docs/resolve-conflicts.md`.
+- **Versioning ceremony** — `release-notes/20.md`, `VERSION` = `20`, plugin manifests = `1.20.0`.
 
 ## Validation on the shipping artifact
 
@@ -47,13 +61,15 @@ These are deliberate deferred scope documented in `release-notes/19.md`, not reg
    `codex-cli-plugin-loading-findings.md`. Local-install update procedure: `codex-local-plugin-update.md`.
 4. **Decide the `.git`-sandbox commit handling** for Codex finalize (run with `.git` writable, or
    document the uncommitted-hand-off gate) — see `codex-git-sandbox-blocks-dotgit.md`.
-5. **Cursor** — `--plugin-dir` parity confirmed but quota-blocked, unvalidated end-to-end. See
-   `cursor-agent-cli-probe-findings.md`.
+5. **Cursor parallelism/worktree interplay** — the shipped v20 profile is intentionally
+   conservative and serial. Any stronger Cursor-native subagent story still needs validation,
+   especially against Cursor's own git-worktree behavior. See
+   `cursor-port-validated-end-to-end.md`, `worktrees-convention.md`.
 
 ## Artifacts produced during the port (in workdir)
 
 - `workdir/first-steps-codex.md` (verified) / `workdir/first-steps-cursor.md` (should-work,
-  unconfirmed) — manual trial guides per engine.
+  original manual recipe) — manual trial guides per engine.
 - `workdir/claude-specific-inventory.md` — the full coupling inventory behind
   `claude-coupling-inventory-and-port-tiers.md`.
 - `workdir/codex-binding-design.md` — the engine-profile design record.
@@ -63,6 +79,7 @@ These are deliberate deferred scope documented in `release-notes/19.md`, not reg
 - `multi-engine-portability-direction.md` — the anchor direction, now marked shipped.
 - `docs-engines-convention.md` — the engine-profile layer, folded into canonical v19.
 - `codex-port-validated-end-to-end.md` — the end-to-end Codex validation.
+- `cursor-port-validated-end-to-end.md` — the local validation that fed the canonical v20 landing.
 - `landing-via-working-tree-diff.md` — the technique that folded the sibling build in.
 - `framework-root-self-location-validated.md`, `haiku-ambiguity-detector.md` — the two Claude-side
   change sets, now applied.

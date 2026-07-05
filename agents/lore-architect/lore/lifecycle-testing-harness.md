@@ -13,8 +13,9 @@ file per scenario group: `test_boot.py`, `test_recall.py`, `test_finalize.py`,
 § Scenario catalog v1) are implemented. They pass on:
 
 - **Claude Code** — the baseline engine, per the draft's Phase 0.5 sequencing
-- **Cursor** — the real local engine, using the validated near-landing `lore-framework-cursor/`
-  build and `cursor-agent -p`
+- **Cursor** — the real local engine, first validated against the pre-ship
+  `lore-framework-cursor/` build and now corresponding to canonical `lore-framework` v20;
+  driven via `cursor-agent -p`
 
 Deliberately deferred:
 - **#14 concurrent-finalize collision** — needs a two-clone push-race script.
@@ -53,10 +54,11 @@ Gated behind `LR_LIFECYCLE=1` (real API cost, ~$0.10–1.35 per scenario on sonn
   rather than manual is still open — see `port-landing-next-steps.md`.
 - **Cursor**: the earlier quota-blocked state is now superseded. A local `cursor` branch was added
   to `run_engine()` and the full implemented scenario catalog passed on the real local engine
-  (`19/19`) against the separate `lore-framework-cursor/` build. Important operational note: the
-  harness code lives under `tests/`, outside finalize's `agents/` commit scope, so harness changes
-  still require their own manual commit after a finalize run. See
-  `cursor-port-validated-end-to-end.md`, `cursor-cli-and-harness-operational-notes.md`.
+  (`19/19`) against the pre-ship `lore-framework-cursor/` build that later landed as canonical
+  `lore-framework` v20. Important operational note: the harness code lives under `tests/`,
+  outside finalize's `agents/` commit scope, so harness changes still require their own manual
+  commit after a finalize run. See `cursor-port-validated-end-to-end.md`,
+  `cursor-cli-and-harness-operational-notes.md`.
 - Manual engine probes done outside the harness should be backgrounded and polled, not foreground-run with a hard kill timeout — see `headless-cli-smoke-testing-discipline.md` (the lesson that produced this note).
 
 ## Doc-change validation loop (`LR_FRAMEWORK_DIR` + `LR_TEST_MODEL`)
@@ -74,7 +76,8 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `execution-testing-catches-blind-ambiguity.md` — the general principle: prose ambiguity invisible to a strong model only surfaces via execution testing.
 - `haiku-ambiguity-detector.md` — why running at the haiku tier is the point, not a caveat; the defer-clarity fix this harness surfaced.
 - `framework-root-self-location-validated.md` — the `<framework-root>` port change set validated via the `LR_FRAMEWORK_DIR` loop.
-- `port-landing-next-steps.md` — the staged change sets awaiting application to the real framework.
+- `port-landing-next-steps.md` — the landing record plus the remaining follow-ups not yet folded
+  into the automated suite.
 - `multi-engine-portability-direction.md` — the anchor topic this harness serves (Phase 0.5).
 - `parallel-reviewer-fanout-pattern.md` — the model-review pre-ship discipline this complements with empirical regression testing.
 - `codex-cli-plugin-loading-findings.md`, `cursor-agent-cli-probe-findings.md` — first empirical

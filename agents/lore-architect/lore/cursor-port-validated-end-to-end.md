@@ -1,8 +1,10 @@
-# Cursor Port Validated End-to-End (local near-landing build)
+# Cursor Port Validated End-to-End and Landed in Canonical v20
 
-The Cursor port is now validated end-to-end on the real local engine, not just drafted.
+The Cursor port is no longer just a validated sibling build. The conservative Cursor profile was
+validated locally first, then landed in canonical `lore-framework` as **v20** on 2026-07-05
+(commit `5cbb967`, manifests `1.20.0`).
 
-Validated shape (2026-07-05):
+Validated shape before landing:
 
 - separate local build at `lore-framework-cursor/`
 - explicit `docs/engines/cursor.md`
@@ -11,7 +13,7 @@ Validated shape (2026-07-05):
 - Cursor uses a conservative **serial host-side** override for the fan-out paths instead of
   claiming an unverified native subagent mechanism
 
-The important result is that this conservative profile is already enough for the currently
+The important result is that this conservative profile was already enough for the currently
 implemented Tier-1 lifecycle surface. The full implemented lifecycle catalog passed on the real
 local Cursor installation:
 
@@ -20,7 +22,7 @@ local Cursor installation:
 - `19/19` lifecycle scenarios green through the harness
 
 Operational conclusion: for Cursor v1, prefer a **small, explicit engine-profile diff** over a
-"native-feeling" redesign. The verified near-landing framework diff is only:
+"native-feeling" redesign. The shipped framework diff is still only:
 
 - `docs/engines/cursor.md` (new)
 - `docs/agent-boot.md`
@@ -28,15 +30,22 @@ Operational conclusion: for Cursor v1, prefer a **small, explicit engine-profile
 - `docs/init.md`
 - `docs/resolve-conflicts.md`
 
-Landing state after validation:
+What landed in canonical v20:
 
-- the separate build is suitable as a near-landing artifact
-- remaining work is landing discipline: copy validated docs into canonical `lore-framework/`,
-  carry the harness updates in `lore-framework-dev/`, add release notes, rerun Cursor against
-  canonical
+- added `docs/engines/cursor.md`
+- updated `docs/agent-boot.md` Step 0 to detect `cursor-agent` / `~/.cursor`
+- added Cursor engine notes to `docs/attach.md`, `docs/init.md`, and `docs/resolve-conflicts.md`
+- added `release-notes/20.md`
+- bumped `VERSION` to `20` and plugin manifests to `1.20.0`
+
+Shipped-state implications:
+
+- the separate `lore-framework-cursor/` build is now **superseded and deletable**
+- the matching lifecycle-harness support in `lore-framework-dev/tests/` remains a **separate
+  dev-repo change** outside finalize's `agents/` commit scope
 - still deferred on purpose: `lr-wait` / `.mcp.json`, DF / AIQA, migrations, and any stronger
   Cursor-native subagent design
 
-The key framing change is that Cursor is no longer "blocked by quota / unvalidated." It is now
-**validated locally with a conservative serial profile**, but not yet landed into the canonical
-framework repo.
+The key framing change is that Cursor is no longer "blocked by quota / unvalidated" or
+"validated locally but not yet landed." It is now **shipped in canonical `lore-framework` with the
+same conservative serial profile that passed local validation**.
