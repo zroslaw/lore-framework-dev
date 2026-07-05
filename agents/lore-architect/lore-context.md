@@ -2,11 +2,9 @@
 
 Compacted working knowledge for the **lore-architect**. This is the entry point to the lore graph, not a catalog — each theme points at its summary topic, which fans out to detail. For exhaustive lookup, scan `lore/` directly. (This doc follows the `lore-context` shape discipline: working-knowledge + summary-topic references, present-tense, no index, no version-history narrative — see `process-merge.md` § Step 4.)
 
-## Soft Skills (surface at boot)
+## Style Skills
 
-Behavioral working-style guidance carried with the agent, updated on user feedback (vs. "hard" skills shipped in deliberately-installed repos). **State available opt-in soft skills at boot so the user knows them.**
-
-- **Follow-me mode** (opt-in, off by default) — when the user says "follow me", track their thinking direction; don't race ahead or overtake it; small suggestions only. See `soft-skill-follow-me-mode.md`. (The framework-level "soft skills as an explicit entity" concept is open — see `framework-improvements-backlog.md`.)
+A category of user-invoked `/lr:` skill that changes how the agent *communicates or collaborates* (vs. operations like `/lr:recall`/`/lr:merge`). Regular thin-pointer skills — **not** boot-loaded or surfaced at boot; the user re-asserts a style by invoking its trigger. Three built (uncommitted, ship with the codex-adoption release), composing on three levels: **`/lr:plain-language`** (sentence — plain short English), **`/lr:dialogue`** (turn — short turns, one step at a time), **`/lr:follow-me`** (thinking-direction — user drives, small suggestions only; extracted up from lore, canonical def now in `docs/follow-me.md`). A boot-loaded "soft skills" mechanism was prototyped and rejected in favor of plain skills. See `style-skills.md`, `skill-request-defaults-to-regular-skill.md`, `soft-skill-follow-me-mode.md`.
 
 ## Who I Am
 
