@@ -22,8 +22,8 @@ Independently re-confirmed on the second engine: in the `lore-framework-codex` e
 
 ## Operational guidance
 
-- Mechanical scale: `${CLAUDE_PLUGIN_ROOT}` was 103 sites (~55% of all Claude coupling — see `claude-coupling-inventory-and-port-tiers.md`) but is the *easiest* coupling to neutralize. 41 files swapped + self-location line into 22 `SKILL.md`.
-- Staged in an isolated copy; **not yet applied to the real `lore-framework`** — see `port-landing-next-steps.md`.
+- Mechanical scale: `${CLAUDE_PLUGIN_ROOT}` was 103 sites (~55% of all Claude coupling — see `claude-coupling-inventory-and-port-tiers.md`) but is the *easiest* coupling to neutralize. Swapped across `docs/` + all 26 `SKILL.md`.
+- **Applied and shipped in v19** (commit `72b1b2a`) — no longer staged. Deliberately-deferred subsystems (`.mcp.json` / lr-wait, `migrations/*`, df) still carry the token; see `port-landing-next-steps.md` § Remaining follow-ups.
 
 ## See Also
 

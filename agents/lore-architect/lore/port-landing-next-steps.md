@@ -1,68 +1,70 @@
-# Port Landing — Staged Work + Next-Session Plan
+# Port Landing — Landed in v19 (retrospective + remaining follow-ups)
 
-State as of 2026-07-05. The **subagent-adapter pass is done**: a full `docs/engines/` engine-profile binding is IMPLEMENTED in the sibling `lore-framework-codex` build and VALIDATED end-to-end on real Codex (profile selection, framework-root self-location, native `spawn_agent` fan-out for recall + merge with the host-reads-steps override). See `docs-engines-convention.md`, `codex-port-validated-end-to-end.md`. What remains is **landing** it onto the canonical `lore-framework` plus two still-staged Claude-side change sets. The real `lore-framework/` plugin is still untouched — the deliberate choice (option a) to keep the live plugin stable and land the whole port as one reviewed, tested change set holds. This is the concrete resume point for `multi-engine-portability-direction.md`.
+The multi-engine (Codex) port **landed in canonical `lore-framework` as v19** (commit `72b1b2a`,
+manifests `1.19.0`, pushed 2026-07-05). The "next dedicated session" landing plan this topic used to
+hold is **done**. What follows is the completion record plus the follow-ups that remain
+Claude-first. Anchor: `multi-engine-portability-direction.md`.
 
-## Done: the `docs/engines/` engine-profile binding (implemented + Codex-validated)
+## What landed in v19
 
-Built in the `lore-framework-codex` sibling (no git remote) and proven on real `codex exec`:
-`docs/engines/{claude,codex}.md` with all five bindings, Boot Step-0 engine selection, per-spawn-site
-"Engine note" pointers. Recall + merge fan-out ran via native `spawn_agent`; framework-root
-self-located with zero leak. Only gap = `.git`-sandbox commit block. Full shape in
-`docs-engines-convention.md`; validation in `codex-port-validated-end-to-end.md`; design record
-`workdir/codex-binding-design.md`.
+- **`docs/engines/` convention** — Boot Step-0 engine selection + `docs/engines/{claude,codex}.md`
+  profiles (five bindings each) + per-spawn-site "Engine note" pointers. Folded from the
+  `lore-framework-codex` sibling build into the real plugin via the working-tree-diff technique
+  (`landing-via-working-tree-diff.md`). Full shape: `docs-engines-convention.md`.
+- **framework-root-full** — `${CLAUDE_PLUGIN_ROOT}` → `<framework-root>` (self-location) across
+  `docs/` + all 26 `SKILL.md`. See `framework-root-self-location-validated.md`.
+- **defer-clarity fix** — authored fresh at landing (it was staged separately, never in the codex
+  build): `version-check.md` three defer points + `agent-boot.md` step 3 ("the version check never
+  aborts boot"). A genuine robustness win, orthogonal to the port. See `haiku-ambiguity-detector.md`.
+- **Style skills** — `/lr:plain-language`, `/lr:dialogue`, `/lr:follow-me` rode along, as planned
+  (deliberately pulled out of v18). See `style-skills.md`.
+- `auto-pull.md` timeout prose got a one-line Engine note (runtime-bounding), not a rewrite.
 
-## Ready to apply to the real `lore-framework` (validated on Claude/haiku)
+## Validation on the shipping artifact
 
-1. **framework-root-full** — `${CLAUDE_PLUGIN_ROOT}` → `<framework-root>` across `docs/` + `skills/` (41 files), self-location line into 22 `SKILL.md`, generic resolution paragraph in `agent-boot.md`. See `framework-root-self-location-validated.md`. (Also independently re-validated on real Codex.)
-2. **defer-clarity fix** — `agent-boot.md` step 3 + two defer points in `version-check.md`: "a deferred upgrade is NOT a boot failure, keep loading the agent." Orthogonal to the port; a genuine robustness win on its own. See `haiku-ambiguity-detector.md`.
+Boot lifecycle suite ran **6/6 on haiku against the real v19 tree** (`LR_LIFECYCLE=1
+LR_TEST_MODEL=haiku LR_FRAMEWORK_DIR=<real>`, ~$0.75). test_06 (dirty-tree upgrade gate) — the exact
+scenario that originally surfaced the defer-clarity ambiguity — now defers cleanly WITHOUT emitting a
+boot-failure sentinel, closing the loop `haiku-ambiguity-detector.md` opened. The Codex path was
+proven end-to-end on real `codex exec` earlier the same session (`codex-port-validated-end-to-end.md`).
 
-## Style skills riding along (built 2026-07-05, uncommitted)
+## The `lore-framework-codex` sibling is now superseded
 
-Three user-invoked *style* skills are built and sitting **uncommitted** in `lore-framework/`:
-`/lr:plain-language`, `/lr:follow-me` (extracted from lore — canonical def now in the framework), and
-`/lr:dialogue`. Files: `skills/{plain-language,follow-me,dialogue}/SKILL.md`,
-`docs/{plain-language,follow-me,dialogue}.md`. They are mechanically unrelated to the port, but the
-user chose to **ship them together with the codex adoption**. They were deliberately pulled out of
-v18's lr-wait release notes — so when the port version is cut, give them a release-notes entry at
-that version. `/lr:check` should pass on them (standard thin-pointer shape); the three form a
-composable set (sentence-level / turn-level / thinking-direction). Full category writeup in
-`style-skills.md`; `follow-me`'s design history stays in `soft-skill-follow-me-mode.md`.
+The no-remote sibling build was the staging ground; its port changes are now in canonical
+`lore-framework` v19. The sibling is **deletable** — nothing unique lives there (design record is in
+workdir `codex-binding-design.md`).
 
-## Next dedicated session (landing onto the canonical framework)
+## Remaining follow-ups (still Claude-first / open)
 
-The subagent-adapter *design + build* is done (in `lore-framework-codex`); the remaining work is
-consolidation onto the real plugin:
+These are deliberate deferred scope documented in `release-notes/19.md`, not regressions:
 
-1. **Fold the `docs/engines/` convention back into canonical `lore-framework`** — port the Boot Step-0
-   engine selection, the two profiles, and the per-spawn-site "Engine note" pointers from the
-   `lore-framework-codex` build. This subsumes the old subagent-spawn binding item (Tier B nucleus,
-   66 sites / 12 fan-out docs; see `claude-coupling-inventory-and-port-tiers.md`).
-2. `CLAUDE.md` → `AGENTS.md` memory-file binding — **update `test_18_init` in lockstep** (it asserts `CLAUDE.md`).
-3. Trivial timeout-prose neutralization (`auto-pull.md`, `conventions.md`).
-4. Apply framework-root-full + defer-clarity + the above to the **real** framework, run the **full
-   suite against the real framework** (not the copy), and commit (show tests before pushing).
-5. **Wire a `codex` driver into `harness.py`'s `run_engine()`** (incl. the one-time
+1. **`lr-wait` MCP** — `.mcp.json` still uses `${CLAUDE_PLUGIN_ROOT}`; port it to a Codex-aware
+   registration when the MCP-on-Codex path is exercised.
+2. **DF/AIQA module** and **`migrations/*`** — still Claude-targeted; carry `${CLAUDE_PLUGIN_ROOT}`.
+3. **Wire a `codex` driver into `harness.py`'s `run_engine()`** (incl. the one-time
    marketplace/plugin-install setup and the rollout-log-based spawn assertions) so the Codex path is
-   in the automated suite, not just manual — see `codex-testing-methodology.md`.
-6. **Decide the `.git`-sandbox commit handling** for Codex finalize (run with `.git` writable, or
+   in the *automated* suite, not just manual — see `codex-testing-methodology.md`,
+   `codex-cli-plugin-loading-findings.md`. Local-install update procedure: `codex-local-plugin-update.md`.
+4. **Decide the `.git`-sandbox commit handling** for Codex finalize (run with `.git` writable, or
    document the uncommitted-hand-off gate) — see `codex-git-sandbox-blocks-dotgit.md`.
+5. **Cursor** — `--plugin-dir` parity confirmed but quota-blocked, unvalidated end-to-end. See
+   `cursor-agent-cli-probe-findings.md`.
 
-## Also produced this session (in workdir)
+## Artifacts produced during the port (in workdir)
 
-- `workdir/first-steps-codex.md`, `workdir/first-steps-cursor.md` — manual trial guides (install + boot) for running the framework on each engine in separate sessions. Codex path is verified; Cursor is "should work, unconfirmed" (blocked on account quota — see `cursor-agent-cli-probe-findings.md`).
-- `workdir/claude-specific-inventory.md` — the full coupling inventory behind `claude-coupling-inventory-and-port-tiers.md`.
-
-## Harness note for next time
-
-`LR_FRAMEWORK_DIR` (point at a modified copy), `LR_TEST_MODEL=haiku`, and the canary mechanism together make a clean "does a doc change break/clarify execution?" loop — no new test code needed. Wiring an actual `codex` driver into `run_engine()` is still open. See `lifecycle-testing-harness.md`.
+- `workdir/first-steps-codex.md` (verified) / `workdir/first-steps-cursor.md` (should-work,
+  unconfirmed) — manual trial guides per engine.
+- `workdir/claude-specific-inventory.md` — the full coupling inventory behind
+  `claude-coupling-inventory-and-port-tiers.md`.
+- `workdir/codex-binding-design.md` — the engine-profile design record.
 
 ## See Also
 
-- `multi-engine-portability-direction.md` — the anchor direction this resumes.
-- `docs-engines-convention.md` — the implemented engine-profile layer to fold back in.
-- `codex-port-validated-end-to-end.md` — the end-to-end Codex validation that closed the subagent pass.
-- `codex-git-sandbox-blocks-dotgit.md` — the git-sandbox gate to resolve during landing.
-- `codex-testing-methodology.md` — the manual method; item 5 wires it into the automated harness.
-- `framework-root-self-location-validated.md`, `haiku-ambiguity-detector.md` — the two staged Claude-side change sets.
-- `claude-coupling-inventory-and-port-tiers.md` — the tiered work map the landing executes.
-- `lifecycle-testing-harness.md` — the harness + `LR_FRAMEWORK_DIR`/`LR_TEST_MODEL` loop.
+- `multi-engine-portability-direction.md` — the anchor direction, now marked shipped.
+- `docs-engines-convention.md` — the engine-profile layer, folded into canonical v19.
+- `codex-port-validated-end-to-end.md` — the end-to-end Codex validation.
+- `landing-via-working-tree-diff.md` — the technique that folded the sibling build in.
+- `framework-root-self-location-validated.md`, `haiku-ambiguity-detector.md` — the two Claude-side
+  change sets, now applied.
+- `codex-git-sandbox-blocks-dotgit.md`, `codex-testing-methodology.md` — the remaining open items.
+- `claude-coupling-inventory-and-port-tiers.md` — the tiered work map the landing executed.

@@ -3,8 +3,10 @@
 The ported framework (`lore-framework-codex`, the `docs/engines/` build — see
 `docs-engines-convention.md`) was run on real Codex (`codex exec`, default model `gpt-5.4-mini`,
 2026-07-05) across the full lifecycle. Result: **works** — including the hardest part (the Tier-B
-subagent-spawn nucleus), **proven not predicted**. This flips the port from "staged in a tierA
-copy" to "engine-profile binding implemented and validated."
+subagent-spawn nucleus), **proven not predicted**. This flipped the port from "staged in a tierA
+copy" to "engine-profile binding implemented and validated" — and the validated build then **shipped
+into canonical `lore-framework` as v19** (commit `72b1b2a`; see `port-landing-next-steps.md`,
+`landing-via-working-tree-diff.md`).
 
 ## Verified
 

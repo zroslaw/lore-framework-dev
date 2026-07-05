@@ -33,7 +33,7 @@ It is the **inbound** counterpart to the outbound signal hooks (`Stop` / `Notifi
 
 ## Status
 
-Built + reviewed + tested; shipped as **v18** but **not yet committed/pushed** (user holding the framework ship). Versioning classification + backfill in `versioning-release-types.md` (v18 entry: release-notes-only, cache-affecting). Conventions it established live in `plugin-mcp-server-convention.md`.
+Shipped as **v18** (commit `e7514db`, 2026-07-05; manifests `1.18.0`) — committed and pushed to `github.com/zroslaw/lore-framework`. The v18 ship staged the lr-wait files *excluding* the three style skills, which were reserved for v19 (see `versioning-release-types.md`). Versioning classification + backfill in `versioning-release-types.md` (v18 entry: release-notes-only, cache-affecting). Conventions it established live in `plugin-mcp-server-convention.md`.
 
 ## See Also
 

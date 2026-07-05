@@ -1,8 +1,9 @@
-# The `docs/engines/` Engine-Profile Convention — Implemented
+# The `docs/engines/` Engine-Profile Convention — Shipped in v19
 
-The multi-engine port's adapter layer is **built**, not just designed (in the
-`lore-framework-codex` build — see `codex-port-validated-end-to-end.md`). It is the concrete
-realization of the "`docs/engines/` adapter" lever named in
+The multi-engine port's adapter layer is **shipped in canonical `lore-framework` as v19** (commit
+`72b1b2a`) — folded in from the `lore-framework-codex` sibling build where it was first built and
+validated (see `codex-port-validated-end-to-end.md`, `landing-via-working-tree-diff.md`). It is the
+concrete realization of the "`docs/engines/` adapter" lever named in
 `multi-engine-portability-direction.md` § Architectural levers.
 
 ## Shape
@@ -37,9 +38,11 @@ realization of the "`docs/engines/` adapter" lever named in
 
 ## Where it lives
 
-The built copy is `lore-framework-codex` (workspace sibling, no git remote). Design record:
-workdir `codex-binding-design.md`. Deferred (still carry the token, out of core scope):
-`.mcp.json` / lr-wait, `migrations/*`, `df`/`aiqa`.
+Canonical `lore-framework/docs/engines/{claude,codex}.md` (shipped v19). It was first built in the
+`lore-framework-codex` sibling build (no git remote) — now **superseded and deletable**, its work
+folded into canonical v19. Design record: workdir `codex-binding-design.md`. Still deferred (carry
+`${CLAUDE_PLUGIN_ROOT}`, out of core scope): `.mcp.json` / lr-wait, `migrations/*`, `df`/`aiqa` —
+see `port-landing-next-steps.md` § Remaining follow-ups.
 
 ## See Also
 

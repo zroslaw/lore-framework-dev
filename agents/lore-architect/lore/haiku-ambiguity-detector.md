@@ -14,11 +14,11 @@ Haiku got the **hard** part right — detected the dirty ∩ migration-write-set
 
 Root cause in the doc: `version-check.md` prints an alarming deferral message (*"cannot auto-upgrade … Resolve by …"*) **inline at the defer point**, while the reassurance ("continue boot in degraded mode" / the invariant "Boot never fails on version errors") was terse or buried at the bottom. A weak model reading top-down acts on the scary message before reaching the reassurance.
 
-## The defer-clarity fix (staged, validated 3/3 on haiku)
+## The defer-clarity fix (shipped in v19, validated 3/3 on haiku)
 
 **Hoist the reassurance to be unmissable and adjacent to the alarming message.** Added to each defer point in `version-check.md`, and to `agent-boot.md` step 3, an explicit: *"A deferred upgrade is NOT a boot failure — return to agent-boot.md and finish loading the agent; do not report boot as failed."* Framing it at the boot level (agent-boot step 3: "version check never aborts boot; always proceed to step 4") makes the boot procedure's own structure pull a confused model forward.
 
-This fix is orthogonal to the port — a genuine robustness win on its own. It is **staged, not yet applied to the real framework** — see `port-landing-next-steps.md`.
+This fix is orthogonal to the port — a genuine robustness win on its own. It **shipped in v19** (commit `72b1b2a`); it was authored fresh at landing because it was staged separately from the codex build, not carried in it. Re-validated 6/6 on haiku against the real v19 tree — test_06 now defers cleanly without emitting the boot-failure sentinel. See `port-landing-next-steps.md`.
 
 ## Generalizable rule
 

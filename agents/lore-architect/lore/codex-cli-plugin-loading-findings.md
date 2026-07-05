@@ -79,3 +79,4 @@ marketplace/plugin-install setup) and run the full `test_boot.py` suite (6 scena
 - `codex-port-validated-end-to-end.md` — the later full-lifecycle Codex validation these probes led to.
 - `codex-native-multi-agent-subsystem.md` — Codex's native subagent tools (found after these early probes).
 - `codex-testing-methodology.md` — the rollout-log ground-truthing method built on top of these CLI recipes.
+- `codex-local-plugin-update.md` — how to update a **local-source** marketplace install to a new plugin version (remove + re-add; `upgrade` is Git-only).
