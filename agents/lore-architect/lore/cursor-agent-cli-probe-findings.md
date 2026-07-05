@@ -1,4 +1,4 @@
-# Cursor Agent CLI — Probe Findings (Blocked, Untested)
+# Cursor Agent CLI — Probe Findings (first probe, later superseded)
 
 First hands-on probe of `cursor-agent` (2026.07.01) as a port target, ahead of the parked
 `workdir/draft-port-cursor.md`.
@@ -21,7 +21,7 @@ immediately with `ActionRequiredError: You've hit your usage limit` — an accou
 Pro/Agent usage cap, not a harness or CLI-integration bug. Login and model listing both work
 fine, isolating the failure to quota, not tooling.
 
-## Status
+## Status at the time
 
 Cursor driver work is parked until the usage limit resets or the account is upgraded. No cursor
 scenario has been run yet — codex got the first real empirical pass this session instead,
@@ -31,9 +31,20 @@ Next step once unblocked: repeat the same smoke test pattern used for codex — 
 `test_boot.py`-equivalent happy-path run — before deciding whether to add a full `cursor` branch
 to `run_engine()`.
 
+## Later result (2026-07-05)
+
+This blocked first probe is now **superseded** by a real successful validation run:
+
+- local separate build `lore-framework-cursor/`
+- explicit `docs/engines/cursor.md`
+- full currently-implemented lifecycle catalog green on the real local engine (`19/19`)
+
+See `cursor-port-validated-end-to-end.md` and `cursor-cli-and-harness-operational-notes.md`.
+
 ## See Also
 
 - `multi-engine-portability-direction.md` — the anchor direction this probe serves.
 - `codex-cli-plugin-loading-findings.md` — the sibling probe, further along (first PASS obtained).
 - `lifecycle-testing-harness.md` — where a `cursor` branch would land in `run_engine()` once
   unblocked.
+- `cursor-port-validated-end-to-end.md` — the later successful local validation.

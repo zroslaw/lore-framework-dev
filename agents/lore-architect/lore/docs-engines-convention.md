@@ -8,9 +8,10 @@ concrete realization of the "`docs/engines/` adapter" lever named in
 
 ## Shape
 
-- One profile per engine: `docs/engines/claude.md` (reference) + `docs/engines/codex.md`. Every
-  profile fills the **same five bindings** — framework-root, invocation-syntax, subagent-spawn,
-  memory-file, runtime-bounding — plus capability gates. Only the values differ.
+- One profile per engine: canonical v19 ships `docs/engines/claude.md` (reference) +
+  `docs/engines/codex.md`; a validated local near-landing Cursor build adds `docs/engines/cursor.md`.
+  Every profile fills the **same five bindings** — framework-root, invocation-syntax,
+  subagent-spawn, memory-file, runtime-bounding — plus capability gates. Only the values differ.
 - **Boot Step-0** (new, top of `agent-boot.md`): (1) resolve `<framework-root>` by self-location
   (the dir containing `VERSION`); (2) infer the engine — strongest signal first: non-empty
   `${CLAUDE_PLUGIN_ROOT}` → claude; else `~/.codex/` present or root under it → codex; else
@@ -19,6 +20,22 @@ concrete realization of the "`docs/engines/` adapter" lever named in
 - **Shared procedure docs stay engine-agnostic.** They describe the Claude mechanism; each spawn
   site (merge/recall/lore-search/consult) carries a one-line "Engine note" pointing at the
   profile's subagent-spawn override. Low churn, and the override wins at execution time.
+
+## Cursor status (validated locally, not yet landed)
+
+The local near-landing Cursor build validated a third profile:
+
+- **framework-root:** self-location, `${CLAUDE_PLUGIN_ROOT}` empty
+- **invocation-syntax:** slash skills work under `cursor-agent --plugin-dir`
+- **subagent-spawn:** conservative **serial host-side** override for v1, rather than claiming an
+  unverified native Cursor subagent mechanism
+- **memory-file:** `AGENTS.md`
+- **runtime-bounding:** rely on Cursor job controls / approvals, not a Claude-style Bash timeout
+
+That profile, plus targeted doc updates, was enough for the full currently-implemented lifecycle
+catalog to pass on the real local Cursor installation (`19/19`). The important design lesson is
+that the `docs/engines/` convention is broad enough to host a **conservative serial profile** as
+well as a native-fan-out one — "engine profile" does not imply parallel subagents.
 
 ## Codex binding values (`docs/engines/codex.md`)
 
@@ -38,16 +55,19 @@ concrete realization of the "`docs/engines/` adapter" lever named in
 
 ## Where it lives
 
-Canonical `lore-framework/docs/engines/{claude,codex}.md` (shipped v19). It was first built in the
-`lore-framework-codex` sibling build (no git remote) — now **superseded and deletable**, its work
-folded into canonical v19. Design record: workdir `codex-binding-design.md`. Still deferred (carry
-`${CLAUDE_PLUGIN_ROOT}`, out of core scope): `.mcp.json` / lr-wait, `migrations/*`, `df`/`aiqa` —
-see `port-landing-next-steps.md` § Remaining follow-ups.
+Canonical `lore-framework/docs/engines/{claude,codex}.md` shipped in v19. The Codex profile was
+first built in the `lore-framework-codex` sibling build (no git remote) — now **superseded and
+deletable**, its work folded into canonical v19. The Cursor profile currently lives in a separate
+local near-landing build (`lore-framework-cursor/`), validated but not yet landed. Design record:
+workdir `codex-binding-design.md`. Still deferred (carry `${CLAUDE_PLUGIN_ROOT}`, out of core
+scope): `.mcp.json` / lr-wait, `migrations/*`, `df`/`aiqa` — see `port-landing-next-steps.md`
+§ Remaining follow-ups.
 
 ## See Also
 
 - `multi-engine-portability-direction.md` — the anchor; § Architectural levers names the five bindings.
 - `codex-port-validated-end-to-end.md` — this convention exercised end-to-end on real Codex.
+- `cursor-port-validated-end-to-end.md` — the validated local Cursor build on the same convention.
 - `codex-native-multi-agent-subsystem.md` — the subagent-spawn binding's underlying mechanism.
 - `codex-git-sandbox-blocks-dotgit.md` — the `.git`-write capability gate.
 - `framework-root-self-location-validated.md` — the framework-root binding, validated separately.

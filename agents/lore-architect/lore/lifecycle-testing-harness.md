@@ -1,10 +1,20 @@
 # Lifecycle Testing Harness
 
-The multi-engine lifecycle testing harness — designed in `workdir/draft-testing-pipeline.md`, Phase 0.5 of `multi-engine-portability-direction.md` — is built and real, not just designed. Lives in `lore-framework-dev/tests/lifecycle/`: `harness.py` (fixture builder — throwaway agent repo + local bare git `origin`, zero network — plus a headless engine driver for `claude -p`) and one `test_*.py` file per scenario group: `test_boot.py`, `test_recall.py`, `test_finalize.py`, `test_consult_attach.py`, `test_repo_workspace.py`.
+The multi-engine lifecycle testing harness — designed in `workdir/draft-testing-pipeline.md`,
+Phase 0.5 of `multi-engine-portability-direction.md` — is built and real, not just designed.
+Lives in `lore-framework-dev/tests/lifecycle/`: `harness.py` (fixture builder — throwaway agent
+repo + local bare git `origin`, zero network — plus headless engine drivers) and one `test_*.py`
+file per scenario group: `test_boot.py`, `test_recall.py`, `test_finalize.py`,
+`test_consult_attach.py`, `test_repo_workspace.py`.
 
 ## Coverage
 
-19 of the 21 Tier-1 scenarios from the design catalog (`workdir/draft-testing-pipeline.md` § Scenario catalog v1) are implemented and passing on Claude Code — the baseline engine, per the draft's Phase 0.5 sequencing.
+19 of the 21 Tier-1 scenarios from the design catalog (`workdir/draft-testing-pipeline.md`
+§ Scenario catalog v1) are implemented. They pass on:
+
+- **Claude Code** — the baseline engine, per the draft's Phase 0.5 sequencing
+- **Cursor** — the real local engine, using the validated near-landing `lore-framework-cursor/`
+  build and `cursor-agent -p`
 
 Deliberately deferred:
 - **#14 concurrent-finalize collision** — needs a two-clone push-race script.
@@ -33,8 +43,20 @@ Gated behind `LR_LIFECYCLE=1` (real API cost, ~$0.10–1.35 per scenario on sonn
 
 - Tests 14 and 15 are specced in the catalog but not implemented.
 - Not yet run: a full pass on `opus`, to complete the three-model baseline before either port session starts.
-- **Codex**: `run_engine()` still has no codex branch. But the framework has now been **manually validated end-to-end on real Codex** (2026-07-05) — the full boot→recall→merge lifecycle, including native `spawn_agent` fan-out, via the `docs/engines/` build; see `codex-port-validated-end-to-end.md`. The ground-truthing method (rollout-log verification of spawn claims, not model self-report) is in `codex-testing-methodology.md`. Wiring an automated `codex` branch (incl. the one-time marketplace/plugin-install setup codex needs, unlike Claude Code's per-invocation `--plugin-dir`, and rollout-log spawn assertions) so this is in the suite rather than manual is still open — see `port-landing-next-steps.md`.
-- **Cursor**: blocked before any scenario could run — an account-level usage-limit quota, not a tooling problem. See `cursor-agent-cli-probe-findings.md`.
+- **Codex**: `run_engine()` still has no codex branch. But the framework has now been **manually
+  validated end-to-end on real Codex** (2026-07-05) — the full boot→recall→merge lifecycle,
+  including native `spawn_agent` fan-out, via the `docs/engines/` build; see
+  `codex-port-validated-end-to-end.md`. The ground-truthing method (rollout-log verification of
+  spawn claims, not model self-report) is in `codex-testing-methodology.md`. Wiring an automated
+  `codex` branch (incl. the one-time marketplace/plugin-install setup codex needs, unlike Claude
+  Code's per-invocation `--plugin-dir`, and rollout-log spawn assertions) so this is in the suite
+  rather than manual is still open — see `port-landing-next-steps.md`.
+- **Cursor**: the earlier quota-blocked state is now superseded. A local `cursor` branch was added
+  to `run_engine()` and the full implemented scenario catalog passed on the real local engine
+  (`19/19`) against the separate `lore-framework-cursor/` build. Important operational note: the
+  harness code lives under `tests/`, outside finalize's `agents/` commit scope, so harness changes
+  still require their own manual commit after a finalize run. See
+  `cursor-port-validated-end-to-end.md`, `cursor-cli-and-harness-operational-notes.md`.
 - Manual engine probes done outside the harness should be backgrounded and polled, not foreground-run with a hard kill timeout — see `headless-cli-smoke-testing-discipline.md` (the lesson that produced this note).
 
 ## Doc-change validation loop (`LR_FRAMEWORK_DIR` + `LR_TEST_MODEL`)
@@ -55,6 +77,9 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `port-landing-next-steps.md` — the staged change sets awaiting application to the real framework.
 - `multi-engine-portability-direction.md` — the anchor topic this harness serves (Phase 0.5).
 - `parallel-reviewer-fanout-pattern.md` — the model-review pre-ship discipline this complements with empirical regression testing.
-- `codex-cli-plugin-loading-findings.md`, `cursor-agent-cli-probe-findings.md` — first empirical per-engine probes, ahead of wiring either into `run_engine()`.
+- `codex-cli-plugin-loading-findings.md`, `cursor-agent-cli-probe-findings.md` — first empirical
+  per-engine probes.
 - `codex-port-validated-end-to-end.md`, `codex-testing-methodology.md` — the manual end-to-end Codex validation and its rollout-log ground-truthing (what the automated codex driver must replicate).
+- `cursor-port-validated-end-to-end.md`, `cursor-cli-and-harness-operational-notes.md` — the local
+  Cursor validation and the harness-driver operational details.
 - `headless-cli-smoke-testing-discipline.md` — how to run manual engine probes without a hard-kill timeout destroying the evidence.

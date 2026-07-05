@@ -20,7 +20,20 @@ The knowledge substrate itself — agent repos, `lore-repo.md`, `role.md`, `lore
 ## Per-engine specifics (detail lives in the drafts)
 
 - **Codex** — **ported, validated end-to-end (2026-07-05), and SHIPPED in v19** via the `docs/engines/` engine-profile binding: profile selection, framework-root self-location, and native subagent fan-out (recall + merge) all pass on real `codex exec`; the only gap is the `.git`-sandbox commit block. See `codex-port-validated-end-to-end.md`, `docs-engines-convention.md`. Key corrections to earlier reads: **Codex has a native multi-agent subsystem** (in-session `spawn_agent` tools, `multi_agent_v1`) — the earlier "no native subagents / needs a `codex exec` script fallback" read was wrong (`codex-native-multi-agent-subsystem.md`); fan-out is expressed as model instructions to `spawn_agent`, not a shell script. Standing constraints: default sandbox denies network (threatens the auto-pull/finalize-push/workspace-sync freshness contracts — mitigated by existing degraded-mode design) and blocks `.git/` writes (`codex-git-sandbox-blocks-dotgit.md`); plugin loading is a persistent local install (`codex plugin marketplace add` + `codex plugin add`), not a per-invocation flag — unlike Claude Code and Cursor, both of which take `--plugin-dir` (`codex-cli-plugin-loading-findings.md`). See `workdir/draft-port-codex.md`.
-- **Cursor** — on paper the best-equipped target of the two. `disable-model-invocation: true` in skill frontmatter gives exact slash-command semantics for lifecycle skills. Declarative `.cursor/agents/*.md` subagent definitions map onto the merge-in-booted-subagents pattern *more cleanly* than Claude Code's own prompt-assembled general-purpose subagent — flagged as a possible back-port candidate once validated. One real risk to verify before advertising Cursor's parallel-agent support: Cursor auto-manages its own git worktrees for parallel agents, which may interact with the framework's existing worktree convention (`worktrees-convention.md`) in ways that aren't yet checked. First probe (2026-07-03) confirmed `--plugin-dir` parity and healthy login, but hit an account-level Cursor usage-limit block before any scenario could run — parked until quota resets, not a tooling problem. See `workdir/draft-port-cursor.md`, `cursor-agent-cli-probe-findings.md`.
+- **Cursor** — now locally validated as a near-landing build (2026-07-05), but not yet landed
+  into canonical `lore-framework`. `--plugin-dir` works, slash skill invocation works, AGENTS.md is
+  the memory-file target, and `ps -o args= -p $PPID` exposes `cursor-agent`, giving Boot Step 0 a
+  strong detection signal. The validated profile is intentionally conservative: rather than claim
+  an unverified native Cursor subagent mechanism, it uses a **serial host-side** override for the
+  fan-out procedures. That smaller claim was enough for the full currently-implemented lifecycle
+  catalog to pass on the real local engine (`19/19`) using a separate `lore-framework-cursor/`
+  build and a local Cursor harness driver. Cursor may still end up with a cleaner declarative
+  subagent story via `.cursor/agents/*.md`, but that is now an optimization phase, not a blocker
+  to Tier-1 parity. One real risk remains before advertising Cursor's parallel-agent support:
+  Cursor auto-manages its own git worktrees for parallel agents, which may interact with the
+  framework's existing worktree convention (`worktrees-convention.md`) in ways that are still not
+  checked. See `workdir/draft-port-cursor.md`, `cursor-agent-cli-probe-findings.md`,
+  `cursor-port-validated-end-to-end.md`, `cursor-cli-and-harness-operational-notes.md`.
 
 ## Dominant shared risk
 
@@ -36,12 +49,22 @@ Every surveyed competitor is bound to one engine (Claude Code) or to a vendor-ho
 
 ## Status
 
-**Codex port SHIPPED in canonical `lore-framework` as v19** (commit `72b1b2a`, manifests `1.19.0`, pushed 2026-07-05). Two full workdir drafts anchored the work; the Codex leg is now done, Cursor remains unconfirmed. Trajectory:
+**Codex port SHIPPED in canonical `lore-framework` as v19** (commit `72b1b2a`, manifests `1.19.0`,
+pushed 2026-07-05). Two full workdir drafts anchored the work; the Codex leg is done, and the
+Cursor leg is now **validated locally as a near-landing build** rather than unconfirmed. Trajectory:
 
 - **Coupling inventory + tiering complete** — the full "real list" (5 adapter bindings; Tier A/B/C) exists in `claude-coupling-inventory-and-port-tiers.md` (durable summary) and `workdir/claude-specific-inventory.md` (full per-site).
 - **Full engine-profile binding IMPLEMENTED and VALIDATED end-to-end on real Codex** (2026-07-05, in the sibling `lore-framework-codex` build) — the `docs/engines/` convention (all five bindings, Boot Step-0 engine selection) passes on `codex exec`: profile selection, framework-root self-location (zero `${CLAUDE_PLUGIN_ROOT}` leak), and native `spawn_agent` fan-out for **both** recall and merge (host-reads-steps override). The Tier-B subagent nucleus — the part most feared — is proven. Only gap: the `.git`-sandbox commit block. See `docs-engines-convention.md`, `codex-port-validated-end-to-end.md`, `codex-native-multi-agent-subsystem.md`, `codex-git-sandbox-blocks-dotgit.md`, `codex-testing-methodology.md`.
 - **Landed into canonical v19** — the validated `docs/engines/` build was folded from the sibling into the real plugin (via the working-tree-diff technique, `landing-via-working-tree-diff.md`), together with framework-root-full (`framework-root-self-location-validated.md`) and the defer-clarity robustness fix (`haiku-ambiguity-detector.md`, authored fresh at landing). Re-validated 6/6 on haiku against the real v19 tree. The `lore-framework-codex` sibling is now **superseded and deletable**. Remaining Claude-first follow-ups (lr-wait MCP port, DF/migrations, `codex` harness driver, git-sandbox gate, Cursor) live in `port-landing-next-steps.md`.
-- **Manual trial guides in workdir**: `workdir/first-steps-codex.md` (verified) and `workdir/first-steps-cursor.md` (should-work, unconfirmed — quota-blocked).
+- **Cursor local build validated** — separate sibling `lore-framework-cursor/` with
+  `docs/engines/cursor.md` and a five-file framework diff. The real local Cursor installation
+  passed the full implemented lifecycle catalog (`19/19`) and the harness now has a local
+  `cursor` driver. Landing the validated diff back into canonical `lore-framework/`, carrying the
+  harness changes in `lore-framework-dev/`, and cutting release notes are the remaining steps. See
+  `cursor-port-validated-end-to-end.md`, `cursor-cli-and-harness-operational-notes.md`.
+- **Manual trial guides in workdir**: `workdir/first-steps-codex.md` (verified) and
+  `workdir/first-steps-cursor.md` (still useful as the original manual recipe, now superseded by
+  the validated build and harness run).
 
 See `workdir/draft-port-codex.md`, `workdir/draft-port-cursor.md`, `port-landing-next-steps.md`.
 
