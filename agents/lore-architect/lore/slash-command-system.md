@@ -5,6 +5,9 @@ per-agent shortcut artifacts follow each engine's native conventions.
 - `/lr:<action>` — all framework operations: boot, reflect, merge, summarize, finalize, register-repo, unregister-repo, create-repo, create-agent, list-agents, list-repos, check, workspace-sync, update, recall, attach, consult, init, spawn-teammate (BETA)
 - `/lr-<agent-name>-agent` — optional per-agent boot commands, generated into `.claude/commands/`
 
+**Cursor plugin skill naming (folder = picker identity):**
+- `/lr-<action>` — same operations, prefixed wrappers under `skills/cursor/lr-<action>/`, loaded via `.cursor-plugin/plugin.json`. Canonical `skills/<action>/` stays for Claude Code. See `cursor-dual-skill-tree-one-repo.md`.
+
 Codex exposes optional per-agent autocomplete through engine-native personal skills:
 `~/.codex/skills/lr-<agent-name>-agent/SKILL.md`, invoked as `$lr-<agent-name>-agent`. Like the
 Claude command, each is a thin absolute-path delegation to canonical `agent-boot.md`.

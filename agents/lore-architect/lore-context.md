@@ -34,7 +34,8 @@ See `system-design-principles.md` (the full list and the overreach diagnostics),
 
 ## Skills & Docs
 
-Operations are Claude Code plugin skills, `lr:` prefix. **Skills are thin pointers** — each `skills/<name>/SKILL.md` is a one-line reference to `docs/<name>.md`, where all logic lives. Same for generated `/lr-<agent>-agent` boot commands (thin delegations to `agent-boot.md`). When a skill orchestrates sub-skills, the orchestration gets its own `docs/<skill>.md`; non-skill procedures shared across call sites get a `docs/<procedure>.md` (e.g. `auto-pull.md`). See `slash-command-system.md`, `skill-doc-pattern.md`, `shared-procedure-doc-pattern.md`, `single-canonical-source-discipline.md`.
+Operations are Claude Code plugin skills, `lr:` prefix on Claude; Cursor uses `/lr-<skill>` via
+prefixed wrappers (`cursor-dual-skill-tree-one-repo.md`). **Skills are thin pointers** — each `skills/<name>/SKILL.md` is a one-line reference to `docs/<name>.md`, where all logic lives. Same for generated `/lr-<agent>-agent` boot commands (thin delegations to `agent-boot.md`). When a skill orchestrates sub-skills, the orchestration gets its own `docs/<skill>.md`; non-skill procedures shared across call sites get a `docs/<procedure>.md` (e.g. `auto-pull.md`). See `slash-command-system.md`, `skill-doc-pattern.md`, `shared-procedure-doc-pattern.md`, `single-canonical-source-discipline.md`.
 
 The plugin can also **bundle an MCP server** (declared in a root `.mcp.json`, auto-launched by Claude Code with its tools merged into the agent): **`lr-wait`** (v18) is the first — and the framework's first `python3` dependency (stdlib-only, no pip; the sole sanctioned exception to bash-on-BSD, for protocol-speaking server components). See `plugin-mcp-server-convention.md`, `wait-primitive-feature.md`.
 
@@ -149,14 +150,16 @@ Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 
 was staged in the no-remote **`lore-framework-codex/`** sibling landed in canonical v19 — that
 sibling is now **superseded and deletable** (see `port-landing-next-steps.md`). The separate
 **`lore-framework-cursor/`** sibling likewise landed in canonical v20 and is now **superseded and
-deletable**. The plugin bundles its first MCP server (`lr-wait`, v18) and carries its first
+deletable**. Local framework source also has **v21 dual skill tree** (2026-07-05, not pushed to
+remote): `skills/cursor/lr-*/` + `.cursor-plugin/` fixes Cursor picker namespace — see
+`cursor-dual-skill-tree-one-repo.md`. The plugin bundles its first MCP server (`lr-wait`, v18) and carries its first
 `python3` dependency; v19 shipped the Codex port (`docs/engines/`, `<framework-root>`
 self-location) and three style skills, and v20 shipped the Cursor engine profile. Dev-only tests
 live here in `lore-framework-dev/tests/`, not in the plugin — including the multi-engine lifecycle
 testing harness (`tests/lifecycle/`, 19/21 Tier-1 scenarios on Claude Code, 19/19 implemented
 scenarios on the real local Cursor run that fed the v20 ship, and 6/6 boot on haiku against v19,
 gated behind `LR_LIFECYCLE=1`; see `lifecycle-testing-harness.md`). Matching harness changes are a
-separate dev-repo concern outside finalize's `agents/` commit scope. ~103 lore topics.
+separate dev-repo concern outside finalize's `agents/` commit scope. ~104 lore topics.
 
 ## Running Backlog
 
