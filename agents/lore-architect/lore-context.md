@@ -124,8 +124,8 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   (`19/19`) before landing. The separate `lore-framework-cursor/` sibling is now superseded and
   deletable. Matching lifecycle-harness support in `lore-framework-dev/tests/` remains a separate
   dev-repo change outside finalize's `agents/` commit scope. Remaining deferred Claude-first
-  surfaces: `lr-wait` `.mcp.json`, DF/AIQA + `migrations/*`, Codex automated harness driver,
-  Codex shortcut lifecycle validation, and any stronger Cursor-native parallel story. The dominant
+  surfaces: `lr-wait` `.mcp.json`, DF/AIQA + `migrations/*`, Codex shortcut lifecycle validation,
+  rollout-log-backed Codex harness assertions, and any stronger Cursor-native parallel story. The dominant
   "framework is prose" risk is empirically retired for the Codex path and materially reduced for
   Cursor's implemented Tier-1 path. Anchor: `multi-engine-portability-direction.md`; see
   `docs-engines-convention.md`, `codex-port-validated-end-to-end.md`,
@@ -158,8 +158,11 @@ self-location) and three style skills, and v20 shipped the Cursor engine profile
 live here in `lore-framework-dev/tests/`, not in the plugin — including the multi-engine lifecycle
 testing harness (`tests/lifecycle/`, 19/21 Tier-1 scenarios on Claude Code, 19/19 implemented
 scenarios on the real local Cursor run that fed the v20 ship, and 6/6 boot on haiku against v19,
-gated behind `LR_LIFECYCLE=1`; see `lifecycle-testing-harness.md`). Matching harness changes are a
-separate dev-repo concern outside finalize's `agents/` commit scope. ~104 lore topics.
+gated behind `LR_LIFECYCLE=1`; see `lifecycle-testing-harness.md`). The harness now also has a
+doc-driven Codex branch for local smoke coverage; it does not rely on a preinstalled Codex plugin,
+but the host launching `codex exec` must allow writes to `~/.codex/` or the run dies before
+entering the fixture repo. Matching harness changes are a separate dev-repo concern outside
+finalize's `agents/` commit scope. ~104 lore topics.
 
 ## Running Backlog
 

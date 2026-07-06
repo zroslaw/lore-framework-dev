@@ -42,9 +42,10 @@ architectural conclusions and work order.
   execution produced repeated pull/push failures and inconsistent escalation.
   A sensitive health-data push also required explicit user approval, so the
   framework cannot promise promptless finalization on every engine.
-- **End-state-only tests miss procedural failures.** The lifecycle harness has
-  no Codex driver and does not assert subagent use, ordering, compaction
-  recovery, or interrupted-finalize resumption.
+- **End-state-only tests miss procedural failures.** At the time, the
+  lifecycle harness had no Codex driver and did not assert subagent use,
+  ordering, compaction recovery, or interrupted-finalize resumption. The
+  driver is now wired, but the trace-level assertions remain open.
 - **Smaller friction remains.** Agent arguments need normalization and unique
   fuzzy suggestions; broad home-directory discovery should be avoided or
   pruned.
@@ -81,7 +82,7 @@ transcript source to the same normalized representation.
    memory files, invocation syntax, and transcript recovery.
 3. Explicit sequencing barriers in lifecycle procedures.
 4. Checkpointed, resumable finalize with deterministic Phase 4 mechanics.
-5. Codex lifecycle-harness driver plus trace-level assertions.
+5. Codex lifecycle-harness hardening plus trace-level assertions.
 6. Compaction/resume, interrupted-finalize, network-denied, sensitive-push,
    and attach-idempotency scenarios.
 7. Argument normalization, fuzzy agent suggestions, and discovery polish.

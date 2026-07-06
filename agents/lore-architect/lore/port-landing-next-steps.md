@@ -55,10 +55,13 @@ These are deliberate deferred scope documented in `release-notes/19.md`, not reg
 1. **`lr-wait` MCP** — `.mcp.json` still uses `${CLAUDE_PLUGIN_ROOT}`; port it to a Codex-aware
    registration when the MCP-on-Codex path is exercised.
 2. **DF/AIQA module** and **`migrations/*`** — still Claude-targeted; carry `${CLAUDE_PLUGIN_ROOT}`.
-3. **Wire a `codex` driver into `harness.py`'s `run_engine()`** (incl. the one-time
-   marketplace/plugin-install setup and the rollout-log-based spawn assertions) so the Codex path is
-   in the *automated* suite, not just manual — see `codex-testing-methodology.md`,
-   `codex-cli-plugin-loading-findings.md`. Local-install update procedure: `codex-local-plugin-update.md`.
+3. **Harden the wired `codex` harness branch** — keep the current doc-driven adapter path
+   (`<LR_FRAMEWORK_DIR>/docs/*.md`, no preinstalled plugin dependency), but add rollout-log-based
+   spawn assertions and broaden coverage beyond the current smoke path so the Codex automation
+   matches the confidence bar of the manual methodology. Local Codex lifecycle runs also require
+   host-level write access to `~/.codex/`; treat that as an environment prerequisite, not a plugin
+   behavior. See `codex-testing-methodology.md`, `codex-cli-plugin-loading-findings.md`. Local-install
+   update procedure: `codex-local-plugin-update.md`.
 4. **Decide the `.git`-sandbox commit handling** for Codex finalize (run with `.git` writable, or
    document the uncommitted-hand-off gate) — see `codex-git-sandbox-blocks-dotgit.md`.
 5. **Cursor parallelism/worktree interplay** — the shipped v20 profile is intentionally

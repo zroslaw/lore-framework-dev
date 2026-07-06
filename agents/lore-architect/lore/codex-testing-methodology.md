@@ -1,8 +1,9 @@
 # Codex Lifecycle-Testing Methodology (manual)
 
 How to exercise the framework on real Codex, and the ground-truthing that makes results
-trustworthy. Complements the lifecycle harness (`lifecycle-testing-harness.md`), which still lacks
-a wired `codex` driver in `run_engine()`.
+trustworthy. Complements the lifecycle harness (`lifecycle-testing-harness.md`), whose `codex`
+branch now covers the headless doc-driven execution path; this manual method remains the
+ground-truth path for rollout-log verification and for diagnosing host-runtime issues.
 
 - **Run headless:** `codex exec --full-auto --skip-git-repo-check < prompt.txt > log 2>&1`,
   **backgrounded and polled** (never foreground-killed — see
@@ -12,6 +13,13 @@ a wired `codex` driver in `run_engine()`.
 - **Boot without plugin install:** the natural-language boot (point at
   `<build>/docs/agent-boot.md` + the agent dir) exercises Step-0, framework-root, profile
   selection, and fan-out — no marketplace install needed, and it avoids `lr` plugin-id collisions.
+- **Same doc-driven adapter as the harness:** for Codex, "engine-neutral prompt" means translating
+  the lifecycle request into a doc-driven prompt against `<LR_FRAMEWORK_DIR>/docs/*.md`, not
+  sending the same slash-skill instruction used on Claude/Cursor. That adapter is the reliable
+  headless path.
+- **Host writes to `~/.codex/` are a prerequisite:** if the outer sandbox makes `~/.codex/`
+  read-only, Codex can die before entering the fixture repo (`~/.codex/state_5.sqlite`, readonly
+  database). Treat that as a host-runtime setup issue, not a framework regression.
 - **Ground-truth tool use in the session rollout logs, not the model's prose** — the load-bearing
   technique. `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` records real `function_call` items
   (`name: spawn_agent`, `namespace: multi_agent_v1`, `arguments`). A spawned subagent gets its own
@@ -28,5 +36,4 @@ a wired `codex` driver in `run_engine()`.
 - `codex-native-multi-agent-subsystem.md` — the `spawn_agent` tools the rollout logs record.
 - `codex-cli-plugin-loading-findings.md` — CLI quirks (stdin redirect, buffered JSONL, install model).
 - `headless-cli-smoke-testing-discipline.md` — the background-don't-hard-kill rule this relies on.
-- `lifecycle-testing-harness.md` — the automated harness this manual method complements (codex
-  driver still unwired).
+- `lifecycle-testing-harness.md` — the automated harness this manual method complements.

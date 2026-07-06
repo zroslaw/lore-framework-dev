@@ -42,16 +42,23 @@ Gated behind `LR_LIFECYCLE=1` (real API cost, ~$0.10–1.35 per scenario on sonn
 
 ## What's still open
 
+- **Parallelize the suite** — scenarios are fixture-isolated; today they run serially via
+  `unittest discover` (~15–45 min/engine). Future: `LR_LIFECYCLE_JOBS`, parallel by test file, or
+  parallel by engine in separate terminals; cap concurrency for API limits. See
+  `lifecycle-harness-parallelization.md`; TODO in `tests/lifecycle/harness.py`.
 - Tests 14 and 15 are specced in the catalog but not implemented.
 - Not yet run: a full pass on `opus`, to complete the three-model baseline before either port session starts.
-- **Codex**: `run_engine()` still has no codex branch. But the framework has now been **manually
-  validated end-to-end on real Codex** (2026-07-05) — the full boot→recall→merge lifecycle,
-  including native `spawn_agent` fan-out, via the `docs/engines/` build; see
-  `codex-port-validated-end-to-end.md`. The ground-truthing method (rollout-log verification of
-  spawn claims, not model self-report) is in `codex-testing-methodology.md`. Wiring an automated
-  `codex` branch (incl. the one-time marketplace/plugin-install setup codex needs, unlike Claude
-  Code's per-invocation `--plugin-dir`, and rollout-log spawn assertions) so this is in the suite
-  rather than manual is still open — see `port-landing-next-steps.md`.
+- **Codex**: `run_engine()` now has a real codex branch. It runs `codex exec` directly, defaults
+  to `gpt-5.4-mini`, redirects stdin from `/dev/null`, and captures the final agent message via
+  `--output-last-message` rather than trying to normalize Codex's JSONL stream into the
+  Claude/Cursor shape. The driver translates the engine-neutral lifecycle prompt into a reliable
+  **doc-driven** Codex prompt at runtime by pointing at `<LR_FRAMEWORK_DIR>/docs/*.md`, so the
+  harness does not depend on a preinstalled Codex plugin or matching plugin cache. Immediate host
+  constraint: the outer process launching `codex exec` must allow writes to `~/.codex/`, or Codex
+  can fail before the fixture run starts (`~/.codex/state_5.sqlite`, readonly database). Still
+  open: rollout-log-based spawn assertions and broader Codex scenario coverage beyond the current
+  smoke path. See `codex-testing-methodology.md`, `codex-port-validated-end-to-end.md`, and
+  `port-landing-next-steps.md`.
 - **Cursor**: the earlier quota-blocked state is now superseded. A local `cursor` branch was added
   to `run_engine()` and the full implemented scenario catalog passed on the real local engine
   (`19/19`) against the pre-ship `lore-framework-cursor/` build that later landed as canonical
@@ -86,3 +93,4 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `cursor-port-validated-end-to-end.md`, `cursor-cli-and-harness-operational-notes.md` — the local
   Cursor validation and the harness-driver operational details.
 - `headless-cli-smoke-testing-discipline.md` — how to run manual engine probes without a hard-kill timeout destroying the evidence.
+- `lifecycle-harness-parallelization.md` — future improvement: parallel scenario execution.
