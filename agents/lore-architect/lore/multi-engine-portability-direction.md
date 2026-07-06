@@ -36,6 +36,12 @@ The knowledge substrate itself — agent repos, `lore-repo.md`, `role.md`, `lore
   `lore-framework-cursor/` sibling is now **superseded**. See `workdir/draft-port-cursor.md`,
   `cursor-agent-cli-probe-findings.md`, `cursor-port-validated-end-to-end.md`,
   `cursor-cli-and-harness-operational-notes.md`.
+- **Engine-specific durable entry points** — after the first wave of ports landed, the lore graph
+  itself also needs a stable shape for future engine work: one hub topic per engine covering
+  install/update, invocation, subagents, memory file, MCP/plugin loading, sandbox, and harness
+  caveats. Use `claude-engine-capabilities.md`, `codex-engine-capabilities.md`, and
+  `cursor-engine-capabilities.md` as those entry points; keep atomic facts in the linked detailed
+  topics.
 
 ## Dominant shared risk
 
@@ -79,6 +85,10 @@ Two full workdir drafts anchored the work; both Tier-1 engine-profile legs are n
   plus `scripts/sync-cursor-skills` and `/lr:check` #21 (cursor-tree parity). Full-harness-verified
   before push: **42/42** on `claude` (19/19 lifecycle + 23 deterministic). See
   `cursor-dual-skill-tree-one-repo.md`, `lifecycle-testing-harness.md`.
+- **v22 follow-up shipped in canonical `lore-framework`** — top-level `INSTALL-CODEX.md` and
+  `INSTALL-CURSOR.md`, `scripts/codex-refresh-plugin`, and engine-specific `R > F`
+  version-mismatch guidance. The directly affected Codex lifecycle path gained its own targeted
+  scenario and was rerun on `gpt-5.4-mini` before push.
 - **Manual trial guides in workdir**: `workdir/first-steps-codex.md` (verified) and
   `workdir/first-steps-cursor.md` (still useful as the original manual recipe, now superseded by
   the shipped v20 Cursor profile and harness run).

@@ -63,21 +63,22 @@ Scenario catalog status (numbering per the draft):
 | 4 | Boot unknown agent | ✅ `lifecycle/test_boot.py` |
 | 5 | Boot version mismatch (release-notes-only) | ✅ `lifecycle/test_boot.py` |
 | 6 | Upgrade gate on dirty tree | ✅ `lifecycle/test_boot.py` |
-| 7 | Recall with hint | ✅ `lifecycle/test_recall.py` |
-| 8 | Consult another agent | ✅ `lifecycle/test_consult_attach.py` |
-| 9 | Attach a guest | ✅ `lifecycle/test_consult_attach.py` |
-| 10 | Reflect | ✅ `lifecycle/test_finalize.py` |
-| 11 | Merge | ✅ `lifecycle/test_finalize.py` |
-| 12 | Summarize | ✅ `lifecycle/test_finalize.py` |
-| 13 | Finalize end-to-end | ✅ `lifecycle/test_finalize.py` |
-| 14 | Concurrent finalize collision | deferred — needs two-clone push-race scripting |
-| 15 | Finalize with guest attached | deferred — needs cross-repo guest fixture |
-| 16 | create-repo | ✅ `lifecycle/test_repo_workspace.py` |
-| 17 | create-agent | ✅ `lifecycle/test_repo_workspace.py` |
-| 18 | init | ✅ `lifecycle/test_repo_workspace.py` |
-| 19 | workspace-sync | ✅ `lifecycle/test_repo_workspace.py` |
-| 20 | check | ✅ `lifecycle/test_repo_workspace.py` |
-| 21 | update --dry-run | ✅ `lifecycle/test_repo_workspace.py` |
+| 7 | Repo newer than framework (Codex refresh guidance) | ✅ `lifecycle/test_boot.py` |
+| 8 | Recall with hint | ✅ `lifecycle/test_recall.py` |
+| 9 | Consult another agent | ✅ `lifecycle/test_consult_attach.py` |
+| 10 | Attach a guest | ✅ `lifecycle/test_consult_attach.py` |
+| 11 | Reflect | ✅ `lifecycle/test_finalize.py` |
+| 12 | Merge | ✅ `lifecycle/test_finalize.py` |
+| 13 | Summarize | ✅ `lifecycle/test_finalize.py` |
+| 14 | Finalize end-to-end | ✅ `lifecycle/test_finalize.py` |
+| 15 | Concurrent finalize collision | deferred — needs two-clone push-race scripting |
+| 16 | Finalize with guest attached | deferred — needs cross-repo guest fixture |
+| 17 | create-repo | ✅ `lifecycle/test_repo_workspace.py` |
+| 18 | create-agent | ✅ `lifecycle/test_repo_workspace.py` |
+| 19 | init | ✅ `lifecycle/test_repo_workspace.py` |
+| 20 | workspace-sync | ✅ `lifecycle/test_repo_workspace.py` |
+| 21 | check | ✅ `lifecycle/test_repo_workspace.py` |
+| 22 | update --dry-run | ✅ `lifecycle/test_repo_workspace.py` |
 | Tier 2 | wait/emit | covered by `test_wait.py` (protocol-level, not a lifecycle scenario) |
 | Tier 2 | spawn-teammate | deferred — not headless-scriptable (multi-pane UI) |
 | Tier 2 | df-repo-init, df-ula-file | deferred — BETA, out of scope for this pass |

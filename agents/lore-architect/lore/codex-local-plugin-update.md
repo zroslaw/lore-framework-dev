@@ -41,9 +41,20 @@ Then `codex plugin marketplace upgrade <name>` would be the fetch step (the only
 source matters). Repointing this machine's local source at the GitHub remote is the prerequisite
 for that path.
 
+## Lifecycle-test preflight implication
+
+If a Codex lifecycle rerun is supposed to validate newly-shipped plugin docs or skills, first
+verify the installed plugin version under `~/.codex/plugins/cache/...`. This session hit the trap
+directly during the v22 targeted `R > F` rerun: the source repo was already at v22, but the
+installed plugin still pointed at `1.21.0`, so the scenario surfaced the old generic
+`version-check.md` warning from the cached copy rather than the newly-shipped Codex-specific
+guidance. Refreshing the installed plugin to `1.22.0` with `codex plugin add lr@lore-framework`
+before rerunning made the test exercise the intended behavior and pass.
+
 ## See Also
 
 - `codex-cli-plugin-loading-findings.md` — the plugin-loading model this extends (persistent local
   install, not a per-invocation `--plugin-dir` flag).
 - `docs-engines-convention.md` — the `docs/engines/` layer whose presence in the new cache confirms
   the update landed.
+- `codex-engine-capabilities.md` — the per-engine hub topic for Codex operational facts.

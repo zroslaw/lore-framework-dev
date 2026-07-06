@@ -50,6 +50,10 @@ permissions, and ask the user to restart Codex. A local checkout path can replac
 marketplace identifier. See `codex-cli-plugin-loading-findings.md`; updating an existing local
 source install is covered by `codex-local-plugin-update.md`.
 
+As of v22, the framework also ships top-level engine-readable install pages next to the README:
+`INSTALL-CODEX.md` and `INSTALL-CURSOR.md`. Use those as the canonical entrypoints for fresh-engine
+installs and refresh instructions; the README stays the short cross-engine overview.
+
 ## Local development
 
 ```bash
@@ -61,3 +65,9 @@ claude --plugin-dir ./lore-framework
 ## What does NOT work
 
 `pluginDirs` in `.claude/settings.json` is not supported. There is no project-level persistent plugin configuration other than marketplace installation.
+
+## See Also
+
+- `codex-engine-capabilities.md`
+- `cursor-engine-capabilities.md`
+- `claude-engine-capabilities.md`

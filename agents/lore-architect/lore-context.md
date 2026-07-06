@@ -39,6 +39,14 @@ prefixed wrappers (`cursor-dual-skill-tree-one-repo.md`). **Skills are thin poin
 
 The plugin can also **bundle an MCP server** (declared in a root `.mcp.json`, auto-launched by Claude Code with its tools merged into the agent): **`lr-wait`** (v18) is the first — and the framework's first `python3` dependency (stdlib-only, no pip; the sole sanctioned exception to bash-on-BSD, for protocol-speaking server components). See `plugin-mcp-server-convention.md`, `wait-primitive-feature.md`.
 
+## Engine Hubs
+
+Engine-specific operational knowledge now has one hub topic per engine: `claude-engine-capabilities.md`,
+`codex-engine-capabilities.md`, and `cursor-engine-capabilities.md`. Use them as the entry points
+for install/update model, invocation surface, subagent mechanism, memory file, MCP/plugin loading,
+sandbox constraints, and lifecycle-harness caveats; keep atomic findings in the linked detailed
+topics rather than rediscovering them from old session notes.
+
 ## Boot & Freshness
 
 Boot (`agent-boot.md`, single source of truth): discover agent → auto-pull repo → version check → read `role.md` + `lore-context.md` → detect teammate spawn → confirm. **Boot loads only those two files; topics are read on demand.** Repos auto-pull at every session-context boundary (boot, attach, pre-merge) to match the team's latest pushed state; `/lr:pull-lore` is the manual refresh. See `freshness-contracts-at-session-boundaries.md`, `auto-pull-mechanism.md`.
@@ -58,7 +66,7 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` (currently **21** — shipped & pushed) is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. See `versioning-release-types.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
+`lore-framework/VERSION` (currently **22** — shipped & pushed) is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. v22 is release-notes-only: top-level engine install guides, explicit Codex/Cursor refresh notes, and engine-specific `R > F` guidance. See `versioning-release-types.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
 
 ## Consistency & Diagnostics
 
@@ -144,13 +152,17 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   `codex-local-plugin-update.md`, `cursor-agent-cli-probe-findings.md`,
   `headless-cli-smoke-testing-discipline.md`, `haiku-ambiguity-detector.md`, and
   `similar-projects-landscape.md` (the positioning case — no surveyed competitor federates
-  knowledge across different coding engines).
+  knowledge across different coding engines). **v22** then added top-level engine-readable install
+  guides (`INSTALL-CODEX.md`, `INSTALL-CURSOR.md`), a Codex refresh helper, and engine-specific
+  `R > F` guidance — plus the durable per-engine hub topics `claude-engine-capabilities.md`,
+  `codex-engine-capabilities.md`, and `cursor-engine-capabilities.md` so future engine work starts
+  from a stable operational map rather than scattered probes.
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** review item — active follow-ups from the 2026-06-13 architecture review; see `framework-improvements-backlog.md`. That review's settled dispositions (incl. DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in `architecture-review-dispositions.md`. A newer 2026-07-02 review added two further backlog items (post-merge diff verification, recall-time staleness surfacing) — see `framework-improvements-backlog.md` § Merge Quality, § Search / Scaling.
 - Parked: workdir-as-reference-library; vector-DB search (until >100 topics/agent); the session-as-durable-artifact cluster (boot auto-push, boot-context cache, suspend/resume, JSONL archive). All in `framework-improvements-backlog.md`.
 
 ## Current State
 
-Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 21 — shipped &
+Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 22 — shipped &
   pushed**; public at github.com/zroslaw/lore-framework), **`lore-framework-dev/`** (this repo —
   framework-dev agents, now **stamped 21**; a workspace-root sibling at
   github.com/zroslaw/lore-framework-dev), and
@@ -168,12 +180,14 @@ a live confirmation of the write-aware gate against a real half-landed stamp). D
 live here in `lore-framework-dev/tests/`, not in the plugin — including the multi-engine lifecycle
 testing harness (`tests/lifecycle/`, 19/21 Tier-1 scenarios; the **complete suite ran 42/42 on the
 `claude` engine** — 19/19 lifecycle + 23 deterministic, ~$9.4/~27 min — as the last gate before the
-v21 push; also 6/6 boot on haiku against v19, gated behind `LR_LIFECYCLE=1`; see
+v21 push; also 6/6 boot on haiku against v19, gated behind `LR_LIFECYCLE=1`; the v22 follow-up
+added a dedicated Codex `R > F` lifecycle scenario and reran that targeted path on `gpt-5.4-mini`;
+see
 `lifecycle-testing-harness.md`). The harness now has engine-neutral driver support (cursor + codex
 branches, engine-neutral `memory_file_name()`); its doc-driven Codex branch does not rely on a
 preinstalled Codex plugin, but the host launching `codex exec` must allow writes to `~/.codex/` or
 the run dies before entering the fixture repo. Matching harness changes are a separate dev-repo
-concern outside finalize's `agents/` commit scope. ~104 lore topics.
+concern outside finalize's `agents/` commit scope. ~107 lore topics.
 
 ## Running Backlog
 

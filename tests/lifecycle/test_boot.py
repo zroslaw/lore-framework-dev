@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lifecycle scenarios 1-6: boot (catalog: workdir/draft-testing-pipeline.md).
+"""Lifecycle scenarios 1-7: boot (catalog: workdir/draft-testing-pipeline.md).
 
 Run:  LR_LIFECYCLE=1 python3 tests/lifecycle/test_boot.py -v
 One:  LR_LIFECYCLE=1 python3 tests/lifecycle/test_boot.py -v -k 01
@@ -127,6 +127,41 @@ class BootUpgradeScenarios(unittest.TestCase):
                 f.read(), dirty_content,
                 "the dirty role.md must be left untouched when the upgrade defers",
             )
+
+    def test_07_boot_repo_newer_than_framework_codex_guidance(self):
+        """Codex warns with the engine-specific plugin refresh remedy when R > F."""
+        if harness.ENGINE != "codex":
+            self.skipTest("Codex-specific mismatch guidance scenario")
+
+        expected_repo_version = str(int(harness.framework_version()) + 1)
+        fx = build_fixture(self.tmp, version=expected_repo_version)
+        prompt = harness._codex_boot_prompt(
+            AGENT_NAME,
+            "If boot emits a version-mismatch warning, print that warning verbatim before "
+            "anything else. Then print two lines:\n"
+            "BOOT-CODEWORD: <the boot codeword stated in your role>\n"
+            "CONTEXT-CODEWORD: <the context codeword stated in your lore-context>\n"
+            "If boot fails, print BOOT-FAILED followed by the reason. "
+            "Do not reflect, merge, finalize, commit, or push.",
+        )
+
+        r = run_engine(fx.workspace, prompt)
+        print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
+        self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
+        self.assertNotIn("BOOT-FAILED", r.text, f"boot reported failure:\n{r.text}")
+        self.assertIn(ROLE_CANARY, r.text)
+        self.assertIn(CTX_CANARY, r.text)
+        self.assertIn("your Codex plugin is older than the repo", r.text)
+        self.assertIn("codex plugin add lr@lore-framework", r.text)
+        self.assertIn("codex plugin marketplace upgrade lore-framework", r.text)
+        self.assertEqual(
+            read_repo_version(fx), expected_repo_version,
+            "R > F guidance must not rewrite the repo version",
+        )
+        self.assertTrue(
+            is_clean(fx.repo),
+            "R > F guidance must not modify tracked files in the repo",
+        )
 
 
 if __name__ == "__main__":
