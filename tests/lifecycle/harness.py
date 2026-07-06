@@ -3,7 +3,8 @@
 
 Fixture builder + headless engine driver. Scenarios live in test_*.py next to
 this module and are engine-neutral; this module binds the engine specifics.
-Currently implemented engine: Claude Code (`claude -p`).
+Currently implemented engines: Claude Code (`claude -p`), Cursor Agent (`cursor-agent -p`),
+and Codex (`codex exec`).
 
 These tests call a real engine and cost API money, so they are gated:
 skipped unless LR_LIFECYCLE=1 and the engine binary is on PATH.
@@ -11,9 +12,15 @@ skipped unless LR_LIFECYCLE=1 and the engine binary is on PATH.
 Environment:
   LR_LIFECYCLE=1        enable the tests (required)
   LR_FRAMEWORK_DIR      plugin under test (default: sibling ../lore-framework)
-  LR_ENGINE             engine to drive (default: claude; only claude so far)
-  LR_TEST_MODEL         model for the engine run (default: sonnet)
+  LR_ENGINE             engine to drive (default: claude; supported: claude, cursor, codex)
+  LR_TEST_MODEL         model for the engine run (default: sonnet; codex default: gpt-5.4-mini)
   LR_RUN_TIMEOUT        per-run timeout in seconds (default: 420)
+
+TODO(parallelization): Scenarios are independent (each test gets its own temp fixture +
+local bare origin; FRAMEWORK_DIR is read-only). Today unittest discover runs them strictly
+sequentially (~15–45 min per full pass). Future improvement: parallelize by test file or via
+LR_LIFECYCLE_JOBS (ProcessPoolExecutor), or run engines in separate terminals. Cap concurrency
+to avoid API rate limits. See lore `lifecycle-harness-parallelization.md`.
 """
 
 import json
@@ -27,14 +34,22 @@ FRAMEWORK_DIR = os.path.abspath(
     os.environ.get("LR_FRAMEWORK_DIR", os.path.join(HERE, "..", "..", "..", "lore-framework"))
 )
 ENGINE = os.environ.get("LR_ENGINE", "claude")
-MODEL = os.environ.get("LR_TEST_MODEL", "sonnet")
+MODEL = os.environ.get(
+    "LR_TEST_MODEL",
+    "gpt-5.4-mini" if ENGINE == "codex" else "sonnet",
+)
 RUN_TIMEOUT = int(os.environ.get("LR_RUN_TIMEOUT", "420"))
 
 LIFECYCLE_ENABLED = os.environ.get("LR_LIFECYCLE") == "1"
-ENGINE_AVAILABLE = shutil.which(ENGINE) is not None
+ENGINE_BIN = {
+    "claude": "claude",
+    "codex": "codex",
+    "cursor": "cursor-agent",
+}.get(ENGINE, ENGINE)
+ENGINE_AVAILABLE = shutil.which(ENGINE_BIN) is not None
 SKIP_REASON = (
     "lifecycle tests disabled (set LR_LIFECYCLE=1)" if not LIFECYCLE_ENABLED
-    else f"engine binary '{ENGINE}' not on PATH" if not ENGINE_AVAILABLE
+    else f"engine binary '{ENGINE_BIN}' not on PATH" if not ENGINE_AVAILABLE
     else ""
 )
 
@@ -155,6 +170,114 @@ UPDATE_DRYRUN_PROMPT = (
 )
 
 
+def _codex_boot_prompt(agent_name, extra):
+    """Codex's reliable path is doc-driven rather than slash-skill dispatch."""
+    return (
+        f"Read the file at '{FRAMEWORK_DIR}/docs/agent-boot.md' and boot as lore agent "
+        f"'{agent_name}'. Follow the boot procedure exactly. {extra}"
+    )
+
+
+def codex_prompt(prompt):
+    """Translate engine-neutral harness prompts into the Codex doc-driven path."""
+    if prompt == BOOT_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            "After boot completes, print two lines:\n"
+            "BOOT-CODEWORD: <the boot codeword stated in your role>\n"
+            "CONTEXT-CODEWORD: <the context codeword stated in your lore-context>\n"
+            "If boot fails, print BOOT-FAILED followed by the reason. "
+            "Do not reflect, merge, finalize, commit, or push.",
+        )
+    if prompt == RECALL_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            f"Once booted, read '{FRAMEWORK_DIR}/docs/recall.md' and follow it with hint "
+            "\"build tool\" to search your lore. Print the synthesis verbatim. "
+            "Do not reflect, merge, finalize, commit, or push.",
+        )
+    if prompt == REFLECT_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            "During this session you learned a new fact: the fixture project's deployment "
+            f"tool is called '{REFLECT_TOOL_CANARY}', replacing the previous tool "
+            "'ristretto-ci' because of faster rollback times. Then read "
+            f"'{FRAMEWORK_DIR}/docs/process-reflection.md' and follow it to reflect on this "
+            "session and capture that fact as a reflection topic. After reflection completes, "
+            "print DONE. Do not merge, finalize, commit, or push.",
+        )
+    if prompt == MERGE_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            "A reflection topic already exists in your reflections/ directory, ready to be "
+            f"integrated. Read '{FRAMEWORK_DIR}/docs/process-merge.md' and follow it to "
+            "integrate that reflection into your lore. After merge completes, print DONE. "
+            "Do not finalize, commit, or push.",
+        )
+    if prompt == BOOT_UNKNOWN_PROMPT:
+        return _codex_boot_prompt(
+            "does-not-exist-agent",
+            "If boot fails, print BOOT-FAILED followed by the reason and the list of "
+            "available agents.",
+        )
+    if prompt == CONSULT_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            f"Once booted, read '{FRAMEWORK_DIR}/docs/consult.md' and follow it to consult "
+            f"'{HELPER_AGENT_NAME}' with hint \"caching layer\". Print the consultant's "
+            "synthesis verbatim. Do not reflect, merge, finalize, commit, or push.",
+        )
+    if prompt == ATTACH_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            f"Once booted, read '{FRAMEWORK_DIR}/docs/attach.md' and follow it to attach "
+            f"'{HELPER_AGENT_NAME}' as a guest. Then read '{FRAMEWORK_DIR}/docs/recall.md' and "
+            "follow it with hint \"caching layer\" to search lore across active agents. Print "
+            "the attach confirmation and the recall synthesis verbatim. Do not reflect, merge, "
+            "finalize, commit, or push.",
+        )
+    if prompt == SUMMARIZE_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            "Then use the Write tool to create a file at workdir/session-note.md containing "
+            "the text 'fixture session note'. Then read "
+            f"'{FRAMEWORK_DIR}/docs/summarize.md' and follow it to write a session summary for "
+            "this session. Do not reflect, merge, finalize, commit, or push.",
+        )
+    if prompt == FINALIZE_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            "During this session you learned a new fact: the fixture project's monitoring "
+            f"tool is called '{FINALIZE_TOOL_CANARY}', replacing the previous tool because of "
+            f"better alerting. Then read '{FRAMEWORK_DIR}/docs/finalize.md' and follow it to "
+            "run the full session finalization: reflect, merge, summarize, then commit and push. "
+            "Print DONE when finalize completes.",
+        )
+    if prompt == CREATE_REPO_PROMPT:
+        return (
+            f"Read '{FRAMEWORK_DIR}/docs/create-repo.md' and follow it to scaffold a new lore "
+            "agent repo named 'new-fixture-repo' in this workspace. If a description is needed, "
+            "use 'Fixture repo created by lifecycle tests'. Do not ask for confirmation. Print "
+            "DONE when complete."
+        )
+    if prompt == CREATE_AGENT_PROMPT:
+        return (
+            f"Read '{FRAMEWORK_DIR}/docs/create-agent.md' and follow it to add a new agent "
+            "named 'second-fixture-agent' to the existing lore agent repo in this workspace. "
+            "Its responsibility: 'Handles fixture testing tasks.' Do not ask for confirmation. "
+            "Print DONE when complete."
+        )
+    if prompt == INIT_PROMPT:
+        return f"Read '{FRAMEWORK_DIR}/docs/init.md' and follow it in this directory. Print DONE when complete."
+    if prompt == WORKSPACE_SYNC_PROMPT:
+        return f"Read '{FRAMEWORK_DIR}/docs/workspace-sync.md' and follow it in this workspace. Print DONE when complete."
+    if prompt == CHECK_PROMPT:
+        return f"Read '{FRAMEWORK_DIR}/docs/check.md' and follow it to run consistency checks across this workspace. Print the full report verbatim."
+    if prompt == UPDATE_DRYRUN_PROMPT:
+        return f"Read '{FRAMEWORK_DIR}/docs/update.md' and follow it with --dry-run in this workspace. Print the full report verbatim."
+    return prompt
+
+
 def _git(repo, *args, check=True):
     """Run git against a repo path without cd (CWD safety)."""
     return subprocess.run(
@@ -188,6 +311,12 @@ class Fixture:
 def framework_version():
     with open(os.path.join(FRAMEWORK_DIR, "VERSION")) as f:
         return f.read().strip()
+
+
+def memory_file_name():
+    if ENGINE in ("codex", "cursor"):
+        return "AGENTS.md"
+    return "CLAUDE.md"
 
 
 def build_fixture(tmpdir, version=None, second_agent=False):
@@ -398,19 +527,64 @@ class RunResult:
 
 def run_engine(workspace, prompt):
     """Run the engine headless in `workspace` and return a RunResult."""
-    if ENGINE != "claude":
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
+    if ENGINE == "claude":
+        cmd = [
+            "claude", "-p", prompt,
+            "--plugin-dir", FRAMEWORK_DIR,
+            "--model", MODEL,
+            "--output-format", "json",
+            "--dangerously-skip-permissions",
+        ]
+        proc = subprocess.run(
+            cmd, cwd=workspace, capture_output=True, text=True, timeout=RUN_TIMEOUT,
+            env=env,
+        )
+    elif ENGINE == "cursor":
+        cmd = [
+            "cursor-agent", "-p", prompt,
+            "--plugin-dir", FRAMEWORK_DIR,
+            "--model", MODEL,
+            "--output-format", "json",
+            "--force",
+            "--trust",
+            "--sandbox", "disabled",
+            "--workspace", workspace,
+        ]
+        proc = subprocess.run(
+            cmd, cwd=workspace, capture_output=True, text=True, timeout=RUN_TIMEOUT,
+            env=env, stdin=subprocess.DEVNULL,
+        )
+    elif ENGINE == "codex":
+        prompt = codex_prompt(prompt)
+        with tempfile.NamedTemporaryFile(mode="w+", encoding="utf-8", delete=False) as f:
+            output_last_message = f.name
+        try:
+            cmd = [
+                "codex", "exec", prompt,
+                "-C", workspace,
+                "--model", MODEL,
+                "--skip-git-repo-check",
+                "--dangerously-bypass-approvals-and-sandbox",
+                "--json",
+                "--output-last-message", output_last_message,
+            ]
+            proc = subprocess.run(
+                cmd, cwd=workspace, capture_output=True, text=True, timeout=RUN_TIMEOUT,
+                env=env, stdin=subprocess.DEVNULL,
+            )
+            text = proc.stdout
+            if os.path.exists(output_last_message):
+                with open(output_last_message, encoding="utf-8", errors="ignore") as fh:
+                    text = fh.read() or proc.stdout
+        finally:
+            try:
+                os.unlink(output_last_message)
+            except FileNotFoundError:
+                pass
+        return RunResult(proc.returncode, text or "", None, None, proc.stderr)
+    else:
         raise NotImplementedError(f"no driver for engine '{ENGINE}' yet")
-    cmd = [
-        "claude", "-p", prompt,
-        "--plugin-dir", FRAMEWORK_DIR,
-        "--model", MODEL,
-        "--output-format", "json",
-        "--dangerously-skip-permissions",
-    ]
-    proc = subprocess.run(
-        cmd, cwd=workspace, capture_output=True, text=True, timeout=RUN_TIMEOUT,
-        env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
-    )
     text, cost, duration = proc.stdout, None, None
     try:
         payload = json.loads(proc.stdout)

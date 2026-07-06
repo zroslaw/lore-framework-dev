@@ -20,7 +20,7 @@ from harness import (
     AGENT_NAME, BROKEN_REF, CHECK_PROMPT, CREATE_AGENT_PROMPT, CREATE_REPO_PROMPT,
     INIT_PROMPT, SKIP_REASON, UPDATE_DRYRUN_PROMPT, WORKSPACE_SYNC_PROMPT,
     build_empty_workspace, build_fixture, declare_sibling_repo, head,
-    make_origin_ahead, read_repo_version, run_engine, seed_broken_reference,
+    make_origin_ahead, memory_file_name, read_repo_version, run_engine, seed_broken_reference,
 )
 
 
@@ -67,15 +67,15 @@ class RepoWorkspaceScenarios(unittest.TestCase):
             )
 
     def test_18_init(self):
-        """init writes the marker-delimited framework section into workspace CLAUDE.md."""
+        """init writes the marker-delimited framework section into the engine's memory file."""
         workspace = build_empty_workspace(self.tmp)
         r = run_engine(workspace, INIT_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
 
-        claude_md = os.path.join(workspace, "CLAUDE.md")
-        self.assertTrue(os.path.isfile(claude_md), "CLAUDE.md was not created")
-        with open(claude_md) as f:
+        memory_file = os.path.join(workspace, memory_file_name())
+        self.assertTrue(os.path.isfile(memory_file), f"{memory_file_name()} was not created")
+        with open(memory_file) as f:
             content = f.read()
         self.assertIn("<!-- lr:init:start -->", content)
         self.assertIn("<!-- lr:init:end -->", content)
