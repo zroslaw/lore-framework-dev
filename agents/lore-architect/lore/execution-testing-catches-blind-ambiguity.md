@@ -17,6 +17,24 @@ Full case study, fixes, and the debugging technique that pinpointed both (tracin
 
 This is why the lifecycle testing harness has standing value **before** either engine port ships, not just as a port-readiness gate — it's a live doc-fidelity check on Claude Code's own procedures. It is now the second, empirical leg of pre-ship review discipline: for any release that changes a procedure doc the harness covers, run the relevant lifecycle scenarios against real engine execution (ideally at more than one model tier) before shipping, in addition to — not instead of — multi-lens prose review. See `role.md` § Lore-Curation Disciplines.
 
+## Pre-ship = pre-push, and it's the *complete* suite
+
+A sharpening from the v21 ship (2026-07-06). I shipped v21, then proposed running the paid lifecycle
+suite "after / on request," having gated the pre-push check to a proportionate subset (deterministic
+`test_wait.py` + `/lr:check` + a single boot smoke). The user corrected twice: "You had to do it
+before the push" and "run all tests before we ship."
+
+- **Pre-ship means pre-push.** The push is the irreversible delivery step; "ship it if ok" presumes
+  "ok" was *fully* established beforehand. The last gate before `commit + push` is the empirical
+  suite, not a promise to run it afterward.
+- **The gate is the complete suite, not a subset.** Proportionality reasoning ("v21 doesn't touch
+  the procedures those scenarios exercise, so skip them") is a *review-time* judgment — it is not a
+  substitute for running the gate the user considers part of shipping. A green subset is not the
+  ship signal when a fuller suite exists and can run.
+- **Treat the gated/paid engine cost as part of the ship**, not a reason to defer. The full run is
+  ~$9–10 / ~25–30 min (v21 reference: 42/42, ~$9.4, ~27 min). Run it in the background, wait, push
+  only on green. See `lifecycle-testing-harness.md`, `versioning-release-types.md`.
+
 ## The weak-model sharpening
 
 The execution-fidelity leg of this principle has a named, sharper form: **the weakest available model (haiku) is an *ambiguity detector*.** Where it stumbles, the doc is usually under-specified — a stronger model silently resolves the gap. The operative bar is therefore not "works on sonnet" but "explanatory enough that even haiku executes it faithfully," which doubles as a port-readiness bar (non-Claude engines are also not top-tier). See `haiku-ambiguity-detector.md` for the principle, its concrete instance (the defer-clarity fix), and the generalizable "put reassurance adjacent to the alarming message" rule.

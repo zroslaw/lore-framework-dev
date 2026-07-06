@@ -1,7 +1,8 @@
 # Cursor Dual Skill Tree (One Repo)
 
-Shipped pattern for Cursor skill naming without breaking Claude Code — **implemented in canonical
-`lore-framework` source as v21 (2026-07-05); local only until the framework remote is pushed.**
+Shipped pattern for Cursor skill naming without breaking Claude Code — **SHIPPED in canonical
+`lore-framework` as v21 (commit `f7b1c2b`, manifests `1.21.0`, `release-notes/21.md`, 2026-07-06)
+and full-harness-verified against the real v21 tree.**
 
 ## Problem
 
@@ -49,12 +50,12 @@ delete when convenient.
 
 ## Validation status (2026-07-06)
 
-Implemented locally but **not fully harness-regression-tested** against v21 before the framework
-remote push. Verified: `test_wait.py` (23/23), `scripts/sync-cursor-skills` parity (27/27), manual
-`cursor-agent --plugin-dir` skill list. Not verified: full lifecycle suite on Cursor/Claude/Codex
-with `LR_FRAMEWORK_DIR` pointing at the v21 tree. A Claude/haiku run reached 12/19 before
-interruption on finalize e2e. Treat as **implemented but unverified** until at least boot + one
-write-path scenario passes on Cursor; push framework v21 to remote only after that.
+**Full-harness-verified before the ship** — the prior "implemented but unverified" caveat is
+retired. The complete lifecycle suite passed **19/19** scenarios + 23 deterministic = **42/42** on
+the `claude` engine (~$9.4, ~27 min); `/lr:check` #19/#20/#21 clean; `sync-cursor-skills` confirmed
+idempotent (regenerates identically). Running the *complete* suite (not a proportionate subset) as
+the last gate before push is the discipline this ship reinforced — see
+`execution-testing-catches-blind-ambiguity.md` (pre-ship = pre-push).
 
 ## See also
 

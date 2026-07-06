@@ -23,6 +23,14 @@ Deliberately deferred:
 
 Both need more scaffolding than the rest and weren't worth rushing.
 
+**Full-suite ship gate (v21, 2026-07-06):** the complete suite ran as the last gate before the v21
+push — **19/19** lifecycle scenarios + 23 deterministic = **42/42** on the `claude` engine (~$9.4,
+~27 min). This is the reference cost/time for a full pre-push run, and reinforces that the gate is
+the *complete* suite, not a proportionate subset (see `execution-testing-catches-blind-ambiguity.md`
+§ pre-ship = pre-push). The v21 ship also folded in engine-neutral driver support:
+`harness.py` cursor + codex branches plus an engine-neutral `memory_file_name()` (dev commit
+`73876d1`).
+
 Out of scope for this harness (covered elsewhere or not headless-scriptable):
 - Tier 2 `wait`/`emit` — already covered at the protocol level by the pre-existing `test_wait.py`; a lifecycle-level duplicate adds little.
 - `spawn-teammate` — not headless-scriptable (multi-pane UI).

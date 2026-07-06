@@ -53,8 +53,10 @@ Every surveyed competitor is bound to one engine (Claude Code) or to a vendor-ho
 
 **Codex port SHIPPED in canonical `lore-framework` as v19** (commit `72b1b2a`, manifests `1.19.0`,
 pushed 2026-07-05). **Cursor engine profile SHIPPED in canonical `lore-framework` as v20**
-(commit `5cbb967`, manifests `1.20.0`, pushed 2026-07-05). Two full workdir drafts anchored the
-work; both Tier-1 engine-profile legs are now landed. Trajectory:
+(commit `5cbb967`, manifests `1.20.0`, pushed 2026-07-05). **Cursor dual skill tree SHIPPED as v21**
+(commit `f7b1c2b`, manifests `1.21.0`, 2026-07-06) — the last packaging gap for mixed-engine teams
+sharing one repo, fixing Cursor's picker showing raw folder names (`cursor-dual-skill-tree-one-repo.md`).
+Two full workdir drafts anchored the work; both Tier-1 engine-profile legs are now landed. Trajectory:
 
 - **Coupling inventory + tiering complete** — the full "real list" (5 adapter bindings; Tier A/B/C) exists in `claude-coupling-inventory-and-port-tiers.md` (durable summary) and `workdir/claude-specific-inventory.md` (full per-site).
 - **Full engine-profile binding IMPLEMENTED and VALIDATED end-to-end on real Codex** (2026-07-05, in the sibling `lore-framework-codex` build) — the `docs/engines/` convention (all five bindings, Boot Step-0 engine selection) passes on `codex exec`: profile selection, framework-root self-location (zero `${CLAUDE_PLUGIN_ROOT}` leak), and native `spawn_agent` fan-out for **both** recall and merge (host-reads-steps override). The Tier-B subagent nucleus — the part most feared — is proven. The test's `.git`-sandbox commit block is now a documented launch/configuration requirement for the supported finalization path. See `docs-engines-convention.md`, `codex-port-validated-end-to-end.md`, `codex-native-multi-agent-subsystem.md`, `codex-git-sandbox-blocks-dotgit.md`, `codex-testing-methodology.md`.
@@ -71,6 +73,12 @@ work; both Tier-1 engine-profile legs are now landed. Trajectory:
   **superseded and deletable**. The matching lifecycle-harness support in
   `lore-framework-dev/tests/` remains a separate dev-repo change outside finalize's `agents/`
   commit scope. See `cursor-port-validated-end-to-end.md`, `cursor-cli-and-harness-operational-notes.md`.
+- **Cursor dual skill tree landed into canonical v21** — one repo now carries both engines' skill
+  namespaces (Claude Code loads canonical `skills/<skill>/` → `/lr:<skill>`; Cursor loads 27
+  prefixed wrappers `skills/cursor/lr-<skill>/` → `/lr-<skill>` via `.cursor-plugin/plugin.json`),
+  plus `scripts/sync-cursor-skills` and `/lr:check` #21 (cursor-tree parity). Full-harness-verified
+  before push: **42/42** on `claude` (19/19 lifecycle + 23 deterministic). See
+  `cursor-dual-skill-tree-one-repo.md`, `lifecycle-testing-harness.md`.
 - **Manual trial guides in workdir**: `workdir/first-steps-codex.md` (verified) and
   `workdir/first-steps-cursor.md` (still useful as the original manual recipe, now superseded by
   the shipped v20 Cursor profile and harness run).

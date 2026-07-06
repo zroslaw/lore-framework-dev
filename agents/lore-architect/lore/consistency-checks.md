@@ -1,4 +1,4 @@
-`/lr:check` runs 20 consistency checks. Defined in `${CLAUDE_PLUGIN_ROOT}/docs/check.md`.
+`/lr:check` runs 21 consistency checks. Defined in `<framework-root>/docs/check.md`.
 
 > **Naming note (a v14 near-miss — see `verify-before-acting-on-suspected-bugs.md`):** the plugin catalog doc is **`docs/check.md`**, NOT `consistency-checks.md`. `consistency-checks.md` is *this lore topic's* name only. `skills/check/SKILL.md` correctly points at `docs/check.md`. Don't "fix" the skill to repoint it — verify on disk first.
 
@@ -42,7 +42,12 @@
     - **20.3 — body content shape:** the fenced body is either an accepted empty-write-set sentinel (`(none)`, optionally followed by space/hyphen/em-dash + prose; or an empty fenced block) or one or more glob tokens drawn from the canonical character class declared in `conventions.md` § Migration Write Paths § Glob token grammar. A malformed body silently produces an empty write-set, which the gate treats as "no collisions possible" — the worst-case false-positive (proceeds when it shouldn't).
     All three substeps land at error because each failure mode degrades the gate the same way (blanket-dirty fallback or silently-empty write-set); severity is graduated by blast radius and they all sit at the high end. Enforces the v15 `dirty-tree-gates-write-vs-read-distinction.md` write-set declaration discipline. See `conventions.md` § Migration Write Paths.
 
-**History:** originally 17 checks. Migration 2 dropped the agent-level version check (old check 6) because `role.md` no longer carries a `version` field — subsequent checks renumbered down by one, leaving 16. Migration 5 added checks 17 and 18 for drift detection. v14 added check 19 (plugin manifest version) — the first non-migration check addition (release-notes-only ship). v15 added check 20 (migration write-paths declaration) — also release-notes-only.
+**Cursor dual skill tree (21, added v21):**
+21. Cursor-tree parity — verifies the `skills/cursor/lr-<skill>/` wrapper tree stays 1:1 with the canonical `skills/<skill>/` tree (the dual-skill-tree pattern in `cursor-dual-skill-tree-one-repo.md`). Checks: a wrapper exists for every canonical skill and vice versa (orphan detection), each wrapper's frontmatter `name` is `lr-<skill>`, self-location says "three levels up," invocation-syntax matches, and no content drift between wrapper and canonical intent. Enforces that `scripts/sync-cursor-skills` was re-run after any skill add/rename. Release-notes-only ship. See `cursor-dual-skill-tree-one-repo.md`.
+
+**History:** originally 17 checks. Migration 2 dropped the agent-level version check (old check 6) because `role.md` no longer carries a `version` field — subsequent checks renumbered down by one, leaving 16. Migration 5 added checks 17 and 18 for drift detection. v14 added check 19 (plugin manifest version) — the first non-migration check addition (release-notes-only ship). v15 added check 20 (migration write-paths declaration) — also release-notes-only. v21 added check 21 (cursor-tree parity) — release-notes-only.
+
+**Candidate check (not yet implemented):** a version-history-completeness check — assert `versioning-release-types.md` has a history entry for every `release-notes/<N>.md` / `migrations/<N>.md` on disk. Surfaced by the v21 gap (both v20 and v21 entries were missing, the backfill discipline having silently slipped at v20). Would make the version-history-backfill discipline self-healing instead of relying on per-ship diligence. See `versioning-release-types.md` § Backfill discipline.
 
 Key principle: git history is the metadata layer for temporal checks — no embedded timestamps in files.
 

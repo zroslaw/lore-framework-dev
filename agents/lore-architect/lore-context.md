@@ -58,11 +58,11 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` (currently **20** — shipped & pushed) is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. See `versioning-release-types.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
+`lore-framework/VERSION` (currently **21** — shipped & pushed) is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. See `versioning-release-types.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
 
 ## Consistency & Diagnostics
 
-- **`/lr:check`** — 20 content-consistency checks (descriptor/version, structure, references, size/state, drift, plugin-manifest #19, migration write-paths #20). See `consistency-checks.md`.
+- **`/lr:check`** — 21 content-consistency checks (descriptor/version, structure, references, size/state, drift, plugin-manifest #19, migration write-paths #20, cursor-tree parity #21). See `consistency-checks.md`.
 - **`/lr:doctor`** — diagnoses runtime/environmental issues that escape content checks (esp. stale plugin cache) via an accreting ailment catalog. See `ailment-catalog-pattern.md`.
 
 ## Operating Disciplines
@@ -122,7 +122,14 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   **serial host-side** override rather than an unverified native fan-out claim. That smaller claim
   was enough for the real local Cursor installation to pass the full implemented lifecycle catalog
   (`19/19`) before landing. The separate `lore-framework-cursor/` sibling is now superseded and
-  deletable. Matching lifecycle-harness support in `lore-framework-dev/tests/` remains a separate
+  deletable. **The Cursor dual skill tree SHIPPED in v21** (commit `f7b1c2b`, manifests `1.21.0`,
+  `release-notes/21.md`): one repo carries both engines' skill namespaces — Claude loads canonical
+  `skills/<skill>/` (`/lr:<skill>`), Cursor loads 27 prefixed wrappers `skills/cursor/lr-<skill>/`
+  (`/lr-<skill>`) via `.cursor-plugin/plugin.json`, plus `scripts/sync-cursor-skills` and
+  `/lr:check` #21 (cursor-tree parity) — closing the last mixed-engine packaging gap (Cursor's
+  picker showing raw folder names). Full-harness-verified before push: **42/42** on `claude` (19/19
+  lifecycle + 23 deterministic, ~$9.4/~27 min). See `cursor-dual-skill-tree-one-repo.md`. Matching
+  lifecycle-harness support in `lore-framework-dev/tests/` remains a separate
   dev-repo change outside finalize's `agents/` commit scope. Remaining deferred Claude-first
   surfaces: `lr-wait` `.mcp.json`, DF/AIQA + `migrations/*`, Codex shortcut lifecycle validation,
   rollout-log-backed Codex harness assertions, and any stronger Cursor-native parallel story. The dominant
@@ -143,26 +150,30 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
 
 ## Current State
 
-Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 20 — shipped &
+Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 21 — shipped &
   pushed**; public at github.com/zroslaw/lore-framework), **`lore-framework-dev/`** (this repo —
-  framework-dev agents; a workspace-root sibling at github.com/zroslaw/lore-framework-dev), and
+  framework-dev agents, now **stamped 21**; a workspace-root sibling at
+  github.com/zroslaw/lore-framework-dev), and
 **`lore-agents/`** (personal agents: tax-advisor, masschallenge-judge). The multi-engine port that
 was staged in the no-remote **`lore-framework-codex/`** sibling landed in canonical v19 — that
 sibling is now **superseded and deletable** (see `port-landing-next-steps.md`). The separate
 **`lore-framework-cursor/`** sibling likewise landed in canonical v20 and is now **superseded and
-deletable**. Local framework source also has **v21 dual skill tree** (2026-07-05, not pushed to
-remote): `skills/cursor/lr-*/` + `.cursor-plugin/` fixes Cursor picker namespace — see
-`cursor-dual-skill-tree-one-repo.md` (implemented but not yet full-harness-verified against v21). The plugin bundles its first MCP server (`lr-wait`, v18) and carries its first
+deletable**. The plugin bundles its first MCP server (`lr-wait`, v18) and carries its first
 `python3` dependency; v19 shipped the Codex port (`docs/engines/`, `<framework-root>`
-self-location) and three style skills, and v20 shipped the Cursor engine profile. Dev-only tests
+self-location) and three style skills, v20 shipped the Cursor engine profile, and **v21 shipped the
+Cursor dual skill tree** (`skills/cursor/lr-*/` + `.cursor-plugin/`, `scripts/sync-cursor-skills`,
+`/lr:check` #21) — full-harness-verified before push. The v21 dev-repo stamp folded in a stranded
+uncommitted 19→20 stamp that boot correctly deferred on (dirty `lore-repo.md` ∩ upgrade write-set —
+a live confirmation of the write-aware gate against a real half-landed stamp). Dev-only tests
 live here in `lore-framework-dev/tests/`, not in the plugin — including the multi-engine lifecycle
-testing harness (`tests/lifecycle/`, 19/21 Tier-1 scenarios on Claude Code, 19/19 implemented
-scenarios on the real local Cursor run that fed the v20 ship, and 6/6 boot on haiku against v19,
-gated behind `LR_LIFECYCLE=1`; see `lifecycle-testing-harness.md`). The harness now also has a
-doc-driven Codex branch for local smoke coverage; it does not rely on a preinstalled Codex plugin,
-but the host launching `codex exec` must allow writes to `~/.codex/` or the run dies before
-entering the fixture repo. Matching harness changes are a separate dev-repo concern outside
-finalize's `agents/` commit scope. ~104 lore topics.
+testing harness (`tests/lifecycle/`, 19/21 Tier-1 scenarios; the **complete suite ran 42/42 on the
+`claude` engine** — 19/19 lifecycle + 23 deterministic, ~$9.4/~27 min — as the last gate before the
+v21 push; also 6/6 boot on haiku against v19, gated behind `LR_LIFECYCLE=1`; see
+`lifecycle-testing-harness.md`). The harness now has engine-neutral driver support (cursor + codex
+branches, engine-neutral `memory_file_name()`); its doc-driven Codex branch does not rely on a
+preinstalled Codex plugin, but the host launching `codex exec` must allow writes to `~/.codex/` or
+the run dies before entering the fixture repo. Matching harness changes are a separate dev-repo
+concern outside finalize's `agents/` commit scope. ~104 lore topics.
 
 ## Running Backlog
 
