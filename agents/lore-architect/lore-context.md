@@ -152,7 +152,7 @@ sibling is now **superseded and deletable** (see `port-landing-next-steps.md`). 
 **`lore-framework-cursor/`** sibling likewise landed in canonical v20 and is now **superseded and
 deletable**. Local framework source also has **v21 dual skill tree** (2026-07-05, not pushed to
 remote): `skills/cursor/lr-*/` + `.cursor-plugin/` fixes Cursor picker namespace — see
-`cursor-dual-skill-tree-one-repo.md`. The plugin bundles its first MCP server (`lr-wait`, v18) and carries its first
+`cursor-dual-skill-tree-one-repo.md` (implemented but not yet full-harness-verified against v21). The plugin bundles its first MCP server (`lr-wait`, v18) and carries its first
 `python3` dependency; v19 shipped the Codex port (`docs/engines/`, `<framework-root>`
 self-location) and three style skills, and v20 shipped the Cursor engine profile. Dev-only tests
 live here in `lore-framework-dev/tests/`, not in the plugin — including the multi-engine lifecycle

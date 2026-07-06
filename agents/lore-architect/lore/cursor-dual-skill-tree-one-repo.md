@@ -47,8 +47,18 @@ python3 scripts/sync-cursor-skills
 The separate `lore-framework-cursor/` sibling that renamed top-level skill folders is superseded —
 delete when convenient.
 
+## Validation status (2026-07-06)
+
+Implemented locally but **not fully harness-regression-tested** against v21 before the framework
+remote push. Verified: `test_wait.py` (23/23), `scripts/sync-cursor-skills` parity (27/27), manual
+`cursor-agent --plugin-dir` skill list. Not verified: full lifecycle suite on Cursor/Claude/Codex
+with `LR_FRAMEWORK_DIR` pointing at the v21 tree. A Claude/haiku run reached 12/19 before
+interruption on finalize e2e. Treat as **implemented but unverified** until at least boot + one
+write-path scenario passes on Cursor; push framework v21 to remote only after that.
+
 ## See also
 
 - `slash-command-system.md` — cross-engine invocation table
 - `cursor-port-validated-end-to-end.md` — v20 engine profile landing
 - `docs/engines/cursor.md` — invocation-syntax binding
+- `lifecycle-testing-harness.md` — regression gate before shipping v21
