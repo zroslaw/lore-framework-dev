@@ -81,7 +81,7 @@ Two full workdir drafts anchored the work; both Tier-1 engine-profile legs are n
   commit scope. See `cursor-port-validated-end-to-end.md`, `cursor-cli-and-harness-operational-notes.md`.
 - **Cursor dual skill tree landed into canonical v21** — one repo now carries both engines' skill
   namespaces (Claude Code loads canonical `skills/<skill>/` → `/lr:<skill>`; Cursor loads 27
-  prefixed wrappers `skills/cursor/lr-<skill>/` → `/lr-<skill>` via `.cursor-plugin/plugin.json`),
+  prefixed wrappers `.cursor-skills/lr-<skill>/` → `/lr-<skill>` via `.cursor-plugin/plugin.json`),
   plus `scripts/sync-cursor-skills` and `/lr:check` #21 (cursor-tree parity). Full-harness-verified
   before push: **42/42** on `claude` (19/19 lifecycle + 23 deterministic). See
   `cursor-dual-skill-tree-one-repo.md`, `lifecycle-testing-harness.md`.
@@ -89,6 +89,11 @@ Two full workdir drafts anchored the work; both Tier-1 engine-profile legs are n
   `INSTALL-CURSOR.md`, `scripts/codex-refresh-plugin`, and engine-specific `R > F`
   version-mismatch guidance. The directly affected Codex lifecycle path gained its own targeted
   scenario and was rerun on `gpt-5.4-mini` before push.
+- **v23 follow-up shipped in canonical `lore-framework`** — the Cursor wrapper side moved from
+  `skills/cursor/` to the hidden `.cursor-skills/` root after real Codex validation showed the old
+  wrapper tree was still being surfaced as redundant `lr:lr-*` skills. The practical verification
+  loop for plugin-layout changes is now: update repo, refresh the installed Codex plugin, then
+  rerun a real skill-count check.
 - **Manual trial guides in workdir**: `workdir/first-steps-codex.md` (verified) and
   `workdir/first-steps-cursor.md` (still useful as the original manual recipe, now superseded by
   the shipped v20 Cursor profile and harness run).

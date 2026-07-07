@@ -66,7 +66,7 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` (currently **22** — shipped & pushed) is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. v22 is release-notes-only: top-level engine install guides, explicit Codex/Cursor refresh notes, and engine-specific `R > F` guidance. See `versioning-release-types.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
+`lore-framework/VERSION` (currently **23** — shipped & pushed) is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. v22 was release-notes-only: top-level engine install guides, explicit Codex/Cursor refresh notes, and engine-specific `R > F` guidance. **v23** is release-notes-only too: it hides Cursor's wrapper tree from Codex by moving wrappers into `.cursor-skills/`, leaving Cursor's `/lr-<skill>` surface intact while removing Codex's redundant `lr:lr-*` skills. See `versioning-release-types.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
 
 ## Consistency & Diagnostics
 
@@ -132,7 +132,7 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   (`19/19`) before landing. The separate `lore-framework-cursor/` sibling is now superseded and
   deletable. **The Cursor dual skill tree SHIPPED in v21** (commit `f7b1c2b`, manifests `1.21.0`,
   `release-notes/21.md`): one repo carries both engines' skill namespaces — Claude loads canonical
-  `skills/<skill>/` (`/lr:<skill>`), Cursor loads 27 prefixed wrappers `skills/cursor/lr-<skill>/`
+  `skills/<skill>/` (`/lr:<skill>`), Cursor loads 27 prefixed wrappers `.cursor-skills/lr-<skill>/`
   (`/lr-<skill>`) via `.cursor-plugin/plugin.json`, plus `scripts/sync-cursor-skills` and
   `/lr:check` #21 (cursor-tree parity) — closing the last mixed-engine packaging gap (Cursor's
   picker showing raw folder names). Full-harness-verified before push: **42/42** on `claude` (19/19
@@ -156,15 +156,18 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   guides (`INSTALL-CODEX.md`, `INSTALL-CURSOR.md`), a Codex refresh helper, and engine-specific
   `R > F` guidance — plus the durable per-engine hub topics `claude-engine-capabilities.md`,
   `codex-engine-capabilities.md`, and `cursor-engine-capabilities.md` so future engine work starts
-  from a stable operational map rather than scattered probes.
+  from a stable operational map rather than scattered probes. **v23** then tightened the Cursor
+  packaging: the wrapper side moved from `skills/cursor/` into `.cursor-skills/` because Codex was
+  recursively surfacing the old tree as `lr:lr-*` duplicates; the practical verification loop is
+  now "update repo → refresh installed Codex plugin → re-run a real skill-count check."
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** review item — active follow-ups from the 2026-06-13 architecture review; see `framework-improvements-backlog.md`. That review's settled dispositions (incl. DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in `architecture-review-dispositions.md`. A newer 2026-07-02 review added two further backlog items (post-merge diff verification, recall-time staleness surfacing) — see `framework-improvements-backlog.md` § Merge Quality, § Search / Scaling.
 - Parked: workdir-as-reference-library; vector-DB search (until >100 topics/agent); the session-as-durable-artifact cluster (boot auto-push, boot-context cache, suspend/resume, JSONL archive). All in `framework-improvements-backlog.md`.
 
 ## Current State
 
-Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 22 — shipped &
+Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 23 — shipped &
   pushed**; public at github.com/zroslaw/lore-framework), **`lore-framework-dev/`** (this repo —
-  framework-dev agents, now **stamped 21**; a workspace-root sibling at
+  framework-dev agents, now **stamped 23**; a workspace-root sibling at
   github.com/zroslaw/lore-framework-dev), and
 **`lore-agents/`** (personal agents: tax-advisor, masschallenge-judge). The multi-engine port that
 was staged in the no-remote **`lore-framework-codex/`** sibling landed in canonical v19 — that
@@ -173,7 +176,7 @@ sibling is now **superseded and deletable** (see `port-landing-next-steps.md`). 
 deletable**. The plugin bundles its first MCP server (`lr-wait`, v18) and carries its first
 `python3` dependency; v19 shipped the Codex port (`docs/engines/`, `<framework-root>`
 self-location) and three style skills, v20 shipped the Cursor engine profile, and **v21 shipped the
-Cursor dual skill tree** (`skills/cursor/lr-*/` + `.cursor-plugin/`, `scripts/sync-cursor-skills`,
+Cursor dual skill tree** (`.cursor-skills/lr-*/` + `.cursor-plugin/`, `scripts/sync-cursor-skills`,
 `/lr:check` #21) — full-harness-verified before push. The v21 dev-repo stamp folded in a stranded
 uncommitted 19→20 stamp that boot correctly deferred on (dirty `lore-repo.md` ∩ upgrade write-set —
 a live confirmation of the write-aware gate against a real half-landed stamp). Dev-only tests
@@ -186,7 +189,9 @@ see
 `lifecycle-testing-harness.md`). The harness now has engine-neutral driver support (cursor + codex
 branches, engine-neutral `memory_file_name()`); its doc-driven Codex branch does not rely on a
 preinstalled Codex plugin, but the host launching `codex exec` must allow writes to `~/.codex/` or
-the run dies before entering the fixture repo. Matching harness changes are a separate dev-repo
+the run dies before entering the fixture repo. **v23** also validated a packaging edge the harness
+doesn't yet encode: Codex can keep loading a stale plugin cache and still show obsolete skill sets,
+so cache refresh is part of real-engine verification for plugin-layout changes. Matching harness changes are a separate dev-repo
 concern outside finalize's `agents/` commit scope. ~107 lore topics.
 
 ## Running Backlog

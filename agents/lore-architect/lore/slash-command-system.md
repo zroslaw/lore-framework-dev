@@ -6,7 +6,7 @@ per-agent shortcut artifacts follow each engine's native conventions.
 - `/lr-<agent-name>-agent` — optional per-agent boot commands, generated into `.claude/commands/`
 
 **Cursor plugin skill naming (folder = picker identity):**
-- `/lr-<action>` — same operations, prefixed wrappers under `skills/cursor/lr-<action>/`, loaded via `.cursor-plugin/plugin.json`. Canonical `skills/<action>/` stays for Claude Code. See `cursor-dual-skill-tree-one-repo.md`.
+- `/lr-<action>` — same operations, prefixed wrappers under `.cursor-skills/lr-<action>/`, loaded via `.cursor-plugin/plugin.json`. Canonical `skills/<action>/` stays for Claude Code. See `cursor-dual-skill-tree-one-repo.md`.
 
 Codex exposes optional per-agent autocomplete through engine-native personal skills:
 `~/.codex/skills/lr-<agent-name>-agent/SKILL.md`, invoked as `$lr-<agent-name>-agent`. Like the

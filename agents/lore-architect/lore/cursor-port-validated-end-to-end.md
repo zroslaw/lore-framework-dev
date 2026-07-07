@@ -42,7 +42,9 @@ Shipped-state implications:
 
 - the separate `lore-framework-cursor/` build is now **superseded and deletable**
 - **v21 (local, not pushed to framework remote, 2026-07-05)** adds the dual skill tree:
-  `skills/cursor/lr-*/`, `.cursor-plugin/plugin.json`, `scripts/sync-cursor-skills`, check #21.
+  initially `skills/cursor/lr-*/`, `.cursor-plugin/plugin.json`, `scripts/sync-cursor-skills`,
+  check #21. **v23** later relocates the wrapper side to `.cursor-skills/lr-*/` to keep the Cursor
+  wrappers out of Codex's plugin skill crawl without changing Cursor's `/lr-<skill>` surface.
   See `cursor-dual-skill-tree-one-repo.md`.
 - the matching lifecycle-harness support in `lore-framework-dev/tests/` remains a **separate
   dev-repo change** outside finalize's `agents/` commit scope

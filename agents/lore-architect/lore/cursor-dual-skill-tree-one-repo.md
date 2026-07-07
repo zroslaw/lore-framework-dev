@@ -21,17 +21,28 @@ Dual trees in one repo:
 | Engine | Path | User invokes |
 |---|---|---|
 | Claude Code | `skills/<skill>/` | `/lr:<skill>` |
-| Cursor | `skills/cursor/lr-<skill>/` | `/lr-<skill>` |
+| Cursor | `.cursor-skills/lr-<skill>/` | `/lr-<skill>` |
 
 Cursor discovery is scoped by `.cursor-plugin/plugin.json`:
 
 ```json
-"skills": "skills/cursor/"
+"skills": ".cursor-skills/"
 ```
 
 Each cursor wrapper is a thin `SKILL.md` pointer to the same `docs/<skill>.md` as the canonical
-skill. Differences only: `name: lr-<skill>`, description uses `/lr-<skill>`, self-location says
-**three** levels up (`skills/cursor/lr-<skill>/SKILL.md`).
+skill. Differences only: `name: lr-<skill>`, description uses `/lr-<skill>`, self-location points
+at `.cursor-skills/lr-<skill>/SKILL.md`.
+
+## v23 follow-up
+
+The original v21 landing stored the wrapper tree under `skills/cursor/`, which was sufficient for
+Cursor itself because `.cursor-plugin/plugin.json` scoped discovery there. A later Codex validation
+found that Codex still crawled the broader plugin tree and surfaced those wrappers as redundant
+`lr:lr-*` skills. **v23 keeps the same dual-tree idea but moves the Cursor side into the hidden
+top-level path `.cursor-skills/`** so Cursor can still load the wrappers explicitly while Codex no
+longer discovers them as first-class skills. The verification lesson is operational too: Codex can
+keep loading a stale cached plugin snapshot after the repo changes, so a packaging fix is not
+proven until the installed plugin is refreshed and a real Codex skill-count check is rerun.
 
 ## Maintenance
 
