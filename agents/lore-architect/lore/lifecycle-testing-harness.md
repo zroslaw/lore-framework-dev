@@ -31,6 +31,13 @@ the *complete* suite, not a proportionate subset (see `execution-testing-catches
 `harness.py` cursor + codex branches plus an engine-neutral `memory_file_name()` (dev commit
 `73876d1`).
 
+**Sibling track (2026-07-07):** a third test track, the quality benchmark
+(`lore-framework-dev/tests/quality/`, gated `LR_QUALITY=1`), measures **lore utilization** — did
+the lore make the output better — where this harness measures **procedure fidelity**. Same repo
+placement rule (outside finalize's `agents/` commit scope), same deterministic-first assertion
+discipline; it adds a pinned LLM judge only for the behavior stage. See
+`quality-benchmark-feature.md`.
+
 Out of scope for this harness (covered elsewhere or not headless-scriptable):
 - Tier 2 `wait`/`emit` — already covered at the protocol level by the pre-existing `test_wait.py`; a lifecycle-level duplicate adds little.
 - `spawn-teammate` — not headless-scriptable (multi-pane UI).
@@ -102,3 +109,5 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
   Cursor validation and the harness-driver operational details.
 - `headless-cli-smoke-testing-discipline.md` — how to run manual engine probes without a hard-kill timeout destroying the evidence.
 - `lifecycle-harness-parallelization.md` — future improvement: parallel scenario execution.
+- `quality-benchmark-feature.md` — the sibling quality track (`tests/quality/`): lore utilization, planted-needle probes, treatment/control uplift.
+- `benchmark-measurement-design-principles.md` — the measurement-design principles shared with (and extending) this harness's assertion style.

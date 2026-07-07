@@ -51,3 +51,4 @@ When a procedure doc has been reviewed multiple times and still ships with an ex
 - `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md` — the prose-review disciplines this complements, not replaces.
 - `haiku-ambiguity-detector.md` — the sharpened weak-model form of the execution-fidelity leg.
 - `naming-foundational-principles.md` — the meta-rule this topic's own existence follows.
+- `quality-benchmark-feature.md`, `benchmark-measurement-design-principles.md` — the same "measure by running, not by reviewing" premise applied to lore *utilization* (did knowledge change behavior) rather than procedure fidelity.

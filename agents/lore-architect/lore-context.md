@@ -159,7 +159,11 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   from a stable operational map rather than scattered probes. **v23** then tightened the Cursor
   packaging: the wrapper side moved from `skills/cursor/` into `.cursor-skills/` because Codex was
   recursively surfacing the old tree as `lr:lr-*` duplicates; the practical verification loop is
-  now "update repo → refresh installed Codex plugin → re-run a real skill-count check."
+  now "update repo → refresh installed Codex plugin → re-run a real skill-count check." The
+  portability claim's knowledge-substrate half now has quantitative backing: the v1 quality
+  benchmark showed positive lore-utilization uplift on every engine+model config and 100%
+  easy-catalog treatment down to weak tiers, with the nuance that **model–engine fit beats model
+  tier** (see `quality-benchmark-feature.md`, `benchmark-findings-engines-models.md`).
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** review item — active follow-ups from the 2026-06-13 architecture review; see `framework-improvements-backlog.md`. That review's settled dispositions (incl. DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in `architecture-review-dispositions.md`. A newer 2026-07-02 review added two further backlog items (post-merge diff verification, recall-time staleness surfacing) — see `framework-improvements-backlog.md` § Merge Quality, § Search / Scaling.
 - Parked: workdir-as-reference-library; vector-DB search (until >100 topics/agent); the session-as-durable-artifact cluster (boot auto-push, boot-context cache, suspend/resume, JSONL archive). All in `framework-improvements-backlog.md`.
 
@@ -192,7 +196,13 @@ preinstalled Codex plugin, but the host launching `codex exec` must allow writes
 the run dies before entering the fixture repo. **v23** also validated a packaging edge the harness
 doesn't yet encode: Codex can keep loading a stale plugin cache and still show obsolete skill sets,
 so cache refresh is part of real-engine verification for plugin-layout changes. Matching harness changes are a separate dev-repo
-concern outside finalize's `agents/` commit scope. ~107 lore topics.
+concern outside finalize's `agents/` commit scope. A third test track now sits beside lifecycle and
+the deterministic layer: the **quality benchmark** (`tests/quality/`, gated `LR_QUALITY=1`) measures
+lore utilization via planted-needle probes with treatment/control arms and three-stage scoring
+(retrieval → grounding → application; headline metric = behavior uplift). Currently uncommitted —
+`tests/` needs its own manual commit outside finalize's `agents/` scope. Anchor:
+`quality-benchmark-feature.md` (fans out to findings, operational lessons, and measurement-design
+principles). ~124 lore topics.
 
 ## Running Backlog
 

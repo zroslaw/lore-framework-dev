@@ -49,6 +49,15 @@ Both drafts converge on the same top risk: **the framework is prose executed by 
 
 The Phase 0.5 harness already turned this from a theoretical risk into an observed one — see `agent-boot-doc-fidelity-fixes.md` for the first concrete instance (on Claude Code itself, before any port), and `execution-testing-catches-blind-ambiguity.md` for why prose review structurally can't catch this bug class.
 
+**Update (2026-07-07): the knowledge-substrate half of the portability claim now has quantitative
+backing.** The v1 quality-benchmark runs (`quality-benchmark-feature.md`,
+`benchmark-findings-engines-models.md`) showed the boot-and-consult-lore path is robust down to
+weak model tiers on all three engines (100% treatment on the easy catalog for every config,
+including haiku and gpt-5.4-mini on the doc-driven codex path), with positive behavior uplift
+(+37.5 to +75.0) in every engine+model config. Nuance worth carrying: **model–engine fit beats
+model tier** — the same model can utilize lore very differently on different engines
+(sonnet: 100% on claude vs 62.5% on cursor), so per-pairing measurement stays necessary.
+
 **Update (2026-07-05): the hard Tier-B nucleus is now proven on Codex, not just feared.** The subagent fan-out (recall + merge) ran faithfully on real `codex exec` at the weak `gpt-5.4-mini` tier — including the host-reads-steps merge override, ground-truthed in Codex's rollout logs. So the "framework is prose" risk is empirically retired for the Codex boot/recall/merge path; the remaining fidelity questions are the un-exercised lifecycle scenarios and the still-unported Cursor target. See `codex-port-validated-end-to-end.md`.
 
 ## Positioning implication
@@ -109,6 +118,7 @@ The harness's first real use already found two genuine doc-fidelity bugs in `age
 - `workdir/draft-port-codex.md`, `workdir/draft-port-cursor.md` — the phased per-engine plans; this topic is the anchor, not a restatement.
 - `workdir/draft-testing-pipeline.md` — the shared multi-engine testing pipeline (Phase 0.5) original design doc; scenario catalog + per-engine drivers + fidelity scorecard.
 - `lifecycle-testing-harness.md` — the built implementation of Phase 0.5, its coverage, and cost/gating.
+- `quality-benchmark-feature.md`, `benchmark-findings-engines-models.md` — the quality track and its v1 cross-engine lore-utilization evidence for this direction's portability claim.
 - `agent-boot-doc-fidelity-fixes.md`, `execution-testing-catches-blind-ambiguity.md`, `haiku-ambiguity-detector.md` — the harness's real finds and the general/weak-model principles behind them.
 - `claude-coupling-inventory-and-port-tiers.md` — the full coupling inventory + Tier A/B/C map.
 - `framework-root-self-location-validated.md` — the biggest Tier A slice, validated on Claude/haiku and now on real Codex.
