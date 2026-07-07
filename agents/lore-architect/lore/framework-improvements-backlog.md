@@ -2,6 +2,12 @@ Running backlog of framework-level improvements, deferred items, and open questi
 
 Items are grouped by area. Each has a one-line what + why + rough trigger or status. Promote an item into its own lore topic (and its own design draft in `workdir/`) when it becomes active.
 
+## Next-Session Active Threads
+
+- **Boot-time `ps` probe cleanup** — reconsider `agent-boot.md`'s unconditional teammate-detection probe shape. Split engine detection from teammate detection, skip teammate-detection probing on Codex and Cursor where the engine profile already establishes the capability story, and prefer capability-gated or fallback `ps` usage over "probe then ignore failure" because the current shape feels inelegant in user-facing runs. Trigger: next lore-architect session opened from the user's explicit follow-up request.
+- **Intent-oriented skill descriptions and per-agent routing metadata** — review skill `description` fields for intent-based invocation quality rather than only slash-command discoverability, and revisit per-agent skills so they carry useful agent identity/purpose metadata that can support boot, attach, consult, and other agent-selection flows without ambiguity. Trigger: next lore-architect session opened from the user's explicit follow-up request.
+- **Agent registration redesign** — revisit how registration appears on Codex and Cursor, question whether repo-level registration is the right primitive, and evaluate either a dedicated single-agent registration skill or a more generic repo-registration skill that can register every agent in a repo or one specified agent incrementally. Trigger: next lore-architect session opened from the user's explicit follow-up request.
+
 ## Init / Workspace Bootstrap
 
 - **Workspace creation automation** — a scaffolding command or flow that creates a new workspace, optionally with an agent repo initialized, a `README.md` carrying setup instructions, and an auto-invocation of `/lr:init`. Status: partially addressed by v11's `/lr:workspace-sync` (the *consumer* side — bootstrap an existing workspace from one cloned agent repo). The *producer* side (initial scaffolding from nothing) is still deferred; revisit when we have more than one hand-built workspace.

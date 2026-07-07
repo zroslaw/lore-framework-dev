@@ -196,4 +196,4 @@ concern outside finalize's `agents/` commit scope. ~107 lore topics.
 
 ## Running Backlog
 
-`framework-improvements-backlog.md` is the canonical list of deferred items and open questions. Read it at the start of framework-design sessions — surprises emerge from the accumulation.
+`framework-improvements-backlog.md` is the canonical list of deferred items and open questions. Read it at the start of framework-design sessions — surprises emerge from the accumulation. The current explicit next-session follow-ups are: boot-time teammate-probe cleanup (`ps` usage / capability gating), intent-oriented skill descriptions plus stronger per-agent routing metadata, and an agent-registration redesign.
