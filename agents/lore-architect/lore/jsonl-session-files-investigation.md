@@ -50,7 +50,13 @@ Instead of parsing the JSONL, framework v7+ uses a UUIDv4 echoed in the agent's 
 
 If the framework ever needs a single piece of information from the JSONL, the safest targets are `timestamp` on the first line (session start time) and the set of unique `sessionId` values (for session grouping). Everything else is risk-weighted against the privacy and stability concerns.
 
+## Post-script: the takeover exception (v24)
+
+The "why we chose not to parse it" reasoning above is about *archiving* and *depending* on the format for correctness. `/lr:takeover` (v24, BETA) now does parse this format — but as a sanctioned, different use: read-only, on-demand conversion to a markdown digest, no archiving, and a broken parse degrades to "can't convert this session" rather than breaking any framework mechanism. Fresh empirical record-type findings (incl. `ai-title`, sidechain filtering, tool-result pairing) live in `engine-session-log-formats.md`.
+
 ## See also
 
+- `engine-session-log-formats.md` — current empirical format notes across Claude Code, Codex, and Cursor (v24 takeover work)
+- `takeover-feature.md` — the feature that parses this format read-only
 - `session-summaries-feature.md` — the feature that was built instead, and why; now including v8 guest summaries
 - `workdir/framework-improvements.md` — backlog item for reliable start-time capture references this investigation

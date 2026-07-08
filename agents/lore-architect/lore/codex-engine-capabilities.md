@@ -41,3 +41,4 @@ MCP/plugin loading assumptions, and harness preflight.
 - `codex-testing-methodology.md`
 - `docs-engines-convention.md`
 - `multi-engine-portability-direction.md`
+- `engine-session-log-formats.md` — rollout JSONL record types, session index, `codex mcp-server` (empirical, v24 takeover work)

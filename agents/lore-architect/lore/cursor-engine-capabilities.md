@@ -32,3 +32,4 @@ refresh, invocation, subagent behavior, and known constraints.
 - `cursor-dual-skill-tree-one-repo.md`
 - `docs-engines-convention.md`
 - `multi-engine-portability-direction.md`
+- `engine-session-log-formats.md` — `store.db` content-addressed chat store blocks transcript reconstruction (empirical, v24 takeover work)

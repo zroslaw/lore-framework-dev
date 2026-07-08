@@ -32,6 +32,10 @@ disabling auto-compaction is only a risk-reduction measure. See
 
 The pattern is emergent from the backlog, not driving any current ship. Promote to a principle when one of these becomes active and the others get pulled in alongside (e.g., designing suspend without pinning down archive policy doesn't work). **Trigger:** at least two of the four shipping or designing simultaneously, or a fifth entry joining the cluster.
 
+## First built foothold: `/lr:takeover` (v24, ship pending)
+
+The v24 takeover feature (`takeover-feature.md`) is the first built feature in this territory: it reads the raw engine-native transcript (member #4's substrate) and delivers a working cross-engine resume path (member #3's goal) — by on-demand conversion to a portable markdown digest, not by archiving. It doesn't retire any cluster member (#4's durable-searchable-archive framing and #3's deliberate suspend ceremony remain unbuilt), but it proves the transcript-reading half is practical and gives future suspend/archive work a tested parsing layer (`scripts/session-takeover`, per-engine formats in `engine-session-log-formats.md`).
+
 ## Adjacent
 
 - `autonomous-agents-vision.md` is the *autonomous* sibling — what happens when sessions never end. This cluster is the *interactive* sibling — what happens between deliberately-ending sessions. They share the durability vocabulary.
@@ -45,3 +49,4 @@ The pattern is emergent from the backlog, not driving any current ship. Promote 
 - `codex-first-real-session-lifecycle-findings.md` — real compaction failure and
   the engine-neutral state-capsule direction.
 - `parked-design-preservation-pattern.md` — methodology for capturing #1's design without shipping (the drill itself was a session output).
+- `takeover-feature.md`, `engine-session-log-formats.md` — the v24 foothold and its parsing layer.

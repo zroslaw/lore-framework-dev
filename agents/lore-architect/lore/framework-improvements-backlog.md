@@ -4,9 +4,16 @@ Items are grouped by area. Each has a one-line what + why + rough trigger or sta
 
 ## Next-Session Active Threads
 
-- **Boot-time `ps` probe cleanup** — reconsider `agent-boot.md`'s unconditional teammate-detection probe shape. Split engine detection from teammate detection, skip teammate-detection probing on Codex and Cursor where the engine profile already establishes the capability story, and prefer capability-gated or fallback `ps` usage over "probe then ignore failure" because the current shape feels inelegant in user-facing runs. Trigger: next lore-architect session opened from the user's explicit follow-up request.
-- **Intent-oriented skill descriptions and per-agent routing metadata** — review skill `description` fields for intent-based invocation quality rather than only slash-command discoverability, and revisit per-agent skills so they carry useful agent identity/purpose metadata that can support boot, attach, consult, and other agent-selection flows without ambiguity. Trigger: next lore-architect session opened from the user's explicit follow-up request.
-- **Agent registration redesign** — revisit how registration appears on Codex and Cursor, question whether repo-level registration is the right primitive, and evaluate either a dedicated single-agent registration skill or a more generic repo-registration skill that can register every agent in a repo or one specified agent incrementally. Trigger: next lore-architect session opened from the user's explicit follow-up request.
+- **Ship v24** — the release is complete in the `lore-framework` working tree (uncommitted; user deferred the push). Remaining: run the Codex quality-benchmark leg, review + commit the tree (plus the dirty `lore-framework-dev/tests/*` as a separate manual commit), push, and finalize the provisional v24 entry in `versioning-release-types.md`. See `v24-ship-status.md`.
+- ~~**Boot-time `ps` probe cleanup**~~ — *done in v24* (boot teammate-probe capability gating). See `v24-ship-status.md`.
+- ~~**Intent-oriented skill descriptions and per-agent routing metadata**~~ — *done in v24* (richer routing metadata). See `v24-ship-status.md`.
+- ~~**Agent registration redesign**~~ — *done in v24* (`/lr:register-agent`, `/lr:unregister-agent`, Cursor native per-agent shortcuts). See `v24-ship-status.md`.
+
+## Takeover (`/lr:takeover`, BETA, v24)
+
+- **Cursor conversion unsupported** — `~/.cursor/chats/.../store.db` is a content-addressed blob store with no recoverable ordering; assistant/tool records are binary. Listed but not convertible until someone reverse-engineers ordering. See `engine-session-log-formats.md`.
+- **No lifecycle-harness scenario for takeover** — validated only by ad-hoc haiku subagent runs (2/2 pass, 2026-07-08). Add a scenario when the harness next grows. See `takeover-feature.md`.
+- **Discovery lists evaluator sessions run in project dirs** — the temp-dir filter (`--all` to include) hides lifecycle/quality fixtures, but evaluator sessions executed *in project dirs* still appear in the Claude list. Cosmetic; fix opportunistically.
 
 ## Init / Workspace Bootstrap
 

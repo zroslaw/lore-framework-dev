@@ -31,3 +31,4 @@ details living in the linked topics below rather than scattered through multi-en
 - `plugin-manifest-versioning.md`
 - `cache-clear-footer-convention.md`
 - `claude-coupling-inventory-and-port-tiers.md`
+- `engine-session-log-formats.md` — session JSONL location/record types (empirical, v24 takeover work)
