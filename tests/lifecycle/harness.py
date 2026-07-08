@@ -169,6 +169,26 @@ UPDATE_DRYRUN_PROMPT = (
     "Print the full report verbatim."
 )
 
+REGISTER_AGENT_PROMPT = (
+    f"Invoke the lr:register-agent skill to create a direct boot shortcut for agent "
+    f"'{AGENT_NAME}' in repo '{REPO_NAME}'. Print DONE when complete."
+)
+
+REGISTER_REPO_PROMPT = (
+    f"Invoke the lr:register-repo skill to create direct boot shortcuts for every agent in "
+    f"repo '{REPO_NAME}'. Print DONE when complete."
+)
+
+UNREGISTER_AGENT_PROMPT = (
+    f"Invoke the lr:unregister-agent skill to remove the direct boot shortcut for agent "
+    f"'{AGENT_NAME}' in repo '{REPO_NAME}'. Print DONE when complete."
+)
+
+UNREGISTER_REPO_PROMPT = (
+    f"Invoke the lr:unregister-repo skill to remove every direct boot shortcut for repo "
+    f"'{REPO_NAME}'. Print DONE when complete."
+)
+
 
 def _codex_boot_prompt(agent_name, extra):
     """Codex's reliable path is doc-driven rather than slash-skill dispatch."""
@@ -275,6 +295,28 @@ def codex_prompt(prompt):
         return f"Read '{FRAMEWORK_DIR}/docs/check.md' and follow it to run consistency checks across this workspace. Print the full report verbatim."
     if prompt == UPDATE_DRYRUN_PROMPT:
         return f"Read '{FRAMEWORK_DIR}/docs/update.md' and follow it with --dry-run in this workspace. Print the full report verbatim."
+    if prompt == REGISTER_AGENT_PROMPT:
+        return (
+            f"Read '{FRAMEWORK_DIR}/docs/register-repo.md' and follow the Register Agent "
+            f"instructions for repo '{REPO_NAME}' and agent '{AGENT_NAME}'. Print DONE when "
+            "complete."
+        )
+    if prompt == REGISTER_REPO_PROMPT:
+        return (
+            f"Read '{FRAMEWORK_DIR}/docs/register-repo.md' and follow the Register Repo "
+            f"instructions for repo '{REPO_NAME}'. Print DONE when complete."
+        )
+    if prompt == UNREGISTER_AGENT_PROMPT:
+        return (
+            f"Read '{FRAMEWORK_DIR}/docs/register-repo.md' and follow the Unregister Agent "
+            f"instructions for repo '{REPO_NAME}' and agent '{AGENT_NAME}'. Print DONE when "
+            "complete."
+        )
+    if prompt == UNREGISTER_REPO_PROMPT:
+        return (
+            f"Read '{FRAMEWORK_DIR}/docs/register-repo.md' and follow the Unregister Repo "
+            f"instructions for repo '{REPO_NAME}'. Print DONE when complete."
+        )
     return prompt
 
 

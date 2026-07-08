@@ -79,6 +79,10 @@ Scenario catalog status (numbering per the draft):
 | 20 | workspace-sync | ✅ `lifecycle/test_repo_workspace.py` |
 | 21 | check | ✅ `lifecycle/test_repo_workspace.py` |
 | 22 | update --dry-run | ✅ `lifecycle/test_repo_workspace.py` |
+| 23 | register-agent | ✅ `lifecycle/test_repo_workspace.py` |
+| 24 | register-repo | ✅ `lifecycle/test_repo_workspace.py` |
+| 25 | unregister-agent | ✅ `lifecycle/test_repo_workspace.py` |
+| 26 | unregister-repo | ✅ `lifecycle/test_repo_workspace.py` |
 | Tier 2 | wait/emit | covered by `test_wait.py` (protocol-level, not a lifecycle scenario) |
 | Tier 2 | spawn-teammate | deferred — not headless-scriptable (multi-pane UI) |
 | Tier 2 | df-repo-init, df-ula-file | deferred — BETA, out of scope for this pass |

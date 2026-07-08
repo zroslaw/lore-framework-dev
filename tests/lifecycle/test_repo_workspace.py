@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Lifecycle scenarios 16-21: repo & workspace skills (catalog: workdir/draft-testing-pipeline.md).
+"""Lifecycle scenarios 17-26: repo & workspace skills (catalog: workdir/draft-testing-pipeline.md).
 
-create-repo, create-agent, init, workspace-sync, check, update --dry-run.
+create-repo, create-agent, init, workspace-sync, check, update --dry-run, and registration flows.
 
 Run:  LR_LIFECYCLE=1 python3 tests/lifecycle/test_repo_workspace.py -v
 One:  LR_LIFECYCLE=1 python3 tests/lifecycle/test_repo_workspace.py -v -k 16
@@ -18,7 +18,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import harness
 from harness import (
     AGENT_NAME, BROKEN_REF, CHECK_PROMPT, CREATE_AGENT_PROMPT, CREATE_REPO_PROMPT,
-    INIT_PROMPT, SKIP_REASON, UPDATE_DRYRUN_PROMPT, WORKSPACE_SYNC_PROMPT,
+    HELPER_AGENT_NAME, INIT_PROMPT, REGISTER_AGENT_PROMPT, REGISTER_REPO_PROMPT,
+    SKIP_REASON, UNREGISTER_AGENT_PROMPT, UNREGISTER_REPO_PROMPT,
+    UPDATE_DRYRUN_PROMPT, WORKSPACE_SYNC_PROMPT,
     build_empty_workspace, build_fixture, declare_sibling_repo, head,
     make_origin_ahead, memory_file_name, read_repo_version, run_engine, seed_broken_reference,
 )
@@ -126,6 +128,74 @@ class RepoWorkspaceScenarios(unittest.TestCase):
         )
         self.assertIn("17", r.text)
         self.assertIn(harness.framework_version(), r.text)
+
+    def _shortcut_paths(self, workspace, agent_name):
+        if harness.ENGINE == "cursor":
+            base = os.path.join(workspace, ".cursor", "skills", f"lr-{agent_name}-agent")
+            return base, os.path.join(base, "SKILL.md")
+        if harness.ENGINE == "claude":
+            path = os.path.join(workspace, ".claude", "commands", f"lr-{agent_name}-agent.md")
+            return path, path
+        self.skipTest("registration lifecycle scenarios are not isolated on codex yet")
+
+    def test_22_register_agent(self):
+        """register-agent creates one engine-native shortcut with the current template."""
+        fx = build_fixture(self.tmp)
+        r = run_engine(fx.workspace, REGISTER_AGENT_PROMPT)
+        print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
+        self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
+
+        _, skill_file = self._shortcut_paths(fx.workspace, AGENT_NAME)
+        self.assertTrue(os.path.isfile(skill_file), "agent shortcut was not created")
+        with open(skill_file) as f:
+            content = f.read()
+        self.assertIn("boot as agent", content)
+        self.assertIn("from", content)
+        self.assertIn(os.path.join(fx.repo, "agents", AGENT_NAME), content)
+        if harness.ENGINE == "cursor":
+            self.assertIn("name: lr-test-agent-agent", content)
+            self.assertIn("disable-model-invocation: true", content)
+            self.assertIn(f'"{harness.REPO_NAME}/**"', content)
+
+    def test_23_register_repo(self):
+        """register-repo creates shortcuts for every agent in the repo."""
+        fx = build_fixture(self.tmp, second_agent=True)
+        r = run_engine(fx.workspace, REGISTER_REPO_PROMPT)
+        print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
+        self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
+
+        for agent_name in (AGENT_NAME, HELPER_AGENT_NAME):
+            _, skill_file = self._shortcut_paths(fx.workspace, agent_name)
+            self.assertTrue(os.path.isfile(skill_file), f"missing shortcut for {agent_name}")
+
+    def test_24_unregister_agent(self):
+        """unregister-agent removes only the targeted shortcut."""
+        fx = build_fixture(self.tmp, second_agent=True)
+        r1 = run_engine(fx.workspace, REGISTER_REPO_PROMPT)
+        self.assertEqual(r1.exit_code, 0, f"register run failed: {r1.stderr[-500:]}")
+
+        r2 = run_engine(fx.workspace, UNREGISTER_AGENT_PROMPT)
+        print(f"\n  [{self.id().split('.')[-1]}] {r2.summary()}")
+        self.assertEqual(r2.exit_code, 0, f"engine run failed: {r2.stderr[-500:]}")
+
+        target_dir, target_file = self._shortcut_paths(fx.workspace, AGENT_NAME)
+        other_dir, other_file = self._shortcut_paths(fx.workspace, HELPER_AGENT_NAME)
+        self.assertFalse(os.path.exists(target_dir), "target shortcut still exists")
+        self.assertTrue(os.path.isfile(other_file), "non-target shortcut was removed too")
+
+    def test_25_unregister_repo(self):
+        """unregister-repo removes every shortcut associated with the repo."""
+        fx = build_fixture(self.tmp, second_agent=True)
+        r1 = run_engine(fx.workspace, REGISTER_REPO_PROMPT)
+        self.assertEqual(r1.exit_code, 0, f"register run failed: {r1.stderr[-500:]}")
+
+        r2 = run_engine(fx.workspace, UNREGISTER_REPO_PROMPT)
+        print(f"\n  [{self.id().split('.')[-1]}] {r2.summary()}")
+        self.assertEqual(r2.exit_code, 0, f"engine run failed: {r2.stderr[-500:]}")
+
+        for agent_name in (AGENT_NAME, HELPER_AGENT_NAME):
+            target_dir, _ = self._shortcut_paths(fx.workspace, agent_name)
+            self.assertFalse(os.path.exists(target_dir), f"shortcut still exists for {agent_name}")
 
 
 if __name__ == "__main__":
