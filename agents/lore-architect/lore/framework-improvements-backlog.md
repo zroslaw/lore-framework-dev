@@ -4,10 +4,10 @@ Items are grouped by area. Each has a one-line what + why + rough trigger or sta
 
 ## Next-Session Active Threads
 
-- **Ship v24** — the release is complete in the `lore-framework` working tree (uncommitted; user deferred the push). Remaining: run the Codex quality-benchmark leg, review + commit the tree (plus the dirty `lore-framework-dev/tests/*` as a separate manual commit), push, and finalize the provisional v24 entry in `versioning-release-types.md`. See `v24-ship-status.md`.
-- ~~**Boot-time `ps` probe cleanup**~~ — *done in v24* (boot teammate-probe capability gating). See `v24-ship-status.md`.
-- ~~**Intent-oriented skill descriptions and per-agent routing metadata**~~ — *done in v24* (richer routing metadata). See `v24-ship-status.md`.
-- ~~**Agent registration redesign**~~ — *done in v24* (`/lr:register-agent`, `/lr:unregister-agent`, Cursor native per-agent shortcuts). See `v24-ship-status.md`.
+- ~~**Ship v24**~~ — *shipped 2026-07-08* (commit `da473b6`; v24 history entry finalized in `versioning-release-types.md`). One leg still open: the **Codex quality-benchmark uplift measurement was deferred, not run** (Codex tokens exhausted for several days) — run it when tokens return; if it surfaces a regression, add a follow-up note. Codex lifecycle already validates the routing/registration behavior. See `versioning-release-types.md`, `takeover-feature.md`.
+- ~~**Boot-time `ps` probe cleanup**~~ — *done in v24* (boot teammate-probe capability gating). See `versioning-release-types.md`.
+- ~~**Intent-oriented skill descriptions and per-agent routing metadata**~~ — *done in v24* (richer routing metadata). See `versioning-release-types.md`.
+- ~~**Agent registration redesign**~~ — *done in v24* (`/lr:register-agent`, `/lr:unregister-agent`, Cursor native per-agent shortcuts). See `versioning-release-types.md`.
 
 ## Takeover (`/lr:takeover`, BETA, v24)
 

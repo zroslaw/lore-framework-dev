@@ -66,7 +66,7 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` — last **shipped & pushed** version is **23**; **v24 is complete in the working tree but deliberately unshipped** (user deferred the push; see `v24-ship-status.md` for exact remaining steps) — is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. v22 was release-notes-only: top-level engine install guides, explicit Codex/Cursor refresh notes, and engine-specific `R > F` guidance. v23 is release-notes-only too: it hides Cursor's wrapper tree from Codex by moving wrappers into `.cursor-skills/`, leaving Cursor's `/lr-<skill>` surface intact while removing Codex's redundant `lr:lr-*` skills. **v24** (built, unshipped) adds registration skills (`/lr:register-agent`, `/lr:unregister-agent`), Cursor native per-agent shortcuts, richer routing metadata, boot teammate-probe capability gating, and **`/lr:takeover` (BETA)** — cross-engine session continuation via a portable markdown digest converted from an engine-native session log, so a dying/rate-limited session can be picked up on any engine. See `versioning-release-types.md`, `v24-ship-status.md`, `takeover-feature.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
+`lore-framework/VERSION` — last **shipped & pushed** version is **24** (commit `da473b6`) — is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. v22 was release-notes-only: top-level engine install guides, explicit Codex/Cursor refresh notes, and engine-specific `R > F` guidance. v23 is release-notes-only too: it hides Cursor's wrapper tree from Codex by moving wrappers into `.cursor-skills/`, leaving Cursor's `/lr-<skill>` surface intact while removing Codex's redundant `lr:lr-*` skills. **v24** (shipped & pushed, commit `da473b6`) adds registration skills (`/lr:register-agent`, `/lr:unregister-agent`), Cursor native per-agent shortcuts, richer routing metadata, boot teammate-probe capability gating, and **`/lr:takeover` (BETA)** — cross-engine session continuation via a portable markdown digest converted from an engine-native session log, so a dying/rate-limited session can be picked up on any engine (first proven in production shipping v24 itself: Codex `019f3ed9` → Claude Code). Its Codex quality-uplift benchmark leg was deferred at ship (Codex tokens exhausted), not run. See `versioning-release-types.md`, `takeover-feature.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
 
 ## Consistency & Diagnostics
 
@@ -169,12 +169,11 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
 
 ## Current State
 
-Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 23 shipped &
-  pushed; v24 complete in the working tree but deliberately unshipped** — registration skills,
-  Cursor native shortcuts, routing metadata, boot teammate-probe gating, `/lr:takeover` BETA; see
-  `v24-ship-status.md`; public at github.com/zroslaw/lore-framework), **`lore-framework-dev/`**
-  (this repo — framework-dev agents, **stamped 24** via boot-time auto-upgrade, uncommitted; a
-  workspace-root sibling at github.com/zroslaw/lore-framework-dev), and
+Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 24 shipped &
+  pushed, commit `da473b6`** — registration skills, Cursor native shortcuts, routing metadata,
+  boot teammate-probe gating, `/lr:takeover` BETA; public at github.com/zroslaw/lore-framework),
+  **`lore-framework-dev/`** (this repo — framework-dev agents, **stamped 24** via boot-time
+  auto-upgrade; a workspace-root sibling at github.com/zroslaw/lore-framework-dev), and
 **`lore-agents/`** (personal agents: tax-advisor, masschallenge-judge). The multi-engine port that
 was staged in the no-remote **`lore-framework-codex/`** sibling landed in canonical v19 — that
 sibling is now **superseded and deletable** (see `port-landing-next-steps.md`). The separate
@@ -208,4 +207,4 @@ principles). ~124 lore topics.
 
 ## Running Backlog
 
-`framework-improvements-backlog.md` is the canonical list of deferred items and open questions. Read it at the start of framework-design sessions — surprises emerge from the accumulation. The current explicit next-session follow-up is **shipping v24**: run the Codex quality-benchmark leg, commit + push the `lore-framework` tree and the dirty `lore-framework-dev/tests/*` (separate manual commit), then finalize the `versioning-release-types.md` v24 entry. See `v24-ship-status.md`. Secondary: Cursor takeover conversion is unsupported (content-addressed `store.db`, no recoverable ordering) — see `engine-session-log-formats.md`.
+`framework-improvements-backlog.md` is the canonical list of deferred items and open questions. Read it at the start of framework-design sessions — surprises emerge from the accumulation. v24 shipped 2026-07-08 (`da473b6`); the one open leg is the **Codex quality-benchmark uplift measurement**, deferred at ship because Codex tokens were exhausted — run it when tokens return and add a follow-up note if it surfaces a regression. Secondary: Cursor takeover conversion is unsupported (content-addressed `store.db`, no recoverable ordering) — see `engine-session-log-formats.md`.
