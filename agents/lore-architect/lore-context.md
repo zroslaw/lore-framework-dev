@@ -200,11 +200,19 @@ so cache refresh is part of real-engine verification for plugin-layout changes. 
 concern outside finalize's `agents/` commit scope. A third test track now sits beside lifecycle and
 the deterministic layer: the **quality benchmark** (`tests/quality/`, gated `LR_QUALITY=1`) measures
 lore utilization via planted-needle probes with treatment/control arms and three-stage scoring
-(retrieval → grounding → application; headline metric = behavior uplift). Currently uncommitted —
-`tests/` needs its own manual commit outside finalize's `agents/` scope. Anchor:
-`quality-benchmark-feature.md` (fans out to findings, operational lessons, and measurement-design
-principles). ~124 lore topics.
+(retrieval → grounding → application; headline metric = behavior uplift). A **v2 probe catalog**
+(18 probes / 8 categories, up from v1's 8/5) landed 2026-07-09, validated on one real
+cursor+composer-2.5 run (+66.7pt behavior uplift, a scorecard column-width bug fixed along the
+way) — **not yet ship-ready**: two probes (P12, P16) still show a ceiling effect with zero
+discrimination, open until reworked and re-run. The same session also closed a known judge
+measurement gap (S3 judge now sees workspace artifacts, not just the final message) and fixed an
+embedded-NUL-byte crash in the artifact-capture path. All of it — v1 and v2 — remains
+uncommitted; `tests/` needs its own manual commit outside finalize's `agents/` scope. Anchor:
+`quality-benchmark-feature.md` (fans out to findings, operational lessons, v2 catalog, and known
+v2 probe gaps). ~129 lore topics.
 
 ## Running Backlog
 
 `framework-improvements-backlog.md` is the canonical list of deferred items and open questions. Read it at the start of framework-design sessions — surprises emerge from the accumulation. v24 shipped 2026-07-08 (`da473b6`); the one open leg is the **Codex quality-benchmark uplift measurement**, deferred at ship because Codex tokens were exhausted — run it when tokens return and add a follow-up note if it surfaces a regression. Secondary: Cursor takeover conversion is unsupported (content-addressed `store.db`, no recoverable ordering) — see `engine-session-log-formats.md`.
+
+**UPCOMING TASK (next session, local/uncommitted note 2026-07-08):** restructure the quality benchmark into **regular** (per-release, each engine at its cheapest *usable* model — claude/sonnet, codex/gpt-5.4-mini, cursor/composer-2.5) vs **deep** (explicit request only, full engine×model matrix incl. claude/haiku+opus-4.8, codex/gpt-5.4, cursor/sonnet). Full design in `quality-benchmark-tiers-proposal.md`. **Blocked (added 2026-07-09):** don't build this on top of the v2 probe catalog until `quality-benchmark-v2-known-probe-gaps.md`'s two open probes (P12, P16 — ceiling effect, zero discrimination) are reworked and re-run. **Remove this pointer and delete that proposal topic once implemented.**
