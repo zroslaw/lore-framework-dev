@@ -4,7 +4,11 @@ Items are grouped by area. Each has a one-line what + why + rough trigger or sta
 
 ## Next-Session Active Threads
 
-- ~~**Ship v24**~~ — *shipped 2026-07-08* (commit `da473b6`; v24 history entry finalized in `versioning-release-types.md`). One leg still open: the **Codex quality-benchmark uplift measurement was deferred, not run** (Codex tokens exhausted for several days) — run it when tokens return; if it surfaces a regression, add a follow-up note. Codex lifecycle already validates the routing/registration behavior. See `versioning-release-types.md`, `takeover-feature.md`.
+- **Implement v25 (Cursor ops parity)** — design approved 2026-07-10 after four review rounds.
+  Canonical spec: `workdir/draft-v25-cursor-ops-parity.md`; lore summary:
+  `v25-cursor-ops-parity-design.md`. Start with D2 probe, then Tier A in `lore-framework/`.
+  Framework PR + lore-architect finalize are separate commits; user asked to defer push until
+  after implementation review. (commit `da473b6`; v24 history entry finalized in `versioning-release-types.md`). One leg still open: the **Codex quality-benchmark uplift measurement was deferred, not run** (Codex tokens exhausted for several days) — run it when tokens return; if it surfaces a regression, add a follow-up note. Codex lifecycle already validates the routing/registration behavior. See `versioning-release-types.md`, `takeover-feature.md`.
 - ~~**Boot-time `ps` probe cleanup**~~ — *done in v24* (boot teammate-probe capability gating). See `versioning-release-types.md`.
 - ~~**Intent-oriented skill descriptions and per-agent routing metadata**~~ — *done in v24* (richer routing metadata). See `versioning-release-types.md`.
 - ~~**Agent registration redesign**~~ — *done in v24* (`/lr:register-agent`, `/lr:unregister-agent`, Cursor native per-agent shortcuts). See `versioning-release-types.md`.
