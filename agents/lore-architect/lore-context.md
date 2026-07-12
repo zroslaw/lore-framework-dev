@@ -47,6 +47,19 @@ for install/update model, invocation surface, subagent mechanism, memory file, M
 sandbox constraints, and lifecycle-harness caveats; keep atomic findings in the linked detailed
 topics rather than rediscovering them from old session notes.
 
+## Marketplace & Distribution
+
+Shipping one repo to multiple engines' plugin marketplaces means handling **each engine's packaging
+separately** — manifest schema, skill-tree location, and update model all differ, so Claude parity
+does *not* imply Cursor/Codex parity. Claude Code is closest (`.claude-plugin/` manifest +
+`marketplace.json` strict-clean; remaining step is a Console-form community submission). Cursor is
+structurally ready (manifest enriched with `logo`/`displayName`/`keywords`; but seamless multi-user
+propagation needs a team marketplace + Auto Refresh + the Cursor GitHub App, still unvalidated —
+only `--plugin-dir` is proven). Codex has an **open packaging discrepancy** (our port lore vs the
+current official build-plugins spec) that must be verified on a real build before claiming
+readiness. See `engine-marketplace-readiness.md` (the cross-engine "are we ready?" map),
+`cursor-plugin-distribution-update-model.md`, `plugin-distribution.md`.
+
 ## Boot & Freshness
 
 Boot (`agent-boot.md`, single source of truth): discover agent → auto-pull repo → version check → read `role.md` + `lore-context.md` → detect teammate spawn → confirm. **Boot loads only those two files; topics are read on demand.** Repos auto-pull at every session-context boundary (boot, attach, pre-merge) to match the team's latest pushed state; `/lr:pull-lore` is the manual refresh. See `freshness-contracts-at-session-boundaries.md`, `auto-pull-mechanism.md`.
@@ -66,11 +79,15 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` — last **shipped & pushed** is **24** (`da473b6`); **v25 implemented locally**
-(`v25-cursor-ops-parity` / `4f3bfcf`, push deferred). Each repo stamps `VERSION` in `lore-repo.md`.
-Plugin manifests mirror as `1.<VERSION>.0` — **three** since v25 (Claude pair = cache-detection lever;
-`.cursor-plugin/plugin.json` = hygiene). `/lr:check` #19 enforces all three. See
-`versioning-release-types.md`, `plugin-manifest-versioning.md`, `v25-cursor-ops-parity-design.md`.
+`lore-framework/VERSION` — last **shipped & pushed** is **24** (`da473b6`). **v25 is half-done, not
+shippable:** cursor-ops-parity is committed on branch `v25-cursor-ops-parity` (`4f3bfcf`, unpushed),
+but the workspace slice, the multi-engine marketplace/manifest polish, and `migrations/25.md` are
+still **pending**. The authoritative gate list before pushing v25 is `framework-improvements-backlog.md`
+§ "v25 SHIP CHECKLIST". Each repo stamps `VERSION` in `lore-repo.md`; plugin manifests mirror as
+`1.<VERSION>.0` — **three** today (Claude pair = cache-detection lever; `.cursor-plugin/plugin.json`
+= hygiene; a Codex fourth may land if formal packaging is required). `/lr:check` #19 enforces the
+three. See `versioning-release-types.md`, `plugin-manifest-versioning.md`,
+`v25-cursor-ops-parity-design.md`.
 
 ## Consistency & Diagnostics
 
@@ -179,14 +196,21 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
 ## Current State
 
 Workspace holds three canonical repos: **`lore-framework/`** (plugin — **v24 shipped & pushed**
-  (`da473b6`); **v25 implemented locally** on `v25-cursor-ops-parity` / `4f3bfcf` + **workspace
-  slice designed, not implemented**), **`lore-framework-dev/`** (this repo — lore-architect lore +
-  drafts), and **`lore-agents/`** (personal agents). User's **`agent-workspace/`** (empty meta-repo
-  candidate) discussed but not scaffolded. Cursor ops parity (v25) — see
-  `v25-cursor-ops-parity-design.md`. Workspace pull/init — see `v25-workspace-pull-init-design.md`.
+  (`da473b6`); **v25 half-done on branch `v25-cursor-ops-parity` / `4f3bfcf`, unpushed** —
+  cursor-ops parity committed, workspace slice designed-not-implemented, Claude+Cursor manifest/logo
+  polish uncommitted in the working tree, Codex packaging unresolved; gate list = backlog § "v25 SHIP
+  CHECKLIST"), **`lore-framework-dev/`** (this repo — lore-architect lore + drafts), and
+  **`lore-agents/`** (personal agents). A `lore-workspace.md` now exists at the workspace root (from
+  the "Initialize lore workspace" commit) — reconcile with the designed two-level schema during the
+  workspace slice. Cursor ops parity — see `v25-cursor-ops-parity-design.md`. Workspace pull/init —
+  see `v25-workspace-pull-init-design.md`.
 
 ## Running Backlog
 
-`framework-improvements-backlog.md` is the canonical list of deferred items. **Next session:**
-implement v25 workspace slice in lore-framework, harness S1–S18, push v25 branch when green.
-Quality benchmark tier restructure still blocked on P12/P16 probe gaps. ~135 lore topics.
+`framework-improvements-backlog.md` is the canonical list of deferred items; its § "v25 SHIP
+CHECKLIST" is the authoritative gate before pushing v25 (scope decision → workspace slice →
+per-engine packaging → ship disciplines incl. `migrations/25.md` → full-suite verification → ship).
+**Next session:** work that checklist — decide v25 scope with the user first, then implement the
+workspace slice and commit the uncommitted manifest/logo polish, handling each engine's packaging
+separately (Codex packaging is the highest-risk, verify-first item). Quality benchmark tier
+restructure still blocked on P12/P16 probe gaps. ~138 lore topics.

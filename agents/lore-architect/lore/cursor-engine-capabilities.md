@@ -35,6 +35,8 @@ This hub is the starting map for install, refresh, fallback, invocation, and con
 - `cursor-port-validated-end-to-end.md`
 - `cursor-cli-and-harness-operational-notes.md`
 - `cursor-dual-skill-tree-one-repo.md`
+- `cursor-plugin-distribution-update-model.md` — install/update/auto-refresh model
+- `engine-marketplace-readiness.md` — marketplace submission + manifest visibility
 - `docs-engines-convention.md`
 - `multi-engine-portability-direction.md`
 - `engine-session-log-formats.md`
