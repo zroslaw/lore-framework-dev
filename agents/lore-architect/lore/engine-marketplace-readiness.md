@@ -17,10 +17,10 @@ This is the "are we marketplace-ready?" map; keep engine-specific operational de
 - **Reserved marketplace names:** Claude reserves a set for Anthropic (`claude-community`, `claude-plugins-official`, `claude-plugins-community`, `anthropic-*`, `first-party-plugins`, `healthcare`, …) and re-checks on every load — a marketplace named into a reserved slot stops loading as "untrusted source." Our `lore-framework` is safe; never rename into that set.
 - **Readiness verdict:** manifest + marketplace.json valid and **strict-clean**; visibility fields present. Remaining: submit via Console form. Low effort.
 
-## Cursor — structurally ready; needs a logo + auto-refresh validation
+## Cursor — structurally ready; needs auto-refresh validation
 
 - **Layout:** single-plugin repo → root `.cursor-plugin/plugin.json`, **omit** the Cursor `marketplace.json` (that's a multi-plugin-monorepo thing). Confirmed against the Cursor plugin-template README.
-- **Manifest best-practice fields:** `name` (kebab regex `^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$` — `lr` passes), `displayName`, `description`, `version`, `author`, `license`, `keywords`, `logo` (SVG, relative path). **Applied 2026-07-12** — added `displayName`, `keywords`, `logo: "assets/logo.svg"` + committed `assets/logo.svg`. Skills declared via `"skills": ".cursor-skills/"` path-override (validator-supported).
+- **Manifest best-practice fields:** `name` (kebab regex `^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$` — `lr` passes), `displayName`, `description`, `version`, `author`, `license`, `keywords`, `logo` (relative path). **Applied 2026-07-12** — added `displayName`, `keywords`, and `logo: "assets/logo-512.png"`; v25 ships PNG logo assets and removes the earlier SVG placeholder. Skills declared via `"skills": ".cursor-skills/"` path-override (validator-supported).
 - **Skill frontmatter:** each `.cursor-skills/*/SKILL.md` needs `name` + `description` (validator-required) — all 30 conform.
 - **Submission:** send repo link to the Cursor team (Slack / email per template docs); `node scripts/validate-template.mjs` targets the monorepo layout, so it won't run 1:1 against our single-plugin repo (expected).
 - **Update model:** see `cursor-plugin-distribution-update-model.md`. Seamless propagation needs a **team marketplace + Auto Refresh + Cursor GitHub App**; unvalidated for us today.

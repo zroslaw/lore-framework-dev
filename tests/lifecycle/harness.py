@@ -153,15 +153,21 @@ CREATE_AGENT_PROMPT = (
     "confirmation — proceed directly using that description. Print DONE when complete."
 )
 
-INIT_PROMPT = "Invoke the lr:init skill in this directory. Print DONE when complete."
+INIT_PROMPT = (
+    "Invoke the lr:workspace-init skill in this directory. Do not pause for confirmation "
+    "or interview questions — proceed directly with sensible defaults (no additional "
+    "repositories) and accept the confirmation gate. Print DONE when complete."
+)
 
-WORKSPACE_SYNC_PROMPT = (
-    "Invoke the lr:workspace-sync skill in this workspace. Print DONE when complete."
+WORKSPACE_PULL_PROMPT = (
+    "Invoke the lr:workspace-pull skill in this workspace. Print DONE when complete."
 )
 
 CHECK_PROMPT = (
-    "Invoke the lr:check skill to run consistency checks across this workspace. "
-    "Print the full report verbatim."
+    "Invoke the lr:check skill to run consistency checks on the lore agent repos in "
+    "this workspace. In your report, explicitly list any broken lore topic or "
+    "lore-context.md cross-references you find, by filename. Focus on the workspace's "
+    "own agent repos — you do not need to reproduce every check section verbatim."
 )
 
 UPDATE_DRYRUN_PROMPT = (
@@ -288,11 +294,21 @@ def codex_prompt(prompt):
             "Print DONE when complete."
         )
     if prompt == INIT_PROMPT:
-        return f"Read '{FRAMEWORK_DIR}/docs/init.md' and follow it in this directory. Print DONE when complete."
-    if prompt == WORKSPACE_SYNC_PROMPT:
-        return f"Read '{FRAMEWORK_DIR}/docs/workspace-sync.md' and follow it in this workspace. Print DONE when complete."
+        return (
+            f"Read '{FRAMEWORK_DIR}/docs/workspace-init.md' and follow it in this directory. "
+            "Do not pause for confirmation or interview questions — proceed directly with "
+            "sensible defaults (no additional repositories) and accept the confirmation gate. "
+            "Print DONE when complete."
+        )
+    if prompt == WORKSPACE_PULL_PROMPT:
+        return f"Read '{FRAMEWORK_DIR}/docs/workspace-pull.md' and follow it in this workspace. Print DONE when complete."
     if prompt == CHECK_PROMPT:
-        return f"Read '{FRAMEWORK_DIR}/docs/check.md' and follow it to run consistency checks across this workspace. Print the full report verbatim."
+        return (
+            f"Read '{FRAMEWORK_DIR}/docs/check.md' and follow it to run consistency checks on the lore "
+            "agent repos in this workspace. In your report, explicitly list any broken lore topic or "
+            "lore-context.md cross-references you find, by filename. Focus on the workspace's own agent "
+            "repos — you do not need to reproduce every check section verbatim."
+        )
     if prompt == UPDATE_DRYRUN_PROMPT:
         return f"Read '{FRAMEWORK_DIR}/docs/update.md' and follow it with --dry-run in this workspace. Print the full report verbatim."
     if prompt == REGISTER_AGENT_PROMPT:
@@ -514,7 +530,7 @@ def seed_broken_reference(fx):
 
 def declare_sibling_repo(fx, sibling_bare_path):
     """Rewrite lore-repo.md to declare `repos:` pointing at a local bare repo not
-    yet cloned into the workspace, for the workspace-sync scenario."""
+    yet cloned into the workspace, for the workspace-pull scenario."""
     path = os.path.join(fx.repo, "lore-repo.md")
     with open(path) as f:
         content = f.read()
@@ -565,6 +581,25 @@ class RunResult:
         cost = f"${self.cost_usd:.4f}" if self.cost_usd is not None else "cost=?"
         secs = f"{self.duration_ms / 1000:.0f}s" if self.duration_ms else "?s"
         return f"exit={self.exit_code} {cost} {secs} model={MODEL}"
+
+
+_DEBUG_SEQ = [0]
+
+
+def _debug_dump(result):
+    """When LR_DEBUG_DIR is set, persist each engine run's final message + stderr for
+    post-mortem diagnosis (fixtures are otherwise torn down). Off by default."""
+    dbg = os.environ.get("LR_DEBUG_DIR")
+    if not dbg:
+        return
+    os.makedirs(dbg, exist_ok=True)
+    _DEBUG_SEQ[0] += 1
+    path = os.path.join(dbg, f"{ENGINE}-{MODEL}-{_DEBUG_SEQ[0]:02d}.txt")
+    with open(path, "w", encoding="utf-8", errors="ignore") as fh:
+        fh.write(
+            f"exit={result.exit_code}\n\n=== FINAL MESSAGE ===\n{result.text}\n\n"
+            f"=== STDERR (tail) ===\n{(result.stderr or '')[-2000:]}\n"
+        )
 
 
 def run_engine(workspace, prompt):
@@ -624,7 +659,9 @@ def run_engine(workspace, prompt):
                 os.unlink(output_last_message)
             except FileNotFoundError:
                 pass
-        return RunResult(proc.returncode, text or "", None, None, proc.stderr)
+        rr = RunResult(proc.returncode, text or "", None, None, proc.stderr)
+        _debug_dump(rr)
+        return rr
     else:
         raise NotImplementedError(f"no driver for engine '{ENGINE}' yet")
     text, cost, duration = proc.stdout, None, None
@@ -635,4 +672,6 @@ def run_engine(workspace, prompt):
         duration = payload.get("duration_ms")
     except (json.JSONDecodeError, AttributeError):
         pass  # keep raw stdout as text
-    return RunResult(proc.returncode, text or "", cost, duration, proc.stderr)
+    rr = RunResult(proc.returncode, text or "", cost, duration, proc.stderr)
+    _debug_dump(rr)
+    return rr

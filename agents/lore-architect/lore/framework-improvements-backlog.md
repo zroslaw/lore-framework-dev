@@ -2,19 +2,18 @@ Running backlog of framework-level improvements, deferred items, and open questi
 
 Items are grouped by area. Each has a one-line what + why + rough trigger or status. Promote an item into its own lore topic (and its own design draft in `workdir/`) when it becomes active.
 
-## v25 SHIP CHECKLIST (authoritative until push)
+## v25 SHIP CLOSURE (2026-07-12)
 
-**Ground truth (verified 2026-07-12).** `lore-framework/main` is locally ahead of `origin/main` by
-three v25 commits and is **not pushed**:
+**Ground truth before final push (verified 2026-07-12).** `lore-framework/main` carried three
+local v25 feature commits:
 
 - `4f3bfcf` — Cursor ops parity
 - `258ad0e` — native Codex plugin packaging + four-manifest discipline
 - `0311ab6` — workspace slice (`workspace-pull` + `workspace-init`)
 
-v25 feature scope is effectively complete locally: Cursor ops parity, Codex formal packaging,
-workspace pull/init, `migrations/25.md`, amended release notes, and the four version-bearing
-manifests are committed in `lore-framework`. The old branch/scope story that v25 is only half-done
-on `v25-cursor-ops-parity` is stale.
+v25 feature scope is complete: Cursor ops parity, Codex formal packaging, workspace pull/init,
+`migrations/25.md`, release notes, and the four version-bearing manifests are in `lore-framework`.
+The old branch/scope story that v25 is only half-done on `v25-cursor-ops-parity` is stale.
 
 A reflect-path doc-fidelity fix landed this session: `docs/process-reflection.md` now anchors the
 explicit `agents/<agent-name>/reflections/` write path (was a role-only reference that a weak/Codex
@@ -23,15 +22,12 @@ workspace-pull, check) are all fixed and re-verified **green on Claude Code + `h
 (`Ran 4 tests in 268s, OK`). Static `/lr:check` and `plugin validate --strict` are green. See
 `v25-lifecycle-scenario-fixes.md`, `reflect-path-anchoring-fidelity-fix.md`.
 
-Remaining release gates before pushing:
-- Resolve dirty `assets/logo.svg` in `lore-framework` (the PNG-logo migration was folded into the
-  v25 tree; working tree still dirty with untracked PNGs + deleted `assets/logo.svg` — commit
-  intentionally or back out).
-- Run the multi-lens doc review leg if following release discipline strictly.
-- Run the full `LR_LIFECYCLE=1` suite as the final empirical gate (the four touched scenarios are
-  green; the *complete* suite is still the gate, and was deferred by the user this session).
-- Decide whether the workspace-root `lore-workspace.md` edit belongs in the meta workspace repo.
-- Push `lore-framework/main` only after green gates.
+Final release disposition:
+- PNG logo migration is accepted: Cursor and Codex manifests point at PNG assets, and the previous
+  `assets/logo.svg` is removed from the distributed plugin tree.
+- The workspace-root `lore-workspace.md` edit belongs in the meta workspace repo.
+- The full three-engine `LR_LIFECYCLE=1` rerun after targeted fixes was explicitly waived by the user
+  as an acceptable quality tradeoff for v25; targeted re-runs for the four failures are green.
 - Post-push: submit `lr` to the Claude community marketplace.
 
 Anchors: `v25-cursor-ops-parity-design.md`, `v25-workspace-pull-init-design.md`,
@@ -186,10 +182,9 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 Cross-engine plugin-marketplace readiness. Anchor topics: `engine-marketplace-readiness.md`,
 `cursor-plugin-distribution-update-model.md`, `plugin-distribution.md`.
 
-- ~~**Cursor + Claude manifest visibility enrichment**~~ — *done 2026-07-12.* Added `logo`
-  (`assets/logo.svg`, committed) + `displayName` + `keywords` to `.cursor-plugin/plugin.json`;
-  added `$schema` + `displayName` + `homepage` + `keywords` to `.claude-plugin/plugin.json`. Both in
-  the `lore-framework/` working tree, **uncommitted**.
+- ~~**Cursor + Claude manifest visibility enrichment**~~ — *done 2026-07-12.* Added `displayName`
+  + `keywords` to `.cursor-plugin/plugin.json`; added `$schema` + `displayName` + `homepage` +
+  `keywords` to `.claude-plugin/plugin.json`. Cursor/Codex logo references now use PNG assets.
 - **Submit `lr` to the Claude community marketplace.** Run `claude plugin validate --strict` locally,
   then submit via the Console form (`platform.claude.com/plugins/submit`, works for individual
   authors; the claude.ai form needs Team/Enterprise). Approved plugins pin to a commit SHA in
@@ -207,9 +202,8 @@ Cross-engine plugin-marketplace readiness. Anchor topics: `engine-marketplace-re
   installs converge" lever. Currently only `--plugin-dir` is validated (Tier-B gap). Point the
   tracked branch at a release tag, not raw `main` (10-min batch re-index ships half-states). See
   `cursor-plugin-distribution-update-model.md`.
-- **`assets/logo.svg` is a functional placeholder.** Swap for brand art anytime; keep the filename
-  so the manifest reference stays valid. A Claude-side logo field does not exist today (Cursor +
-  Codex `interface` support logos); revisit if Claude adds one.
+- **Plugin logo assets.** Cursor and Codex consume PNG logo assets from `assets/logo*.png`. Claude has
+  no logo field today; revisit if Claude adds one.
 
 ## Preserve Claude Code Session JSONLs Alongside Session Metadata (parked 2026-06-05)
 

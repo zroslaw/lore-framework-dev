@@ -30,7 +30,10 @@ class FinalizeScenarios(unittest.TestCase):
 
     def setUp(self):
         tmp = tempfile.mkdtemp(prefix="lr-lifecycle-")
-        self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
+        if os.environ.get("LR_KEEP_FIXTURES"):
+            print(f"\n  [fixture kept] {tmp}", file=sys.stderr)
+        else:
+            self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
         self.fx = build_fixture(tmp)
 
     def test_10_reflect(self):

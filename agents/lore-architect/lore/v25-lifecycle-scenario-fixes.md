@@ -40,12 +40,12 @@ check). Report: `workdir/v25-lifecycle-codex-cursor-2026-07-12.md`.
 
 ## v25 ship state
 
-Feature scope complete on `lore-framework/main` (unpushed); static `/lr:check`, `plugin validate
---strict`, and these four lifecycle scenarios green. Remaining before push tracked in
-`framework-improvements-backlog.md` § v25 SHIP CHECKLIST: the full `LR_LIFECYCLE=1` suite is the
-last gate (still deferred by the user this session), then push, then community-marketplace submit.
-The PNG-logo migration was folded into the v25 tree this session (working tree still dirty with the
-untracked PNGs + deleted `assets/logo.svg` — commit or back out before pushing v25).
+Feature scope complete on `lore-framework/main`; static `/lr:check`, `plugin validate
+--strict`, and these four lifecycle scenarios green. The user explicitly accepted shipping v25
+without a fresh full three-engine `LR_LIFECYCLE=1` rerun after the targeted fixes. The PNG-logo
+migration was folded into the v25 tree: Cursor and Codex point at PNG assets and the previous
+`assets/logo.svg` is removed from the distributed plugin tree. Remaining release step after push:
+community-marketplace submit.
 
 See `v25-workspace-pull-init-design.md`, `lifecycle-testing-harness.md`,
 `execution-testing-catches-blind-ambiguity.md`, `reflect-path-anchoring-fidelity-fix.md`.

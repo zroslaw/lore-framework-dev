@@ -14,12 +14,15 @@ Environment:
   LR_FRAMEWORK_DIR    plugin under test (default: sibling ../lore-framework)
   LR_ENGINE           engine to drive (default: claude; supported: claude,
                       cursor, codex)
-  LR_TEST_MODEL       model for the agent runs (default: sonnet;
-                      codex default: gpt-5.4-mini)
+  LR_TEST_MODEL       model for the agent runs (default: the engine's
+                      REGULAR_MODEL — claude:sonnet, codex:gpt-5.4-mini,
+                      cursor:composer-2.5)
   LR_JUDGE_MODEL      model for S3 judging — always runs on the claude CLI so
                       the judge is identical across engines (default: haiku)
   LR_RUN_TIMEOUT      per-run timeout in seconds (default: 420)
-  LR_QUALITY_JOBS     parallel engine runs (default: 3)
+  LR_QUALITY_JOBS     parallel probe x arm runs within one config (default: 3)
+  LR_QUALITY_NO_LOCAL ignore matrix-config.local.json, use canonical tier
+                      defaults (=1). What a release ship gate uses.
 
 S1 (retrieval) tracing per engine:
   claude — stream-json trace; tool_use INPUTS only (outputs would false-
@@ -44,10 +47,62 @@ FRAMEWORK_DIR = os.path.abspath(
     os.environ.get("LR_FRAMEWORK_DIR", os.path.join(HERE, "..", "..", "..", "lore-framework"))
 )
 ENGINE = os.environ.get("LR_ENGINE", "claude")
-MODEL = os.environ.get(
-    "LR_TEST_MODEL",
-    "gpt-5.4-mini" if ENGINE == "codex" else "sonnet",
-)
+
+# --- Quality matrix model tiers (canonical defaults + optional local override) -
+# Two tiers (see lore quality-benchmark-tiers-proposal.md):
+#   regular — one "cheapest usable" model per engine; the per-release ship gate
+#             and the per-engine default when LR_TEST_MODEL is unset.
+#   deep    — the full engine x model matrix; run only on explicit request.
+#
+# The Python dicts below are the CANONICAL DEFAULTS — always present, so a fresh
+# checkout / CI release run always resolves to this exact set. run_matrix.py
+# imports these, so the matrix presets and the bare single-config default can
+# never drift apart.
+#
+# For PERSONAL, PERSISTENT reconfiguration (swap a model, drop an engine) without
+# editing code or affecting releases, drop a `matrix-config.local.json` beside
+# this file — it is git-ignored, so it never ships. Its keys layer over the
+# defaults: `engine_order` (list) replaces the engine set; `regular` (engine ->
+# model) and `deep` (engine -> [models]) update per-engine entries. Set
+# LR_QUALITY_NO_LOCAL=1 (or run_matrix --no-local-config) to ignore it and force
+# the canonical defaults — this is what a release ship gate uses.
+_DEFAULT_REGULAR = {"claude": "sonnet", "codex": "gpt-5.4-mini", "cursor": "composer-2.5"}
+_DEFAULT_DEEP = {
+    "claude": ["haiku", "sonnet", "opus-4.8"],
+    "codex": ["gpt-5.4-mini", "gpt-5.4"],
+    "cursor": ["composer-2.5", "sonnet"],
+}
+_DEFAULT_ENGINE_ORDER = ["claude", "codex", "cursor"]  # proposal table order
+LOCAL_TIER_CONFIG = os.path.join(HERE, "matrix-config.local.json")
+
+
+def load_tiers():
+    """Return (engine_order, regular, deep), defaults optionally overlaid with a
+    git-ignored matrix-config.local.json. Engines are filtered to engine_order,
+    so dropping an engine from engine_order drops it from both tiers."""
+    order = list(_DEFAULT_ENGINE_ORDER)
+    regular = dict(_DEFAULT_REGULAR)
+    deep = {e: list(v) for e, v in _DEFAULT_DEEP.items()}
+    if os.environ.get("LR_QUALITY_NO_LOCAL") != "1" and os.path.exists(LOCAL_TIER_CONFIG):
+        try:
+            with open(LOCAL_TIER_CONFIG) as f:
+                override = json.load(f)
+            if isinstance(override.get("engine_order"), list):
+                order = [str(e) for e in override["engine_order"]]
+            if isinstance(override.get("regular"), dict):
+                regular.update(override["regular"])
+            if isinstance(override.get("deep"), dict):
+                deep.update({e: list(v) for e, v in override["deep"].items()})
+        except (OSError, ValueError) as exc:
+            print(f"warning: ignoring {LOCAL_TIER_CONFIG}: {exc}")
+    regular = {e: regular[e] for e in order if e in regular}
+    deep = {e: deep[e] for e in order if e in deep}
+    return order, regular, deep
+
+
+ENGINE_ORDER, REGULAR_MODEL, DEEP_MODELS = load_tiers()
+
+MODEL = os.environ.get("LR_TEST_MODEL", REGULAR_MODEL.get(ENGINE, "sonnet"))
 JUDGE_MODEL = os.environ.get("LR_JUDGE_MODEL", "haiku")
 RUN_TIMEOUT = int(os.environ.get("LR_RUN_TIMEOUT", "420"))
 JOBS = int(os.environ.get("LR_QUALITY_JOBS", "3"))
@@ -87,12 +142,16 @@ def framework_version():
         return f.read().strip()
 
 
-def build_quality_fixture(tmpdir, arm, needle_topics, distractor_topics):
+def build_quality_fixture(tmpdir, arm, needle_topics, distractor_topics,
+                          workdir_files=None):
     """Throwaway workspace with one agent repo + local bare origin.
 
     arm: "treatment" (needles present) or "control" (needles neutralized).
     Topic filenames and lore-context.md are identical across arms, so S1
     retrieval is equally possible in both — only the knowledge differs.
+    workdir_files (rel-path -> content) are written under the agent's
+    workdir/ identically in both arms (only the lore topic pointing at them
+    differs).
     """
     workspace = os.path.join(tmpdir, "workspace")
     repo = os.path.join(workspace, REPO_NAME)
@@ -137,6 +196,8 @@ def build_quality_fixture(tmpdir, arm, needle_topics, distractor_topics):
     for name, content in sorted(all_topics.items()):
         write(f"agents/{AGENT_NAME}/lore/{name}", content)
     write(f"agents/{AGENT_NAME}/workdir/.gitkeep", "")
+    for rel, content in sorted((workdir_files or {}).items()):
+        write(f"agents/{AGENT_NAME}/workdir/{rel}", content)
 
     _git(workspace, "init", "-b", "main", REPO_NAME)
     _git(repo, "add", "-A")
@@ -154,6 +215,51 @@ TASK_SUFFIX = (
     "Print your complete answer. "
     "Do not reflect, merge, finalize, commit, or push."
 )
+
+# Caps for the workspace-artifact capture handed to the S3 judge.
+_ARTIFACT_FILE_CAP = 8_000     # chars per file
+_ARTIFACT_TOTAL_CAP = 40_000   # chars overall
+
+
+def collect_workspace_artifacts(workspace):
+    """What the agent wrote during the run: the fixture repo's diff plus the
+    contents of new files (untracked in the repo, or created at workspace
+    level outside it). Handed to the S3 judge so file-writing engines/models
+    aren't judged 'no code shown' on their final message alone. Must be
+    called BEFORE the throwaway workspace is deleted. Returns '' if nothing
+    was written."""
+    repo = os.path.join(workspace, REPO_NAME)
+    parts = []
+
+    diff = _strip_nulls(_git(repo, "diff", check=False).stdout.strip())
+    if diff:
+        parts.append("--- repo diff ---\n" + diff)
+
+    new_files = []
+    ls = _git(repo, "ls-files", "--others", "--exclude-standard", check=False)
+    for rel in ls.stdout.splitlines():
+        new_files.append((rel, os.path.join(repo, rel)))
+    for dirpath, dirs, files in os.walk(workspace):
+        # workspace level only; the repo is covered by git above
+        dirs[:] = [d for d in dirs if os.path.join(dirpath, d) != repo]
+        for fname in files:
+            path = os.path.join(dirpath, fname)
+            new_files.append((os.path.relpath(path, workspace), path))
+
+    total = sum(len(p) for p in parts)
+    for rel, path in sorted(new_files):
+        if total >= _ARTIFACT_TOTAL_CAP:
+            parts.append(f"[... more files omitted, size cap reached ...]")
+            break
+        try:
+            with open(path, encoding="utf-8", errors="ignore") as f:
+                content = _strip_nulls(f.read(_ARTIFACT_FILE_CAP))
+        except OSError:
+            continue
+        part = f"--- new file: {rel} ---\n{content}"
+        parts.append(part)
+        total += len(part)
+    return "\n\n".join(parts)
 
 
 def probe_prompt(task):
@@ -174,11 +280,23 @@ def probe_prompt(task):
     )
 
 
+def _strip_nulls(s):
+    """Embedded NUL bytes crash subprocess.run() (execve requires
+    NUL-terminated C strings) wherever this text later gets passed as a CLI
+    arg — e.g. the S3 judge prompt. Engine stdout and workspace file reads
+    can carry a stray \\x00 (control chars, binary content, truncated
+    streams); strip it at the capture boundary so no downstream consumer
+    has to think about it."""
+    return s.replace("\x00", "") if s else s
+
+
 class ProbeRun:
     def __init__(self, exit_code, text, tool_inputs, cost_usd, duration_ms, stderr):
         self.exit_code = exit_code
-        self.text = text
-        self.tool_inputs = tool_inputs  # serialized tool-call INPUTS, or None
+        self.text = _strip_nulls(text)
+        self.tool_inputs = (
+            [_strip_nulls(ti) for ti in tool_inputs] if tool_inputs is not None else None
+        )
         self.cost_usd = cost_usd
         self.duration_ms = duration_ms
         self.stderr = stderr
@@ -319,7 +437,7 @@ def score_s2(run, s2_check):
     raise ValueError(f"unknown s2 check type: {s2_check['type']}")
 
 
-def judge_s3(task, response, rubric):
+def judge_s3(task, response, rubric, artifacts=""):
     """Application: binary LLM-judge label against a one-paragraph rubric.
     The judge always runs on the claude CLI with a fixed model
     (LR_JUDGE_MODEL), independent of LR_ENGINE, so scores stay comparable
@@ -330,11 +448,22 @@ def judge_s3(task, response, rubric):
     a broken judge must INVALIDATE the score, never count as FAIL. Learned
     the hard way: a session-limit message scored as FAIL corrupts every S3
     silently."""
+    # Last-line-of-defense: response/artifacts are stripped at capture time,
+    # but this call is the one that crashes on a stray \x00 (execve requires
+    # NUL-terminated args), so re-guard here too.
+    response, artifacts = _strip_nulls(response), _strip_nulls(artifacts)
+    artifacts_section = (
+        f"--- FILES THE AGENT WROTE IN ITS WORKSPACE ---\n{artifacts}\n\n"
+        if artifacts else ""
+    )
     prompt = (
         "You are a strict, literal test evaluator. An AI agent was given a "
-        "task; you grade its response against a rubric.\n\n"
+        "task; you grade its response against a rubric. Judge the response "
+        "and any workspace files together — code delivered as a written "
+        "file counts the same as code printed in the response.\n\n"
         f"--- TASK GIVEN TO THE AGENT ---\n{task}\n\n"
         f"--- AGENT'S RESPONSE ---\n{response}\n\n"
+        f"{artifacts_section}"
         f"--- RUBRIC ---\n{rubric}\n\n"
         "Reply with exactly one line: the word PASS or FAIL, then ' - ' and "
         "one short reason. No other text."

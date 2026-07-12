@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Lifecycle scenarios 17-26: repo & workspace skills (catalog: workdir/draft-testing-pipeline.md).
 
-create-repo, create-agent, init, workspace-sync, check, update --dry-run, and registration flows.
+create-repo, create-agent, workspace-init, workspace-pull, check, update --dry-run, and registration flows.
 
 Run:  LR_LIFECYCLE=1 python3 tests/lifecycle/test_repo_workspace.py -v
 One:  LR_LIFECYCLE=1 python3 tests/lifecycle/test_repo_workspace.py -v -k 16
@@ -20,7 +20,7 @@ from harness import (
     AGENT_NAME, BROKEN_REF, CHECK_PROMPT, CREATE_AGENT_PROMPT, CREATE_REPO_PROMPT,
     HELPER_AGENT_NAME, INIT_PROMPT, REGISTER_AGENT_PROMPT, REGISTER_REPO_PROMPT,
     SKIP_REASON, UNREGISTER_AGENT_PROMPT, UNREGISTER_REPO_PROMPT,
-    UPDATE_DRYRUN_PROMPT, WORKSPACE_SYNC_PROMPT,
+    UPDATE_DRYRUN_PROMPT, WORKSPACE_PULL_PROMPT,
     build_empty_workspace, build_fixture, declare_sibling_repo, head,
     make_origin_ahead, memory_file_name, read_repo_version, run_engine, seed_broken_reference,
 )
@@ -31,7 +31,10 @@ class RepoWorkspaceScenarios(unittest.TestCase):
 
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="lr-lifecycle-")
-        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        if os.environ.get("LR_KEEP_FIXTURES"):
+            print(f"\n  [fixture kept] {self.tmp}", file=sys.stderr)
+        else:
+            self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
 
     def test_16_create_repo(self):
         """create-repo scaffolds a valid, git-initialized agent repo in an empty workspace."""
@@ -68,8 +71,8 @@ class RepoWorkspaceScenarios(unittest.TestCase):
                 f"new agent missing {required}",
             )
 
-    def test_18_init(self):
-        """init writes the marker-delimited framework section into the engine's memory file."""
+    def test_18_workspace_init(self):
+        """workspace-init writes the marker-delimited framework section into the engine's memory file."""
         workspace = build_empty_workspace(self.tmp)
         r = run_engine(workspace, INIT_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
@@ -79,12 +82,12 @@ class RepoWorkspaceScenarios(unittest.TestCase):
         self.assertTrue(os.path.isfile(memory_file), f"{memory_file_name()} was not created")
         with open(memory_file) as f:
             content = f.read()
-        self.assertIn("<!-- lr:init:start -->", content)
-        self.assertIn("<!-- lr:init:end -->", content)
+        self.assertIn("<!-- lr:workspace-init:start -->", content)
+        self.assertIn("<!-- lr:workspace-init:end -->", content)
         self.assertIn("Lore Framework Workspace", content)
 
-    def test_19_workspace_sync(self):
-        """workspace-sync clones a declared-but-missing sibling and pulls an existing repo."""
+    def test_19_workspace_pull(self):
+        """workspace-pull clones a declared-but-missing sibling and pulls an existing repo."""
         fx = build_fixture(self.tmp)
         make_origin_ahead(fx)  # test-lore itself should get pulled up to date
 
@@ -93,7 +96,7 @@ class RepoWorkspaceScenarios(unittest.TestCase):
                         capture_output=True, text=True, check=True)
         declare_sibling_repo(fx, sibling_bare)
 
-        r = run_engine(fx.workspace, WORKSPACE_SYNC_PROMPT)
+        r = run_engine(fx.workspace, WORKSPACE_PULL_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
 

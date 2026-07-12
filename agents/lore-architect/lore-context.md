@@ -78,15 +78,12 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` — last **shipped & pushed** is **24** (`da473b6`). v25 is implemented
-locally on `lore-framework/main` as three unpushed commits: Cursor ops parity (`4f3bfcf`), native
-Codex packaging + four-manifest discipline (`258ad0e`), and the workspace slice (`0311ab6`). The
-authoritative pre-push gates live in `framework-improvements-backlog.md` § "v25 SHIP CHECKLIST".
-Static `/lr:check` and `plugin validate --strict` are green; the four v25-touched lifecycle
-scenarios (reflect, workspace-init, workspace-pull, check) are fixed and green on Claude+`haiku`,
-and the reflect-path doc-fidelity fix (`process-reflection.md` now anchors the explicit
-`agents/<agent-name>/reflections/` write path) has landed — the full `LR_LIFECYCLE=1` suite remains
-the last pre-push gate.
+`lore-framework/VERSION` — v25 is the current release closure: Cursor ops parity, native Codex
+packaging + four-manifest discipline, workspace pull/init, PNG logo assets, and the check/reflection
+doc-fidelity fixes. Static `/lr:check` and `plugin validate --strict` are green; targeted re-runs
+for the four v25 lifecycle failures are green. The user explicitly accepted shipping without a fresh
+full three-engine lifecycle rerun after those targeted fixes; this tradeoff is recorded in
+`framework-improvements-backlog.md` § "v25 SHIP CLOSURE".
 Each repo stamps `VERSION` in `lore-repo.md`; four version-bearing plugin manifests mirror
 `1.<VERSION>.0` (Claude pair, Cursor, Codex). `/lr:check` #19 enforces them. See
 `versioning-release-types.md`, `plugin-manifest-versioning.md`, `v25-cursor-ops-parity-design.md`,
@@ -199,19 +196,17 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
 
 ## Current State
 
-Workspace holds three canonical repos: **`lore-framework/`** (plugin — v24 shipped & pushed at
-`da473b6`; v25 feature scope is complete locally on `main` but unpushed, with final gates tracked in
-backlog), **`lore-framework-dev/`** (this repo — lore-architect lore + drafts), and
-**`lore-agents/`** (personal agents). A workspace-root `lore-workspace.md` exists; decide whether its
-current edit belongs in the meta workspace repo before pushing v25. Cursor ops parity — see
-`v25-cursor-ops-parity-design.md`. Workspace pull/init — see `v25-workspace-pull-init-design.md`.
+Workspace holds three canonical repos: **`lore-framework/`** (plugin), **`lore-framework-dev/`**
+(this repo — lore-architect lore + drafts), and **`lore-agents/`** (personal agents). v25 is the
+workspace-layer / native-Codex-packaging / Cursor-ops-parity release. Final disposition: PNG logo
+migration accepted, workspace-root `lore-workspace.md` belongs in the meta workspace repo, targeted
+lifecycle re-runs for the four v25 failures are green, and the user explicitly waived a fresh full
+three-engine lifecycle rerun after those fixes as an acceptable v25 ship tradeoff. Cursor ops parity
+— see `v25-cursor-ops-parity-design.md`. Workspace pull/init — see
+`v25-workspace-pull-init-design.md`.
 
 ## Running Backlog
 
 `framework-improvements-backlog.md` is the canonical list of deferred items; its § "v25 SHIP
-CHECKLIST" is the authoritative gate before pushing v25. **Next session:** resolve dirty
-`assets/logo.svg` (PNG-logo migration folded into the v25 tree), then run the full `LR_LIFECYCLE=1`
-suite as the last gate before pushing `lore-framework/main` (static `/lr:check`, `plugin validate
---strict`, and the four v25-touched lifecycle scenarios are already green; multi-lens doc review
-remains optional-if-strict). Quality benchmark tier restructure still blocked on P12/P16 probe gaps.
-~139 lore topics.
+CLOSURE" records the final v25 gate disposition. Quality benchmark tier/probe expansion is now in
+the dev repo with regular/deep matrix defaults and local override support. ~139 lore topics.

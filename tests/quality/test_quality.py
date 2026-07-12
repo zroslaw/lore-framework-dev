@@ -33,9 +33,10 @@ from concurrent.futures import ThreadPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from harness import (
     ENGINE, JOBS, JUDGE_MODEL, MODEL, SKIP_REASON, TRACES_TOOLS,
-    build_quality_fixture, judge_s3, run_probe, score_s2,
+    build_quality_fixture, collect_workspace_artifacts, judge_s3, run_probe,
+    score_s2,
 )
-from probes import DISTRACTOR_TOPICS, NEEDLE_TOPICS, PROBES
+from probes import DISTRACTOR_TOPICS, NEEDLE_TOPICS, PROBES, WORKDIR_FILES
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RESULTS_DIR = os.path.join(HERE, "results")
@@ -48,7 +49,8 @@ def run_one(probe, arm):
     engine run fails that probe only, never the whole suite."""
     tmp = tempfile.mkdtemp(prefix=f"lr-quality-{probe['id']}-{arm}-")
     try:
-        workspace = build_quality_fixture(tmp, arm, NEEDLE_TOPICS, DISTRACTOR_TOPICS)
+        workspace = build_quality_fixture(tmp, arm, NEEDLE_TOPICS, DISTRACTOR_TOPICS,
+                                          WORKDIR_FILES)
         try:
             run = run_probe(workspace, probe["task"])
         except subprocess.TimeoutExpired:
@@ -56,6 +58,7 @@ def run_one(probe, arm):
                 "probe": probe["id"], "category": probe["category"],
                 "difficulty": probe.get("difficulty", ""), "arm": arm,
                 "exit_code": 124, "text": "", "tool_inputs": [],
+                "artifacts": "",
                 "cost_usd": None, "duration_ms": None,
                 "stderr_tail": "engine run timed out",
             }
@@ -67,6 +70,10 @@ def run_one(probe, arm):
             "exit_code": run.exit_code,
             "text": run.text,
             "tool_inputs": run.tool_inputs,
+            # captured before the throwaway workspace is deleted; judged
+            # alongside the final message (S2/S3) so file-writing runs
+            # aren't scored "no code shown".
+            "artifacts": collect_workspace_artifacts(workspace),
             "cost_usd": run.cost_usd,
             "duration_ms": run.duration_ms,
             "stderr_tail": run.stderr[-500:] if run.stderr else "",
@@ -85,7 +92,8 @@ def score_one(probe, result):
     if "S2" in probe["stages"]:
         stages["S2"] = int(score_s2_from(result, probe["s2_check"]))
     if "S3" in probe["stages"]:
-        passed, verdict = judge_s3(probe["task"], result["text"], probe["s3_rubric"])
+        passed, verdict = judge_s3(probe["task"], result["text"], probe["s3_rubric"],
+                                   artifacts=result.get("artifacts", ""))
         result["judge_verdict"] = verdict
         if passed is None:
             result["judge_error"] = True  # invalid, not FAIL — excluded from scoring
@@ -96,14 +104,22 @@ def score_one(probe, result):
 
 
 def score_s1_from(result, target):
-    return any(target in ti for ti in result["tool_inputs"])
+    """target may be a single filename or a list (synthesis probes) —
+    a list passes only if EVERY listed file appears in the tool trace."""
+    targets = target if isinstance(target, list) else [target]
+    return all(
+        any(t in ti for ti in result["tool_inputs"]) for t in targets
+    )
 
 
 def score_s2_from(result, s2_check):
     class _R:  # minimal shim so harness.score_s2 works on stored dicts
         pass
     r = _R()
-    r.text = result["text"]
+    # Grounding counts wherever the agent delivered it: final message or a
+    # written file. Agents don't edit lore topics, so the artifact capture
+    # can't echo needle text back and false-positive this.
+    r.text = result["text"] + "\n" + result.get("artifacts", "")
     return score_s2(r, s2_check)
 
 
@@ -131,38 +147,42 @@ def aggregate(results):
 
 
 def scorecard(results, agg):
+    # Wide enough for the longest v2 probe id (P17-abstention-general-knowledge,
+    # 32 chars) plus a gap; widen this if a future probe id runs past it.
+    probe_w = max(24, max((len(r["probe"]) for r in results), default=24) + 2)
+    rule_w = probe_w + 48
     lines = []
     lines.append("")
-    lines.append("=" * 72)
+    lines.append("=" * rule_w)
     lines.append(
         f"  LORE AGENT QUALITY BENCHMARK — engine={ENGINE} model={MODEL} judge={JUDGE_MODEL}"
     )
-    lines.append("=" * 72)
-    lines.append(f"  {'probe':<24}{'arm':<12}{'S1':>4}{'S2':>4}{'S3':>4}   judge")
-    lines.append("-" * 72)
+    lines.append("=" * rule_w)
+    lines.append(f"  {'probe':<{probe_w}}{'arm':<12}{'S1':>4}{'S2':>4}{'S3':>4}   judge")
+    lines.append("-" * rule_w)
     for r in sorted(results, key=lambda x: (x["probe"], x["arm"])):
         s = r["stages"]
         def fmt(k):
             return {1: "  1", 0: "  0"}.get(s.get(k), "  -")
         verdict = r.get("judge_verdict", "")[:40]
         lines.append(
-            f"  {r['probe']:<24}{r['arm']:<12}{fmt('S1'):>4}{fmt('S2'):>4}{fmt('S3'):>4}   {verdict}"
+            f"  {r['probe']:<{probe_w}}{r['arm']:<12}{fmt('S1'):>4}{fmt('S2'):>4}{fmt('S3'):>4}   {verdict}"
         )
-    lines.append("-" * 72)
+    lines.append("-" * rule_w)
     for arm in ARMS:
         a = agg[arm]
         lines.append(
             f"  {arm:<12} LUS {a['lus_pct']:>5}%  ({a['earned']}/{a['possible']} stage points)"
             f"   S3 pass rate {a['s3_pass_rate_pct']}%"
         )
-    lines.append("-" * 72)
+    lines.append("-" * rule_w)
     def _pts(v):
         return f"{v:+.1f} pts" if v is not None else "n/a (judge errors)"
     lines.append(f"  LUS UPLIFT (treatment - control):      {_pts(agg['lus_uplift_pct'])}")
     lines.append(f"  BEHAVIOR UPLIFT (S3 delta, headline):  {_pts(agg['behavior_uplift_pct'])}")
     total_cost = sum(r["cost_usd"] or 0 for r in results)
     lines.append(f"  total engine cost: ${total_cost:.2f}")
-    lines.append("=" * 72)
+    lines.append("=" * rule_w)
     return "\n".join(lines)
 
 
