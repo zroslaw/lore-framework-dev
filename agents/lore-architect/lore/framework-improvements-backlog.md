@@ -16,11 +16,20 @@ workspace pull/init, `migrations/25.md`, amended release notes, and the four ver
 manifests are committed in `lore-framework`. The old branch/scope story that v25 is only half-done
 on `v25-cursor-ops-parity` is stale.
 
+A reflect-path doc-fidelity fix landed this session: `docs/process-reflection.md` now anchors the
+explicit `agents/<agent-name>/reflections/` write path (was a role-only reference that a weak/Codex
+model wrote to repo root). The four v25-touched lifecycle scenarios (reflect, workspace-init,
+workspace-pull, check) are all fixed and re-verified **green on Claude Code + `haiku`**
+(`Ran 4 tests in 268s, OK`). Static `/lr:check` and `plugin validate --strict` are green. See
+`v25-lifecycle-scenario-fixes.md`, `reflect-path-anchoring-fidelity-fix.md`.
+
 Remaining release gates before pushing:
-- Resolve dirty `assets/logo.svg` in `lore-framework` (commit intentionally or discard).
-- Run `/lr:check` and `claude plugin validate --strict` on the final tree.
+- Resolve dirty `assets/logo.svg` in `lore-framework` (the PNG-logo migration was folded into the
+  v25 tree; working tree still dirty with untracked PNGs + deleted `assets/logo.svg` — commit
+  intentionally or back out).
 - Run the multi-lens doc review leg if following release discipline strictly.
-- Run the full `LR_LIFECYCLE=1` suite as the final empirical gate.
+- Run the full `LR_LIFECYCLE=1` suite as the final empirical gate (the four touched scenarios are
+  green; the *complete* suite is still the gate, and was deferred by the user this session).
 - Decide whether the workspace-root `lore-workspace.md` edit belongs in the meta workspace repo.
 - Push `lore-framework/main` only after green gates.
 - Post-push: submit `lr` to the Claude community marketplace.

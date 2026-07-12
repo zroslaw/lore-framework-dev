@@ -38,6 +38,27 @@ reinforced the design:
 - Takeover is continuation, not finalization. The receiving session's finalization preserves the
   recovered session's learning.
 
+## Codex→Claude continuation use (2026-07-12)
+
+The reverse direction of the handoff above: a dying Codex `lore-architect` session (`019f5537`, mid
+v25 lifecycle-fix work) was taken over on Claude Code and carried to completion. Reinforcements:
+
+- **Bare `/lr:takeover` asked, didn't pick.** The `--list` cross-engine table rendered; a shortlist
+  was offered and the user chose by id. Recency-is-not-intent held up in practice again.
+- **On-disk verification over the digest tail — sharper than prior instances.** The digest ended
+  right after the recorded agent created a goal and *read* the failing test bodies. The tail
+  strongly *implied* fixes were imminent, but disk verification confirmed `tests/lifecycle/` was
+  **untouched** — no fixes applied. Trusting the tail would have meant assuming work that didn't
+  exist. So the "trust on-disk state over the digest's final turn" rule is not only about a
+  *claimed-complete* action (the RC-glider generator, the v25 `logo.svg`) — it also covers a tail
+  that merely *implies* imminent work. Check the files before continuing.
+- **Boot-first sequencing worked.** The recorded session had booted `lore-architect` from
+  `lore-framework-dev`; it was not active in the taking-over session, so it was booted via
+  `agent-boot.md` (auto-pull, version-check `25`==`25`, role + lore-context) before acting — as
+  step 3 prescribes.
+- **Takeover is continuation, not finalization.** The taken-over Codex session's unfinalized
+  knowledge is preserved by *this* session's finalization — exactly the boundary the doc states.
+
 ## Known gaps / follow-ups
 
 - **Cursor conversion unsupported**: `~/.cursor/chats/<ws-hash>/<uuid>/store.db` is a content-addressed SQLite blob store (ids = SHA-256 of data, no ordering); messages are JSON blobs in API shape but assistant turns sit in binary records. Listed but not convertible until someone reverse-engineers ordering.

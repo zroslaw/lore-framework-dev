@@ -13,6 +13,8 @@ The framework's core mechanism is prose executed by a model (see `multi-engine-p
 
 Full case study, fixes, and the debugging technique that pinpointed both (tracing actual tool calls via `--output-format stream-json --verbose` rather than reading only final text output): `agent-boot-doc-fidelity-fixes.md`.
 
+**Second instance, a different doc (v25, 2026-07-12).** `docs/process-reflection.md` told the model to write into "the current agent's `reflections/` directory" but never stated the path. Sonnet infers `agents/<agent-name>/reflections/`; the Codex lifecycle run on `gpt-5.4-mini` took it literally and wrote to `<repo>/reflections/` (repo root), where merge, `/lr:check` #12, and the reflect test never look — so the file was silently orphaned while the model believed it had succeeded. This confirms the bug class is not specific to `agent-boot.md`: it recurs anywhere a procedure doc names a filesystem location by role ("the agent's X directory") without anchoring an explicit path. Curation rule that falls out: **when a doc tells the model to write to a named directory, spell out the path.** Full case study (incl. the rollout-log tracing that pinpointed the wrong write path): `reflect-path-anchoring-fidelity-fix.md`.
+
 ## Operational Guidance
 
 This is why the lifecycle testing harness has standing value **before** either engine port ships, not just as a port-readiness gate — it's a live doc-fidelity check on Claude Code's own procedures. It is now the second, empirical leg of pre-ship review discipline: for any release that changes a procedure doc the harness covers, run the relevant lifecycle scenarios against real engine execution (ideally at more than one model tier) before shipping, in addition to — not instead of — multi-lens prose review. See `role.md` § Lore-Curation Disciplines.
@@ -45,7 +47,9 @@ When a procedure doc has been reviewed multiple times and still ships with an ex
 
 ## See Also
 
-- `agent-boot-doc-fidelity-fixes.md` — the concrete case study this principle generalizes from.
+- `agent-boot-doc-fidelity-fixes.md` — the first concrete case study this principle generalizes from.
+- `reflect-path-anchoring-fidelity-fix.md` — the second case study (reflect path anchoring), in a different doc.
+- `v25-lifecycle-scenario-fixes.md` — the v25 lifecycle run that surfaced the reflect-path bug alongside three harness-staleness fixes.
 - `lifecycle-testing-harness.md` — the tool that operationalizes execution testing.
 - `multi-engine-portability-direction.md` — the "framework is prose executed by the model" risk this is direct first-hand evidence for.
 - `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md` — the prose-review disciplines this complements, not replaces.

@@ -82,10 +82,16 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 locally on `lore-framework/main` as three unpushed commits: Cursor ops parity (`4f3bfcf`), native
 Codex packaging + four-manifest discipline (`258ad0e`), and the workspace slice (`0311ab6`). The
 authoritative pre-push gates live in `framework-improvements-backlog.md` § "v25 SHIP CHECKLIST".
+Static `/lr:check` and `plugin validate --strict` are green; the four v25-touched lifecycle
+scenarios (reflect, workspace-init, workspace-pull, check) are fixed and green on Claude+`haiku`,
+and the reflect-path doc-fidelity fix (`process-reflection.md` now anchors the explicit
+`agents/<agent-name>/reflections/` write path) has landed — the full `LR_LIFECYCLE=1` suite remains
+the last pre-push gate.
 Each repo stamps `VERSION` in `lore-repo.md`; four version-bearing plugin manifests mirror
 `1.<VERSION>.0` (Claude pair, Cursor, Codex). `/lr:check` #19 enforces them. See
 `versioning-release-types.md`, `plugin-manifest-versioning.md`, `v25-cursor-ops-parity-design.md`,
-`v25-workspace-pull-init-design.md`.
+`v25-workspace-pull-init-design.md`, `v25-lifecycle-scenario-fixes.md`,
+`reflect-path-anchoring-fidelity-fix.md`.
 
 ## Consistency & Diagnostics
 
@@ -204,7 +210,8 @@ current edit belongs in the meta workspace repo before pushing v25. Cursor ops p
 
 `framework-improvements-backlog.md` is the canonical list of deferred items; its § "v25 SHIP
 CHECKLIST" is the authoritative gate before pushing v25. **Next session:** resolve dirty
-`assets/logo.svg`, run `/lr:check`, `claude plugin validate --strict`, the multi-lens doc review if
-following release discipline strictly, and the full `LR_LIFECYCLE=1` suite before pushing
-`lore-framework/main`. Quality benchmark tier restructure still blocked on P12/P16 probe gaps.
-~138 lore topics.
+`assets/logo.svg` (PNG-logo migration folded into the v25 tree), then run the full `LR_LIFECYCLE=1`
+suite as the last gate before pushing `lore-framework/main` (static `/lr:check`, `plugin validate
+--strict`, and the four v25-touched lifecycle scenarios are already green; multi-lens doc review
+remains optional-if-strict). Quality benchmark tier restructure still blocked on P12/P16 probe gaps.
+~139 lore topics.
