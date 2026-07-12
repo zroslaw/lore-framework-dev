@@ -13,7 +13,8 @@ finalize — framework tree is committed locally only.
 - README — engine-neutral sweep + Cursor self-install block
 - `docs/engines/cursor.md` — canonical mid-session fallback, load surfaces, refresh contract
 - `docs/doctor-cursor-session-without-plugin.md` — atomic ailment, catalog-registered
-- `/lr:check` #19 + `conventions.md` — **three** manifests (`.cursor-plugin/plugin.json` included)
+- `/lr:check` #19 + `conventions.md` — v25 ultimately expanded this to **four** version-bearing
+  manifests once Codex native packaging landed
 - `release-notes/25.md`; `VERSION` 25; all manifests `1.25.0`
 
 ## Verification at implement
@@ -39,5 +40,5 @@ Tier B marketplace, `workspaceOpen` hooks, `agent-boot.md` Cursor note, Cursor t
 - `v25-implementation-review-lessons.md`
 - `cursor-engine-capabilities.md`
 - `cursor-mid-session-fallback-validated.md`
-- `plugin-manifest-versioning.md` — three-manifest discipline (v25)
+- `plugin-manifest-versioning.md` — four-manifest discipline (v25)
 - `framework-improvements-backlog.md`

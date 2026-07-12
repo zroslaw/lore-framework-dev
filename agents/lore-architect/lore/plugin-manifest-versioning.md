@@ -8,12 +8,17 @@ The recurring "stale skill catalog after an upgrade" pain — the failure mode t
 
 Applied at **every `VERSION` bump**:
 
-- Set `version` in **all three** manifests to **`1.<VERSION>.0`**:
+- Set `version` in **all four version-bearing manifests** to **`1.<VERSION>.0`**:
   - `.claude-plugin/plugin.json`
   - `.claude-plugin/marketplace.json` (the `lr` entry)
-  - `.cursor-plugin/plugin.json` (v25+; consistency hygiene — **not** a verified Cursor cache-detection lever)
+  - `.cursor-plugin/plugin.json` (consistency/visibility hygiene — **not** a verified Cursor cache-detection lever)
+  - `.codex-plugin/plugin.json` (v25+; the version Codex reads for native installs)
 - The mapping is **mechanical**, derived from `VERSION`: can't be forgotten, strictly increasing, valid semver.
 - **Enforced by `/lr:check` #19** (`consistency-checks.md`) — flags any read manifest whose version ≠ `1.<VERSION>.0`, and flags pairwise disagreement.
+
+The native Codex marketplace file `.agents/plugins/marketplace.json` is deliberately **not** part of
+the version check: it carries marketplace policy/source metadata but has no per-plugin `version`
+field. Validate it structurally with real Codex install tests when touched.
 
 Three layers of defense: documented (conventions) + mechanical (derived from VERSION) + checked (check #19).
 

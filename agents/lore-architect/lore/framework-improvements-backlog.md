@@ -2,109 +2,32 @@ Running backlog of framework-level improvements, deferred items, and open questi
 
 Items are grouped by area. Each has a one-line what + why + rough trigger or status. Promote an item into its own lore topic (and its own design draft in `workdir/`) when it becomes active.
 
-## v25 SHIP CHECKLIST (authoritative — next session)
+## v25 SHIP CHECKLIST (authoritative until push)
 
-**Ground truth (verified 2026-07-12).** Branch `v25-cursor-ops-parity` @ `4f3bfcf "Ship v25 Cursor
-ops parity"`; `VERSION` = 25; lore-repo stamps 25; manifests at `1.25.0`. **Last pushed = v24
-(`da473b6`).** v25 is **half-done and NOT ready to push.** `migrations/25.md` is MISSING;
-`release-notes/25.md` exists but covers only cursor-ops-parity; the workspace slice is designed but
-not implemented; this session's plugin-manifest/logo work is **uncommitted** in the `lore-framework/`
-working tree. This checklist is the single gate list before `git push` of v25.
+**Ground truth (verified 2026-07-12).** `lore-framework/main` is locally ahead of `origin/main` by
+three v25 commits and is **not pushed**:
+
+- `4f3bfcf` — Cursor ops parity
+- `258ad0e` — native Codex plugin packaging + four-manifest discipline
+- `0311ab6` — workspace slice (`workspace-pull` + `workspace-init`)
+
+v25 feature scope is effectively complete locally: Cursor ops parity, Codex formal packaging,
+workspace pull/init, `migrations/25.md`, amended release notes, and the four version-bearing
+manifests are committed in `lore-framework`. The old branch/scope story that v25 is only half-done
+on `v25-cursor-ops-parity` is stale.
+
+Remaining release gates before pushing:
+- Resolve dirty `assets/logo.svg` in `lore-framework` (commit intentionally or discard).
+- Run `/lr:check` and `claude plugin validate --strict` on the final tree.
+- Run the multi-lens doc review leg if following release discipline strictly.
+- Run the full `LR_LIFECYCLE=1` suite as the final empirical gate.
+- Decide whether the workspace-root `lore-workspace.md` edit belongs in the meta workspace repo.
+- Push `lore-framework/main` only after green gates.
+- Post-push: submit `lr` to the Claude community marketplace.
 
 Anchors: `v25-cursor-ops-parity-design.md`, `v25-workspace-pull-init-design.md`,
-`workspace-meta-repo-pattern.md`, `engine-marketplace-readiness.md`,
-`cursor-plugin-distribution-update-model.md`, `plugin-distribution.md`,
-`plugin-manifest-versioning.md`. Design drafts: `workdir/draft-v25-workspace-pull.md`,
-`workdir/draft-v25-workspace-init.md`.
-
-### 0 — Scope decision (decide FIRST, with user)
-
-Three workstreams are currently entangled under the "v25" label. Decide what ships as v25 vs defers:
-- **(a) Cursor ops parity** — DONE, committed `4f3bfcf`.
-- **(b) Workspace slice** — `workspace-sync`→`workspace-pull` + `init`→`workspace-init` hard renames,
-  two-level repo declarations (`lore-workspace.md` + domain `repos:`), optional workspace-as-git
-  envelope. DESIGNED, **not implemented**. (`lore-workspace.md` already exists at workspace root from
-  the "Initialize lore workspace" commit — reconcile with the designed schema.)
-- **(c) Multi-engine plugin packaging + manifest visibility** — this session. Claude + Cursor manifests
-  enriched & strict-validated; Codex packaging unresolved.
-- **Recommendation:** ship (a)+(b)+Claude/Cursor polish of (c) as **v25**; carry **Codex formal
-  packaging** to **v26** if verification shows it's net-new (§2 Codex). Confirm with user.
-
-### 1 — Implement the workspace slice (b)
-
-- [ ] `workspace-sync` → `workspace-pull`: skill rename, `docs/workspace-pull.md`, two-level pull
-  (`lore-workspace.md` + domain `repos:`), optional workspace git envelope, gitignore plumbing.
-  Spec: `workdir/draft-v25-workspace-pull.md`. **Hard rename, no alias.**
-- [ ] `init` → `workspace-init`: skill rename, `docs/workspace-init.md`, payload v2 (repos, agents,
-  commands, worktree convention; markers `lr:workspace-init:*`). Spec:
-  `workdir/draft-v25-workspace-init.md`. Hard rename.
-- [ ] Reconcile the existing workspace-root `lore-workspace.md` with the designed schema.
-- [ ] Update README skills table + any cross-refs to the old skill names.
-
-### 2 — Multi-engine plugin packaging (HANDLE EACH ENGINE SEPARATELY — this is the risk surface)
-
-We ship ONE repo as a plugin to THREE (maybe four manifests') engines. Each engine's packaging,
-manifest, skill-tree, and update model differ — do not assume Claude parity implies the others.
-
-**Claude Code** — closest to ready
-- [x] `.claude-plugin/plugin.json` enriched: `$schema`, `displayName` "Lore", `homepage`, `keywords`. Strict-validated ✓
-- [x] `.claude-plugin/marketplace.json`: added `description` (was the sole `--strict` failure). Strict-validated ✓
-- [ ] Commit these manifest edits to the v25 branch (currently uncommitted).
-- [ ] Mention manifest visibility in `release-notes/25.md`.
-- [ ] Marketplace name `lore-framework` confirmed NOT reserved (reserved list incl. `claude-community`, `anthropic-*`, `claude-plugins-official`).
-- [ ] POST-SHIP (separate from push): submit to `claude-community` via Console form
-  `platform.claude.com/plugins/submit`; review pipeline re-runs `claude plugin validate` (green now).
-
-**Cursor** — manifest ready; distribution unvalidated
-- [x] `.cursor-plugin/plugin.json` enriched: `displayName`, `keywords`, `logo`; `assets/logo.svg` created (both uncommitted).
-- [ ] Commit manifest + `assets/` to the v25 branch.
-- [x] Single-plugin layout confirmed correct (root `.cursor-plugin/plugin.json`, NO Cursor `marketplace.json`).
-- [ ] Verify on a REAL Cursor install: `logo` renders + skills load from the `.cursor-skills/` path override.
-- [ ] If the workspace-slice renames change the skill set, re-run `scripts/sync-cursor-skills` and `/lr:check` #21 (cursor-tree parity).
-- [ ] `release-notes/25.md`: note logo + manifest fields.
-- [ ] DEFER (v26?): team marketplace + Auto Refresh + Cursor GitHub App — the only "push once, all Cursor installs converge" lever; currently only `--plugin-dir` validated. See `cursor-plugin-distribution-update-model.md`.
-
-**Codex** — HIGHEST RISK; verify before building anything
-- [ ] RESOLVE the packaging discrepancy on a REAL current Codex build: does it load our
-  `.claude-plugin/marketplace.json` (port lore, validated at port time) OR require
-  `.codex-plugin/plugin.json` + `.agents/plugins/marketplace.json` (current official
-  build-plugins spec)? We ship neither of the latter. `verify-before-acting-on-suspected-bugs.md`.
-- [ ] If formal `.codex-plugin/` is required: net-new — author `.codex-plugin/plugin.json`
-  (`name`/`version`/`description` + `interface` block: `displayName`/`category`/`logo`/`screenshots`)
-  + `.agents/plugins/marketplace.json`. This becomes a **FOURTH manifest** → extend `/lr:check` #19
-  to bump it to `1.<VERSION>.0`.
-- [ ] Confirm canonical `skills/*/SKILL.md` (description-only frontmatter) load on Codex, or whether
-  Codex needs a `name:` field like Cursor's wrappers.
-- **Likely too big for v25 → recommend Codex formal packaging as its own version.**
-
-**Manifest-sync discipline (all engines)**
-- [ ] All manifests read `1.<VERSION>.0` (three today, all `1.25.0` ✓; four if Codex packaging lands). `/lr:check` #19 enforces the three — extend if Codex added.
-
-### 3 — Version-ship disciplines (mechanical, every VERSION ship — from role.md)
-
-- [ ] `release-notes/25.md` — AMEND: currently cursor-ops-parity only; add workspace slice + manifest/marketplace visibility.
-- [ ] `migrations/25.md` — **MISSING, author it**: the hard skill renames (workspace-sync→workspace-pull, init→workspace-init) need an idempotent migration (rename/regenerate generated artifacts, remove orphaned old skill dirs). Without it, `/lr:update` and boot auto-upgrade can't carry users across the rename.
-- [ ] Cache-clear footer — v25 touches `skills/` + `scripts/` (cache-affecting) → include the Clear Plugin Cache footer in `release-notes/25.md`, hoisted near the top.
-- [ ] `versioning-release-types.md` — backfill the v25 entry (kind: migration + release-notes; scope; **cache-affecting: yes**).
-- [ ] Promote any newly-named principle from design to its own topic (none pending beyond captured).
-
-### 4 — Pre-ship verification (BOTH legs — review + empirical)
-
-- [ ] Multi-lens parallel-reviewer fan-out over changed procedure docs (workspace-pull/init, migrations/25), iterated to zero-findings convergence. `parallel-reviewer-fanout-pattern.md`.
-- [ ] Lifecycle harness — **complete** suite, real engine execution, ideally >1 model tier (`LR_LIFECYCLE=1`, ~$9–10 / ~25–30 min). Add/extend scenarios for the workspace slice. The full run is the gate, not a subset. `lifecycle-testing-harness.md`.
-- [ ] `claude plugin validate --strict` — green now; re-run after manifest/skill edits land.
-- [ ] `/lr:check` — all checks incl #19 (manifests) and #21 (cursor-tree parity).
-
-### 5 — Ship
-
-- [ ] Commit workspace slice + manifests + `assets/` to `v25-cursor-ops-parity`.
-- [ ] Push **only on green** full lifecycle suite.
-- [ ] Post-push: Claude community submission (separate step, §2 Claude).
-
-### Already landed in v25 (committed `4f3bfcf`, NOT pushed)
-
-- Cursor ops parity — `v25-cursor-ops-parity-design.md`.
-- (v24 items — agent registration, richer routing metadata, `/lr:takeover` BETA, boot `ps`-probe gating — shipped in v24; see `versioning-release-types.md`.)
+`engine-marketplace-readiness.md`, `plugin-distribution.md`, `plugin-manifest-versioning.md`,
+`versioning-release-types.md`.
 
 ## Takeover (`/lr:takeover`, BETA, v24)
 
@@ -114,14 +37,13 @@ manifest, skill-tree, and update model differ — do not assume Claude parity im
 
 ## Init / Workspace Bootstrap
 
-- ~~**Workspace creation automation**~~ — *designed for v25* (`/lr:workspace-init` setup wizard replaces
-  deferred producer; no separate create-workspace). Spec: `workdir/draft-v25-workspace-init.md`. **Not
-  yet implemented** in lore-framework.
-- ~~**Richer `/lr:init` payloads**~~ — *designed for v25* (workspace-init payload v2: repos, agents,
-  commands, worktree convention; markers `lr:workspace-init:*`). Hard rename from `/lr:init`.
-- **`/lr:workspace-sync` → `/lr:workspace-pull`** — *designed for v25* (two-level pull,
-  `lore-workspace.md`, optional workspace git repo, gitignore plumbing). Spec:
-  `workdir/draft-v25-workspace-pull.md`. Hard rename, no alias.
+- ~~**Workspace creation automation**~~ — resolved by the v25 `/lr:workspace-init` setup wizard; no
+  separate create-workspace command.
+- ~~**Richer `/lr:init` payloads**~~ — resolved by hard rename to `/lr:workspace-init` with payload v2
+  (repos, agents, commands, worktree convention; markers `lr:workspace-init:*`).
+- ~~**`/lr:workspace-sync` → `/lr:workspace-pull`**~~ — landed in the local v25 workspace slice:
+  two-level pull (`lore-workspace.md` + domain `repos:`), optional workspace git root, and gitignore
+  plumbing. See `v25-workspace-pull-init-design.md`.
 - **Sync CLAUDE.md on framework version bump** — v11 changed the payload header; users rerun
   `/lr:workspace-init --refresh` manually. Options for future: `/lr:update` chains workspace-init.
 - **register-repo in workspace-init wizard** — deferred v26 (hint only in v25 setup summary).
@@ -237,10 +159,10 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 - **Ailment-discovery hook in finalization** — when a session diagnoses an issue not yet in the catalog, the finalize flow should prompt: "Was this an ailment? Add a `doctor-<slug>.md` topic?" Lightweight discipline cue. Trigger: after enough sessions where catalog gaps were noticed only after the fact.
 - **`/lr:check` cross-reference to `/lr:doctor`** — already added in v12 (one-line cross-ref in `check.md` and `update.md`). If users discover further gaps where `/lr:check` reports clean but a runtime issue persists, that's the signal to add a new ailment.
 
-## Workspace-Sync (`/lr:workspace-sync`, v11)
+## Workspace Pull (`/lr:workspace-pull`; lineage from `/lr:workspace-sync`)
 
-- **`repos:` validators in `/lr:check`** — verify URL syntax (parseable, has scheme), reachability (probe with `git ls-remote`, run sparingly because network), dir-name collision (two declared URLs deriving the same dir name across descriptors). Not added in v11 by design — wait until usage shows what to check. Trigger: user reports stale or broken URL lists; multi-domain workspaces accumulate friction. See `workspace-sync-utility.md`.
-- **Undeclared-top-level-repo nudge** — when `/lr:workspace-sync` finishes and there are top-level git repos in the workspace that aren't declared in any `repos:` field, print a one-liner: *"N undeclared top-level repos: foo, bar, baz. Add to a lore-repo.md `repos:` block to share workspace structure."* Contextual nudge, not a guide. Cheap to add. Trigger: real adopters with multi-domain workspaces want their setups to bootstrap for teammates.
+- **`repos:` validators in `/lr:check`** — verify URL syntax (parseable, has scheme), reachability (probe with `git ls-remote`, run sparingly because network), dir-name collision (two declared URLs deriving the same dir name across descriptors). Not added in v11 by design; v25 added unsafe URL rejection in the script but not the full check suite. Trigger: user reports stale or broken URL lists; multi-domain workspaces accumulate friction. See `v25-workspace-pull-init-design.md`.
+- **Undeclared-top-level-repo nudge** — when `/lr:workspace-pull` finishes and there are top-level git repos in the workspace that aren't declared in `lore-workspace.md` or any domain `repos:` field, print a one-liner: *"N undeclared top-level repos: foo, bar, baz. Add to lore-workspace.md or a lore-repo.md repos block to share workspace structure."* Contextual nudge, not a guide. Cheap to add. Trigger: real adopters with multi-domain workspaces want their setups to bootstrap for teammates.
 - **Per-entry overrides in `repos:`** — schema currently is a flat URL list. Branch pinning, custom dir name, depth, etc. would need an object-form entry: `{ url: ..., branch: ..., dir: ... }`. Defer until real-world usage demands it; v11 schema is deliberately tight. See `workspace-sync.md` Limitations.
 - **Inline-flow form (`repos: [a, b]`)** — deliberately not supported in v11 to keep the awk parser surface small. Reconsider only if users complain.
 - **workspace-sync BatchMode behavior-change note (v14, doc follow-up)** — v14 added `GIT_SSH_COMMAND` `BatchMode=yes` to `scripts/workspace-sync`; SSH keys needing an interactive passphrase (not in an ssh-agent), or unknown host keys, now fail-fast instead of prompting. Correct for parallel jobs, but currently undocumented — add a one-line note to `release-notes/14.md` § workspace-sync (or a future release-notes). Low-severity `/code-review` finding, shipped as-is. See `portable-shell-in-framework-docs.md`.
@@ -264,13 +186,13 @@ Cross-engine plugin-marketplace readiness. Anchor topics: `engine-marketplace-re
   authors; the claude.ai form needs Team/Enterprise). Approved plugins pin to a commit SHA in
   `anthropics/claude-plugins-community` and sync nightly. Low effort; biggest Claude visibility win.
   See `engine-marketplace-readiness.md`.
-- **Codex packaging discrepancy — verify before building.** Our port lore says Codex consumes
-  `.claude-plugin/marketplace.json` via `codex plugin marketplace add`; the current official Codex
-  build-plugins spec describes a separate `.codex-plugin/plugin.json` + `.agents/plugins/marketplace.json`.
-  We ship neither. Verify on a real current Codex build which packaging Codex actually loads. If the
-  formal `.codex-plugin/` package is now required, it's a net-new deliverable (manifest + `interface`
-  visibility block + marketplace.json + lifecycle-harness validation). See
-  `engine-marketplace-readiness.md`, `plugin-distribution.md`.
+- ~~**Codex packaging discrepancy — verify before building**~~ — resolved empirically on
+  `codex-cli 0.142.5` during v25. Codex still accepts the legacy Claude marketplace fallback, but
+  when `.agents/plugins/marketplace.json` is present it prefers the native marketplace file.
+  `.codex-plugin/plugin.json` is the Codex version-bearing manifest; `.agents/plugins/marketplace.json`
+  has no per-plugin version. Keep using live parser tests for future Codex packaging changes. See
+  `engine-marketplace-readiness.md`, `plugin-distribution.md`,
+  `codex-cli-plugin-loading-findings.md`.
 - **Cursor seamless-update path (team marketplace + Auto Refresh).** Stand up + validate a Cursor
   team marketplace with Auto Refresh + the Cursor GitHub App — the only "push once, all Cursor
   installs converge" lever. Currently only `--plugin-dir` is validated (Tier-B gap). Point the

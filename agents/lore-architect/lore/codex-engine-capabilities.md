@@ -8,7 +8,9 @@ the linked topics below.
 
 - **Plugin loading** — persistent installed plugin, not `--plugin-dir`. Register a marketplace with
   `codex plugin marketplace add ...`, then install or refresh with `codex plugin add
-  lr@lore-framework`.
+  lr@lore-framework`. Legacy `.claude-plugin/marketplace.json` fallback still works, but v25 native
+  packaging uses `.agents/plugins/marketplace.json` + `.codex-plugin/plugin.json`; Codex prefers the
+  native marketplace file when present.
 - **Plugin refresh** — on verified current builds there is no separate `codex plugin update`
   subcommand; `plugin add` is the refresh path. If the marketplace is Git-backed, run `codex
   plugin marketplace upgrade lore-framework` first. A mid-session refresh affects future sessions,

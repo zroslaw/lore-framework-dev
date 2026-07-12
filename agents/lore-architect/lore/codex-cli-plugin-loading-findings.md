@@ -20,6 +20,24 @@ First hands-on investigation of `codex` (0.142.5) as a port target, ahead of the
   (incl. `boot`) under the installed path. Concrete evidence for the "packaging, not redesign"
   framing in `multi-engine-portability-direction.md`.
 
+## Formal native packaging ground truth (v25)
+
+The v25 packaging pass re-checked this on `codex-cli 0.142.5` against a real local checkout:
+
+- The legacy `.claude-plugin/marketplace.json` fallback still works.
+- When `.agents/plugins/marketplace.json` is present, Codex prefers the native marketplace file.
+- `.codex-plugin/plugin.json` is the version-bearing plugin manifest; Codex reads
+  `version: 1.<VERSION>.0` from it.
+- `.agents/plugins/marketplace.json` carries marketplace policy/source information but no
+  per-plugin version, so it is not part of `/lr:check` #19's manifest-version check.
+- A root-source native marketplace entry works:
+  `source: { source: "local", path: "./" }`.
+- The valid no-auth policy enum is `ON_USE`; `ON_FIRST_USE` is rejected by the real parser.
+
+Operational rule: for future Codex packaging questions, register the real local checkout, then run a
+clean remove/add cycle. Treat documentation summaries as hypotheses until the live parser accepts
+the files.
+
 ## Repo-driven onboarding contract
 
 Codex onboarding is agent-driven. If a user gives Codex the Lore Framework repository URL and

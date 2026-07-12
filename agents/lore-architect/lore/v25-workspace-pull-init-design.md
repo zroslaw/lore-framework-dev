@@ -1,6 +1,6 @@
-v25 **workspace layer** design (draft specs in `workdir/`, **not yet implemented** in
-`lore-framework/`). Ships alongside cursor-ops-parity in one v25 release; user deferred framework
-push — implement + harness next session.
+v25 **workspace layer** design and local implementation. The workspace slice landed in
+`lore-framework/main` as local commit `0311ab6` after the branch split collapsed into main. It is
+not pushed yet; the full lifecycle suite remains the final empirical gate.
 
 ## Commands (hard renames)
 
@@ -9,7 +9,7 @@ push — implement + harness next session.
 | `/lr:workspace-sync` | `/lr:workspace-pull` | Consumer: pull workspace repo → workspace-level repos → domain-level repos |
 | `/lr:init` | `/lr:workspace-init` | Producer: setup wizard + AGENTS.md refresh |
 
-No deprecation aliases. Cross-ref sweep includes `auto-pull.md`, README, INSTALL-*.
+No deprecation aliases. Cursor wrappers were regenerated after the hard renames.
 
 ## Two-level repo declarations
 
@@ -18,8 +18,10 @@ No deprecation aliases. Cross-ref sweep includes `auto-pull.md`, README, INSTALL
 | Workspace | `<workspace>/lore-workspace.md` | High-level layout — agent repos, app repos, etc. |
 | Domain | `<lore-agent-repo>/lore-repo.md` | Dependencies for that domain's agents |
 
-`workspace-pull` runs phase 1 then phase 2 (agent repos must be in workspace list or on disk).
-Union dedupe. Same parser (`repos:` block-form) — document distinct semantics in `conventions.md`.
+`workspace-pull` runs workspace-level clone first, then domain-level clone from each discovered
+`lore-repo.md` (agent repos must be in workspace list or already on disk). Union dedupe. Same
+parser (`repos:` block-form); `conventions.md` now distinguishes workspace-level and domain-level
+semantics.
 
 ## workspace-pull phases
 
@@ -40,11 +42,13 @@ register-repo wizard **deferred v26** (hint in summary).
 
 Optional workspace git repo — team shares recipe; children gitignored.
 
-## Review & ship gate
+## Verification & ship gate
 
 Three-lens review (architecture, UX, implementation) — three rounds, converged approve 2026-07-12.
-Harness: S1–S14 (pull) + S15–S18 (init) in pull draft checklist. UX artifact:
-`workdir/review-v25-workspace-ux.md`.
+Implemented verification covered script fixtures for two-level clone, idempotency, non-git
+workspace, git-workspace gitignore maintenance, domain-only backward compatibility, and unsafe URL
+rejection. `claude plugin validate --strict` passed; cursor wrapper parity was 30/30; a haiku smoke
+test followed the renamed skill pointers. The full lifecycle suite remains the final pre-push gate.
 
 ## See Also
 

@@ -23,6 +23,21 @@ First real (non-test) use for its actual purpose: a Claude Code session took ove
 - The digest showed the recorded session had booted `lore-architect` — already active in the taking-over session, so the "boot the digest's agent first" step was a designed no-op.
 - Step-4 on-disk verification paid off: confirmed v24 was uncommitted in the tree, HEAD still at v23, and the session's `init` `AGENTS.md` fix had survived on disk. Continuation resumed from the exact stop point.
 
+## Cross-engine continuation use (2026-07-12)
+
+The skill also worked for a Claude session handoff into Codex during v25 work. Operational lessons
+reinforced the design:
+
+- Bare `/lr:takeover` must list sessions and ask; do not choose by recency.
+- Direct takeover with an id should convert to a digest, read it fully, then boot the digest's
+  recorded lore agent identity before acting when one is present.
+- After digest load, verify on-disk repo state before trusting the final assistant turn. In the v25
+  handoff, the digest said the workspace slice had been committed and the repo was clean, but disk
+  verification found dirty `assets/logo.svg` in `lore-framework`.
+- On Codex, boot auto-pull may need network escalation; still attempt it because boot requires it.
+- Takeover is continuation, not finalization. The receiving session's finalization preserves the
+  recovered session's learning.
+
 ## Known gaps / follow-ups
 
 - **Cursor conversion unsupported**: `~/.cursor/chats/<ws-hash>/<uuid>/store.db` is a content-addressed SQLite blob store (ids = SHA-256 of data, no ordering); messages are JSON blobs in API shape but assistant turns sit in binary records. Listed but not convertible until someone reverse-engineers ordering.

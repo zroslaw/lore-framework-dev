@@ -1,4 +1,4 @@
-`/lr:check` runs 21 consistency checks. Defined in `<framework-root>/docs/check.md`.
+`/lr:check` runs 23 consistency checks. Defined in `<framework-root>/docs/check.md`.
 
 > **Naming note (a v14 near-miss — see `verify-before-acting-on-suspected-bugs.md`):** the plugin catalog doc is **`docs/check.md`**, NOT `consistency-checks.md`. `consistency-checks.md` is *this lore topic's* name only. `skills/check/SKILL.md` correctly points at `docs/check.md`. Don't "fix" the skill to repoint it — verify on disk first.
 
@@ -33,7 +33,7 @@
 18. Legacy sibling-path per-agent boot commands — scans `lr-*-agent.md` for `lore-framework/docs/agent-boot.md` pattern (pre-v5 emission form). These break on plugin installs. Triggers `/lr:update` (migration 5 regenerates them). See `plugin-compat-template-audit.md`.
 
 **Plugin manifest (19, added v14):**
-19. Plugin manifest version — reads framework `VERSION` (N) and the `version` of all three plugin manifests: `.claude-plugin/plugin.json`, the `lr` entry in `.claude-plugin/marketplace.json` (skip gracefully if missing — see backlog), and `.cursor-plugin/plugin.json` (v25+). Asserts every read manifest `== 1.<N>.0`. Errors on mismatch or pairwise disagreement. Claude manifests are the cache-detection lever; `.cursor-plugin/plugin.json` is mechanical parity only. Enforces `plugin-manifest-versioning.md`. Complementary to check #3 (repo-level stamp vs `VERSION`).
+19. Plugin manifest version — reads framework `VERSION` (N) and the `version` of all four version-bearing plugin manifests: `.claude-plugin/plugin.json`, the `lr` entry in `.claude-plugin/marketplace.json` (skip gracefully if missing — see backlog), `.cursor-plugin/plugin.json`, and `.codex-plugin/plugin.json` (v25+). Asserts every read manifest `== 1.<N>.0`. Errors on mismatch or pairwise disagreement. Claude manifests are the original cache-detection lever; Cursor is consistency/visibility hygiene; Codex is the version native Codex installs read. `.agents/plugins/marketplace.json` has no per-plugin version and is outside this check. Enforces `plugin-manifest-versioning.md`. Complementary to check #3 (repo-level stamp vs `VERSION`).
 
 **Migration write paths (20, added v15):**
 20. Migration write-paths declaration — three substeps, all error-severity, applied to every `migrations/<N>.md`:
@@ -45,7 +45,11 @@
 **Cursor dual skill tree (21, added v21):**
 21. Cursor-tree parity — verifies the `.cursor-skills/lr-<skill>/` wrapper tree stays 1:1 with the canonical `skills/<skill>/` tree (the dual-skill-tree pattern in `cursor-dual-skill-tree-one-repo.md`). Checks: a wrapper exists for every canonical skill and vice versa (orphan detection), each wrapper's frontmatter `name` is `lr-<skill>`, self-location references `.cursor-skills/lr-<skill>/SKILL.md`, invocation-syntax matches, and no content drift between wrapper and canonical intent. Enforces that `scripts/sync-cursor-skills` was re-run after any skill add/rename. Added in v21, path root moved in v23 to keep wrappers out of Codex's plugin crawl. See `cursor-dual-skill-tree-one-repo.md`.
 
-**History:** originally 17 checks. Migration 2 dropped the agent-level version check (old check 6) because `role.md` no longer carries a `version` field — subsequent checks renumbered down by one, leaving 16. Migration 5 added checks 17 and 18 for drift detection. v14 added check 19 (plugin manifest version) — the first non-migration check addition (release-notes-only ship). v15 added check 20 (migration write-paths declaration) — also release-notes-only. v21 added check 21 (cursor-tree parity) — release-notes-only.
+**Workspace layer (22–23, added v25):**
+22. Workspace child repos gitignored — verifies declared child repos under a git-backed workspace are covered by the workspace `.gitignore`, preventing parent-repo accidental staging.
+23. Legacy init markers — flags old `lr:init` managed-section markers in engine memory files so users refresh through `/lr:workspace-init`.
+
+**History:** originally 17 checks. Migration 2 dropped the agent-level version check (old check 6) because `role.md` no longer carries a `version` field — subsequent checks renumbered down by one, leaving 16. Migration 5 added checks 17 and 18 for drift detection. v14 added check 19 (plugin manifest version) — the first non-migration check addition (release-notes-only ship). v15 added check 20 (migration write-paths declaration) — also release-notes-only. v21 added check 21 (cursor-tree parity) — release-notes-only. v25 extended check 19 to four manifests and added checks 22–23 for the workspace layer.
 
 **Candidate check (not yet implemented):** a version-history-completeness check — assert `versioning-release-types.md` has a history entry for every `release-notes/<N>.md` / `migrations/<N>.md` on disk. Surfaced by the v21 gap (both v20 and v21 entries were missing, the backfill discipline having silently slipped at v20). Would make the version-history-backfill discipline self-healing instead of relying on per-ship diligence. See `versioning-release-types.md` § Backfill discipline.
 

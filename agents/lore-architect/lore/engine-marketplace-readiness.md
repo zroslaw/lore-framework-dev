@@ -25,12 +25,23 @@ This is the "are we marketplace-ready?" map; keep engine-specific operational de
 - **Submission:** send repo link to the Cursor team (Slack / email per template docs); `node scripts/validate-template.mjs` targets the monorepo layout, so it won't run 1:1 against our single-plugin repo (expected).
 - **Update model:** see `cursor-plugin-distribution-update-model.md`. Seamless propagation needs a **team marketplace + Auto Refresh + Cursor GitHub App**; unvalidated for us today.
 
-## Codex — DISCREPANCY: our lore vs current official spec
+## Codex — native packaging resolved in v25
 
-- **Our port lore** (`plugin-distribution.md`, `codex-cli-plugin-loading-findings.md`) says Codex installs via `codex plugin marketplace add zroslaw/lore-framework` + `codex plugin add lr@lore-framework`, consuming the **`.claude-plugin/marketplace.json`** — validated end-to-end at port time.
-- **Current official Codex build-plugins spec** (learn.chatgpt.com/codex/build-plugins) describes a **distinct packaging**: required manifest `.codex-plugin/plugin.json` (fields: `name`, `version`, `description` required; `author`/`homepage`/`repository`/`license`/`keywords`/`skills`/`mcpServers`/`apps`/`hooks`/`interface` optional — `interface` holds `displayName`/`category`/`logo`/`screenshots`/etc. for install-surface visibility), marketplace file at `.agents/plugins/marketplace.json` (repo) or `~/.agents/plugins/marketplace.json`, commands `codex plugin marketplace add owner/repo` + a `/plugins` in-CLI browser, install cache `~/.codex/plugins/cache/$MARKETPLACE/$PLUGIN/$VERSION/`.
-- **We have NO `.codex-plugin/` and NO `.agents/plugins/marketplace.json`.** So under the *current* spec we are not formally packaged for Codex.
-- **Do not assert either way.** Recalled port lore reflects what was true when written; the docs summary came from a fast model. **Verify on a real current Codex build** which manifest Codex actually loads before building `.codex-plugin/` or claiming Codex marketplace-readiness (`verify-before-acting-on-suspected-bugs.md`). If the formal `.codex-plugin/` packaging is now required, that's a net-new deliverable (manifest + `interface` visibility block + marketplace.json + lifecycle-harness validation), not a tweak.
+- **Legacy fallback still works:** Codex can install `lr` through `.claude-plugin/marketplace.json`,
+  so earlier port lore was not wrong.
+- **Native marketplace preferred when present:** on `codex-cli 0.142.5`, registering a real local
+  checkout with `codex plugin marketplace add <repo>` prefers `.agents/plugins/marketplace.json`
+  when that file exists.
+- **Version-bearing manifest:** `.codex-plugin/plugin.json` is the Codex plugin manifest and reads
+  `version: 1.<VERSION>.0`. It joins check #19's four version-bearing manifests.
+- **Marketplace file:** `.agents/plugins/marketplace.json` carries marketplace policy/source
+  metadata but no per-plugin version, so it is structurally validated by live install testing rather
+  than the manifest-version check.
+- **Empirical parser details:** a root-source entry works with
+  `source: { source: "local", path: "./" }`; the valid no-auth policy enum is `ON_USE`
+  (`ON_FIRST_USE` is rejected by the real parser).
+- **Operating rule:** for future Codex packaging questions, register the real checkout, then run a
+  clean remove/add cycle. Treat docs summaries as hypotheses until the live parser accepts the file.
 
 ## Cross-cutting visibility levers (all engines)
 
@@ -40,6 +51,6 @@ This is the "are we marketplace-ready?" map; keep engine-specific operational de
 
 - `cursor-plugin-distribution-update-model.md` — Cursor update/auto-refresh detail
 - `plugin-distribution.md` — the base distribution overview (Claude/Codex install commands)
-- `plugin-manifest-versioning.md` — the `1.<VERSION>.0` three-manifest discipline; check #19
+- `plugin-manifest-versioning.md` — the `1.<VERSION>.0` four-manifest discipline; check #19
 - `claude-engine-capabilities.md`, `cursor-engine-capabilities.md`, `codex-engine-capabilities.md`
 - `verify-before-acting-on-suspected-bugs.md` — why the Codex packaging gap is a verify-first item

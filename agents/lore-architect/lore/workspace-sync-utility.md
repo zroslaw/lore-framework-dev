@@ -1,4 +1,8 @@
-The `workspace-sync` utility is the workspace-level git orchestration skill. It both bootstraps a fresh workspace (cloning declared siblings) and keeps an existing one in sync (pulling everything). Replaced `/lr:pull-domain` in v11.
+Historical v11 baseline. The `workspace-sync` utility was the workspace-level git orchestration
+skill that bootstrapped a fresh workspace (cloning declared siblings) and kept an existing one in
+sync (pulling everything). It replaced `/lr:pull-domain` in v11 and was itself hard-renamed and
+expanded in v25 into `/lr:workspace-pull` with `lore-workspace.md` + domain `repos:` two-level
+declarations. Use `v25-workspace-pull-init-design.md` for the current shape.
 
 **Script:** `lore-framework/scripts/workspace-sync [path]`
 

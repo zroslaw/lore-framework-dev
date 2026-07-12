@@ -1,5 +1,6 @@
-The `lr` plugin is distributed from its GitHub repository through marketplace metadata that both
-Claude Code and Codex consume.
+The `lr` plugin is distributed from its GitHub repository through engine-specific marketplace
+metadata. Claude and legacy Codex installs can consume the Claude marketplace file; native Codex
+installs prefer the Codex-native marketplace when present.
 
 ## Marketplace setup
 
@@ -47,12 +48,12 @@ permissions, and ask the user to restart Codex. A local checkout path can replac
 marketplace identifier. See `codex-cli-plugin-loading-findings.md`; updating an existing local
 source install is covered by `codex-local-plugin-update.md`.
 
-> **⚠ Codex packaging discrepancy (2026-07-12, unresolved).** The commands above (validated at
-> port time, consuming `.claude-plugin/marketplace.json`) disagree with the *current* official
-> Codex build-plugins spec, which describes a distinct `.codex-plugin/plugin.json` manifest +
-> `.agents/plugins/marketplace.json`. We ship neither. Verify on a real current Codex build which
-> packaging Codex actually loads before claiming Codex marketplace-readiness. Full analysis:
-> `engine-marketplace-readiness.md`.
+Codex formal packaging is resolved as of v25 on `codex-cli 0.142.5`: Codex still accepts the legacy
+`.claude-plugin/marketplace.json` fallback, but when `.agents/plugins/marketplace.json` exists it
+prefers the native marketplace file. `.codex-plugin/plugin.json` carries the plugin `version`;
+`.agents/plugins/marketplace.json` carries marketplace source/policy metadata and no per-plugin
+version. A root-source entry works with `source: { source: "local", path: "./" }`; the valid no-auth
+policy enum is `ON_USE`.
 
 As of v22, the framework also ships top-level engine-readable install pages next to the README:
 `INSTALL-CODEX.md` and `INSTALL-CURSOR.md`. Use those as the canonical entrypoints for fresh-engine

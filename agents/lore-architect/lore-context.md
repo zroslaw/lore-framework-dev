@@ -51,14 +51,13 @@ topics rather than rediscovering them from old session notes.
 
 Shipping one repo to multiple engines' plugin marketplaces means handling **each engine's packaging
 separately** — manifest schema, skill-tree location, and update model all differ, so Claude parity
-does *not* imply Cursor/Codex parity. Claude Code is closest (`.claude-plugin/` manifest +
-`marketplace.json` strict-clean; remaining step is a Console-form community submission). Cursor is
-structurally ready (manifest enriched with `logo`/`displayName`/`keywords`; but seamless multi-user
-propagation needs a team marketplace + Auto Refresh + the Cursor GitHub App, still unvalidated —
-only `--plugin-dir` is proven). Codex has an **open packaging discrepancy** (our port lore vs the
-current official build-plugins spec) that must be verified on a real build before claiming
-readiness. See `engine-marketplace-readiness.md` (the cross-engine "are we ready?" map),
-`cursor-plugin-distribution-update-model.md`, `plugin-distribution.md`.
+does *not* imply Cursor/Codex parity. Claude Code is strict-clean; remaining public-distribution step
+is Console-form community submission. Cursor is structurally ready, but seamless multi-user
+propagation still needs a team marketplace + Auto Refresh + Cursor GitHub App validation. Codex
+native packaging is resolved in v25: legacy Claude marketplace fallback still works, native
+`.agents/plugins/marketplace.json` is preferred when present, and `.codex-plugin/plugin.json` is the
+Codex version-bearing manifest. See `engine-marketplace-readiness.md`, `plugin-distribution.md`,
+`cursor-plugin-distribution-update-model.md`, `plugin-manifest-versioning.md`.
 
 ## Boot & Freshness
 
@@ -79,25 +78,24 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` — last **shipped & pushed** is **24** (`da473b6`). **v25 is half-done, not
-shippable:** cursor-ops-parity is committed on branch `v25-cursor-ops-parity` (`4f3bfcf`, unpushed),
-but the workspace slice, the multi-engine marketplace/manifest polish, and `migrations/25.md` are
-still **pending**. The authoritative gate list before pushing v25 is `framework-improvements-backlog.md`
-§ "v25 SHIP CHECKLIST". Each repo stamps `VERSION` in `lore-repo.md`; plugin manifests mirror as
-`1.<VERSION>.0` — **three** today (Claude pair = cache-detection lever; `.cursor-plugin/plugin.json`
-= hygiene; a Codex fourth may land if formal packaging is required). `/lr:check` #19 enforces the
-three. See `versioning-release-types.md`, `plugin-manifest-versioning.md`,
-`v25-cursor-ops-parity-design.md`.
+`lore-framework/VERSION` — last **shipped & pushed** is **24** (`da473b6`). v25 is implemented
+locally on `lore-framework/main` as three unpushed commits: Cursor ops parity (`4f3bfcf`), native
+Codex packaging + four-manifest discipline (`258ad0e`), and the workspace slice (`0311ab6`). The
+authoritative pre-push gates live in `framework-improvements-backlog.md` § "v25 SHIP CHECKLIST".
+Each repo stamps `VERSION` in `lore-repo.md`; four version-bearing plugin manifests mirror
+`1.<VERSION>.0` (Claude pair, Cursor, Codex). `/lr:check` #19 enforces them. See
+`versioning-release-types.md`, `plugin-manifest-versioning.md`, `v25-cursor-ops-parity-design.md`,
+`v25-workspace-pull-init-design.md`.
 
 ## Consistency & Diagnostics
 
-- **`/lr:check`** — 21 content-consistency checks (descriptor/version, structure, references, size/state, drift, plugin-manifest #19, migration write-paths #20, cursor-tree parity #21). See `consistency-checks.md`.
+- **`/lr:check`** — 23 content-consistency checks (descriptor/version, structure, references, size/state, drift, four-manifest #19, migration write-paths #20, cursor-tree parity #21, workspace-layer checks #22–23). See `consistency-checks.md`.
 - **`/lr:doctor`** — diagnoses runtime/environmental issues that escape content checks (esp. stale plugin cache) via an accreting ailment catalog. See `ailment-catalog-pattern.md`.
 
 ## Operating Disciplines
 
 How I work, especially at version ships and high-stakes lore edits:
-- **On VERSION bumps:** backfill `versioning-release-types.md` history, add the cache-clear footer if cache-affecting, bump **all three** plugin manifests to `1.<VERSION>.0`, promote any newly-named principle to its own topic. (Full curation disciplines live in `role.md`.)
+- **On VERSION bumps:** backfill `versioning-release-types.md` history, add the cache-clear footer if cache-affecting, bump all four version-bearing plugin manifests to `1.<VERSION>.0`, promote any newly-named principle to its own topic. (Full curation disciplines live in `role.md`.)
 - **Pre-ship review:** multi-lens parallel-reviewer fan-out, iterated until a round finds nothing worth fixing (convergence is the ship signal); sonnet boot-as-self review for high-stakes single edits. See `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md`. **Second, empirical leg (v18+):** for procedure docs covered by the lifecycle testing harness, also run the relevant scenarios against real engine execution before shipping — review catches reasoning issues, the harness catches model-execution-fidelity issues invisible to a strong-model reviewer. See `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`.
 - **Verify before asserting** — check filesystem/state directly before "fixing" a suspected bug; verify *which* bug, not just whether. See `verify-before-acting-on-suspected-bugs.md`.
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source (pointer, don't restate); don't defer completable bounded sweeps; graduated verification (confidence, not boolean). See `naming-foundational-principles.md`, `single-canonical-source-discipline.md`, `feedback-don-t-defer-completable-scope.md`, `graduated-verification-confidence.md`.
@@ -187,30 +185,26 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   tier** (see `quality-benchmark-feature.md`, `benchmark-findings-engines-models.md`).
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** review item — active follow-ups from the 2026-06-13 architecture review; see `framework-improvements-backlog.md`. That review's settled dispositions (incl. DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in `architecture-review-dispositions.md`. A newer 2026-07-02 review added two further backlog items (post-merge diff verification, recall-time staleness surfacing) — see `framework-improvements-backlog.md` § Merge Quality, § Search / Scaling.
 - Parked: workdir-as-reference-library; vector-DB search (until >100 topics/agent); the session-as-durable-artifact cluster (boot auto-push, boot-context cache, suspend/resume, JSONL archive). All in `framework-improvements-backlog.md`.
-- **v25 workspace layer (pull + init)** — designed and review-approved 2026-07-12; specs in
-  `workdir/draft-v25-workspace-*.md`. Hard renames: workspace-sync→workspace-pull,
-  init→workspace-init. Two-level repo declarations (`lore-workspace.md` + domain `repos:`).
-  Optional workspace-as-git-repo envelope. **Implement in lore-framework next session** — see
+- **v25 workspace layer (pull + init)** — implemented locally in `lore-framework` commit `0311ab6`.
+  Hard renames: workspace-sync→workspace-pull, init→workspace-init. Two-level repo declarations
+  (`lore-workspace.md` + domain `repos:`), optional workspace-as-git-repo envelope, cursor wrapper
+  regeneration, checks #22–23. Full lifecycle remains the pre-push gate. See
   `v25-workspace-pull-init-design.md`, `workspace-meta-repo-pattern.md`.
 
 ## Current State
 
-Workspace holds three canonical repos: **`lore-framework/`** (plugin — **v24 shipped & pushed**
-  (`da473b6`); **v25 half-done on branch `v25-cursor-ops-parity` / `4f3bfcf`, unpushed** —
-  cursor-ops parity committed, workspace slice designed-not-implemented, Claude+Cursor manifest/logo
-  polish uncommitted in the working tree, Codex packaging unresolved; gate list = backlog § "v25 SHIP
-  CHECKLIST"), **`lore-framework-dev/`** (this repo — lore-architect lore + drafts), and
-  **`lore-agents/`** (personal agents). A `lore-workspace.md` now exists at the workspace root (from
-  the "Initialize lore workspace" commit) — reconcile with the designed two-level schema during the
-  workspace slice. Cursor ops parity — see `v25-cursor-ops-parity-design.md`. Workspace pull/init —
-  see `v25-workspace-pull-init-design.md`.
+Workspace holds three canonical repos: **`lore-framework/`** (plugin — v24 shipped & pushed at
+`da473b6`; v25 feature scope is complete locally on `main` but unpushed, with final gates tracked in
+backlog), **`lore-framework-dev/`** (this repo — lore-architect lore + drafts), and
+**`lore-agents/`** (personal agents). A workspace-root `lore-workspace.md` exists; decide whether its
+current edit belongs in the meta workspace repo before pushing v25. Cursor ops parity — see
+`v25-cursor-ops-parity-design.md`. Workspace pull/init — see `v25-workspace-pull-init-design.md`.
 
 ## Running Backlog
 
 `framework-improvements-backlog.md` is the canonical list of deferred items; its § "v25 SHIP
-CHECKLIST" is the authoritative gate before pushing v25 (scope decision → workspace slice →
-per-engine packaging → ship disciplines incl. `migrations/25.md` → full-suite verification → ship).
-**Next session:** work that checklist — decide v25 scope with the user first, then implement the
-workspace slice and commit the uncommitted manifest/logo polish, handling each engine's packaging
-separately (Codex packaging is the highest-risk, verify-first item). Quality benchmark tier
-restructure still blocked on P12/P16 probe gaps. ~138 lore topics.
+CHECKLIST" is the authoritative gate before pushing v25. **Next session:** resolve dirty
+`assets/logo.svg`, run `/lr:check`, `claude plugin validate --strict`, the multi-lens doc review if
+following release discipline strictly, and the full `LR_LIFECYCLE=1` suite before pushing
+`lore-framework/main`. Quality benchmark tier restructure still blocked on P12/P16 probe gaps.
+~138 lore topics.
