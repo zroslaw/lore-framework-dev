@@ -8,9 +8,12 @@ The recurring "stale skill catalog after an upgrade" pain — the failure mode t
 
 Applied at **every `VERSION` bump**:
 
-- Set `version` in BOTH `plugin.json` and `marketplace.json` (the `lr` entry) to **`1.<VERSION>.0`** — framework `VERSION` 14 → manifest `1.14.0`.
-- The mapping is **mechanical**, derived from `VERSION`: can't be forgotten, strictly increasing from the old `1.0.0`, valid semver.
-- **Enforced by `/lr:check` #19** (`consistency-checks.md`) — flags any manifest whose version ≠ `1.<VERSION>.0`, and flags the two manifests disagreeing with each other.
+- Set `version` in **all three** manifests to **`1.<VERSION>.0`**:
+  - `.claude-plugin/plugin.json`
+  - `.claude-plugin/marketplace.json` (the `lr` entry)
+  - `.cursor-plugin/plugin.json` (v25+; consistency hygiene — **not** a verified Cursor cache-detection lever)
+- The mapping is **mechanical**, derived from `VERSION`: can't be forgotten, strictly increasing, valid semver.
+- **Enforced by `/lr:check` #19** (`consistency-checks.md`) — flags any read manifest whose version ≠ `1.<VERSION>.0`, and flags pairwise disagreement.
 
 Three layers of defense: documented (conventions) + mechanical (derived from VERSION) + checked (check #19).
 

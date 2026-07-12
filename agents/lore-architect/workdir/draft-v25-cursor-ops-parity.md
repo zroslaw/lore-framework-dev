@@ -1,6 +1,6 @@
 # Draft — v25 Cursor Ops Parity
 
-Status: **approved — ready to implement** (Round 4, 2026-07-10).
+Status: **implemented locally (2026-07-10)** — branch `v25-cursor-ops-parity`, commit `4f3bfcf`. Push deferred.
 Session: 2026-07-10.
 
 Supersedes: nothing (extends Cursor Tier-1 lifecycle from v20–v24).

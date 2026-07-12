@@ -19,11 +19,11 @@ Name mapping is **not** mechanical — always use the wrapper SKILL, not guessed
 
 ## v25 formalization
 
-Ships as canonical wording in `docs/engines/cursor.md` and a framework semantic commitment that
-procedure docs remain self-contained for file-driven execution.
+Canonical wording ships in `docs/engines/cursor.md` § Mid-session fallback (v25, commit `4f3bfcf`
+local). Framework semantic commitment: procedure docs remain self-contained for file-driven execution.
 
 ## See Also
 
 - `v25-cursor-ops-parity-design.md`
 - `cursor-engine-capabilities.md`
-- `docs/engines/cursor.md` (canonical after v25 ship)
+- `docs/engines/cursor.md`

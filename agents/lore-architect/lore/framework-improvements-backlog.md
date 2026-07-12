@@ -4,11 +4,15 @@ Items are grouped by area. Each has a one-line what + why + rough trigger or sta
 
 ## Next-Session Active Threads
 
-- **Implement v25 (Cursor ops parity)** — design approved 2026-07-10 after four review rounds.
-  Canonical spec: `workdir/draft-v25-cursor-ops-parity.md`; lore summary:
-  `v25-cursor-ops-parity-design.md`. Start with D2 probe, then Tier A in `lore-framework/`.
-  Framework PR + lore-architect finalize are separate commits; user asked to defer push until
-  after implementation review. (commit `da473b6`; v24 history entry finalized in `versioning-release-types.md`). One leg still open: the **Codex quality-benchmark uplift measurement was deferred, not run** (Codex tokens exhausted for several days) — run it when tokens return; if it surfaces a regression, add a follow-up note. Codex lifecycle already validates the routing/registration behavior. See `versioning-release-types.md`, `takeover-feature.md`.
+- **Implement + ship v25 workspace slice in `lore-framework/`** — specs approved after 3-lens review
+  (2026-07-12): `workdir/draft-v25-workspace-pull.md`, `workdir/draft-v25-workspace-init.md`.
+  Implement script/skill/docs, harness S1–S18, amend release-notes/25.md, then push
+  `v25-cursor-ops-parity` when ready (`LR_LIFECYCLE=1`). **This session did not touch
+  lore-framework.**
+- **Push v25 (`lore-framework`)** — cursor-ops-parity already implemented locally (`4f3bfcf`);
+  workspace slice still to land on same branch before push.
+- ~~**Implement v25 (Cursor ops parity)**~~ — *done locally 2026-07-10*; see
+  `v25-cursor-ops-parity-design.md`.
 - ~~**Boot-time `ps` probe cleanup**~~ — *done in v24* (boot teammate-probe capability gating). See `versioning-release-types.md`.
 - ~~**Intent-oriented skill descriptions and per-agent routing metadata**~~ — *done in v24* (richer routing metadata). See `versioning-release-types.md`.
 - ~~**Agent registration redesign**~~ — *done in v24* (`/lr:register-agent`, `/lr:unregister-agent`, Cursor native per-agent shortcuts). See `versioning-release-types.md`.
@@ -21,10 +25,19 @@ Items are grouped by area. Each has a one-line what + why + rough trigger or sta
 
 ## Init / Workspace Bootstrap
 
-- **Workspace creation automation** — a scaffolding command or flow that creates a new workspace, optionally with an agent repo initialized, a `README.md` carrying setup instructions, and an auto-invocation of `/lr:init`. Status: partially addressed by v11's `/lr:workspace-sync` (the *consumer* side — bootstrap an existing workspace from one cloned agent repo). The *producer* side (initial scaffolding from nothing) is still deferred; revisit when we have more than one hand-built workspace.
-- **Richer `/lr:init` payloads** — v1 payload was only the worktree convention; v11 renamed the header from "Lore Framework Domain" to "Lore Framework Workspace" but didn't grow the body. Future additions planned: workspace intro, list of registered agents, invocation tips (`/lr-<agent>-agent` shortcuts), links to framework docs. All extend the same `<!-- lr:init -->` marker block; mechanism unchanged. Trigger: user feedback on what's missing from the workspace CLAUDE.md; framework features that want visibility at session start.
-- **Sync CLAUDE.md on framework version bump** — v11 changed the payload header; users have to rerun `/lr:init` manually to refresh. Options for future: `/lr:update` chains `/lr:init`; boot checks payload version and prompts. Decide when the next payload-changing version lands.
-- **Booted-agent nudge for un-initialized workspace** — originally proposed: at boot, check for `<!-- lr:init -->` markers; if absent, emit a one-line suggestion to run `/lr:init`. Dropped in v9 as too complicated. User prefers the future workspace-creation-automation path to solve discovery.
+- ~~**Workspace creation automation**~~ — *designed for v25* (`/lr:workspace-init` setup wizard replaces
+  deferred producer; no separate create-workspace). Spec: `workdir/draft-v25-workspace-init.md`. **Not
+  yet implemented** in lore-framework.
+- ~~**Richer `/lr:init` payloads**~~ — *designed for v25* (workspace-init payload v2: repos, agents,
+  commands, worktree convention; markers `lr:workspace-init:*`). Hard rename from `/lr:init`.
+- **`/lr:workspace-sync` → `/lr:workspace-pull`** — *designed for v25* (two-level pull,
+  `lore-workspace.md`, optional workspace git repo, gitignore plumbing). Spec:
+  `workdir/draft-v25-workspace-pull.md`. Hard rename, no alias.
+- **Sync CLAUDE.md on framework version bump** — v11 changed the payload header; users rerun
+  `/lr:workspace-init --refresh` manually. Options for future: `/lr:update` chains workspace-init.
+- **register-repo in workspace-init wizard** — deferred v26 (hint only in v25 setup summary).
+- **Booted-agent nudge for un-initialized workspace** — still deferred; workspace-init setup path
+  is the preferred discovery mechanism.
 
 ## Worktree Convention
 

@@ -66,7 +66,11 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` — last **shipped & pushed** version is **24** (commit `da473b6`) — is the single source of truth; each repo stamps it in `lore-repo.md`. Plugin manifests mirror it as `1.<VERSION>.0` — the cache-detection lever (`/lr:check #19`). Each version may carry `migrations/<N>.md` (executed) and/or `release-notes/<N>.md` (shown); at least one. `/lr:update` and boot auto-upgrade walk versions forward, applying migrations and stamping; the upgrade gate defers on a `dirty ∩ write-set` collision. Cache-affecting versions (touch skills/scripts/referenced docs) need the Clear Plugin Cache footer. v22 was release-notes-only: top-level engine install guides, explicit Codex/Cursor refresh notes, and engine-specific `R > F` guidance. v23 is release-notes-only too: it hides Cursor's wrapper tree from Codex by moving wrappers into `.cursor-skills/`, leaving Cursor's `/lr-<skill>` surface intact while removing Codex's redundant `lr:lr-*` skills. **v24** (shipped & pushed, commit `da473b6`) adds registration skills (`/lr:register-agent`, `/lr:unregister-agent`), Cursor native per-agent shortcuts, richer routing metadata, boot teammate-probe capability gating, and **`/lr:takeover` (BETA)** — cross-engine session continuation via a portable markdown digest converted from an engine-native session log, so a dying/rate-limited session can be picked up on any engine (first proven in production shipping v24 itself: Codex `019f3ed9` → Claude Code). Its Codex quality-uplift benchmark leg was deferred at ship (Codex tokens exhausted), not run. See `versioning-release-types.md`, `takeover-feature.md`, `update-process.md`, `plugin-manifest-versioning.md`, `dirty-tree-gates-write-vs-read-distinction.md`.
+`lore-framework/VERSION` — last **shipped & pushed** is **24** (`da473b6`); **v25 implemented locally**
+(`v25-cursor-ops-parity` / `4f3bfcf`, push deferred). Each repo stamps `VERSION` in `lore-repo.md`.
+Plugin manifests mirror as `1.<VERSION>.0` — **three** since v25 (Claude pair = cache-detection lever;
+`.cursor-plugin/plugin.json` = hygiene). `/lr:check` #19 enforces all three. See
+`versioning-release-types.md`, `plugin-manifest-versioning.md`, `v25-cursor-ops-parity-design.md`.
 
 ## Consistency & Diagnostics
 
@@ -76,7 +80,7 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 ## Operating Disciplines
 
 How I work, especially at version ships and high-stakes lore edits:
-- **On VERSION bumps:** backfill `versioning-release-types.md` history, add the cache-clear footer if cache-affecting, bump both plugin manifests to `1.<VERSION>.0`, promote any newly-named principle to its own topic. (Full curation disciplines live in `role.md`.)
+- **On VERSION bumps:** backfill `versioning-release-types.md` history, add the cache-clear footer if cache-affecting, bump **all three** plugin manifests to `1.<VERSION>.0`, promote any newly-named principle to its own topic. (Full curation disciplines live in `role.md`.)
 - **Pre-ship review:** multi-lens parallel-reviewer fan-out, iterated until a round finds nothing worth fixing (convergence is the ship signal); sonnet boot-as-self review for high-stakes single edits. See `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md`. **Second, empirical leg (v18+):** for procedure docs covered by the lifecycle testing harness, also run the relevant scenarios against real engine execution before shipping — review catches reasoning issues, the harness catches model-execution-fidelity issues invisible to a strong-model reviewer. See `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`.
 - **Verify before asserting** — check filesystem/state directly before "fixing" a suspected bug; verify *which* bug, not just whether. See `verify-before-acting-on-suspected-bugs.md`.
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source (pointer, don't restate); don't defer completable bounded sweeps; graduated verification (confidence, not boolean). See `naming-foundational-principles.md`, `single-canonical-source-discipline.md`, `feedback-don-t-defer-completable-scope.md`, `graduated-verification-confidence.md`.
@@ -166,55 +170,23 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
   tier** (see `quality-benchmark-feature.md`, `benchmark-findings-engines-models.md`).
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** review item — active follow-ups from the 2026-06-13 architecture review; see `framework-improvements-backlog.md`. That review's settled dispositions (incl. DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in `architecture-review-dispositions.md`. A newer 2026-07-02 review added two further backlog items (post-merge diff verification, recall-time staleness surfacing) — see `framework-improvements-backlog.md` § Merge Quality, § Search / Scaling.
 - Parked: workdir-as-reference-library; vector-DB search (until >100 topics/agent); the session-as-durable-artifact cluster (boot auto-push, boot-context cache, suspend/resume, JSONL archive). All in `framework-improvements-backlog.md`.
+- **v25 workspace layer (pull + init)** — designed and review-approved 2026-07-12; specs in
+  `workdir/draft-v25-workspace-*.md`. Hard renames: workspace-sync→workspace-pull,
+  init→workspace-init. Two-level repo declarations (`lore-workspace.md` + domain `repos:`).
+  Optional workspace-as-git-repo envelope. **Implement in lore-framework next session** — see
+  `v25-workspace-pull-init-design.md`, `workspace-meta-repo-pattern.md`.
 
 ## Current State
 
-Workspace holds three canonical repos: **`lore-framework/`** (plugin, **VERSION 24 shipped &
-  pushed, commit `da473b6`** — registration skills, Cursor native shortcuts, routing metadata,
-  boot teammate-probe gating, `/lr:takeover` BETA; public at github.com/zroslaw/lore-framework),
-  **`lore-framework-dev/`** (this repo — framework-dev agents, **stamped 24** via boot-time
-  auto-upgrade; a workspace-root sibling at github.com/zroslaw/lore-framework-dev), and
-**`lore-agents/`** (personal agents: tax-advisor, masschallenge-judge). The multi-engine port that
-was staged in the no-remote **`lore-framework-codex/`** sibling landed in canonical v19 — that
-sibling is now **superseded and deletable** (see `port-landing-next-steps.md`). The separate
-**`lore-framework-cursor/`** sibling likewise landed in canonical v20 and is now **superseded and
-deletable**. The plugin bundles its first MCP server (`lr-wait`, v18) and carries its first
-`python3` dependency; v19 shipped the Codex port (`docs/engines/`, `<framework-root>`
-self-location) and three style skills, v20 shipped the Cursor engine profile, and **v21 shipped the
-Cursor dual skill tree** (`.cursor-skills/lr-*/` + `.cursor-plugin/`, `scripts/sync-cursor-skills`,
-`/lr:check` #21) — full-harness-verified before push. The v21 dev-repo stamp folded in a stranded
-uncommitted 19→20 stamp that boot correctly deferred on (dirty `lore-repo.md` ∩ upgrade write-set —
-a live confirmation of the write-aware gate against a real half-landed stamp). Dev-only tests
-live here in `lore-framework-dev/tests/`, not in the plugin — including the multi-engine lifecycle
-testing harness (`tests/lifecycle/`, 19/21 Tier-1 scenarios; the **complete suite ran 42/42 on the
-`claude` engine** — 19/19 lifecycle + 23 deterministic, ~$9.4/~27 min — as the last gate before the
-v21 push; also 6/6 boot on haiku against v19, gated behind `LR_LIFECYCLE=1`; the v22 follow-up
-added a dedicated Codex `R > F` lifecycle scenario and reran that targeted path on `gpt-5.4-mini`;
-see
-`lifecycle-testing-harness.md`). The harness now has engine-neutral driver support (cursor + codex
-branches, engine-neutral `memory_file_name()`); its doc-driven Codex branch does not rely on a
-preinstalled Codex plugin, but the host launching `codex exec` must allow writes to `~/.codex/` or
-the run dies before entering the fixture repo. **v23** also validated a packaging edge the harness
-doesn't yet encode: Codex can keep loading a stale plugin cache and still show obsolete skill sets,
-so cache refresh is part of real-engine verification for plugin-layout changes. Matching harness changes are a separate dev-repo
-concern outside finalize's `agents/` commit scope. A third test track now sits beside lifecycle and
-the deterministic layer: the **quality benchmark** (`tests/quality/`, gated `LR_QUALITY=1`) measures
-lore utilization via planted-needle probes with treatment/control arms and three-stage scoring
-(retrieval → grounding → application; headline metric = behavior uplift). A **v2 probe catalog**
-(18 probes / 8 categories, up from v1's 8/5) landed 2026-07-09, validated on one real
-cursor+composer-2.5 run (+66.7pt behavior uplift, a scorecard column-width bug fixed along the
-way) — **not yet ship-ready**: two probes (P12, P16) still show a ceiling effect with zero
-discrimination, open until reworked and re-run. The same session also closed a known judge
-measurement gap (S3 judge now sees workspace artifacts, not just the final message) and fixed an
-embedded-NUL-byte crash in the artifact-capture path. All of it — v1 and v2 — remains
-uncommitted; `tests/` needs its own manual commit outside finalize's `agents/` scope. Anchor:
-`quality-benchmark-feature.md` (fans out to findings, operational lessons, v2 catalog, and known
-v2 probe gaps). ~129 lore topics.
+Workspace holds three canonical repos: **`lore-framework/`** (plugin — **v24 shipped & pushed**
+  (`da473b6`); **v25 implemented locally** on `v25-cursor-ops-parity` / `4f3bfcf` + **workspace
+  slice designed, not implemented**), **`lore-framework-dev/`** (this repo — lore-architect lore +
+  drafts), and **`lore-agents/`** (personal agents). User's **`agent-workspace/`** (empty meta-repo
+  candidate) discussed but not scaffolded. Cursor ops parity (v25) — see
+  `v25-cursor-ops-parity-design.md`. Workspace pull/init — see `v25-workspace-pull-init-design.md`.
 
 ## Running Backlog
 
-`framework-improvements-backlog.md` is the canonical list of deferred items and open questions. Read it at the start of framework-design sessions — surprises emerge from the accumulation. v24 shipped 2026-07-08 (`da473b6`); the one open leg is the **Codex quality-benchmark uplift measurement**, deferred at ship because Codex tokens were exhausted — run it when tokens return and add a follow-up note if it surfaces a regression. Secondary: Cursor takeover conversion is unsupported (content-addressed `store.db`, no recoverable ordering) — see `engine-session-log-formats.md`.
-
-**UPCOMING (2026-07-10):** implement **v25 Cursor ops parity** — design approved; spec in `workdir/draft-v25-cursor-ops-parity.md` and `v25-cursor-ops-parity-design.md`. Separate implementation session; push deferred until after framework ship.
-
-**UPCOMING TASK (next session, local/uncommitted note 2026-07-08):** restructure the quality benchmark into **regular** (per-release, each engine at its cheapest *usable* model — claude/sonnet, codex/gpt-5.4-mini, cursor/composer-2.5) vs **deep** (explicit request only, full engine×model matrix incl. claude/haiku+opus-4.8, codex/gpt-5.4, cursor/sonnet). Full design in `quality-benchmark-tiers-proposal.md`. **Blocked (added 2026-07-09):** don't build this on top of the v2 probe catalog until `quality-benchmark-v2-known-probe-gaps.md`'s two open probes (P12, P16 — ceiling effect, zero discrimination) are reworked and re-run. **Remove this pointer and delete that proposal topic once implemented.**
+`framework-improvements-backlog.md` is the canonical list of deferred items. **Next session:**
+implement v25 workspace slice in lore-framework, harness S1–S18, push v25 branch when green.
+Quality benchmark tier restructure still blocked on P12/P16 probe gaps. ~135 lore topics.
