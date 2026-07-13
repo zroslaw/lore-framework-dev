@@ -2,6 +2,17 @@ The `lr` plugin is distributed from its GitHub repository through engine-specifi
 metadata. Claude and legacy Codex installs can consume the Claude marketplace file; native Codex
 installs prefer the Codex-native marketplace when present.
 
+Marketplace submission has two layers that should not be conflated:
+
+- **Runtime package metadata** — engine manifests and marketplace files that installers consume.
+- **Reviewer-facing submission metadata** — root files such as `MARKETPLACE.md` (copy/paste directory
+  fields for Claude Code, Codex, and Cursor) and `PRIVACY.md` (privacy policy URL required by the
+  Claude Console submission form).
+
+Keep future submission language precise: `lr--v1.25.0` / runtime commit `09fe4f0` names the release
+artifact; `MARKETPLACE.md` and `PRIVACY.md` support review on `main`; per-engine public availability
+must be stated only after that engine's live submission/distribution path is verified.
+
 ## Marketplace setup
 
 `.claude-plugin/marketplace.json` in the lore-framework repo root (versions track `1.<VERSION>.0`, not the `1.0.0` shown historically — see `plugin-manifest-versioning.md`):
@@ -32,6 +43,10 @@ Critical details:
 /plugin marketplace add zroslaw/lore-framework
 /plugin install lr@lore-framework
 ```
+
+Before a public Claude community submission: run `claude plugin validate --strict`, create and push
+the plugin tag with `claude plugin tag --push`, ensure `MARKETPLACE.md` has current directory copy,
+and ensure root `PRIVACY.md` is reachable from the repository URL.
 
 ## Codex installation
 

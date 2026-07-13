@@ -56,7 +56,9 @@ is Console-form community submission. Cursor is structurally ready, but seamless
 propagation still needs a team marketplace + Auto Refresh + Cursor GitHub App validation. Codex
 native packaging is resolved in v25: legacy Claude marketplace fallback still works, native
 `.agents/plugins/marketplace.json` is preferred when present, and `.codex-plugin/plugin.json` is the
-Codex version-bearing manifest. See `engine-marketplace-readiness.md`, `plugin-distribution.md`,
+Codex version-bearing manifest. Public submission also needs reviewer-facing metadata (`MARKETPLACE.md`
+directory copy + root `PRIVACY.md`) and precise separation between runtime release identity,
+submission-support files, and per-engine verified publication status. See `engine-marketplace-readiness.md`, `plugin-distribution.md`,
 `cursor-plugin-distribution-update-model.md`, `plugin-manifest-versioning.md`.
 
 ## Boot & Freshness
