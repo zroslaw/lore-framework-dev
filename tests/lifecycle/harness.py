@@ -195,6 +195,22 @@ UNREGISTER_REPO_PROMPT = (
     f"'{REPO_NAME}'. Print DONE when complete."
 )
 
+TAKEOVER_CURSOR_FACT = BUILD_TOOL_FACT
+
+
+def takeover_cursor_prompt(jsonl_path, digest_path):
+    return (
+        f"Read '{FRAMEWORK_DIR}/docs/takeover.md' and follow the **direct takeover** "
+        "procedure (the section for a session id or path). Use this absolute JSONL path "
+        f"as the session token:\n  {jsonl_path}\n"
+        "Run scripts/session-takeover with that path and -o "
+        f"'{digest_path}'. Read the digest file fully into context. Then print:\n"
+        "TAKEOVER-OK\n"
+        f"RECALL-FACT: {TAKEOVER_CURSOR_FACT}\n"
+        "TOOL-PAIRING: <tool_results_paired>/<tool_calls_total> from digest metadata\n"
+        "Do not boot, reflect, merge, finalize, commit, or push."
+    )
+
 
 def _codex_boot_prompt(agent_name, extra):
     """Codex's reliable path is doc-driven rather than slash-skill dispatch."""
@@ -206,6 +222,8 @@ def _codex_boot_prompt(agent_name, extra):
 
 def codex_prompt(prompt):
     """Translate engine-neutral harness prompts into the Codex doc-driven path."""
+    if isinstance(prompt, str) and "docs/takeover.md" in prompt:
+        return prompt
     if prompt == BOOT_PROMPT:
         return _codex_boot_prompt(
             AGENT_NAME,
@@ -465,6 +483,21 @@ def build_empty_workspace(tmpdir):
     workspace = os.path.join(tmpdir, "workspace")
     os.makedirs(workspace)
     return workspace
+
+
+def build_cursor_takeover_paths(tmpdir, workspace):
+    """Cursor HOME + JSONL transcript for /lr:takeover lifecycle scenarios."""
+    import sys
+
+    fixtures = os.path.join(HERE, "..", "fixtures")
+    if fixtures not in sys.path:
+        sys.path.insert(0, fixtures)
+    from cursor_takeover_fixture import minimal_session
+
+    cursor_home = os.path.join(tmpdir, "cursor-home")
+    jsonl_path, _store_db = minimal_session(cursor_home, workspace_cwd=workspace)
+    digest_path = os.path.join(workspace, "takeover-digest.md")
+    return cursor_home, jsonl_path, digest_path
 
 
 def make_origin_ahead(fx):

@@ -10,6 +10,7 @@ Stdlib only — no pytest, no install.
 
 ```bash
 python3 tests/test_wait.py -v
+python3 tests/test_session_takeover.py -v
 # or
 python3 -m unittest discover -s tests -v
 ```
@@ -34,6 +35,10 @@ LR_FRAMEWORK_DIR=/path/to/lore-framework python3 tests/test_wait.py -v
     blocking-wake, and EOF shutdown.
 
 ## Lifecycle scenario tests (Layer 3)
+
+- **`test_session_takeover.py`**
+  - Cursor takeover conversion: synthetic `CURSOR_HOME` fixture, JSONL + `store.db` batch-window
+    tool-result pairing, `.db` → JSONL redirect, uuid resolution.
 
 `lifecycle/` holds end-to-end scenario tests: a throwaway fixture workspace (agent repo +
 local bare `origin`, zero network) is built per test, a real engine runs a lifecycle prompt
@@ -86,6 +91,7 @@ Scenario catalog status (numbering per the draft):
 | 24 | register-repo | ✅ `lifecycle/test_repo_workspace.py` |
 | 25 | unregister-agent | ✅ `lifecycle/test_repo_workspace.py` |
 | 26 | unregister-repo | ✅ `lifecycle/test_repo_workspace.py` |
+| 27 | Cursor takeover (direct JSONL path) | ✅ `lifecycle/test_takeover.py` |
 | Tier 2 | wait/emit | covered by `test_wait.py` (protocol-level, not a lifecycle scenario) |
 | Tier 2 | spawn-teammate | deferred — not headless-scriptable (multi-pane UI) |
 | Tier 2 | df-repo-init, df-ula-file | deferred — BETA, out of scope for this pass |
