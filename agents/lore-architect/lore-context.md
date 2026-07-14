@@ -74,23 +74,23 @@ Boot (`agent-boot.md`, single source of truth): discover agent → auto-pull rep
 
 See `lore-search-pattern.md`, `consult-pattern.md`, `attach-pattern.md`, `spawn-teammate-feature.md`, `teammate-conventions.md`.
 
+## Session Takeover (BETA)
+
+**`/lr:takeover`** converts engine-native session logs into a markdown digest so a new session on any engine can continue interrupted work. Codex, Claude Code, and Cursor are supported (`scripts/session-takeover` — list, convert, render). Cursor pairs tool results from `store.db` to JSONL `tool_use` batches via batch-window name matching; same-name parallel batches and interrupted sessions set `pairing_uncertain`. See `takeover-feature.md`, `cursor-takeover-batch-pairing.md`, `engine-session-log-formats.md`.
+
 ## Finalization
 
 User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone): **reflect** (inline, host-first, per agent — needs session context) → **merge** (parallel subagents, one per agent booted as itself, file-driven — integrates reflections into `lore/`, `lore-context.md`, `role.md`) → **summarize** (host writes the canonical session summary + short guest summaries) → **commit+push** (one commit per touched repo; conflict-resolution on push rejection). Do not finalize unless the user triggers it. See `finalization-process.md`, `finalize.md`, `merge-in-booted-subagents.md`, `reflect-merge-execution-asymmetry.md`.
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` — v25 is the current release closure: Cursor ops parity, native Codex
-packaging + four-manifest discipline, workspace pull/init, PNG logo assets, and the check/reflection
-doc-fidelity fixes. Static `/lr:check` and `plugin validate --strict` are green; targeted re-runs
-for the four v25 lifecycle failures are green. The user explicitly accepted shipping without a fresh
-full three-engine lifecycle rerun after those targeted fixes; this tradeoff is recorded in
-`framework-improvements-backlog.md` § "v25 SHIP CLOSURE".
-Each repo stamps `VERSION` in `lore-repo.md`; four version-bearing plugin manifests mirror
-`1.<VERSION>.0` (Claude pair, Cursor, Codex). `/lr:check` #19 enforces them. See
-`versioning-release-types.md`, `plugin-manifest-versioning.md`, `v25-cursor-ops-parity-design.md`,
-`v25-workspace-pull-init-design.md`, `v25-lifecycle-scenario-fixes.md`,
-`reflect-path-anchoring-fidelity-fix.md`.
+`lore-framework/VERSION` — **v26 is shipped and pushed** (Cursor takeover conversion for
+`/lr:takeover` BETA; `release-notes/26.md`, manifests `1.26.0`; `lore-framework` main commit
+`ce90f9a` on top of `3909129` "Release v26: Cursor takeover conversion", tagged `lr--v1.26.0`).
+**v25** (Cursor ops parity, native Codex packaging, workspace pull/init) is the prior release. Each repo stamps
+`VERSION` in `lore-repo.md`; four version-bearing plugin manifests mirror `1.<VERSION>.0`. `/lr:check`
+#19 enforces them. See `versioning-release-types.md`, `takeover-feature.md`,
+`cursor-takeover-batch-pairing.md`, `plugin-manifest-versioning.md`.
 
 ## Consistency & Diagnostics
 
@@ -199,13 +199,10 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. L
 ## Current State
 
 Workspace holds three canonical repos: **`lore-framework/`** (plugin), **`lore-framework-dev/`**
-(this repo — lore-architect lore + drafts), and **`lore-agents/`** (personal agents). v25 is the
-workspace-layer / native-Codex-packaging / Cursor-ops-parity release. Final disposition: PNG logo
-migration accepted, workspace-root `lore-workspace.md` belongs in the meta workspace repo, targeted
-lifecycle re-runs for the four v25 failures are green, and the user explicitly waived a fresh full
-three-engine lifecycle rerun after those fixes as an acceptable v25 ship tradeoff. Cursor ops parity
-— see `v25-cursor-ops-parity-design.md`. Workspace pull/init — see
-`v25-workspace-pull-init-design.md`.
+(this repo — lore-architect lore + drafts), and **`lore-agents/`** (personal agents). **v26 is
+shipped and pushed** in `lore-framework/` (Cursor takeover conversion; commit `ce90f9a`, tag
+`lr--v1.26.0`). **v25** (workspace layer, native Codex packaging, Cursor ops parity) is the prior
+release. See `takeover-feature.md`, `cursor-takeover-batch-pairing.md`, `release-notes/26.md` (plugin tree).
 
 ## Running Backlog
 

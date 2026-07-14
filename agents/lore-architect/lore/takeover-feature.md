@@ -9,6 +9,7 @@ Cross-engine session continuation: when a session dies (rate limit, crash, engin
 - **Skill shape:** thin `skills/takeover/SKILL.md` → `docs/takeover.md` (orchestration: discover→ask, or direct takeover; boot the digest's lore agent before acting; verify on-disk state; confirm per step 5) → script does the mechanical work. Script is python3 stdlib-only — the second sanctioned python component after `lr-wait` (see `plugin-mcp-server-convention.md` § non-shell runtimes precedent).
 - **Bare invocation must ask, not pick** — recency is not intent.
 - **Boundaries:** read-only on source logs; takeover is a continuation, not a finalization trigger; trust on-disk state over the digest — a dying session's tail may claim unfinished work (the RC glider session's last act was rewriting a generator it never ran). **Extend the same rule to any secondary summary of a session, including our own lore:** trust the raw log tail over prose that summarizes it. In the v24 production takeover the digest's last line was `exit 1: FAIL` (the Codex quality run), but a hand-written rescued-state lore topic had softened it to "interrupted when the session died." When a topic is written to capture a dying session's final state, its prose can drift from the raw tail — trust the tail and verify on-disk before acting.
+- **Cursor JSONL + batch-window pairing (2026-07-14, shipped in v26)** — Cursor conversion reads ordered `agent-transcripts/*.jsonl` for transcript order; tool results come from `store.db` and are paired per assistant-line batch by `toolName` within the next N sqlite rows. Rejects blob-DAG ordering (1/N reachable). Empirically validated 364/364 local sessions; unit + haiku lifecycle tests. Shipped and pushed as `lore-framework` main commit `ce90f9a` (on top of `3909129` "Release v26: Cursor takeover conversion"), tagged `lr--v1.26.0`. See `cursor-takeover-batch-pairing.md`, `engine-session-log-formats.md`.
 
 ## Validation (2026-07-08)
 
@@ -61,9 +62,9 @@ v25 lifecycle-fix work) was taken over on Claude Code and carried to completion.
 
 ## Known gaps / follow-ups
 
-- **Cursor conversion unsupported**: `~/.cursor/chats/<ws-hash>/<uuid>/store.db` is a content-addressed SQLite blob store (ids = SHA-256 of data, no ordering); messages are JSON blobs in API shape but assistant turns sit in binary records. Listed but not convertible until someone reverse-engineers ordering.
+- **Cursor takeover — interrupted-session lifecycle** — unit coverage for missing trailing tool results + `pairing_uncertain`; lifecycle scenario still uses a completed fixture only. See `tests/lifecycle/test_takeover.py`.
+- **Cursor IDE vs CLI transcript parity** — JSONL path validated CLI-heavy (364/364); IDE-only sessions not separately verified.
 - Discovery's temp-dir filter (`--all` to include) hides lifecycle/quality fixtures, but evaluator sessions run *in project dirs* still appear in the Claude list — cosmetic, unfixed.
-- No lifecycle-harness scenario for takeover yet; validated only by the ad-hoc haiku runs above.
 
 Tracked in `framework-improvements-backlog.md` § Takeover.
 
@@ -76,5 +77,5 @@ Takeover is the first *shipped* feature (in v24) in the session-as-durable-artif
 - `engine-session-log-formats.md` — empirical per-engine log-format ground truth this feature is built on.
 - `session-as-durable-artifact-cluster.md` — the parked cluster this partially delivers.
 - `jsonl-session-files-investigation.md` — the earlier "don't parse the JSONL" decision; takeover is the sanctioned read-only, on-demand exception (no archiving, no stability dependency for correctness).
-- `versioning-release-types.md` — v24 history entry (the release that shipped this feature).
+- `versioning-release-types.md` — v24 history entry (initial ship); v26 completes Cursor conversion (shipped, commit `ce90f9a`, tag `lr--v1.26.0`).
 - `haiku-ambiguity-detector.md` — the validation tier used.

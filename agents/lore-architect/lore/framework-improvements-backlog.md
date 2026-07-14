@@ -36,8 +36,10 @@ Anchors: `v25-cursor-ops-parity-design.md`, `v25-workspace-pull-init-design.md`,
 
 ## Takeover (`/lr:takeover`, BETA, v24)
 
-- **Cursor conversion unsupported** — `~/.cursor/chats/.../store.db` is a content-addressed blob store with no recoverable ordering; assistant/tool records are binary. Listed but not convertible until someone reverse-engineers ordering. See `engine-session-log-formats.md`.
-- **No lifecycle-harness scenario for takeover** — validated only by ad-hoc haiku subagent runs (2/2 pass, 2026-07-08). Add a scenario when the harness next grows. See `takeover-feature.md`.
+- ~~**Cursor conversion unsupported**~~ — **done (v26, 2026-07-14):** JSONL transcript + `store.db` batch-window pairing in `scripts/session-takeover`. See `cursor-takeover-batch-pairing.md`, `engine-session-log-formats.md`, `release-notes/26.md`.
+- ~~**No lifecycle-harness scenario for takeover**~~ — **done (2026-07-14):** `tests/lifecycle/test_takeover.py` (Cursor direct path, haiku).
+- **Takeover lifecycle gaps** — bare `/lr:takeover` list-and-ask flow; boot-from-digest step 3; interrupted-session fixture on haiku. Unit coverage exists for interrupted + same-name parallel batches.
+- **IDE-only Cursor transcript parity** — CLI-heavy validation (364/364 JSONL match); IDE-only workflows not separately verified. See `takeover-feature.md` Known Gaps.
 - **Discovery lists evaluator sessions run in project dirs** — the temp-dir filter (`--all` to include) hides lifecycle/quality fixtures, but evaluator sessions executed *in project dirs* still appear in the Claude list. Cosmetic; fix opportunistically.
 
 ## Init / Workspace Bootstrap

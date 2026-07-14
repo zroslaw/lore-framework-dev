@@ -1,6 +1,6 @@
-# Engine Session-Log Formats (empirical, 2026-07-08)
+# Engine Session-Log Formats (empirical, 2026-07-14)
 
-Ground-truth findings from building `scripts/session-takeover` (`takeover-feature.md`). Useful for any future session-introspection work: takeover, harness assertions, benchmarks, transcript-backed state recovery.
+Ground-truth findings from building `scripts/session-takeover` (`takeover-feature.md`). Useful for any future session-introspection work: takeover, harness assertions, benchmarks, transcript-backed state recovery. The Cursor findings below fed the v26 Cursor takeover conversion, shipped and pushed as `lore-framework` main commit `ce90f9a` (on top of `3909129` "Release v26: Cursor takeover conversion"), tagged `lr--v1.26.0`.
 
 ## Codex (`~/.codex/`)
 
@@ -17,10 +17,31 @@ Ground-truth findings from building `scripts/session-takeover` (`takeover-featur
 - Command invocations and harness injections appear as user-content strings starting with tags (`<command-name>`, `<local-command-caveat>`) — filter on leading `<`.
 - Earlier location/format notes (encoded-cwd slug rules, sessionId resolution mechanisms, and why the framework avoids *archiving* this format) live in `jsonl-session-files-investigation.md`.
 
-## Cursor (`~/.cursor/chats/`)
+## Cursor (`~/.cursor/`)
 
-- `<workspace-md5>/<chat-uuid>/{store.db, meta.json}`. `meta.json`: `createdAtMs`, `updatedAtMs`, `cwd`, `hasConversation`.
-- `store.db` is SQLite with `blobs(id, data)` + empty `meta`: a **content-addressed** store (blob id = SHA-256 of content). System/user messages are plaintext JSON in API shape; assistant/tool records are binary (protobuf-ish); no ordering info recoverable without reverse-engineering. This blocks transcript reconstruction — Cursor takeover conversion is unsupported for now.
+### Discovery — `~/.cursor/chats/`
+
+- `<workspace-hash>/<session-uuid>/meta.json` — `createdAtMs`, `updatedAtMs`, `cwd`, `hasConversation`, optional `isSubagent`.
+- Same directory holds `store.db` (see Secondary below). Listing uses `meta.json`; `--list` shows times in the **local timezone**.
+
+### Conversion — `~/.cursor/projects/.../agent-transcripts/`
+
+- `<project-slug>/agent-transcripts/<session-uuid>/<session-uuid>.jsonl` — **ordered** transcript.
+- Records: `role:user` / `role:assistant` (with `message.content` text + `tool_use` items), `type:turn_ended`.
+- Join to the chat index by session UUID. This is the primary source for takeover digest message order.
+
+### Secondary — `store.db`
+
+- Content-addressed SQLite (`blobs` + hex-encoded `meta` row with `name`, `lastUsedModel`, etc.).
+- Tool **results** live here as JSON `role:tool` blobs (`type:tool-result`). Not used for message ordering.
+- `scripts/session-takeover` pairs results to JSONL `tool_use` batches via **batch-window name matching** (parallel calls may complete out of JSONL order). See `cursor-takeover-batch-pairing.md`.
+
+### Limitations
+
+- Assistant text is often `[REDACTED]` at rest.
+- JSONL `tool_use` items lack `toolCallId`; pairing is by tool name within each batch window — same-name parallel batches set `pairing_uncertain`.
+- Undocumented on-disk format; CLI-heavy validation (364/364 on one machine, 2026-07-14). IDE-only parity not separately verified.
+- No official list API; filesystem scan only (`CURSOR_HOME` override for tests).
 
 ## Operational lesson
 
@@ -29,6 +50,7 @@ When skimming a session log, don't conclude from a truncated read — a `head`-l
 ## See Also
 
 - `takeover-feature.md` — the feature these findings fed.
+- `cursor-takeover-batch-pairing.md` — Cursor tool-result pairing algorithm.
 - `jsonl-session-files-investigation.md` — prior Claude-format investigation (location encoding, sessionId resolution, archiving concerns).
 - `claude-engine-capabilities.md`, `codex-engine-capabilities.md`, `cursor-engine-capabilities.md` — the per-engine hubs.
 - `session-as-durable-artifact-cluster.md` — the raw-transcript durability thread.
