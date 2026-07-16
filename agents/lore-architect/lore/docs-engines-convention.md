@@ -71,6 +71,10 @@ and deletable** after the v20 landing. Design record: workdir `codex-binding-des
 deferred (carry `${CLAUDE_PLUGIN_ROOT}`, out of core scope): `.mcp.json` / lr-wait,
 `migrations/*`, `df`/`aiqa` — see `port-landing-next-steps.md` § Remaining follow-ups.
 
+## Cross-profile guardrail audits
+
+When one engine profile documents a named guardrail against a class of error, check every sibling profile for the same latent bug rather than assuming the guardrail was only ever needed once. Since all three profiles share the same five bindings by design, a fix in one binding's handling on one profile is a strong signal to audit the same binding on the others. Concrete instance: `docs/engines/cursor.md` had long guarded against guessing `docs/<skill>.md` from a skill name (skill-name and doc-filename diverge, e.g. `boot` → `agent-boot.md`), but `docs/engines/codex.md`'s invocation-syntax binding had the identical latent bug, undetected until an AI-installer review pass traced it against real files on disk. See `skill-doc-filename-divergence-bug-class.md`.
+
 ## See Also
 
 - `multi-engine-portability-direction.md` — the anchor; § Architectural levers names the five bindings.
@@ -81,3 +85,4 @@ deferred (carry `${CLAUDE_PLUGIN_ROOT}`, out of core scope): `.mcp.json` / lr-wa
 - `framework-root-self-location-validated.md` — the framework-root binding, validated separately.
 - `claude-coupling-inventory-and-port-tiers.md` — the five bindings as the whole port surface.
 - `port-landing-next-steps.md` — the landing record and remaining Claude-first follow-ups.
+- `skill-doc-filename-divergence-bug-class.md` — the concrete cross-profile guardrail bug, caught by an AI-installer review pass.

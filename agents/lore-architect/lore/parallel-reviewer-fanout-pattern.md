@@ -32,6 +32,7 @@ The lens choice should be deliberate per ship. Lenses that worked well:
 - **Release readiness / disclosure** — are breaking changes mentioned? Is auto-upgrade safe? Are version stamps consistent? Is the backlog updated?
 - **Framework architectural consistency** — does the change compose with the three-layer model, skill-doc pattern, framework-scope-vs-agent-scope, naming-foundational-principles meta-rule, sibling-skill non-overlap? Especially powerful when the architecture reviewer is given the architect's own `lore-context.md` as a baseline — applies the architect's stated meta-rules to the change being reviewed.
 - **Correctness with filesystem verification** — for doc edits that promise commands, paths, or behaviors, the correctness reviewer should run actual bash commands (`ls ~/.claude/plugins/cache/`, `cat .../VERSION`, `find ...`) and ground every finding in observed state. Catches defects pure prose review misses.
+- **AI-installer (literal executor)** — for the paste-link installer doc genre (`paste-link-installer-doc-genre.md`): brief the reviewer to read the doc *as the agent that must execute it literally*, tracing each instruction against real files/commands rather than judging tone. Catches a distinct class the newcomer/editorial lenses miss — see `ai-installer-review-lens.md` for the full brief shape and the empirical case that justified naming it as a fourth lens.
 
 **Rule:** the lenses should be *mutually exclusive* — if two reviewers are likely to find the same issues, you've wasted a slot. Tell each lens explicitly what to skip (what the others will catch).
 
@@ -159,3 +160,5 @@ Often complementary: use sonnet-subagent for the lore-side polish; use parallel-
 - `graduated-verification-confidence.md` — partial returns from stalled reviewers as additive evidence is one instance of this principle.
 - `workflow-primitive-operational-notes.md` — the right-size-the-fan-out rule codified for the dynamic Workflow tool; complementary inverse case.
 - `consistency-sweep-read-not-just-grep.md` — the read-the-prose half of a rename/restructure sweep; the manual sibling of the filesystem-verification review lens.
+- `paste-link-installer-doc-genre.md` — the onboarding-doc genre the AI-installer lens is built for.
+- `skill-doc-filename-divergence-bug-class.md` — the bug class the AI-installer lens caught that a prose lens missed.

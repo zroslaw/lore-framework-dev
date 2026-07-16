@@ -28,6 +28,8 @@ Concrete examples grounded in the team's actual use. Skipped in v1 of the doc.
 
 Why it works: the reader has just walked through N use cases; the (N+1)th is the doc they're holding — self-illustrating proof. Closes the positive-feedback-loop framing from §1: §1 *asserts* the loop; the meta subsection *demonstrates* it. Skip for strict reference manuals — keep it for narrative/showcase docs.
 
+**Placement differs on a landing page.** The above meta-closer-at-the-end placement holds for a long-form narrative doc (the Activities-team-intro shape this pattern documents), where "Getting started" instructions aren't competing for the same fold. Applying the same self-referential idea (the framework's own maintainer agent living in its own agent repo) to a **landing-page-length README** is a different placement problem: putting it between the use-cases section and the primary "Getting started" CTA competes with the reader's momentum right at the moment they're deciding whether to try the thing — flagged by newcomer-lens review as a real regression. The fix: a compact section placed *after* "Getting started" (e.g. titled `## Go deeper — meet the maintainer agent`), not before it. **Rule of thumb:** in a short landing-page doc, primacy goes to the single strongest CTA; treat the meta/self-referential example as a secondary "go deeper / here's proof" beat placed after that CTA, not as part of the pitch preceding it. See `paste-link-installer-doc-genre.md` for the sibling doc-genre finding from the same session.
+
 ## Section 3 — The Anatomy
 
 Demystification, not specification. Lead with "A Lore Agent is, mechanically, just a directory of plain markdown files…" Same blockquote-headline pattern as §1 — visual rhythm carries across. "Deliberately boring" works as a tone marker.
@@ -95,3 +97,5 @@ Source session: Activities team's intro doc, ~3 days of iteration with the user.
 - `use-cases-via-parallel-consult-pattern.md` — how to populate §2 by fanning consults to the working agents.
 - `sonnet-subagent-review-pattern.md` — pre-publication review step for high-stakes onboarding drafts.
 - `framework-as-engine-not-kb.md` — the "boring by design" framing §3 pulls from.
+- `paste-link-installer-doc-genre.md` — the sibling AI-agent-facing genre (vs. this doc's human-facing narrative genre).
+- `ai-installer-review-lens.md` — the review lens purpose-built for the installer genre, complementing the newcomer-lens review this pattern already relies on.

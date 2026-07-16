@@ -46,3 +46,4 @@ Not a replacement of the skill-doc pattern — a refinement for orchestration ca
 - `shared-procedure-doc-pattern.md` — sibling refinement for *non-skill* procedures invoked from multiple sites (the body lives in `docs/<procedure>.md` with no matching skill).
 - `framework-defined-role-pattern.md` — the same thin-pointer mechanism applied to a *role*: `role.md` becomes a thin pointer to a central versioned behavior doc.
 - `slash-command-system.md` — how skill files relate to their docs at the top level.
+- `skill-doc-filename-divergence-bug-class.md` — a bug class from *mis-deriving* this pattern: guessing `docs/<skill>.md` from the skill name instead of reading the skill file, wrong wherever the two names diverge (`boot` → `agent-boot.md`, etc.).
