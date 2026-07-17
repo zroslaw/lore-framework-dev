@@ -6,7 +6,7 @@ This is the "are we marketplace-ready?" map; keep engine-specific operational de
 
 ## Claude Code — most mature path; we're close
 
-- **Manifest** `.claude-plugin/plugin.json`: only `name` is strictly required. Visibility/metadata fields (all recognized): `displayName` (picker name, v2.1.143+, falls back to `name`), `description`, `keywords` (discovery tags), `homepage`, `repository`, `license`, `author`, `$schema` (editor autocomplete). Unrecognized fields are ignored (warn under `--strict`). **Enriched 2026-07-12** — added `$schema`, `displayName: "Lore"`, `homepage`, `keywords`.
+- **Manifest** `.claude-plugin/plugin.json`: only `name` is strictly required. Visibility/metadata fields (all recognized): `displayName` (picker name, v2.1.143+, falls back to `name`), `description`, `keywords` (discovery tags), `homepage`, `repository`, `license`, `author`, `$schema` (editor autocomplete). Unrecognized fields are ignored (warn under `--strict`). **Enriched 2026-07-12** — added `$schema`, `displayName`, `homepage`, `keywords`. The `displayName` is now `"Lore Agents"` (rebrand, commit `84948e8`; was `"Lore"`) — see `lore-agents-product-name.md` for the product-vs-engine naming split that governs every manifest string.
 - **Marketplace file** `.claude-plugin/marketplace.json` (we have it): `source` must be `"./"` (trailing slash). Entry carries name/source/description/version/repository/license.
 - **Submission-support bundle:** public review needs reviewer-facing metadata, not only runtime manifests. The root `MARKETPLACE.md` carries copy/paste directory fields for Claude Code, Codex, and Cursor; root `PRIVACY.md` exists because the Claude Console submission form requires a privacy policy URL. Treat these as submission-support files on `main`, separate from the runtime release tag/commit.
 - **Public marketplaces:**
@@ -52,7 +52,7 @@ This is the "are we marketplace-ready?" map; keep engine-specific operational de
 
 Keep three identities separate when describing readiness:
 
-- **Runtime release identity:** the plugin tag and runtime commit users/installers consume, e.g. `lr--v1.25.0` at runtime commit `09fe4f0`.
+- **Runtime release identity:** the plugin tag and runtime commit users/installers consume, e.g. `lr--v1.25.0` at runtime commit `09fe4f0`. **Derive the recorded runtime commit from the tag**, never from scrollback — see `release-commit-hash-from-tag.md` (the v26 orphaned-SHA incident).
 - **Submission-support metadata:** reviewer-facing files such as `MARKETPLACE.md` and `PRIVACY.md` on `main`; these can exist to support forms without redefining the runtime release.
 - **Verified publication status:** per-engine facts about where the plugin is actually published or validated. Claude Console submission-ready, Codex native repo packaging-ready, and Cursor local `--plugin-dir`-ready are not the same as public marketplace publication.
 
@@ -63,5 +63,7 @@ Before a public submission, run `claude plugin validate --strict`, create/push t
 - `cursor-plugin-distribution-update-model.md` — Cursor update/auto-refresh detail
 - `plugin-distribution.md` — the base distribution overview (Claude/Codex install commands)
 - `plugin-manifest-versioning.md` — the `1.<VERSION>.0` four-manifest discipline; check #19
+- `lore-agents-product-name.md` — the "Lore Agents" product name that fills the `displayName`/description fields
+- `release-commit-hash-from-tag.md` — derive the recorded runtime release commit from the tag, not scrollback
 - `claude-engine-capabilities.md`, `cursor-engine-capabilities.md`, `codex-engine-capabilities.md`
 - `verify-before-acting-on-suspected-bugs.md` — why the Codex packaging gap is a verify-first item

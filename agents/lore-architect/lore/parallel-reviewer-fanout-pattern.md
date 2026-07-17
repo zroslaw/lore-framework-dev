@@ -90,6 +90,19 @@ Each round was tightly scoped to its phase of work.
 
 **Refinement (v13):** plan round 2 deliberately as **a single focused reviewer with filesystem access and the full diff in scope** — not just "more rounds if needed." Round 1 is "find issues per lens" (breadth, parallel, lens-isolated). Round 2 is "verify fixes and catch cross-doc drift" (depth, sequential, full diff). Two distinct jobs.
 
+## Persistent reviewers across rounds via SendMessage (validated variant)
+
+When the reviewers are spawned as **named teammates**, keep the *same* named reviewer agents across rounds and send round N+1 as a `SendMessage` follow-up instead of spawning fresh reviewers. Validated on the 2026-07-17 onboarding/rebrand review (three sonnet teammates — newcomer, AI-installer, editorial — four rounds to convergence on Claude Code):
+
+- **Same agents, follow-up messages.** They retain full context of the files and their own prior findings, so later rounds are fast and focused (no re-reading the tree from scratch).
+- **Feed dispositions back explicitly.** Open each round's brief with a numbered **APPLIED / DECLINED(+reason)** list for that reviewer's previous findings, plus a short digest of *other* lenses' changes that touched their territory. This stops declined taste-calls from resurfacing and re-anchors the reviewer on the delta — no reviewer re-raised a settled item across four rounds.
+- **Route new edits to the owning lens.** When a fix lands in text that is literally that lens's dimension (e.g. an INSTALL preamble is AI-installer territory), send the already-clean installer lens back over just that delta rather than assuming its earlier clean verdict still covers it.
+- **A scoped final round is legitimate.** When the only remaining change is a one-line wording fix in one lens's dimension, a single-reviewer confirmation round closes convergence; the other lenses' clean verdicts remain valid for a tree unchanged in their dimensions.
+- Convergence profile on that run: R1 = 21 findings (17 applied), R2 = 8 (6 applied, **two of them real bugs introduced by R1 fixes** — the fixes-create-seams pattern), R3 = 1, R4 = 0. Consistent with the 2–3-round doc-release norm, stretched by a large R1 batch.
+- Also confirmed on that run: sonnet reviewers **do** run CLIs and slug-check anchors when the brief explicitly instructs it ("you may run `claude plugin --help`", "verify per GitHub anchor rules"). Earlier misses on such catches were briefing gaps, not model-capability gaps — see `ai-installer-review-lens.md` (execute-the-CLI-help brief).
+
+This is the persistent-teammate counterpart to the "Result delivery differs by spawn kind" note above: named teammates don't auto-return, so instruct each to `SendMessage` its findings; the payoff is context that survives across rounds.
+
 ## v15 operational lessons — multi-round convergence
 
 v15 went through **seven rounds** before shipping. Each round caught real issues; convergence was the ship signal. Operational lessons:

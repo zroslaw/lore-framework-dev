@@ -14,6 +14,8 @@ In one session, round 1 found real bugs across all three lenses, but round 2 —
 
 Don't just ask "is this clear" — ask the reviewer to *trace* each instruction against the actual repo (grep for referenced files/commands, check they exist, check the exact wording against the profile doc it's meant to mirror). Cross-checking against the underlying `docs/*.md` / `skills/*/SKILL.md` sources, not just reading the onboarding prose in isolation, is what makes this lens catch execution-fidelity bugs a pure editorial pass misses.
 
+**Executing the CLI's help is part of the brief.** For any install/refresh doc that recommends engine CLI commands, tell the reviewer to *run the CLI's own help* (`claude plugin --help`, `claude plugin marketplace --help`, and the equivalents on other engines) to enumerate the **real** subcommands, rather than trusting the doc's prose. A doc that recommends install commands as the *refresh* path reads as plausible prose no prose-reading reviewer flags — the catch on the INSTALL-CLAUDE refresh bug (`claude-engine-capabilities.md`; re-`install` where `claude plugin update` was meant) came only from running the live help. Briefs must say so explicitly, and sonnet reviewers **do** run CLIs when instructed — the earlier miss was a briefing gap, not a model-capability gap (`persistent-reviewer-rounds` finding in `parallel-reviewer-fanout-pattern.md`).
+
 ## See Also
 
 - `parallel-reviewer-fanout-pattern.md` — the general multi-lens pattern this lens is one entry in.

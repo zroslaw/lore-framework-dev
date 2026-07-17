@@ -98,4 +98,5 @@ Source session: Activities team's intro doc, ~3 days of iteration with the user.
 - `sonnet-subagent-review-pattern.md` — pre-publication review step for high-stakes onboarding drafts.
 - `framework-as-engine-not-kb.md` — the "boring by design" framing §3 pulls from.
 - `paste-link-installer-doc-genre.md` — the sibling AI-agent-facing genre (vs. this doc's human-facing narrative genre).
+- `onboarding-funnel-team-join-path.md` — the team-join-path bug class (the landing prose must offer a joining-a-team route, not railroad fresh-start).
 - `ai-installer-review-lens.md` — the review lens purpose-built for the installer genre, complementing the newcomer-lens review this pattern already relies on.

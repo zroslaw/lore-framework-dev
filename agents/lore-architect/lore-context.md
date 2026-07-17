@@ -118,7 +118,7 @@ How I work, especially at version ships and high-stakes lore edits:
 
 ## Onboarding-Doc Authoring
 
-Co-authoring framework onboarding docs for adopting teams is part of the role. Two distinct genres now exist: **`onboarding-doc-narrative-pattern.md`** (long-form prose pitching a human reader) and **`paste-link-installer-doc-genre.md`** (a doc written *to the AI agent* as the literal installer, meant to be pasted as a link — shipped as `QUICKSTART.md` + per-engine `INSTALL-<ENGINE>.md`). Load the identity-layer framings first, then the toolkit: the two genre topics above, `use-cases-via-parallel-consult-pattern.md`, `terminology-domain-collision-trap.md`, `agent-as-universal-working-environment.md`, `in-flight-skill-teaching-pattern.md`. Pre-ship review for either genre uses `parallel-reviewer-fanout-pattern.md`'s multi-lens fan-out; the installer genre additionally needs the **AI-installer (literal executor)** lens (`ai-installer-review-lens.md`) — it catches execution-fidelity bugs (e.g. `skill-doc-filename-divergence-bug-class.md`) the newcomer/editorial lenses miss. Landing-page placement of a self-referential/meta example differs from long-narrative placement — primacy goes to the strongest CTA; see `onboarding-doc-narrative-pattern.md` § placement note. First instance: the Activities team's intro doc.
+Co-authoring framework onboarding docs for adopting teams is part of the role. Two distinct genres now exist: **`onboarding-doc-narrative-pattern.md`** (long-form prose pitching a human reader) and **`paste-link-installer-doc-genre.md`** (a doc written *to the AI agent* as the literal installer, meant to be pasted as a link — shipped as `QUICKSTART.md` + per-engine `INSTALL-<ENGINE>.md`). Load the identity-layer framings first, then the toolkit: the two genre topics above, `use-cases-via-parallel-consult-pattern.md`, `terminology-domain-collision-trap.md`, `agent-as-universal-working-environment.md`, `in-flight-skill-teaching-pattern.md`. Pre-ship review for either genre uses `parallel-reviewer-fanout-pattern.md`'s multi-lens fan-out; the installer genre additionally needs the **AI-installer (literal executor)** lens (`ai-installer-review-lens.md`) — it catches execution-fidelity bugs (e.g. `skill-doc-filename-divergence-bug-class.md`) the newcomer/editorial lenses miss. Landing-page placement of a self-referential/meta example differs from long-narrative placement — primacy goes to the strongest CTA; see `onboarding-doc-narrative-pattern.md` § placement note. A recurring funnel bug: an author writing from the fresh-start perspective railroads readers into create-your-first-agent and leaves the **team-join path** invisible at every layer (README prose, QUICKSTART, and the INSTALL AI-agent preambles) — check all layers, and keep the fork question verbatim-identical across sites (`onboarding-funnel-team-join-path.md`). Adopter-facing prose carries the product name **"Lore Agents"** while the engine keeps `lore-framework`/`lr` (`lore-agents-product-name.md`). First instance: the Activities team's intro doc.
 
 ## Active Design Explorations
 
@@ -204,8 +204,21 @@ shipped and pushed** in `lore-framework/` (Cursor takeover conversion; commit `c
 `lr--v1.26.0`). **v25** (workspace layer, native Codex packaging, Cursor ops parity) is the prior
 release. See `takeover-feature.md`, `cursor-takeover-batch-pairing.md`, `release-notes/26.md` (plugin tree).
 
+`lore-framework/` `main` is currently **2 commits ahead of origin, deliberately unpushed**, awaiting
+a **v27 ship gate**: `25b1c3c` (onboarding docs — QUICKSTART/FIRST-STEPS/INSTALL-CLAUDE, README
+rework, a `docs/engines/codex.md` invocation-syntax fix) and `84948e8` (the **Lore Agents** rebrand
+across docs + all five manifests, README Get-started three-path/team-join routing, INSTALL refresh +
+self-invoke fixes, MARKETPLACE v26 hash correction to `3909129`). Both carry cache-affecting /
+runtime-behavior changes (manifest `displayName`, the codex.md binding), so at `1.26.0` a
+marketplace-installed user may never re-resolve them. Before push: bump to **v27** (VERSION=27, four
+manifests → `1.27.0`, `release-notes/27.md` with cache-clear footer, `versioning-release-types.md`
+backfill, tag) and run the **full lifecycle suite** (`docs/engines/codex.md` is harness-covered) as
+the pre-push gate. Manifests still read `1.26.0` in the committed tree — the bump belongs to the v27
+ship commit, not retroactively. See `lore-agents-product-name.md`, `plugin-manifest-versioning.md`,
+`cache-clear-footer-convention.md`, `lifecycle-testing-harness.md`.
+
 ## Running Backlog
 
 `framework-improvements-backlog.md` is the canonical list of deferred items; its § "v25 SHIP
 CLOSURE" records the final v25 gate disposition. Quality benchmark tier/probe expansion is now in
-the dev repo with regular/deep matrix defaults and local override support. ~139 lore topics.
+the dev repo with regular/deep matrix defaults and local override support. ~142 lore topics.

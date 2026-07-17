@@ -23,4 +23,5 @@ A doc *about* an agent executing steps reads fine to a human proofreader but can
 - `onboarding-doc-narrative-pattern.md` — the sibling human-facing genre (long-form narrative, different audience and shape).
 - `ai-installer-review-lens.md` — the review lens purpose-built for this genre.
 - `skill-doc-filename-divergence-bug-class.md` — a bug this lens caught in the shipped installer docs.
+- `onboarding-funnel-team-join-path.md` — the team-join-path bug class that recurs in these docs' `## For the AI agent reading this` preambles.
 - `onboarding-doc-narrative-pattern.md` § placement note — a landing-page meta-example placement refinement discovered in the same session, applied to the README that links to these installer docs.
