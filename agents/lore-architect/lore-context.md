@@ -199,23 +199,14 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
 ## Current State
 
 Workspace holds three canonical repos: **`lore-framework/`** (plugin), **`lore-framework-dev/`**
-(this repo — lore-architect lore + drafts), and **`lore-agents/`** (personal agents). **v26 is
-shipped and pushed** in `lore-framework/` (Cursor takeover conversion; commit `ce90f9a`, tag
-`lr--v1.26.0`). **v25** (workspace layer, native Codex packaging, Cursor ops parity) is the prior
-release. See `takeover-feature.md`, `cursor-takeover-batch-pairing.md`, `release-notes/26.md` (plugin tree).
-
-`lore-framework/` `main` is currently **2 commits ahead of origin, deliberately unpushed**, awaiting
-a **v27 ship gate**: `25b1c3c` (onboarding docs — QUICKSTART/FIRST-STEPS/INSTALL-CLAUDE, README
-rework, a `docs/engines/codex.md` invocation-syntax fix) and `84948e8` (the **Lore Agents** rebrand
-across docs + all five manifests, README Get-started three-path/team-join routing, INSTALL refresh +
-self-invoke fixes, MARKETPLACE v26 hash correction to `3909129`). Both carry cache-affecting /
-runtime-behavior changes (manifest `displayName`, the codex.md binding), so at `1.26.0` a
-marketplace-installed user may never re-resolve them. Before push: bump to **v27** (VERSION=27, four
-manifests → `1.27.0`, `release-notes/27.md` with cache-clear footer, `versioning-release-types.md`
-backfill, tag) and run the **full lifecycle suite** (`docs/engines/codex.md` is harness-covered) as
-the pre-push gate. Manifests still read `1.26.0` in the committed tree — the bump belongs to the v27
-ship commit, not retroactively. See `lore-agents-product-name.md`, `plugin-manifest-versioning.md`,
-`cache-clear-footer-convention.md`, `lifecycle-testing-harness.md`.
+(this repo — lore-architect lore + drafts), and **`lore-agents/`** (personal agents). **v27 is
+shipped and pushed** in `lore-framework/` (Lore Agents onboarding/identity pass; commit `b69ee0f`,
+tag `lr--v1.27.0`, manifests `1.27.0`). The v27 gate was explicitly partial: static release
+validation, unit/free tests, and Cursor full lifecycle passed; Claude/Haiku hit account limit and
+Codex `gpt-5.4-mini` ran only the initial boot scenarios before user-approved early ship. Keep
+release notes truthful about completed vs partial gates. See `versioning-release-types.md`,
+`release-notes/27.md` (plugin tree), `lifecycle-testing-harness.md`,
+`lore-agents-product-name.md`, `onboarding-funnel-team-join-path.md`.
 
 ## Running Backlog
 

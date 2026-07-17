@@ -51,6 +51,17 @@ Assertions are structural, matching the design premise: git HEAD before/after, f
 
 Gated behind `LR_LIFECYCLE=1` (real API cost, ~$0.10–1.35 per scenario on sonnet depending on complexity — the multi-step ones like attach, finalize end-to-end, and the dirty-tree-gate walk cost the most). Free layer-1/2 tests (script tests, lint checks) remain ungated and pass in ~4s.
 
+## Claude account-limit signature
+
+Claude Code account-limit exhaustion can masquerade as broad lifecycle breakage. The signature is:
+earlier scenarios run normally with real durations and nonzero costs; then affected scenarios exit
+quickly with code 1, report zero cost, and end with a message like `You've hit your session limit -
+resets 12pm (Asia/Bangkok)`.
+
+When a Claude lifecycle run flips into that pattern, inspect `LR_DEBUG_DIR` captures before treating
+the failures as framework regressions. This is quota/session-limit exhaustion, not evidence that the
+procedure docs suddenly broke.
+
 ## Repo placement
 
 `tests/` sits at the `lore-framework-dev` repo root, not under `agents/lore-architect/` — finalize's Phase 4 commit is scoped to `agents/` only (per `finalize.md` Phase 4 step 1: `git add agents/`), so harness code needs its own separate commit, outside the finalize flow.

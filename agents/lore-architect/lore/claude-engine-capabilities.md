@@ -24,6 +24,10 @@ are written in Claude terms first, and other engines override only the binding p
 - **Plugin cache** — stale-cache behavior and the manifest-version/cache-clear disciplines are real
   Claude operational concerns; see `plugin-manifest-versioning.md`, `cache-clear-footer-convention.md`,
   and `doctor-stale-plugin-cache.md` in the framework.
+- **Lifecycle quota signature** — account/session limit exhaustion in headless lifecycle runs can
+  look like broad scenario failure: quick exit code 1, zero cost, and a final "session limit" message
+  after earlier normal scenarios. Treat that as quota exhaustion and inspect `LR_DEBUG_DIR` before
+  debugging framework behavior. See `lifecycle-testing-harness.md`.
 
 ## Why this hub exists
 
@@ -40,3 +44,4 @@ details living in the linked topics below rather than scattered through multi-en
 - `cache-clear-footer-convention.md`
 - `claude-coupling-inventory-and-port-tiers.md`
 - `engine-session-log-formats.md` — session JSONL location/record types (empirical, v24 takeover work)
+- `lifecycle-testing-harness.md` — Claude lifecycle quota signature and debug discipline
