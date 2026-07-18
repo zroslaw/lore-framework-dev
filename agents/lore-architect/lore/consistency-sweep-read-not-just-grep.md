@@ -26,3 +26,4 @@ A rename changes *names*; a restructure changes *facts*. Names are greppable; fa
 - `canonicalize-testbed-fixes.md` — sibling: a green run is even weaker than a clean grep.
 - `single-canonical-source-discipline.md` — the discipline that *prevents* the restatement drift this rule *detects*.
 - `df-per-repo-backbone.md` — the DF rename/restructure whose sweep produced this lesson.
+- `deterministic-sweep-catches-check-blind-spots.md` — sibling lesson, opposite direction: LLM-alone misses mechanical existence rot at scale, where this topic shows grep-alone misses semantic drift.

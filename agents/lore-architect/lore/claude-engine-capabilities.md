@@ -20,7 +20,7 @@ are written in Claude terms first, and other engines override only the binding p
   into `.claude/commands/lr-<agent>-agent.md`.
 - **Subagent model** — the shared procedure docs' default fan-out language describes Claude's
   `Agent` path; Codex and Cursor override from there.
-- **Memory file** — `CLAUDE.md`.
+- **Memory file** — `CLAUDE.md`. On case-insensitive APFS (the macOS default), this collides with any lowercase `claude.md` under a directory Claude reads — the memory auto-injection matches filenames case-insensitively. See `macos-case-insensitive-filename-collision-with-memory-files.md`.
 - **Plugin cache** — stale-cache behavior and the manifest-version/cache-clear disciplines are real
   Claude operational concerns; see `plugin-manifest-versioning.md`, `cache-clear-footer-convention.md`,
   and `doctor-stale-plugin-cache.md` in the framework.
@@ -45,3 +45,4 @@ details living in the linked topics below rather than scattered through multi-en
 - `claude-coupling-inventory-and-port-tiers.md`
 - `engine-session-log-formats.md` — session JSONL location/record types (empirical, v24 takeover work)
 - `lifecycle-testing-harness.md` — Claude lifecycle quota signature and debug discipline
+- `macos-case-insensitive-filename-collision-with-memory-files.md` — the case-insensitive collision between the memory file and `docs/engines/claude.md`

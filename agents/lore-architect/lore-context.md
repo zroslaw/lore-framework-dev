@@ -94,7 +94,7 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Consistency & Diagnostics
 
-- **`/lr:check`** — 23 content-consistency checks (descriptor/version, structure, references, size/state, drift, four-manifest #19, migration write-paths #20, cursor-tree parity #21, workspace-layer checks #22–23). See `consistency-checks.md`.
+- **`/lr:check`** — 23 content-consistency checks (descriptor/version, structure, references, size/state, drift, four-manifest #19, migration write-paths #20, cursor-tree parity #21, workspace-layer checks #22–23). At scale, prefer a deterministic script-based sweep for the mechanical subset (existence/version/glob checks) over an LLM read-through — checks #9–10 alone missed 14 dangling references in a 147-topic graph. See `consistency-checks.md`.
 - **`/lr:doctor`** — diagnoses runtime/environmental issues that escape content checks (esp. stale plugin cache) via an accreting ailment catalog. See `ailment-catalog-pattern.md`.
 
 ## Operating Disciplines
@@ -208,8 +208,17 @@ release notes truthful about completed vs partial gates. See `versioning-release
 `release-notes/27.md` (plugin tree), `lifecycle-testing-harness.md`,
 `lore-agents-product-name.md`, `onboarding-funnel-team-join-path.md`.
 
-## Running Backlog
+## Running Backlog & Standing Improvement List
 
 `framework-improvements-backlog.md` is the canonical list of deferred items; its § "v25 SHIP
 CLOSURE" records the final v25 gate disposition. Quality benchmark tier/probe expansion is now in
-the dev repo with regular/deep matrix defaults and local override support. ~142 lore topics.
+the dev repo with regular/deep matrix defaults and local override support. ~150 lore topics.
+
+**`workdir/what-to-improve.md`** is the **standing prioritized improvement list** — a ranked
+action view over the backlog that must always exist, not a one-off review deliverable
+(user-established practice, 2026-07-18). Reread it at the start of every framework-work session;
+refresh it at each architecture review. Last refresh 2026-07-18: A-tier verified inconsistencies
+(script-backed `/lr:check` core + reference-rot cleanup first), B-tier backlog promotions (merge
+verification, staleness surfacing, trust model), C-tier feature directions (ambient recall,
+`/lr:note`, lore MCP server). See `standing-improvement-list-practice.md` for the refresh
+protocol, backlog relationship, and tiering convention.

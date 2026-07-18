@@ -53,6 +53,8 @@
 
 **Candidate check (not yet implemented):** a version-history-completeness check — assert `versioning-release-types.md` has a history entry for every `release-notes/<N>.md` / `migrations/<N>.md` on disk. Surfaced by the v21 gap (both v20 and v21 entries were missing, the backfill discipline having silently slipped at v20). Would make the version-history-backfill discipline self-healing instead of relying on per-ship diligence. See `versioning-release-types.md` § Backfill discipline.
 
+**Execution-reliability gap (2026-07-18):** checks like #9–10 are specified as procedures for an LLM to execute directly, but at scale an LLM read-through under-extracts — a deterministic script-based sweep of this agent's own 147-topic graph found 14 unresolved references that a prior clean `/lr:check` run had missed. The gap isn't the check's definition, it's the execution method: mechanical existence/version/glob checks (roughly #2–3, #9–11, #13–14, #19–21) are more reliably run by a script than read by an LLM at this scale; reserve LLM judgment for the genuinely semantic checks (#15–16). See `deterministic-sweep-catches-check-blind-spots.md`, `framework-improvements-backlog.md`.
+
 Key principle: git history is the metadata layer for temporal checks — no embedded timestamps in files.
 
 ## See Also
@@ -63,3 +65,4 @@ Key principle: git history is the metadata layer for temporal checks — no embe
 - `plugin-compat-template-audit.md` — check 18 (legacy sibling-path boot commands)
 - `framework-improvements-backlog.md` — check #19 graceful-skip-on-missing-`marketplace.json` follow-up
 - `dirty-tree-gates-write-vs-read-distinction.md` — the v15 write-set discipline check #20 enforces
+- `deterministic-sweep-catches-check-blind-spots.md` — the 2026-07-18 script-based sweep that found the execution-reliability gap firsthand
