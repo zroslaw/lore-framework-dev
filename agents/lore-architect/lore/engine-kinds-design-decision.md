@@ -1,7 +1,7 @@
 # Lore Beings engine `kind` — design decision
 
 Decision: Lore Beings' single hardcoded claude-shaped `spawn_session` invocation is replaced by
-per-engine **`kind`** (`ENGINE_KINDS = ("claude", "codex")`), each with its own invocation argv and
+per-engine **`kind`** (`ENGINE_KINDS = ("claude", "codex", "cursor")`), each with its own invocation argv and
 result-parsing contract, selected at `lrb engines add` (defaults to the engine name if the name is
 itself a known kind, else `claude`).
 

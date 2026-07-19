@@ -30,6 +30,7 @@ FRAMEWORK_DIR = os.environ.get("LR_FRAMEWORK_DIR") or os.path.abspath(
 LRB = os.path.join(FRAMEWORK_DIR, "scripts", "lrb.py")
 STUB = os.path.join(os.path.dirname(__file__), "fixtures", "stub_engine.py")
 STUB_CODEX = os.path.join(os.path.dirname(__file__), "fixtures", "stub_codex_engine.py")
+STUB_CURSOR = os.path.join(os.path.dirname(__file__), "fixtures", "stub_cursor_engine.py")
 
 
 def load_lrb_module():
@@ -71,7 +72,8 @@ class LrbTestCase(unittest.TestCase):
         os.environ["LRB_HOME"] = self.home
         os.environ["LRB_LAUNCHAGENTS_DIR"] = self.launchagents
         for k in ("STUB_COST", "STUB_IS_ERROR", "STUB_SLEEP_SECONDS", "STUB_RESULT_TEXT", "STUB_CRASH",
-                  "STUB_CODEX_FAIL", "STUB_CODEX_SLEEP_SECONDS"):
+                  "STUB_CODEX_FAIL", "STUB_CODEX_SLEEP_SECONDS",
+                  "STUB_CURSOR_FAIL", "STUB_CURSOR_SLEEP_SECONDS"):
             os.environ.pop(k, None)
         self.workspace = os.path.join(self.tmp, "workspace")
         os.makedirs(self.workspace)
@@ -80,7 +82,8 @@ class LrbTestCase(unittest.TestCase):
         shutil.rmtree(self.tmp, ignore_errors=True)
         for k in ("LRB_HOME", "LRB_LAUNCHAGENTS_DIR", "STUB_COST", "STUB_IS_ERROR",
                   "STUB_SLEEP_SECONDS", "STUB_RESULT_TEXT", "STUB_CRASH",
-                  "STUB_CODEX_FAIL", "STUB_CODEX_SLEEP_SECONDS"):
+                  "STUB_CODEX_FAIL", "STUB_CODEX_SLEEP_SECONDS",
+                  "STUB_CURSOR_FAIL", "STUB_CURSOR_SLEEP_SECONDS"):
             os.environ.pop(k, None)
 
     NEVER_SCHEDULE = "0 0 1 1 *"  # Jan 1 00:00 — effectively never due during a test run
@@ -1237,6 +1240,89 @@ class TestCodexEngineKind(LrbTestCase):
         self.assertEqual(len(state["beings"][being_id]["running"]), 0)
 
 
+class TestCursorEngineKind(LrbTestCase):
+    """Engines of kind 'cursor' use cursor-agent argv (--plugin-dir, --workspace,
+    --trust, optional --force --sandbox disabled) and a claude-shaped JSON result
+    contract with optional flat-cost fallback when total_cost_usd is absent."""
+
+    def cursor_cfg(self, plugin_dir=None, session_cost_usd=None, permission_mode="default"):
+        if plugin_dir is None:
+            plugin_dir = FRAMEWORK_DIR
+        eng = {
+            "command": STUB_CURSOR,
+            "permission_mode": permission_mode,
+            "kind": "cursor",
+            "plugin_dir": plugin_dir,
+        }
+        if session_cost_usd is not None:
+            eng["session_cost_usd"] = session_cost_usd
+        return {"workspaces": [self.workspace], "engines": {"stub": eng}}
+
+    def _wait_until(self, predicate, timeout=5.0, interval=0.1):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if predicate():
+                return True
+            time.sleep(interval)
+        return predicate()
+
+    def _run_to_completion(self, keeper, cfg, being_id):
+        keeper.tick(cfg)
+
+        def finished():
+            keeper.tick(cfg)
+            return len(lrb.load_state(self.workspace)["beings"][being_id]["running"]) == 0
+
+        self.assertTrue(self._wait_until(finished, timeout=10))
+        with open(lrb.ledger_path(self.workspace, being_id)) as f:
+            return [json.loads(l) for l in f if l.strip()]
+
+    def test_cursor_kind_ok_charges_reported_cost_and_records_usage(self):
+        being_id = self.make_being(daily_usd=1.0, schedule=self.this_minute_cron())
+        os.environ["STUB_COST"] = "0.18"
+        lines = self._run_to_completion(lrb.Keeper(), self.cursor_cfg(), being_id)
+        done = [l for l in lines if l["outcome"] == "ok"]
+        self.assertEqual(len(done), 1)
+        self.assertAlmostEqual(done[0]["cost_usd"], 0.18, places=4)
+        self.assertEqual(done[0]["usage"]["output_tokens"], 12)
+        state = lrb.load_state(self.workspace)
+        self.assertAlmostEqual(state["beings"][being_id]["spent_today_usd"], 0.18, places=4)
+
+    def test_cursor_kind_flat_fallback_when_no_reported_cost(self):
+        being_id = self.make_being(daily_usd=1.0, schedule=self.this_minute_cron())
+        os.environ["STUB_COST"] = "none"
+        lines = self._run_to_completion(lrb.Keeper(), self.cursor_cfg(session_cost_usd=0.12), being_id)
+        done = [l for l in lines if l["outcome"] == "ok"]
+        self.assertEqual(len(done), 1)
+        self.assertAlmostEqual(done[0]["cost_usd"], 0.12, places=4)
+
+    def test_cursor_kind_error_outcome(self):
+        being_id = self.make_being(daily_usd=1.0, schedule=self.this_minute_cron())
+        os.environ["STUB_IS_ERROR"] = "1"
+        lines = self._run_to_completion(lrb.Keeper(), self.cursor_cfg(), being_id)
+        errs = [l for l in lines if l["outcome"] == "error"]
+        self.assertEqual(len(errs), 1)
+
+    def test_cursor_missing_plugin_dir_fails_to_spawn(self):
+        being_id = self.make_being(daily_usd=1.0, schedule=self.this_minute_cron())
+        cfg = self.cursor_cfg()
+        cfg["engines"]["stub"].pop("plugin_dir")
+        lrb.Keeper().tick(cfg)
+        lines = []
+        with open(lrb.ledger_path(self.workspace, being_id)) as f:
+            lines = [json.loads(l) for l in f if l.strip()]
+        self.assertTrue(any(l.get("outcome") == "failed-to-spawn" for l in lines))
+        self.assertEqual(len(lrb.load_state(self.workspace)["beings"][being_id]["running"]), 0)
+
+    def test_require_plugin_dir_validates_framework_root(self):
+        with self.assertRaises(ValueError):
+            lrb.require_plugin_dir("/no/such/path")
+        with self.assertRaises(ValueError):
+            lrb.require_plugin_dir(self.tmp)
+        self.assertEqual(lrb.require_plugin_dir(FRAMEWORK_DIR),
+                         os.path.abspath(FRAMEWORK_DIR))
+
+
 class TestCliSubprocess(LrbTestCase):
     """A thin end-to-end slice through the actual `lrb` CLI as a subprocess,
     matching how a real being (or a human) invokes it — not just internal
@@ -1284,11 +1370,30 @@ class TestCliSubprocess(LrbTestCase):
         self.run_lrb("install")
         r = self.run_lrb("engines", "add", "stub", "--command", STUB, "--session-cost-usd", "0.10")
         self.assertNotEqual(r.returncode, 0)
-        self.assertIn("only applies to kind 'codex'", r.stderr)
+        self.assertIn("only applies to kind", r.stderr)
         # and a plain add still defaults to the claude-shaped contract
         r = self.run_lrb("engines", "add", "stub", "--command", STUB)
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(lrb.load_config()["engines"]["stub"]["kind"], "claude")
+
+    def test_engines_add_cursor_kind_requires_plugin_dir(self):
+        self.run_lrb("install")
+        r = self.run_lrb("engines", "add", "cursor", "--command", STUB_CURSOR)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("plugin-dir", r.stderr)
+        r = self.run_lrb("engines", "add", "cursor", "--command", STUB_CURSOR,
+                          "--plugin-dir", FRAMEWORK_DIR)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        cfg = lrb.load_config()
+        self.assertEqual(cfg["engines"]["cursor"]["kind"], "cursor")
+        self.assertEqual(cfg["engines"]["cursor"]["plugin_dir"], os.path.abspath(FRAMEWORK_DIR))
+
+    def test_engines_add_rejects_plugin_dir_for_claude_kind(self):
+        self.run_lrb("install")
+        r = self.run_lrb("engines", "add", "stub", "--command", STUB,
+                          "--plugin-dir", FRAMEWORK_DIR)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("only applies to kind 'cursor'", r.stderr)
 
     def test_schedule_requires_registered_workspace(self):
         self.run_lrb("install")
