@@ -29,6 +29,7 @@ FRAMEWORK_DIR = os.environ.get("LR_FRAMEWORK_DIR") or os.path.abspath(
 )
 LRB = os.path.join(FRAMEWORK_DIR, "scripts", "lrb.py")
 STUB = os.path.join(os.path.dirname(__file__), "fixtures", "stub_engine.py")
+STUB_CODEX = os.path.join(os.path.dirname(__file__), "fixtures", "stub_codex_engine.py")
 
 
 def load_lrb_module():
@@ -69,7 +70,8 @@ class LrbTestCase(unittest.TestCase):
         self.launchagents = os.path.join(self.tmp, "launchagents")
         os.environ["LRB_HOME"] = self.home
         os.environ["LRB_LAUNCHAGENTS_DIR"] = self.launchagents
-        for k in ("STUB_COST", "STUB_IS_ERROR", "STUB_SLEEP_SECONDS", "STUB_RESULT_TEXT", "STUB_CRASH"):
+        for k in ("STUB_COST", "STUB_IS_ERROR", "STUB_SLEEP_SECONDS", "STUB_RESULT_TEXT", "STUB_CRASH",
+                  "STUB_CODEX_FAIL", "STUB_CODEX_SLEEP_SECONDS"):
             os.environ.pop(k, None)
         self.workspace = os.path.join(self.tmp, "workspace")
         os.makedirs(self.workspace)
@@ -77,7 +79,8 @@ class LrbTestCase(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
         for k in ("LRB_HOME", "LRB_LAUNCHAGENTS_DIR", "STUB_COST", "STUB_IS_ERROR",
-                  "STUB_SLEEP_SECONDS", "STUB_RESULT_TEXT", "STUB_CRASH"):
+                  "STUB_SLEEP_SECONDS", "STUB_RESULT_TEXT", "STUB_CRASH",
+                  "STUB_CODEX_FAIL", "STUB_CODEX_SLEEP_SECONDS"):
             os.environ.pop(k, None)
 
     NEVER_SCHEDULE = "0 0 1 1 *"  # Jan 1 00:00 — effectively never due during a test run
@@ -1149,6 +1152,91 @@ class TestKeeperIntegration(LrbTestCase):
             return False
 
 
+class TestCodexEngineKind(LrbTestCase):
+    """Engines of kind 'codex' use a different invocation (exec --json
+    --skip-git-repo-check -m M PROMPT), a JSONL result contract
+    (turn.completed/turn.failed), and a flat per-session USD charge instead
+    of a reported cost. The codex stub VERIFIES the argv shape itself — a
+    drift from the real codex CLI contract surfaces as a failed session."""
+
+    def codex_cfg(self, session_cost_usd=0.25):
+        return {
+            "workspaces": [self.workspace],
+            "engines": {"stub": {"command": STUB_CODEX, "permission_mode": "default",
+                                  "kind": "codex", "session_cost_usd": session_cost_usd}},
+        }
+
+    def _wait_until(self, predicate, timeout=5.0, interval=0.1):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if predicate():
+                return True
+            time.sleep(interval)
+        return predicate()
+
+    def _run_to_completion(self, keeper, cfg, being_id):
+        keeper.tick(cfg)
+
+        def finished():
+            keeper.tick(cfg)
+            return len(lrb.load_state(self.workspace)["beings"][being_id]["running"]) == 0
+
+        self.assertTrue(self._wait_until(finished, timeout=10))
+        with open(lrb.ledger_path(self.workspace, being_id)) as f:
+            return [json.loads(l) for l in f if l.strip()]
+
+    def test_codex_kind_ok_charges_flat_cost_and_records_usage(self):
+        being_id = self.make_being(daily_usd=1.0, schedule=self.this_minute_cron())
+        lines = self._run_to_completion(lrb.Keeper(), self.codex_cfg(0.25), being_id)
+        done = [l for l in lines if l["outcome"] == "ok"]
+        self.assertEqual(len(done), 1)  # argv-contract violations would surface as turn.failed/error
+        self.assertAlmostEqual(done[0]["cost_usd"], 0.25, places=4)
+        self.assertEqual(done[0]["usage"]["output_tokens"], 20)
+        state = lrb.load_state(self.workspace)
+        self.assertAlmostEqual(state["beings"][being_id]["spent_today_usd"], 0.25, places=4)
+
+    def test_codex_kind_failure_is_error_and_still_charged(self):
+        being_id = self.make_being(daily_usd=1.0, schedule=self.this_minute_cron())
+        os.environ["STUB_CODEX_FAIL"] = "1"
+        lines = self._run_to_completion(lrb.Keeper(), self.codex_cfg(0.25), being_id)
+        errs = [l for l in lines if l["outcome"] == "error"]
+        self.assertEqual(len(errs), 1)
+        self.assertAlmostEqual(errs[0]["cost_usd"], 0.25, places=4)
+        state = lrb.load_state(self.workspace)
+        self.assertAlmostEqual(state["beings"][being_id]["spent_today_usd"], 0.25, places=4)
+
+    def test_codex_flat_cost_trips_the_daily_gate(self):
+        # daily-usd 0.20 with a 0.25/session flat rate: the first session
+        # overshoots and exhausts the budget (spent 0.25 >= cap 0.20 — the
+        # documented spawn-gate overshoot), so a second (outbox) spawn must
+        # be refused.
+        being_id = self.make_being(daily_usd=0.20, schedule=self.this_minute_cron())
+        keeper = lrb.Keeper()
+        cfg = self.codex_cfg(0.25)
+        self._run_to_completion(keeper, cfg, being_id)
+        soon = (datetime.now() + timedelta(seconds=1)).isoformat(timespec="seconds")
+        lrb.write_outbox_request(self.workspace, being_id, soon, 5, "one more")
+        time.sleep(1.1)
+        keeper.tick(cfg)
+        rejected = os.listdir(lrb.outbox_rejected_dir(self.workspace))
+        self.assertEqual(len(rejected), 1)
+        with open(os.path.join(lrb.outbox_rejected_dir(self.workspace), rejected[0])) as f:
+            self.assertIn("budget", json.load(f)["rejected_reason"])
+
+    def test_unknown_engine_kind_fails_to_spawn_visibly(self):
+        being_id = self.make_being(daily_usd=1.0, schedule=self.this_minute_cron())
+        cfg = self.codex_cfg()
+        cfg["engines"]["stub"]["kind"] = "gemini"  # hand-edited config, unknown contract
+        keeper = lrb.Keeper()
+        keeper.tick(cfg)
+        with open(lrb.ledger_path(self.workspace, being_id)) as f:
+            lines = [json.loads(l) for l in f if l.strip()]
+        self.assertEqual(lines[-1]["outcome"], "failed-to-spawn")
+        self.assertIn("unknown engine kind", lines[-1]["error"])
+        state = lrb.load_state(self.workspace)
+        self.assertEqual(len(state["beings"][being_id]["running"]), 0)
+
+
 class TestCliSubprocess(LrbTestCase):
     """A thin end-to-end slice through the actual `lrb` CLI as a subprocess,
     matching how a real being (or a human) invokes it — not just internal
@@ -1177,6 +1265,30 @@ class TestCliSubprocess(LrbTestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         out = json.loads(r.stdout)
         self.assertIn(os.path.realpath(self.workspace), out["workspaces"])
+
+    def test_engines_add_codex_kind_requires_session_cost(self):
+        self.run_lrb("install")
+        # Engine NAMED codex defaults to kind codex — and codex reports no
+        # USD, so a flat session cost is mandatory for the spawn gate.
+        r = self.run_lrb("engines", "add", "codex", "--command", STUB_CODEX)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("session-cost-usd", r.stderr)
+        r = self.run_lrb("engines", "add", "codex", "--command", STUB_CODEX,
+                          "--session-cost-usd", "0.10")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        cfg = lrb.load_config()
+        self.assertEqual(cfg["engines"]["codex"]["kind"], "codex")
+        self.assertAlmostEqual(cfg["engines"]["codex"]["session_cost_usd"], 0.10, places=4)
+
+    def test_engines_add_rejects_session_cost_for_claude_kind(self):
+        self.run_lrb("install")
+        r = self.run_lrb("engines", "add", "stub", "--command", STUB, "--session-cost-usd", "0.10")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("only applies to kind 'codex'", r.stderr)
+        # and a plain add still defaults to the claude-shaped contract
+        r = self.run_lrb("engines", "add", "stub", "--command", STUB)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(lrb.load_config()["engines"]["stub"]["kind"], "claude")
 
     def test_schedule_requires_registered_workspace(self):
         self.run_lrb("install")
