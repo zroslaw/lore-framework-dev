@@ -88,4 +88,5 @@ This substrate design remains valid as a fallback or deeper integration path if 
 - `autonomous-agents-vision.md` — the framework-direction vision this substrate would implement
 - `spawn-teammate-feature.md` — the Agent Teams path chosen experimentally over this substrate
 - `wait-primitive-feature.md` — the v18 `lr-wait` primitive; first shipped inbound-signal building block of this substrate
+- `agent-being-consciousness-substrate-split.md` — the switchboard daemon sketched here is the precedent generalized by the 2026-07-19 Agent Beings supervisor: deterministic substrate, never an LLM, for scheduling/spawning/monitoring/budget
 - `framework-improvements-backlog.md` — running backlog tracking this direction

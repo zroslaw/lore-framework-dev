@@ -40,3 +40,4 @@ It's also the prose-density form of `soft-skill-follow-me-mode.md` — over-list
 - `soft-skill-follow-me-mode.md` — the same restraint principle in working-style form.
 - `feedback-confirm-before-writing-lore.md` — same family (corrective: don't over-do when the user is still steering).
 - `feedback-don-t-defer-completable-scope.md` — adjacent precision-discipline feedback (over-listing and under-shipping are different sides of the same imprecision).
+- `feedback-layered-decomposition-for-open-ended-asks.md` — the open-ended-ask variant: for a broad/aspirational ask (not an option-menu or a concept question), the win is naming hidden axes and sequencing by dependency, not just trimming length.

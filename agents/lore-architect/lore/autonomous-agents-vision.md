@@ -37,7 +37,7 @@ Likely to compose well with:
 - How does the framework express "this agent is autonomous" vs "this agent is interactive only"? Per-agent flag in `role.md` frontmatter? Per-invocation?
 - How does a user **adopt** a running autonomous agent into their interactive session — is that just `/lr:attach` extended, or a new `/lr:resume`?
 - Concurrency: can two user sessions interact with the same autonomous agent simultaneously? How do lore writes serialize?
-- Cost / loop safety: an autonomous agent that loops can burn through API budget silently. Need budget caps and a kill switch.
+- ~~Cost / loop safety: an autonomous agent that loops can burn through API budget silently. Need budget caps and a kill switch.~~ **Resolved in principle (2026-07-19)** by the consciousness/substrate split: budget caps and the kill switch live in a deterministic supervisor daemon, never in the LLM reasoning loop itself — see `agent-being-consciousness-substrate-split.md`. Still open: the supervisor's concrete implementation (scheduling, spawn mechanism, budget accounting) — see the Agent Beings capture in `framework-improvements-backlog.md` § Major Directions § Autonomous Agents / Agent Beings.
 - Does this require Anthropic's hosted "Managed Agents" / Claude Agent SDK as the runtime, or is local Claude Code the substrate?
 
 ## See Also
@@ -46,6 +46,7 @@ Likely to compose well with:
 - `df-per-repo-backbone.md` — the per-repo `<repo>-df` backbone the Dark Factory runs on; the storage/state layer this autonomous-substrate direction will eventually accrete run/task state onto (the parked "above-file layers").
 - `autonomous-agents-substrate.md` — concrete substrate findings (tmux, iTerm2 Python API, Claude Code hooks, escape sequences, switchboard daemon, security boundaries)
 - `wait-primitive-feature.md` — the v18 `lr-wait` primitive; the first concrete inbound-signal step of this direction
+- `agent-being-consciousness-substrate-split.md` — the 2026-07-19 sharpening: agent = LLM consciousness + deterministic supervisor substrate; resolves the cost/loop-safety open question above
 - `workdir-as-reference-library.md` — another parked exploration; composes with this direction
 - `attach-pattern.md` — current cross-agent collaboration mechanism that autonomous mode will need to extend
 - `framework-improvements-backlog.md` — running backlog where this direction is tracked
