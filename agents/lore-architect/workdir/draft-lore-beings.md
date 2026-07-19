@@ -97,7 +97,7 @@ Standing guidance I read every time I wake up:
 - A good day: the diary honestly records what happened in the workspace today.
 ```
 
-Five frontmatter keys total. Notes:
+Five frontmatter keys total; unexpected top-level or task keys are config errors. Notes:
 - Frontmatter-on-descriptor-files is the existing convention (`lore-repo.md`,
   `role.md`); no new file-format rule.
 - Schedules are plain cron in **machine-local time** — the Keeper runs on the user's
@@ -111,6 +111,9 @@ Five frontmatter keys total. Notes:
   "config error" in status. Never silently substitute. The tier/preference-list
   system (portable `model-tier` + `models.json` mapping + ordered fallback) is
   deferred until a second engine actually ships (§15).
+- Task `name` values are safe slugs because they become log filename components; task
+  `prompt` paths are relative to the agent directory and may not escape it. `daily-usd`
+  must be finite and nonnegative; `timeout-minutes` must be between 1 and 1440.
 - The file is team-shared and versioned like everything else. Consequence: a
   teammate's push can change a being's lifecycle; the Keeper enforces whatever the
   current contract says — which is exactly why the cap lives here and why the being
@@ -160,11 +163,12 @@ copy on update. A daemon must not live inside any of them. So:
   `lr-wait` path).
 - **Installed copy:** `~/.lore-beings/` — the stable machine home launchd points at.
   `lrb install` (runnable from any engine's plugin copy) copies the script there,
-  writes the launchd plist, loads it.
-- **Update:** re-run `lrb install` after a framework update → re-copy + restart the
-  daemon. A running daemon doesn't notice its source changed; the installed version is
-  shown in `lrb status`, so drift is visible. (`/lr:doctor` should learn this
-  symptom.)
+  and writes the launchd plist. It loads/restarts the persistent launchd job only when
+  run with the explicit `--launchd` flag.
+- **Update:** re-run `lrb install --launchd` after a framework update → re-copy +
+  restart the daemon. A running daemon doesn't notice its source changed; the installed
+  version is shown in `lrb status`, so drift is visible. (`/lr:doctor` should learn
+  this symptom.)
 - **launchd model:** one entry, `KeepAlive` — launchd's job is only "keep this one
   program running" (start at login, restart on crash). All scheduling intelligence is
   inside the Keeper. Linux later = a small systemd unit, same shape.
@@ -239,8 +243,8 @@ non-recomputable minimum:
   holds pending one-shots.
 
 Workspace state dir: `state.json`, `outbox/` (+ `accepted/`, `rejected/`, `done/`),
-`logs/` (per-session log + result JSON + per-being ledger: one line per finished
-session — task, duration, cost, outcome).
+`logs/` (per-session stdout log containing the final JSON result, sibling stderr log,
+and per-being ledger: one line per finished session — task, duration, cost, outcome).
 
 ## 7. Engines & permissions — explicit configuration, never detection
 
