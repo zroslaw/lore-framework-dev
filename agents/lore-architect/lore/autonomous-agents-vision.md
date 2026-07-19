@@ -1,6 +1,6 @@
 # Autonomous Lore Agents — Vision
 
-Active design exploration (parked, not decided). User-articulated vision (2026-04-26): lore agents should evolve into **autonomous background agents**. The shape:
+Active design exploration (design settled 2026-07-19 as **Lore Beings** — see `lore-beings-design.md`; nothing shipped yet). User-articulated vision (2026-04-26): lore agents should evolve into **autonomous background agents**. The shape:
 
 - Agents run continuously in the background, not only when the user is interacting with them.
 - The user kicks off an agent with a task; the agent works on it independently across time.
@@ -21,7 +21,9 @@ This is a **major architectural direction**, not a minor feature. It implies:
 
 ## Status
 
-Parked exploration. Substrate findings (tools, APIs, protocols) captured separately in `autonomous-agents-substrate.md`. No design doc yet.
+Active major direction. Substrate findings (tools, APIs, protocols) captured separately in `autonomous-agents-substrate.md`.
+
+**Design settled (2026-07-19): Lore Beings.** The beings shape of this vision — a being (`being.md` descriptor) with existential tasks, run by the deterministic **Being Keeper** daemon — was agreed in a design dialogue and is ready for an MVP build (first being: the Chronicler). Anchor: `lore-beings-design.md`; full design: `workdir/draft-lore-beings.md`. Nothing shipped yet.
 
 **Concrete first step taken (v10):** `/lr:spawn-teammate` uses Claude Code's Agent Teams feature as the initial multi-agent substrate. The user framing: "I'll use that command for some time and check how it fits our needs." The custom tmux/iTerm2 substrate is parked but remains valid if Agent Teams proves insufficient. See `spawn-teammate-feature.md` and `autonomous-agents-substrate.md`.
 
@@ -33,12 +35,15 @@ Likely to compose well with:
 
 ## Open questions
 
-- Where does an autonomous agent live? Inside an iTerm2 session backed by tmux? A headless `claude` invocation under `launchd`? A cloud runner?
-- How does the framework express "this agent is autonomous" vs "this agent is interactive only"? Per-agent flag in `role.md` frontmatter? Per-invocation?
-- How does a user **adopt** a running autonomous agent into their interactive session — is that just `/lr:attach` extended, or a new `/lr:resume`?
-- Concurrency: can two user sessions interact with the same autonomous agent simultaneously? How do lore writes serialize?
-- ~~Cost / loop safety: an autonomous agent that loops can burn through API budget silently. Need budget caps and a kill switch.~~ **Resolved in principle (2026-07-19)** by the consciousness/substrate split: budget caps and the kill switch live in a deterministic supervisor daemon, never in the LLM reasoning loop itself — see `agent-being-consciousness-substrate-split.md`. Still open: the supervisor's concrete implementation (scheduling, spawn mechanism, budget accounting) — see the Agent Beings capture in `framework-improvements-backlog.md` § Major Directions § Autonomous Agents / Agent Beings.
-- Does this require Anthropic's hosted "Managed Agents" / Claude Agent SDK as the runtime, or is local Claude Code the substrate?
+Most of the original open questions are answered by the settled Lore Beings design (`lore-beings-design.md`, detail in `workdir/draft-lore-beings.md`):
+
+- ~~Where does an autonomous agent live?~~ **Settled:** headless engine sessions spawned by the machine-level Being Keeper daemon under `launchd` (`~/.lore-beings/`). No iTerm2/tmux dependency; no cloud runner required.
+- ~~How does the framework express "this agent is autonomous"?~~ **Settled:** the presence of `agents/<name>/being.md` makes an agent a being; being-ness is additive — the agent stays fully usable interactively.
+- ~~Concurrency / serialization~~ **Settled for MVP (deliberately relaxed):** no per-being locks, parallel sessions allowed (even same being), one machine-wide concurrency cap (~3) as fork-bomb guard; fail visibly, learn first.
+- ~~Cost / loop safety~~ **Resolved in principle (2026-07-19)** by the consciousness/substrate split — budget caps and the kill switch live in the deterministic Being Keeper, never in the LLM reasoning loop (`agent-being-consciousness-substrate-split.md`); concretized in the design as dollar-primary budgets + wall-clock fallback.
+- ~~Managed Agents / Agent SDK as runtime?~~ **Settled:** local engines are the substrate — explicitly user-configured (`lrb engines add`), never auto-detected.
+
+Still genuinely open (deferred seams, not decided — see draft §15): how a user **adopts** a running being's session into interactive work (`/lr:attach` extended vs something new), and the broader agent → user communication surface (status/notification channels beyond logs).
 
 ## See Also
 
@@ -46,6 +51,7 @@ Likely to compose well with:
 - `df-per-repo-backbone.md` — the per-repo `<repo>-df` backbone the Dark Factory runs on; the storage/state layer this autonomous-substrate direction will eventually accrete run/task state onto (the parked "above-file layers").
 - `autonomous-agents-substrate.md` — concrete substrate findings (tmux, iTerm2 Python API, Claude Code hooks, escape sequences, switchboard daemon, security boundaries)
 - `wait-primitive-feature.md` — the v18 `lr-wait` primitive; the first concrete inbound-signal step of this direction
+- `lore-beings-design.md` — the settled Lore Beings design (2026-07-19) that concretizes this vision; full design in `workdir/draft-lore-beings.md`
 - `agent-being-consciousness-substrate-split.md` — the 2026-07-19 sharpening: agent = LLM consciousness + deterministic supervisor substrate; resolves the cost/loop-safety open question above
 - `workdir-as-reference-library.md` — another parked exploration; composes with this direction
 - `attach-pattern.md` — current cross-agent collaboration mechanism that autonomous mode will need to extend

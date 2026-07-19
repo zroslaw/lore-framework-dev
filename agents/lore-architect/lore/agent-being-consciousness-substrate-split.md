@@ -1,6 +1,6 @@
 # Agent Being = LLM Consciousness + Deterministic Supervisor Substrate
 
-Named principle surfaced during the 2026-07-19 "Agent Beings" brainstorm (see `framework-improvements-backlog.md` § Major Directions § Autonomous Agents / Agent Beings for the full capture — being definitions, existential tasks, supervisor sketch).
+Named principle surfaced during the 2026-07-19 "Agent Beings" brainstorm. The direction has since settled its design and naming (same day, design dialogue): the module is **Lore Beings**, the supervisor daemon is the **Being Keeper** — see `lore-beings-design.md` (anchor) and `workdir/draft-lore-beings.md` (full agreed design). This topic keeps its original filename; the principle it names is unchanged and governs that design.
 
 ## The principle
 
@@ -14,11 +14,11 @@ This also resolves the framework's oldest open question in this space cheaply: "
 
 ## Diagnostic
 
-When designing any piece of the autonomous-agents / Agent Beings direction, ask: is this judgment (route to LLM) or is this enforcement/bookkeeping (route to the deterministic supervisor)? Existential-task *content* (what to do during a morning-plan session) is judgment. Existential-task *scheduling and execution* (when to spawn, how much budget, whether to kill) is substrate.
+When designing any piece of the autonomous-agents / Lore Beings direction, ask: is this judgment (route to LLM) or is this enforcement/bookkeeping (route to the Being Keeper, the deterministic supervisor)? Existential-task *content* (what to do during a morning-plan session) is judgment. Existential-task *scheduling and execution* (when to spawn, how much budget, whether to kill) is substrate.
 
 ## Precedent already in lore
 
-This isn't a new invention — the framework's `lr-wait` (`wait-primitive-feature.md`) is already a deterministic (stdlib Python, no LLM) MCP server providing the inbound half of this pattern. The switchboard daemon sketch in `autonomous-agents-substrate.md` was already conceived as a non-LLM daemon. The Agent Beings supervisor generalizes that precedent to own the *between-session* half (scheduling existential tasks, spawning headless engine sessions, budget/kill-switch), where `lr-wait` owns the *within-session* synchronous half.
+This isn't a new invention — the framework's `lr-wait` (`wait-primitive-feature.md`) is already a deterministic (stdlib Python, no LLM) MCP server providing the inbound half of this pattern. The switchboard daemon sketch in `autonomous-agents-substrate.md` was already conceived as a non-LLM daemon. The Being Keeper generalizes that precedent to own the *between-session* half (scheduling existential tasks, spawning headless engine sessions, budget/kill-switch), where `lr-wait` owns the *within-session* synchronous half.
 
 ## See Also
 
@@ -27,4 +27,5 @@ This isn't a new invention — the framework's `lr-wait` (`wait-primitive-featur
 - `wait-primitive-feature.md` — the shipped deterministic inbound-signal precedent
 - `naming-foundational-principles.md` — the meta-rule this topic follows (name the framing, not just the mechanism)
 - `system-design-principles.md` — index of named principles; this one is listed there
-- `framework-improvements-backlog.md` § Major Directions § Autonomous Agents / Agent Beings — the fuller capture (being definitions, existential tasks, supervisor sketch, outbox scheduling channel)
+- `lore-beings-design.md` — anchor for the settled Lore Beings design this principle governs; full design in `workdir/draft-lore-beings.md`
+- `framework-improvements-backlog.md` § Major Directions § Autonomous Agents / Lore Beings — the direction's backlog home

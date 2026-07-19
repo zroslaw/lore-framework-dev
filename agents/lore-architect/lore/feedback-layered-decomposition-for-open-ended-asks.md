@@ -16,4 +16,4 @@ For future big, open-ended asks (especially ones framed as frustration or aspira
 
 - `feedback-too-many-words.md` — the sibling working-style feedback for option-menus and concept explanations; this topic is the open-ended-ask variant
 - `feedback-don-t-defer-completable-scope.md`, `feedback-confirm-before-writing-lore.md`, `feedback-schemas-as-enforcement-overreach.md` — other members of the "User-feedback working style" family
-- `autonomous-agents-vision.md`, `framework-improvements-backlog.md` § Major Directions § Autonomous Agents / Agent Beings — the concrete session this pattern played out in
+- `autonomous-agents-vision.md`, `framework-improvements-backlog.md` § Major Directions § Autonomous Agents / Lore Beings — the concrete session this pattern played out in

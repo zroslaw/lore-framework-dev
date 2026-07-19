@@ -53,7 +53,7 @@ This rule composes with:
 
 - `team-shared-knowledge-principle.md` — the topic born from this lesson; the canonical example
 - `haiku-ambiguity-detector.md` — a later principle named per this meta-rule (surfaced by a concrete harness result rather than a missing-topic gap)
-- `agent-being-consciousness-substrate-split.md` — another later principle named per this meta-rule (surfaced during the 2026-07-19 Agent Beings brainstorm; named immediately rather than left implicit in the supervisor sketch)
+- `agent-being-consciousness-substrate-split.md` — another later principle named per this meta-rule (surfaced during the 2026-07-19 Agent Beings brainstorm — the direction now settled as Lore Beings, see `lore-beings-design.md`; named immediately rather than left implicit in the supervisor sketch)
 - `system-design-principles.md` — where new named principles get indexed
 - `lore-topic-format.md` — mechanics of topic structure
 - `framework-scope-vs-agent-scope.md` — another principle that crystallized only when named
