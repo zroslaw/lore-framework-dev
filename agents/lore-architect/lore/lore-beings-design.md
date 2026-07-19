@@ -1,6 +1,6 @@
 # Lore Beings — Settled Design (Anchor)
 
-The autonomous-agents direction's beings shape has a **settled design** as of 2026-07-19, agreed in a full dialogue-mode session with the user, then reworked the same day by a user-directed **MVP simplification pass** (directive: keep the initial design as simple as possible; introduce nothing the MVP doesn't exercise — see `feedback-mvp-minimalism.md`). The complete design lives in **`workdir/draft-lore-beings.md`** (which supersedes and replaced the same-day `draft-agent-beings.md`). Status: **build-ready**; **nothing shipped**. MVP success = "the Chronicler lives for a week."
+The autonomous-agents direction's beings shape has a **settled design** as of 2026-07-19, agreed in a full dialogue-mode session with the user, then reworked the same day by a user-directed **MVP simplification pass** (directive: keep the initial design as simple as possible; introduce nothing the MVP doesn't exercise — see `feedback-mvp-minimalism.md`). The complete design lives in **`workdir/draft-lore-beings.md`** (which supersedes and replaced the same-day `draft-agent-beings.md`). **Status (same day, later): MVP built** (`lore-framework/scripts/lrb.py`, `docs/beings.md`, `lore-framework-dev/tests/test_lrb.py`, the Chronicler at `lore-chronicler/`), real-engine-validated, independently reviewed and hardened — see the draft's **§16 "Build & hardening notes"** for what the Claude Code build+review pass found and fixed, and `lore-beings-mvp-takeover-review.md` for the later Codex third-review takeover and local worktree checkpoint. One real open gap remains: self-scheduling needs a permission decision the safe default can't satisfy headlessly. **Not yet installed as a persistent `--launchd` daemon on any real machine** — that step is a deliberate, separate, user-triggered action. MVP success criterion unchanged: "the Chronicler lives for a week" (not yet run).
 
 This topic is the anchor: the settled decisions at a glance, with the draft as the single detailed source. Don't restate draft detail here — extend the draft, then refresh this summary.
 
@@ -20,7 +20,7 @@ This topic is the anchor: the settled decisions at a glance, with the draft as t
 - **One `config.json`** in `~/.lore-beings/` (workspaces + engines with permission modes) instead of three files; `models.json` died with tiers.
 - **One-shots are never in `state.json`** — `outbox/accepted/` files ARE the pending schedule (rebuilt-never-stored applied uniformly), moved to `done/` on spawn. `state.json` = `spent_today_usd`, `running`, `last_runs` only. One-shot horizon = next 24h (keeps outbox budget validation and the daily cap on the same clock; matches "morning plans today"). No per-day one-shot cap in outbox validation — daily budget + machine-wide concurrency cap already bound a runaway scheduler.
 - **Trimmed v1 CLI:** `install` (doubles as restart), `status`, `pause`/`resume` (all-beings only), `stop`, `engines add|remove|list`, `workspaces add|remove|list`, `schedule`. Dropped: `restart`, `logs <being>`, per-being pause/resume.
-- **Missed-fire policy: same-day catch-up.** Laptop sleep must not silently kill the day (the biggest real gap found — morning-wakeup at 8:30 with the lid closed). A task whose time passed today but hasn't run fires once on next tick, ledger-marked `late`; past midnight → dropped, status-marked `missed`.
+- **Missed-fire policy: same-day catch-up.** Laptop sleep must not silently kill the day (the biggest real gap found — morning-wakeup at 8:30 with the lid closed). A task whose time passed today but hasn't run fires once on next tick, ledger-marked `spawned-late`; past midnight → dropped, status-marked `missed`.
 - **Result-capture contract:** Keeper redirects engine stdout to the per-session log; Claude headless `--output-format json` final JSON *is* the result. No separate result-file protocol. Session summary = final output message captured in the log — explicitly not the `sessions/YYYY/MM/` finalization machinery.
 - **Stub engine for tests:** `lrb engines add` accepts a stub script printing canned result JSON → dev-repo tests exercise the full Keeper loop deterministically at zero API cost.
 
@@ -44,6 +44,7 @@ This topic is the anchor: the settled decisions at a glance, with the draft as t
 ## See Also
 
 - `workdir/draft-lore-beings.md` — the full agreed design (single detailed source; §15 "Open seams" holds all deferred cuts with reintroduction triggers)
+- `lore-beings-mvp-takeover-review.md` — Codex takeover of the intermediate Claude Code worktree result, third-review fixes, local checkpoint commits, and verification
 - `agent-being-consciousness-substrate-split.md` — the governing named principle
 - `unenforceable-caps-are-prompt-theater.md` — the enforceability sharpening
 - `feedback-mvp-minimalism.md` — the simplification-pass working style applied here

@@ -97,9 +97,16 @@ Standing guidance I read every time I wake up:
 - A good day: the diary honestly records what happened in the workspace today.
 ```
 
-Five frontmatter keys total. Notes:
+Descriptor frontmatter is intentionally small and strict: unexpected top-level keys
+or task keys are configuration errors, not ignored hints. Notes:
 - Frontmatter-on-descriptor-files is the existing convention (`lore-repo.md`,
   `role.md`); no new file-format rule.
+- Task names are safe slugs because they become state/log path components. Task
+  prompts are relative paths inside the agent directory, never absolute or
+  escaping paths. `daily-usd` and result costs must be finite nonnegative numbers;
+  `timeout-minutes` must be positive and bounded. `at:` one-shots use naive
+  local ISO datetimes; timezone-aware datetimes are rejected until a real
+  distributed-team requirement justifies timezone semantics.
 - Schedules are plain cron in **machine-local time** — the Keeper runs on the user's
   machine, so local time is correct for realistic first users; a `timezone:` field is
   deferred until a distributed team actually hits the problem (§15). The Keeper is the
@@ -161,10 +168,24 @@ copy on update. A daemon must not live inside any of them. So:
 - **Installed copy:** `~/.lore-beings/` — the stable machine home launchd points at.
   `lrb install` (runnable from any engine's plugin copy) copies the script there,
   writes the launchd plist, loads it.
-- **Update:** re-run `lrb install` after a framework update → re-copy + restart the
-  daemon. A running daemon doesn't notice its source changed; the installed version is
-  shown in `lrb status`, so drift is visible. (`/lr:doctor` should learn this
-  symptom.)
+- **Deviation from this spec, adopted during the build (2026-07-19):** `lrb install`
+  copies the script and writes the plist, but does **not** load it into launchd unless
+  `--launchd` is explicitly passed. Rationale: unconditionally bootstrapping a
+  persistent, real, machine-level daemon that spends real API money on a schedule — as
+  a side effect of the *first* `install` invocation, including routine dev/test
+  iteration — is exactly the class of hard-to-reverse action that warrants an explicit
+  opt-in gate, not implicit installer behavior. `$LRB_HOME` and
+  `$LRB_LAUNCHAGENTS_DIR` env overrides make the whole CLI sandboxable for tests as a
+  result. This is judged the right call (independent review concurred) and is now the
+  spec, not just an implementation detail — see `docs/beings.md` for the CLI-facing
+  wording. Consequence: a bare re-run of `install` after an update does not restart an
+  already-running daemon (only `--launchd` does); `lrb status` shows the *running*
+  daemon's recorded version (from `$LRB_HOME/daemon.info`) precisely so this drift
+  stays visible in the meantime.
+- **Update:** re-run `lrb install --launchd` after a framework update → re-copy +
+  restart the daemon. A running daemon doesn't notice its source changed; the running
+  daemon's installed version is shown in `lrb status`, so drift is visible.
+  (`/lr:doctor` should learn this symptom.)
 - **launchd model:** one entry, `KeepAlive` — launchd's job is only "keep this one
   program running" (start at login, restart on crash). All scheduling intelligence is
   inside the Keeper. Linux later = a small systemd unit, same shape.
@@ -239,8 +260,9 @@ non-recomputable minimum:
   holds pending one-shots.
 
 Workspace state dir: `state.json`, `outbox/` (+ `accepted/`, `rejected/`, `done/`),
-`logs/` (per-session log + result JSON + per-being ledger: one line per finished
-session — task, duration, cost, outcome).
+`logs/` (per-session stdout log containing the final JSON result, sibling stderr
+log, and per-being ledger: one line per finished session — task, duration, cost,
+outcome).
 
 ## 7. Engines & permissions — explicit configuration, never detection
 
@@ -374,10 +396,10 @@ needed by a real being (§15).
 
 ## 12. CLI surface — MVP is CLI-only
 
-`lrb` subcommands (v1 set, trimmed): `install` (copy + launchd + load/restart —
-doubles as the restart command), `status` (`--json` for agents; beings, last/next
-runs, running now, spend vs cap, failures, config errors, log-dir paths, Keeper
-version), `pause` / `resume` (all beings; backed by the `~/.lore-beings/paused`
+`lrb` subcommands (v1 set, trimmed): `install` (copy + write plist; `--launchd`
+loads/restarts), `status` (`--json` for agents; beings, last runs, running now,
+spend vs cap, failures, config errors, log-dir paths, Keeper version), `pause` /
+`resume` (all beings; backed by the `~/.lore-beings/paused`
 dead-man file, so `touch`/`rm` works even with a wedged CLI), `stop` (kill switch:
 SIGTERM running sessions + pause scheduling), `engines add|remove|list`,
 `workspaces add|remove|list`, `schedule` (the outbox, §8).
@@ -472,3 +494,110 @@ history; reintroduce when the stated trigger fires):
   `restart`.
 - **Per-day one-shot cap** in outbox validation — only if budget + concurrency
   bounds prove insufficient against a runaway scheduler.
+
+## 16. Build & hardening notes (2026-07-19 — MVP built, independently reviewed)
+
+The MVP (`lore-framework/scripts/lrb.py`, `docs/beings.md`, `lore-framework-dev/tests/test_lrb.py`,
+the Chronicler at `lore-chronicler/`) was built to this spec, verified end-to-end (36 tests,
+a real standalone `lrb daemon` run, and a real smoke test against the actual Chronicler with the
+real `claude` engine — both an existential-task same-day catch-up fire and a self-scheduled
+one-shot completed successfully, cost captured correctly), then independently reviewed across two
+rounds by a fresh model instance (a different model tier than the one that built it — cross-model
+review, not self-review). Round 1 found the tick-loop architecture, budget model, and outbox flow
+faithful to this spec, but surfaced real bugs the design discussion hadn't anticipated — all fixed
+in the same pass, taking the suite to 52 tests:
+
+- **A being's config values were validated for presence only, not validity** — a bad `schedule` or
+  non-integer `timeout-minutes` passed `load_being_file` silently, then raised uncaught deep in the
+  tick loop, wedging not just that being but (compounding: `tick()` had no per-workspace exception
+  boundary) every later workspace in the same tick, forever. Fixed: `load_being_file` now validates
+  cron syntax (all 5 fields) and rejects a schedule that fires more than once/day (existential tasks
+  are once-daily by design — the same-day dedup means only the first fire would ever run anyway;
+  multiple intraday runs belong on the outbox) as visible config errors; `tick()` now isolates each
+  workspace so one bad being/workspace can't stop others from ticking.
+- **Cost capture was fragile in a way that silently disabled the budget cap** — stderr was merged
+  into the same log file as the engine's stdout JSON, so any stderr noise (a CLI update notice, a
+  warning) broke the whole-file JSON parse, read cost as $0.00, and let the daily-usd spawn gate
+  never trip. Fixed: stderr now goes to a sibling `.stderr.log`; result parsing also falls back to
+  scanning for the last parseable JSON line as a second line of defense.
+- **PID-reuse could kill an unrelated process after a reboot** — a re-adopted `running` entry (no
+  live `Popen` handle) was trusted by pid alone; after a reboot the OS can reassign that pid to any
+  other same-user process, and the Keeper's overdue-timeout logic would SIGTERM/SIGKILL it. Fixed:
+  identity verified via `ps -p <pid> -o command=` against the recorded engine command before
+  signaling any pid the Keeper didn't spawn itself this run (both the tick loop and `lrb stop`).
+- **`lrb` was never actually on PATH** — `lrb install` copies the script into `$LRB_HOME` but
+  creates no PATH entry, so the spawn prompt's instruction to self-schedule via `lrb schedule`
+  couldn't work even with permissions solved. Fixed: the spawn prompt now embeds the concrete
+  invocation (`sys.executable` + the running script's own path), computed fresh per spawn.
+- **The being.md example in this very draft (and `docs/beings.md`) used inline `# comment`
+  annotations the parser didn't strip**, silently corrupting `engine`/`schedule`/`prompt` values.
+  Fixed: comments are now stripped respecting quotes.
+- **Medium-severity findings also fixed:** the concurrency cap was per-workspace, not machine-wide
+  as specified (§9) — now computed across all registered workspaces; nothing stopped two Keepers
+  running concurrently and double-spawning/racing on `state.json` — now an `flock`-based
+  single-instance lock; a kill signaled only the direct child, not the session's process group, so
+  Bash/MCP-server grandchildren could survive a "hard kill" — now `start_new_session=True` +
+  `killpg`; a stale accepted one-shot could fire days late against the wrong day's budget/context —
+  now dropped (`missed`) past its own day, matching the existential-task policy; an unparseable
+  outbox `at` defaulted to firing immediately instead of failing safe — now rejected visibly;
+  engine-not-configured was invisible in `lrb status` — now surfaced as a config error; a stale
+  `.gitignore` gap could let `.lr-beings/` session logs get committed — `lrb workspaces add` now
+  appends it automatically when the workspace is a git repo; the launchd plist hardcoded
+  `/usr/bin/python3` and didn't pass through the installing user's `PATH`, so an engine with a
+  `#!/usr/bin/env` shebang could resolve fine manually but fail under launchd in production — both
+  fixed.
+- **A genuine, not-yet-closed gap the build surfaced (confirms §7's framing, doesn't contradict
+  it):** self-scheduling — and any of a being's designed write actions — needs a permission
+  decision the default (`permission_mode: default`) can't satisfy headlessly, since there's no user
+  to approve the Bash/Write call. Observed live: the Chronicler correctly followed its own
+  `being.md` "never block on a human" guidance and reported the denial instead of hanging, but §13's
+  success criteria (diary written, outbox used daily) are structurally unreachable under the safe
+  default. This is not a bug in the Keeper — it's §7's "explicit user configuration, never
+  auto-detected" working as designed, applied to a case the original design discussion didn't
+  spell out. Resolving it (full permission mode vs. a future scoped-`--allowedTools` mechanism) is
+  an explicit user decision, deliberately not made by this build. See `docs/beings.md` § outbox for
+  the user-facing framing.
+
+All round-1 fixes landed with matching test coverage (frontmatter-with-comments,
+bad-schedule/bad-timeout config errors, multi-occurrence-cron rejection,
+stderr-noise-doesn't-break-parsing, garbage-stdout-vs-hard-crash outcome classification, PID-reuse
+non-signaling, single-instance-lock refusal, SIGKILL-after-ignored-SIGTERM,
+pause/concurrency-cap/existential-budget-gate).
+
+**Round 2** independently re-verified every round-1 fix against a fresh full read of the code (not
+a diff review) plus its own test run, confirmed all 12 H/M findings genuinely closed, and endorsed
+the H1 PID-identity approach specifically (including a live-verified explanation of a macOS
+framework-Python quirk hit and worked around during round 1: a running process's own
+`sys.executable` can legitimately not match what `ps` reports for that same process, which is why
+identity verification was kept for the kill paths — where it's proven correct against real spawned
+engine sessions — but dropped from the purely-cosmetic daemon-self-detection display). Round 2 also
+surfaced one new medium finding: the day/month/weekday syntax-validation probe added in round 1
+checked only a single sample value per field, and `_cron_field_matches` short-circuits on the first
+matching comma-part — so a schedule like `"30 8 1,junk * *"` passed `load_being_file` (the "1" part
+matched the probe value, "junk" was never reached), then could raise uncaught during the rollover's
+missed-fire check specifically (`_fire_existential_tasks` already had a matching guard;
+`_check_missed_from_prev_day` didn't), wedging that one workspace's tick forever. Fixed: the syntax
+probe now iterates every value in each field's legal range (guaranteeing something falls through to
+every non-`*` comma-part), `*/0` now raises `ValueError` instead of `ZeroDivisionError`, and
+`_check_missed_from_prev_day` gained the same defensive `except ValueError: continue` as the fire
+path. Round 2 also closed three low-severity findings (a refused second daemon no longer truncates
+the incumbent's lock-file pid record; the launchd plist now XML-escapes interpolated paths; `lrb
+status` no longer hides a being's currently-running sessions just because its engine was removed
+mid-flight) and added 3 more tests (55 total). Status: **MVP built, hardened, cross-model-reviewed
+across two rounds — not yet installed as a persistent `--launchd` daemon on any real machine.** That
+remains a deliberate, separate, user-triggered step.
+
+**Codex takeover / third review (same day):** a later Codex session took over the intermediate
+worktree result after the user reported Claude Code had completed about 2.5 implement-review
+cycles and run out of tokens before the third review. Codex did not have the raw exported Claude
+Code transcript; its reliable inputs were the paired worktrees, the user's description, and the
+Claude Code build notes already preserved above. Three fresh review lenses found and fixed the
+remaining high/medium edges: tri-state PID identity under sandboxed `ps`, safe task-name log paths,
+finite nonnegative `daily-usd` and result costs, bounded outbox timeouts, malformed accepted
+outbox requests, timezone-aware one-shot `--at` requests, cron range validation, cross-midnight
+spend attribution, shell-quoted self-scheduling commands, test ResourceWarnings, and documentation
+drift. Local checkpoint commits, not pushed: framework worktree `2badbdb` ("Checkpoint Lore Beings
+Keeper MVP") and dev worktree `961ac22` ("Checkpoint Lore Beings Keeper tests"). Verification at
+handoff: 70 focused Keeper tests passed, then 129 broader dev-unit tests passed with 25 lifecycle
+tests skipped because `LR_LIFECYCLE=1` was off. This remains a worktree checkpoint that merits
+more review before release or persistent daemon installation.
