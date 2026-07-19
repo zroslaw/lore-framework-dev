@@ -34,7 +34,7 @@ Three independent review lenses then found the main third-pass issues:
 
 All of those were fixed in the worktree checkpoint with matching tests where appropriate.
 
-## Checkpoint state
+## Checkpoint state (superseded — see below)
 
 The session deliberately made **local worktree commits only**, with no push and no release claim:
 
@@ -49,8 +49,17 @@ Verification after the fixes:
 - Broader dev unit discovery: 129 tests passed, with 25 lifecycle tests skipped because
   `LR_LIFECYCLE=1` was off.
 
-This is a useful checkpoint for more review/testing, not a shipped framework release and not a
-persistent `--launchd` daemon install.
+At the time this was "a useful checkpoint for more review/testing, not a shipped framework
+release." **That has since changed (2026-07-20):** a fourth review pass ran on real, unsandboxed
+macOS — the sandbox that blocked `ps` during this Codex pass had silently kept the PID-identity
+confirmed-match/confirmed-mismatch branches from ever executing (see `role.md` § Lore-Curation
+Disciplines and `macos-ps-o-multi-field-single-line.md` for the bug this surfaced), and a `codex`
+engine kind was added (`engine-kinds-design-decision.md`, `codex-exec-real-invocation-contract.md`).
+Both worktrees were then merged into their repos' main branches (`lore-framework` ff-only,
+`lore-framework-dev` via a `--no-ff` merge since main had diverged with a v27 finalize commit), and
+the result shipped as **v28** (commit `44bc57d`, BETA, release-committed but not yet pushed — see
+`versioning-release-types.md` and `lore-beings-design.md`). It is still not a persistent
+`--launchd` daemon install on any real machine.
 
 ## Operational lesson
 
@@ -58,3 +67,10 @@ For daemon/scheduler code, the third review should stay adversarial even after a
 highest-value catches were not happy-path failures; they were state poisoning, path containment,
 PID reuse, malformed accepted files, and cross-midnight accounting. The review shape that worked
 was: runtime/process lifecycle, parser/security/filesystem safety, and product/docs/framework fit.
+
+A sharper lesson emerged one pass later: **this review's own sandbox silently disabled its
+highest-value check.** `ps` was blocked, so every PID-identity test took the "unknown, can't
+verify" branch — the suite went green without the confirmed-match/confirmed-mismatch logic ever
+running once. A green suite from a review environment with a known-blocked capability does not
+verify the code paths that depend on that capability; see `role.md` § Lore-Curation Disciplines and
+`macos-ps-o-multi-field-single-line.md` for the concrete bug this cost.

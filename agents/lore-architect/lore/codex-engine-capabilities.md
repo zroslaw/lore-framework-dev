@@ -26,6 +26,13 @@ the linked topics below.
   degrades around it.
 - **Lifecycle-harness caveat** — when a test is meant to validate newly-shipped plugin docs, verify
   which installed plugin version Codex will actually load before trusting the result.
+- **`codex exec` headless contract** — `codex exec --json --skip-git-repo-check -m <model> <prompt>`
+  streams JSONL events (`thread.started` → `turn.started` → `item.completed`* → `turn.completed`/
+  `turn.failed`), carries a token `usage` object but **no USD cost field at all**, and writes
+  spurious warnings to stderr even on success — gate success on the terminal event type, never on
+  empty stderr. Empirical detail (probed for Lore Beings' `codex` engine kind): see
+  `codex-exec-real-invocation-contract.md`. Distinct from the rollout-JSONL session-log artifact
+  below.
 
 ## Why this hub exists
 
@@ -44,3 +51,4 @@ MCP/plugin loading assumptions, and harness preflight.
 - `docs-engines-convention.md`
 - `multi-engine-portability-direction.md`
 - `engine-session-log-formats.md` — rollout JSONL record types, session index, `codex mcp-server` (empirical, v24 takeover work)
+- `codex-exec-real-invocation-contract.md` — the `codex exec` headless stdout JSONL contract (empirical, v28 Lore Beings work)

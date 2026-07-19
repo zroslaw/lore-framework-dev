@@ -634,3 +634,21 @@ framework worktree `aac55b3`, dev worktree `3d4a26f`. Operational lesson, extend
 review's: sandbox-degraded review environments don't just miss findings, they can *green-light*
 code whose primary path never ran — a suite that passes under a blocked capability must be re-run
 where the capability works before it counts as verification.
+
+**Codex engine kind + v28 release commit (2026-07-20, same session):** the user then directed a
+ready-to-ship pass with e2e verification on both Claude Code and Codex. Codex required closing a
+real gap: `spawn_session` hardcoded claude flags, and Codex reports no USD cost. Shipped as
+**engine kinds** (`kind: claude|codex` per configured engine): codex-kind spawns
+`CMD exec --json --skip-git-repo-check -m M PROMPT`, reads the final JSONL event
+(`turn.completed`→ok with usage tokens ledgered, `turn.failed`→error), and charges a **mandatory
+flat `--session-cost-usd`** per finished session whatever the outcome (over-charge is the safe
+direction; without it the daily-usd gate would be prompt theater for codex beings — shapes taken
+verbatim from real `codex-cli 0.142.5` probes). Unknown kinds fail-to-spawn visibly. 6 new tests
+against an argv-verifying codex stub (76 focused total). **Real-engine e2e through the actual
+tick loop passed for both kinds** (claude/haiku: result JSON parsed, real $0.0188 charged;
+codex/gpt-5.4-mini: `E2E-CODEX-OK`, flat $0.05 charged, usage recorded; codex's spurious stderr
+ERROR lines proved the sibling-stderr isolation against a real engine). Both worktrees merged to
+local mains; **v28 release commit `44bc57d`** in `lore-framework` (VERSION 28, manifests `1.28.0`,
+`release-notes/28.md` with cache-clear footer). **Not pushed, not tagged** — the remaining
+pre-push gate is the full lifecycle suite; the launchd daemon install and the Chronicler-week run
+stay user-triggered.
