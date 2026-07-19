@@ -601,3 +601,36 @@ Keeper MVP") and dev worktree `961ac22` ("Checkpoint Lore Beings Keeper tests").
 handoff: 70 focused Keeper tests passed, then 129 broader dev-unit tests passed with 25 lifecycle
 tests skipped because `LR_LIFECYCLE=1` was off. This remains a worktree checkpoint that merits
 more review before release or persistent daemon installation.
+
+**Fourth review (2026-07-20, lore-architect back on real macOS):** running the Codex checkpoint's
+suite on unsandboxed macOS immediately failed both PID-reuse tests — and exposed a real Keeper bug
+Codex's environment structurally could not see (its sandbox blocked `ps`, forcing every identity
+check down the "unknown" path, so the confirmed-match/confirmed-mismatch branches were never
+exercised against real `ps` output):
+
+- **PID-identity false mismatch on macOS** — `ps -p <pid> -o lstart= -o command=` joins both
+  fields on ONE line on macOS (the code assumed one per line), so the recorded `process_start`
+  embedded the full command line. The command string of a live process is not stable: macOS
+  framework Python re-execs `bin/python3.x` into `Python.app/…/MacOS/Python` moments after spawn
+  (the exact quirk round 1 had already documented for `_daemon_status`, not connected to this
+  path). Net effect: a genuinely alive re-adopted session read as a *confirmed* PID-reuse mismatch
+  and was reaped while still running — dropped from `running`, its timeout no longer enforced, its
+  cost read from a partial log. Fixed: `lstart` and `command` are now fetched by two separate `ps`
+  calls so "start" is pure start-time; command containment plus start equality is stable across
+  re-exec. (Old-format `process_start` values in a pre-fix `state.json` would now read as
+  mismatch → reaped-as-dead, never signaled; zero real deployments exist, so no migration shim.)
+- **Test bug** — the mismatch-path test judged its sandbox-vs-real branch on
+  `bstate["running"][0]` *after* the poll had already reaped it (IndexError on real macOS); it now
+  judges via the entry reference captured before the poll.
+- **Minor** — `process_outbox` now persists the normalized `timeout_minutes` into the accepted
+  file before the rename (accepted/ files ARE the pending schedule; previously the normalization
+  was in-memory only, functionally masked by `_spawn_accepted`'s revalidation).
+
+Also re-probed clean this round: frontmatter parser vs CRLF/tabs/duplicate-keys/NaN, cron
+occurrence counting, and Chronicler discovery via the real `discover_beings`. Verification:
+70/70 focused Keeper tests and 129 broader dev-unit tests (25 lifecycle skipped) on real macOS
+with working `ps` — the configuration the third review couldn't exercise. New checkpoints:
+framework worktree `aac55b3`, dev worktree `3d4a26f`. Operational lesson, extending the third
+review's: sandbox-degraded review environments don't just miss findings, they can *green-light*
+code whose primary path never ran — a suite that passes under a blocked capability must be re-run
+where the capability works before it counts as verification.
