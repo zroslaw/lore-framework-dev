@@ -1024,13 +1024,14 @@ class TestKeeperIntegration(LrbTestCase):
         state = lrb.default_state()
         bstate = lrb.being_state(state, being_id)
         impersonated_pid = os.getpid()  # this test process: definitely alive
-        bstate["running"].append({
+        entry = {
             "task": "morning-wakeup", "pid": impersonated_pid,
             "started": datetime.now().isoformat(timespec="seconds"),
             "timeout_minutes": 30, "log_path": os.path.join(self.tmp, "nonexistent.log"),
             "command": "/definitely/not/this/test/process",
             "process_start": (lrb._pid_identity(impersonated_pid) or {}).get("start"),
-        })
+        }
+        bstate["running"].append(entry)
         lrb.ensure_ws_dirs(self.workspace)
         lrb.save_state(self.workspace, state)
 
@@ -1039,8 +1040,9 @@ class TestKeeperIntegration(LrbTestCase):
         # When ps is available, a confirmed identity mismatch is treated as
         # dead and reaped. In restricted sandboxes (Codex), ps can be blocked;
         # then the Keeper cannot prove mismatch, so it keeps the stale entry
-        # visible but still must not signal it.
-        if lrb._pid_matches_entry(impersonated_pid, bstate["running"][0]) is None:
+        # visible but still must not signal it. Judge via the saved `entry`
+        # reference — on the reaped path bstate["running"] is already empty.
+        if lrb._pid_matches_entry(impersonated_pid, entry) is None:
             self.assertEqual(len(state["beings"][being_id]["running"]), 1)
         else:
             self.assertEqual(len(state["beings"][being_id]["running"]), 0)
