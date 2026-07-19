@@ -28,4 +28,5 @@ This isn't a new invention — the framework's `lr-wait` (`wait-primitive-featur
 - `naming-foundational-principles.md` — the meta-rule this topic follows (name the framing, not just the mechanism)
 - `system-design-principles.md` — index of named principles; this one is listed there
 - `lore-beings-design.md` — anchor for the settled Lore Beings design this principle governs; full design in `workdir/draft-lore-beings.md`
+- `unenforceable-caps-are-prompt-theater.md` — the sharpening that adds the enforceability honesty test: a limit only belongs in the substrate contract if the substrate can actually enforce it
 - `framework-improvements-backlog.md` § Major Directions § Autonomous Agents / Lore Beings — the direction's backlog home
