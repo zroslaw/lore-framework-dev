@@ -53,6 +53,10 @@ parsed JSON, not empty stderr.
 Landed in `scripts/lrb.py`: `ENGINE_KINDS` includes `cursor`; `spawn_session` cursor branch;
 `_finish` cursor branch with reported-cost + flat fallback; `lrb engines add --plugin-dir`.
 
+**Pre-ship checklist:** run `python3 tests/test_lrb_cursor_real_e2e.py` on a machine where
+`cursor-agent status` shows logged in; capture a real stdout JSON sample and confirm
+`total_cost_usd` presence/absence before claiming empirical verification complete.
+
 ## See Also
 
 - `engine-kinds-design-decision.md` — per-kind dispatch pattern
