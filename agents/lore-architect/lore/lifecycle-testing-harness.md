@@ -41,11 +41,19 @@ discipline; it adds a pinned LLM judge only for the behavior stage. See
 ## Keeper (Lore Beings) coverage — separate flag, higher blast radius (2026-07-20)
 
 Until 2026-07-20 the harness had **zero** coverage of Lore Beings / the Being Keeper — the only
-real-engine Keeper test was a standalone Cursor-only script (`test_lrb_cursor_real_e2e.py`). Closed
-that gap with `tests/lifecycle/keeper_harness.py` + `tests/lifecycle/test_lrb_lifecycle.py`: 8
-scenarios — A1–A3 (core spawn→result→ledger loop, one per engine kind), B1 (real process-tree
-kill), C1 (self-scheduling round trip via the outbox), C4 (self-scheduling denied under the default
-permission mode), D1 (real PID-identity confirmed-match), E1 (real `lrb daemon` subprocess).
+real-engine Keeper test was a standalone Cursor-only script (`test_lrb_cursor_real_e2e.py`, since
+deleted, superseded by A3). Closed that gap with `tests/lifecycle/keeper_harness.py` +
+`tests/lifecycle/test_lrb_lifecycle.py`: originally 8 scenarios — A1–A3 (core spawn→result→ledger
+loop, one per engine kind), B1 (real process-tree kill, claude), C1 (self-scheduling round trip via
+the outbox), C4 (self-scheduling denied under the default permission mode), D1 (real PID-identity
+confirmed-match), E1 (real `lrb daemon` subprocess) — then B2/B3 added the same day (codex/cursor
+process-tree-kill variants of B1): a code review found the Keeper's own concurrency-slot-leak bug
+in exactly the per-engine-asymmetry blind spot B2/B3 exist to close, sharpening the case that
+"engine-agnostic in the Keeper's own code" isn't sufficient justification to skip per-engine proof
+for a mechanism (killpg) whose risk lives in the SPAWNED process tree's shape, not the Keeper's
+call site. D2/D3 (PID-identity variants) remain deferred — `ps` is pure OS-level inspection,
+independent of which engine spawned the PID, so that argument does hold there. See
+`lore-beings-mvp-takeover-review.md`, `test_lrb_lifecycle.py` module docstring.
 
 **Gated behind a *separate* flag, `LR_LIFECYCLE_KEEPER=1` — deliberately not folded into
 `LR_LIFECYCLE=1`.** Keeper scenarios are a strictly higher blast-radius class: some spawn a real
@@ -156,3 +164,5 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `quality-benchmark-feature.md` — the sibling quality track (`tests/quality/`): lore utilization, planted-needle probes, treatment/control uplift.
 - `benchmark-measurement-design-principles.md` — the measurement-design principles shared with (and extending) this harness's assertion style.
 - `lore-beings-design.md` — the feature the `LR_LIFECYCLE_KEEPER=1` track exercises; `keeper-spawn-prompt-boilerplate-distraction.md`, `cursor-agent-real-invocation-contract.md` — the two issues hit getting the Keeper scenarios green.
+- `testing-simulate-process-escape-without-setsid-binary.md` — a fast synthetic-process-tree technique that complements this harness's real-engine B1/B2/B3 scenarios when only the process-tree *shape* (not real engine behavior) needs reproducing.
+- `kill-tree-enumerate-before-signal-ordering.md`, `hot-path-latency-can-expose-latent-test-timing-races.md` — operational lessons from the B2/B3 Keeper kill-tree fix that produced this harness's cursor coverage.

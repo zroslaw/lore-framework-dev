@@ -51,5 +51,6 @@ Same spirit as the review/verification disciplines: look before you assert, and 
 - `plugin-manifest-versioning.md` — its open auto-invalidation question is a "verify before acting" candidate (test empirically before dropping the cache-clear footer)
 - `consistency-sweep-read-not-just-grep.md` — sibling: a grep sweep verifies tokens; only *reading the prose* verifies semantics (a rename sweep near-miss)
 - `canonicalize-testbed-fixes.md` — sibling: verify what actually persisted to disk from a testbed session before declaring a fix done
+- `hot-path-latency-can-expose-latent-test-timing-races.md` — the same "confirm which cause, not just whether it's broken" discipline applied to a test-failure diagnosis (stash-and-rerun A/B, not assuming new code is wrong)
 - `workflow-primitive-operational-notes.md` — the size-vs-coercion misdiagnosis this session's "which bug" lesson came from
 - `lore-context-shape-discipline.md` — the v17 fix that followed from diagnosing the *drift* mechanism (not the mislabeled "denormalized index"); the architectural-critique instance above

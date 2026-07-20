@@ -35,10 +35,9 @@ doesn't yet match:
 
 - **`cursor` is empirically cost-blind too.** Real `cursor-agent` (2026.07.16, `composer-2.5`,
   `--output-format json`) returns **no `total_cost_usd`** — only token `usage`. So the flat
-  `--session-cost-usd` fallback is load-bearing for cursor, exactly as for codex, yet
-  `cmd_engines_add` treats it as **optional for cursor but mandatory for codex**. Without it, cost
-  charges `$0.00` forever and the `daily-usd` gate never trips. Backlog: make it mandatory for
-  cursor too (or re-verify across models first). See `cursor-agent-real-invocation-contract.md`.
+  `--session-cost-usd` fallback is load-bearing for cursor, exactly as for codex. **Fixed
+  2026-07-20:** `cmd_engines_add` now requires `--session-cost-usd` for `cursor` too, mirroring
+  codex, instead of leaving it optional. See `cursor-agent-real-invocation-contract.md`.
 - **`claude` kind has no `--plugin-dir` mechanism at all.** `spawn_session` passes `--plugin-dir`
   only for `cursor`; a claude-kind being can therefore load `lr:` skills (which every spawn prompt
   assumes) **only if the configured engine `command` itself bakes in `--plugin-dir`** — i.e. a tiny
@@ -47,6 +46,19 @@ doesn't yet match:
   Backlog: add an explicit `--plugin-dir` config field for the claude kind (mirroring cursor), or
   document the wrapper requirement. Both filed as findings, not silently patched into `lrb.py` —
   they are user-facing schema/design decisions.
+- **`cursor`'s sandboxed shell tool escapes process-group kill (2026-07-20, confirmed real, fixed
+  same day).** Real `cursor-agent` tool-invoked shell commands run inside a freshly `setsid`'d
+  session — a new process group — so `_kill`'s original `killpg(pgid-of-the-direct-child)` alone
+  could not reach a grandchild that escaped into it: confirmed live via the new B3 lifecycle
+  scenario, which left an orphaned real process running on the test machine until manually
+  SIGKILLed. Unlike the cost-blindness/plugin-dir findings above, this one is NOT a schema/config
+  decision — it's a Keeper-internal correctness gap, so it was fixed directly: `_kill` now also
+  walks the full ppid-descendant tree (`_descendant_pids`) and signals every descendant found,
+  independent of process-group/session membership — enumerated BEFORE signaling the parent (killing
+  the parent first risks the OS reparenting a surviving child to PID 1, breaking the very ppid chain
+  the walk depends on). See `lore-beings-mvp-takeover-review.md` § Fifth pass,
+  `cursor-agent-real-invocation-contract.md`, and the general ordering rule extracted to its own
+  topic, `kill-tree-enumerate-before-signal-ordering.md`.
 
 ## See Also
 
@@ -54,3 +66,5 @@ doesn't yet match:
 - `unenforceable-caps-are-prompt-theater.md` — the enforceability principle that shaped the flat-cost fallback
 - `agent-being-consciousness-substrate-split.md` — judgment-vs-enforcement framing this decision follows
 - `lore-beings-design.md` — the parent feature anchor
+- `kill-tree-enumerate-before-signal-ordering.md` — general ordering rule for ancestry-based kill-tree code
+- `testing-simulate-process-escape-without-setsid-binary.md` — macOS-portable technique for testing the setsid-escape scenario

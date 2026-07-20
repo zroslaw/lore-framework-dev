@@ -74,3 +74,31 @@ verify" branch — the suite went green without the confirmed-match/confirmed-mi
 running once. A green suite from a review environment with a known-blocked capability does not
 verify the code paths that depend on that capability; see `role.md` § Lore-Curation Disciplines and
 `macos-ps-o-multi-field-single-line.md` for the concrete bug this cost.
+
+## Fifth pass (2026-07-20): the coverage gap this review named turned out to be real
+
+The B1-only claude coverage (§ Third-review findings fixed doesn't cover this — B1 shipped in the
+fourth pass) carried an explicit "claude coverage is representative, B2/B3 deferred" justification
+(`test_lrb_lifecycle.py`'s original docstring, § lifecycle-testing-harness.md). Adding B2/B3
+(codex/cursor kill-tree scenarios) and running them for real immediately falsified that
+justification for cursor: **a real grandchild process survived the Keeper's hard kill under
+cursor**, confirmed live on the test machine (the orphaned `sleep`/`sh`/sandbox-wrapper chain was
+still running and had to be manually SIGKILLed). Root cause: cursor-agent's sandboxed tool
+execution runs each shell command inside a freshly `setsid`'d session — a new process group that
+`killpg(pgid-of-the-direct-child)` cannot reach. Fix: `_kill` now also walks the full ppid-descendant
+tree (`_descendant_pids`) and signals every descendant directly, not just the process group —
+catches a descendant regardless of which session/group it escaped into. Critical ordering
+requirement discovered while building the regression test: **descendants must be enumerated BEFORE
+signaling the parent, not after** — killing the parent first can let the OS reparent a surviving
+child to PID 1, silently breaking the very ppid chain the walk depends on. Codex's own equivalent
+scenario (B2) separately surfaced one non-reproducing early-completion (the model didn't block for
+the instructed duration, similar in shape to the already-documented cursor backend flakiness) —
+retried clean, not a Keeper defect. See `_descendant_pids`/`_kill` in `scripts/lrb.py`,
+`test_kill_reaches_a_grandchild_that_escaped_into_a_new_session` in `test_lrb.py`, and
+`test_lrb_lifecycle.py`'s B2/B3. Reinforces this topic's own operational lesson one more level: not
+just "verify the review environment's capabilities," but "an explicit engine-agnostic-therefore-
+skippable justification is itself a claim to verify empirically, not a settled fact" — see
+`execution-testing-catches-blind-ambiguity.md`. The ordering fix and its second-order test breakage
+are written up as their own general-purpose topics: `kill-tree-enumerate-before-signal-ordering.md`
+and `hot-path-latency-can-expose-latent-test-timing-races.md`; the regression test's macOS-portable
+reproduction technique is `testing-simulate-process-escape-without-setsid-binary.md`.

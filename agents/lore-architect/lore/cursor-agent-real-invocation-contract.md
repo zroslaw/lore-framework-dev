@@ -3,8 +3,9 @@
 Documents the headless contract the Being Keeper's `cursor` engine kind implements. Primary
 empirical basis: the lifecycle harness driver (`lore-framework-dev/tests/lifecycle/harness.py`),
 the A3 Keeper lifecycle scenario (2026-07-20, live `cursor-agent`), and prior Cursor CLI probes
-(`cursor-agent-cli-probe-findings.md`, `cursor-cli-and-harness-operational-notes.md`).
-`tests/test_lrb_cursor_real_e2e.py` still requires `cursor-agent login` to run.
+(`cursor-agent-cli-probe-findings.md`, `cursor-cli-and-harness-operational-notes.md`). The earlier
+standalone `tests/test_lrb_cursor_real_e2e.py` script (superseded by A3, weaker teardown
+guarantees) was deleted 2026-07-20 once A3 fully covered its ground.
 
 ## Invocation argv
 
@@ -45,29 +46,50 @@ capture (`cursor-agent` 2026.07.16, model `composer-2.5`, `--output-format json`
 original Lore Beings build note (`draft-lore-beings.md` §16: "cursor: … real cost charged");
 whether cursor's contract changed or that check never actually exercised the field is unconfirmed.
 Consequence per `_finish`'s cursor branch: with `total_cost_usd` absent **and** no
-`session_cost_usd` flat fallback configured, cost is silently charged as `$0.00` forever and the
-`daily-usd` spawn gate never trips — the exact cost-blind failure the `codex` kind's mandatory
-`--session-cost-usd` guards against. So the flat fallback is **load-bearing, not optional**, for
-any real cursor being today. `cmd_engines_add` currently treats `--session-cost-usd` as **mandatory
-for codex but optional for cursor** — an asymmetry that no longer matches what real cursor-agent
-reports. Backlog: either make it mandatory for cursor too, or re-verify across more cursor models
-that `total_cost_usd` is genuinely gone before hardening (see `framework-improvements-backlog.md`
-§ Autonomous Agents / Lore Beings). The A3 test config adds `session_cost_usd` to exercise the
-fallback — which is what any real deployment must do anyway.
+`session_cost_usd` flat fallback configured, cost would silently charge as `$0.00` forever and the
+`daily-usd` spawn gate never trip — the exact cost-blind failure the `codex` kind's mandatory
+`--session-cost-usd` guards against. **Fixed 2026-07-20:** `cmd_engines_add` now requires
+`--session-cost-usd` for `cursor` too, same as `codex` (see `docs/beings.md`, `test_lrb.py`
+`TestCliSubprocess.test_engines_add_cursor_kind_requires_session_cost`) — the flat fallback is
+load-bearing for any real cursor being, and is enforced at config time rather than left to the
+operator to remember. The A3 test config sets `session_cost_usd` to exercise exactly that fallback
+path.
 
 ## stderr
 
 Route stderr to a sibling file, not merged into stdout — same rule as claude/codex. Gate success on
 parsed JSON, not empty stderr.
 
+## Sandboxed shell tool escapes process-group kill (2026-07-20)
+
+Real `cursor-agent` tool-invoked shell commands run inside a freshly `setsid`'d session (observed
+process tree: a `zsh -c` sandbox wrapper as session leader, then `sh -c`, then the actual command —
+all in a NEW process group distinct from the direct `cursor-agent` child's). `_kill`'s original
+`killpg(pgid-of-the-direct-child)` cannot reach that group at all — confirmed live via the B3
+lifecycle scenario, which left a real orphaned process running on the test machine (had to be
+manually SIGKILLed) before the fix. Fixed same day: `_kill` now also walks the full ppid-descendant
+tree (`_descendant_pids`) and signals every descendant directly — ppid links survive a `setsid`
+even though pgid/session don't. Ordering matters: descendants must be enumerated BEFORE the parent
+is signaled, or a fast-dying parent gets reaped and the OS reparents the survivor to PID 1,
+overwriting the very ppid link the walk depends on. See `engine-kinds-design-decision.md`,
+`lore-beings-mvp-takeover-review.md` § Fifth pass, and the general operational writeup in
+`kill-tree-enumerate-before-signal-ordering.md` (the ordering rule for any future ancestry-based
+kill-tree code) and `testing-simulate-process-escape-without-setsid-binary.md` (how the regression
+test reproduces the setsid-escaped process tree on macOS without a real `cursor-agent` call). Adding
+the `ps`-based descendant walk to `_kill`'s hot path also had a second-order effect — see
+`hot-path-latency-can-expose-latent-test-timing-races.md`.
+
 ## Keeper wiring
 
 Landed in `scripts/lrb.py`: `ENGINE_KINDS` includes `cursor`; `spawn_session` cursor branch;
-`_finish` cursor branch with reported-cost + flat fallback; `lrb engines add --plugin-dir`.
+`_finish` cursor branch with reported-cost + flat fallback; `lrb engines add --plugin-dir`;
+`_kill`'s ppid-descendant-tree walk (`_descendant_pids`, 2026-07-20) closes the setsid-escape gap
+above — engine-agnostic in the code, but empirically load-bearing for cursor specifically.
 
-**Pre-ship checklist:** run `python3 tests/test_lrb_cursor_real_e2e.py` on a machine where
-`cursor-agent status` shows logged in; capture a real stdout JSON sample and confirm
-`total_cost_usd` presence/absence before claiming empirical verification complete.
+**Pre-ship checklist:** run `LR_LIFECYCLE_KEEPER=1 LR_ENGINE=cursor python3
+tests/lifecycle/test_lrb_lifecycle.py -v -k a3` on a machine where `cursor-agent status` shows
+logged in; capture a real stdout JSON sample and confirm `total_cost_usd` presence/absence before
+claiming empirical verification complete.
 
 ## Backend reliability — transient flakiness observed 2026-07-20
 
@@ -91,4 +113,7 @@ isn't silently masked (backlog).
 - `engine-kinds-design-decision.md` — per-kind dispatch pattern
 - `codex-exec-real-invocation-contract.md` — the cost-blind kind precedent
 - `cursor-cli-and-harness-operational-notes.md` — harness driver notes
+- `kill-tree-enumerate-before-signal-ordering.md` — the general enumerate-before-kill ordering rule this fix follows
+- `testing-simulate-process-escape-without-setsid-binary.md` — the macOS-portable technique used to regression-test this without a real `cursor-agent` call
+- `hot-path-latency-can-expose-latent-test-timing-races.md` — unrelated tests that broke when this fix's `ps` call slowed `_kill` down
 - `docs/beings.md` — user-facing reference
