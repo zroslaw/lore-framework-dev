@@ -96,6 +96,53 @@ Scenario catalog status (numbering per the draft):
 | Tier 2 | spawn-teammate | deferred — not headless-scriptable (multi-pane UI) |
 | Tier 2 | df-repo-init, df-ula-file | deferred — BETA, out of scope for this pass |
 
+## Keeper lifecycle scenarios (Layer 3, Being Keeper)
+
+- **`lifecycle/test_lrb_lifecycle.py`** + **`lifecycle/keeper_harness.py`**
+  — real-engine scenarios for the Being Keeper (`lrb`, `lore-framework/scripts/lrb.py`), covering
+  what only a real engine subprocess can prove (real argv, real headless result-JSON shape, real
+  cost fields, real process trees to kill, real `ps` output to parse identity from). Deliberately
+  does **not** re-cover scheduling math, budget gating, outbox validation, or PID-identity *logic*
+  — those are already exercised deterministically and at zero cost by `test_lrb.py`'s stub-engine
+  suite. Design: lore-architect `workdir/draft-lrb-lifecycle-tests.md`.
+
+  **Gated separately from `LR_LIFECYCLE`: `LR_LIFECYCLE_KEEPER=1`.** Keeper scenarios have a
+  strictly higher blast-radius class than "one headless call that costs money" — some spawn a real
+  background process (a real process tree to kill, or a real `lrb daemon` subprocess) that could
+  outlive a naive test. Every scenario sandboxes `$LRB_HOME`/`$LRB_LAUNCHAGENTS_DIR` into a
+  throwaway tempdir and guarantees teardown of anything real it spawned, even on assertion failure
+  — never touches the real machine's `~/.lore-beings` or loads a real `launchd` job.
+
+  ```bash
+  LR_LIFECYCLE_KEEPER=1 LR_ENGINE=claude python3 tests/lifecycle/test_lrb_lifecycle.py -v
+  LR_LIFECYCLE_KEEPER=1 LR_ENGINE=codex  python3 tests/lifecycle/test_lrb_lifecycle.py -v -k a2
+  LR_LIFECYCLE_KEEPER=1 LR_ENGINE=cursor python3 tests/lifecycle/test_lrb_lifecycle.py -v -k a3
+  ```
+
+  Same env knobs as the framework's own lifecycle suite (`LR_FRAMEWORK_DIR`, `LR_RUN_TIMEOUT`,
+  `LR_KEEP_FIXTURES`, `LR_DEBUG_DIR`), plus `LR_ENGINE` selects which single engine's scenarios run
+  (claude-only scenarios skip cleanly under `LR_ENGINE=codex`/`=cursor`) and `LR_TEST_MODEL`
+  overrides the per-engine cheapest-model default (`MODEL_DEFAULTS` in `keeper_harness.py`: claude
+  → haiku, codex → gpt-5.4-mini, cursor → composer-2.5).
+
+  **Hard prerequisite:** run on a real shell with a working `ps` binary — a sandboxed environment
+  that blocks `ps` forces every PID-identity check down the "unknown" branch and can't exercise the
+  confirmed-match logic the D1 scenario exists to prove (see `macos-ps-o-multi-field-single-line.md`).
+
+  Recommended-minimum tier (9 of the design's 13 scenarios):
+
+  | # | Scenario | Engine kind(s) | Status |
+  |---|---|---|---|
+  | A1 | Core loop: existential task fires → real spawn → cost charged → ledger `ok` | claude | ✅ |
+  | A2 | Core loop: codex JSONL `turn.completed` parsed, flat cost charged | codex | ✅ |
+  | A3 | Core loop: cursor claude-shaped JSON parsed, real cost charged | cursor | ✅ (supersedes standalone `../test_lrb_cursor_real_e2e.py`, kept for now during migration) |
+  | B1 | Timeout kill takes down the real process tree (grandchildren too) | claude | ✅ |
+  | C1 | Self-scheduling round trip via real `lrb schedule` invocation | claude | ✅ |
+  | C4 | Self-scheduling denied under `permission_mode: default` — no hang, no silent success | claude | ✅ |
+  | D1 | Real PID-identity confirmed-match against a real engine's `ps` output | claude | ✅ |
+  | E1 | Real `lrb daemon` subprocess: daemon.lock, SIGTERM shutdown, lock release | claude | ✅ (PATH-under-launchd/M7 minimal-PATH probe deliberately out of scope — see file docstring) |
+  | B2/B3/D2/D3 | Same as B1/D1, codex/cursor | codex, cursor | deferred — engine-agnostic mechanism, claude coverage is the representative proof (design §8) |
+
 ## Quality benchmark (Layer: lore utilization)
 
 `quality/` measures whether an agent's lore actually improves its output. Each probe plants a

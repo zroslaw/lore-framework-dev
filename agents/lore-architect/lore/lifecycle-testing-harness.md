@@ -38,6 +38,39 @@ placement rule (outside finalize's `agents/` commit scope), same deterministic-f
 discipline; it adds a pinned LLM judge only for the behavior stage. See
 `quality-benchmark-feature.md`.
 
+## Keeper (Lore Beings) coverage — separate flag, higher blast radius (2026-07-20)
+
+Until 2026-07-20 the harness had **zero** coverage of Lore Beings / the Being Keeper — the only
+real-engine Keeper test was a standalone Cursor-only script (`test_lrb_cursor_real_e2e.py`). Closed
+that gap with `tests/lifecycle/keeper_harness.py` + `tests/lifecycle/test_lrb_lifecycle.py`: 8
+scenarios — A1–A3 (core spawn→result→ledger loop, one per engine kind), B1 (real process-tree
+kill), C1 (self-scheduling round trip via the outbox), C4 (self-scheduling denied under the default
+permission mode), D1 (real PID-identity confirmed-match), E1 (real `lrb daemon` subprocess).
+
+**Gated behind a *separate* flag, `LR_LIFECYCLE_KEEPER=1` — deliberately not folded into
+`LR_LIFECYCLE=1`.** Keeper scenarios are a strictly higher blast-radius class: some spawn a real
+background process (`lrb daemon`, launchd-style) that must be torn down even on assertion failure,
+not just "one headless call that costs money." Keep the two gates distinct so a routine full-suite
+pre-push run doesn't silently start daemons. The Keeper's own `$LRB_HOME` / `$LRB_LAUNCHAGENTS_DIR`
+env-var sandboxing (already built into `lrb.py`, no prerequisite code change) is what makes these
+scenarios safe to run against a throwaway home.
+
+**Real-engine-verified 2026-07-20** at the recommended-minimum tier (9 of the design's 13
+scenarios): **claude 6/6** (A1, B1, C1, C4, D1, E1), **codex 1/1** (A2), **cursor 1/1** (A3, after
+adding a `session_cost_usd` fallback to the test's engine config — see
+`cursor-agent-real-invocation-contract.md`). B2/B3/D2/D3 (codex/cursor variants of process-kill and
+PID-identity) were deliberately deferred: those mechanisms are engine-agnostic in the Keeper's own
+code, so claude coverage is the representative proof.
+
+The scenario catalog + sandboxing mechanism + cheapest-model picks were produced by a **Fable-model
+subagent given a design-only brief** (read the shipped `lrb.py`, the `harness.py` conventions, the
+beings draft; propose but do not implement) → `workdir/draft-lrb-lifecycle-tests.md`. The design
+correctly found the built-in env-var sandboxing by reading the actual source rather than assuming.
+Two concrete issues hit while getting these green are recorded as their own topics:
+`keeper-spawn-prompt-boilerplate-distraction.md` (a cheap model fixating on the always-appended
+self-scheduling boilerplate) and the cursor-backend-flakiness note in
+`cursor-agent-real-invocation-contract.md`.
+
 Out of scope for this harness (covered elsewhere or not headless-scriptable):
 - Tier 2 `wait`/`emit` — already covered at the protocol level by the pre-existing `test_wait.py`; a lifecycle-level duplicate adds little.
 - `spawn-teammate` — not headless-scriptable (multi-pane UI).
@@ -122,3 +155,4 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `lifecycle-harness-parallelization.md` — future improvement: parallel scenario execution.
 - `quality-benchmark-feature.md` — the sibling quality track (`tests/quality/`): lore utilization, planted-needle probes, treatment/control uplift.
 - `benchmark-measurement-design-principles.md` — the measurement-design principles shared with (and extending) this harness's assertion style.
+- `lore-beings-design.md` — the feature the `LR_LIFECYCLE_KEEPER=1` track exercises; `keeper-spawn-prompt-boilerplate-distraction.md`, `cursor-agent-real-invocation-contract.md` — the two issues hit getting the Keeper scenarios green.

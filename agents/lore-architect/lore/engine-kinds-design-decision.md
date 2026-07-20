@@ -27,6 +27,27 @@ extension point when one is.
 Landed alongside the v28 Lore Beings release (`lore-framework` commit `5f7eea1` "codex engine
 kind", on top of the PID-identity fix, below the v28 release commit `44bc57d`).
 
+## Real-engine findings that sharpen the kind contracts (2026-07-20)
+
+Two gaps surfaced building the Keeper lifecycle scenarios (`lifecycle-testing-harness.md`
+§ Keeper coverage) — both are per-kind contract asymmetries the current `cmd_engines_add` schema
+doesn't yet match:
+
+- **`cursor` is empirically cost-blind too.** Real `cursor-agent` (2026.07.16, `composer-2.5`,
+  `--output-format json`) returns **no `total_cost_usd`** — only token `usage`. So the flat
+  `--session-cost-usd` fallback is load-bearing for cursor, exactly as for codex, yet
+  `cmd_engines_add` treats it as **optional for cursor but mandatory for codex**. Without it, cost
+  charges `$0.00` forever and the `daily-usd` gate never trips. Backlog: make it mandatory for
+  cursor too (or re-verify across models first). See `cursor-agent-real-invocation-contract.md`.
+- **`claude` kind has no `--plugin-dir` mechanism at all.** `spawn_session` passes `--plugin-dir`
+  only for `cursor`; a claude-kind being can therefore load `lr:` skills (which every spawn prompt
+  assumes) **only if the configured engine `command` itself bakes in `--plugin-dir`** — i.e. a tiny
+  wrapper script (`exec claude --plugin-dir <framework-dir> "$@"`) registered as the command. An
+  operator following `docs/beings.md` literally would get a being that can never load Lore skills.
+  Backlog: add an explicit `--plugin-dir` config field for the claude kind (mirroring cursor), or
+  document the wrapper requirement. Both filed as findings, not silently patched into `lrb.py` —
+  they are user-facing schema/design decisions.
+
 ## See Also
 
 - `codex-exec-real-invocation-contract.md` — the empirical contract this decision encodes
