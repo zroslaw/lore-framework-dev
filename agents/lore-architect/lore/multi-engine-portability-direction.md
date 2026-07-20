@@ -60,9 +60,11 @@ model tier** — the same model can utilize lore very differently on different e
 
 **Update (2026-07-05): the hard Tier-B nucleus is now proven on Codex, not just feared.** The subagent fan-out (recall + merge) ran faithfully on real `codex exec` at the weak `gpt-5.4-mini` tier — including the host-reads-steps merge override, ground-truthed in Codex's rollout logs. So the "framework is prose" risk is empirically retired for the Codex boot/recall/merge path; the remaining fidelity questions are the un-exercised lifecycle scenarios and the still-unported Cursor target. See `codex-port-validated-end-to-end.md`.
 
-## Positioning implication
+## Positioning implication (revised 2026-07-20)
 
-Every surveyed competitor is bound to one engine (Claude Code) or to a vendor-hosted service — none federate knowledge across *different* coding agents sharing one git substrate. Once a port ships, "a team with members on different AI coding tools shares one knowledge base" becomes a differentiator no surveyed competitor can match, because they're all engine-bound by construction. This is the sharpest answer yet to "how do we stand out" and should inform README/positioning language once a port ships. See `similar-projects-landscape.md`.
+**Superseded claim:** this section used to argue that no surveyed competitor federates knowledge across different coding engines, and that shipping this port would therefore create an unmatched differentiator. The 2026-07-20 landscape re-survey invalidated that — claude-mem, BYK/loreai, and rohitg00/agentmemory all now claim multi-engine support, so cross-engine federation is table stakes, not a moat (see `similar-projects-landscape.md` § What changed).
+
+The port still matters — it's the technical enabler that makes "share one team-shared agent repo regardless of which coding engine each member runs" possible at all, and mixed-engine teams remain a real practical benefit. But it's now a supporting fact, not the headline claim. The headline is the **positioning triad** — canonical framing at `positioning-triad-differentiation.md`: (1) named role-based agents as the knowledge unit, (2) a deliberate, skill-triggered reflect/merge curation lifecycle vs. everyone else's automatic capture, (3) cross-agent collaboration (attach/consult/recall/spawn-teammate). Lead README/marketplace/positioning language with the triad; mention cross-engine and git-sharing as supporting facts. See `similar-projects-landscape.md` and `workdir/positioning-analysis-2026-07-20.md` for the full argument and draft pitch line.
 
 ## Status
 
@@ -129,6 +131,7 @@ The harness's first real use already found two genuine doc-fidelity bugs in `age
 - `codex-testing-methodology.md` — the rollout-log ground-truthing behind the Codex validation.
 - `port-landing-next-steps.md` — the landing record and the remaining follow-ups.
 - `similar-projects-landscape.md` — the competitive survey this direction's positioning case rests on.
+- `positioning-triad-differentiation.md` — the canonical positioning framing that now supersedes this topic's old cross-engine-uniqueness claim.
 - `wait-primitive-feature.md` — the MCP-based primitive that ports with no redesign, evidence for "packaging not redesign."
 - `framework-scope-vs-agent-scope.md` — the layer-ownership test the `docs/engines/` adapter lever will need to pass.
 - `worktrees-convention.md` — the Cursor auto-worktree interplay flagged to verify.

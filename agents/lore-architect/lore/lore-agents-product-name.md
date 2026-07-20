@@ -24,9 +24,20 @@ Canonical description copy lives in `MARKETPLACE.md`. The Codex manifest `longDe
 
 Treat "Lore Agents" as a **singular product name** ("Lore Agents is a local, git-backed plugin…", "Lore Agents gives…") except where the sentence genuinely refers to the agents ("Lore Agents turns coding agents into…" reads fine either way).
 
+## Name-collision watch (added 2026-07-20)
+
+The 2026-07-20 competitive re-survey found "Lore" is now a contested name in exactly this
+niche: **amarlearning/lore** ("institutional memory for your codebase"), **BYK/loreai**, and
+**getlore-ai** all use "Lore" as or within their project name. None is dominant yet (largest
+is loreai at 85 stars), but it's a standing consideration for discoverability/SEO of any
+"Lore Agents" advertising and for the brand decision itself — re-check on future naming
+discussions or before public marketplace submission. See `similar-projects-landscape.md`
+§ Name collision and `positioning-triad-differentiation.md`.
+
 ## See Also
 
 - `engine-marketplace-readiness.md` — where the manifest `displayName`/description fields live per engine.
 - `plugin-distribution.md` — repo/marketplace/plugin-id names that stay unchanged.
 - `terminology-domain-collision-trap.md` — the sibling terminology-hygiene discipline for adopter-facing prose.
 - `paste-link-installer-doc-genre.md`, `onboarding-doc-narrative-pattern.md` — the adopter-facing docs that carry the product name.
+- `similar-projects-landscape.md`, `positioning-triad-differentiation.md` — the name-collision finding and the positioning framing it bears on.

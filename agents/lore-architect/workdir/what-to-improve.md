@@ -142,16 +142,26 @@ this list.
 ### C3. Lore MCP server (`lr-lore`) — OPEN
 Expose lore search/read over agent repos as MCP tools → claude.ai web/mobile/Slack can
 consult the team's agents without a coding CLI. Substrate is already engine-agnostic
-files+git. Extends `agent-as-universal-working-environment.md` beyond terminals; per
-`similar-projects-landscape.md`, no competitor federates knowledge across surfaces.
-Medium build, biggest strategic reach.
+files+git. Extends `agent-as-universal-working-environment.md` beyond terminals — a
+surface-federation angle distinct from (and not eroded by) the engine-federation claims
+that `similar-projects-landscape.md`'s 2026-07-20 re-survey found competitors now also
+make; none of the surveyed CLI-bound tools reach non-CLI surfaces like this today. Medium
+build, biggest strategic reach.
 
 ### C4. Scheduled autonomous maintenance — OPEN
 Nightly routine (Claude Code cron/routines exist now): workspace-pull → script-backed
 check (A1) → staleness/groom report (B2/B3) → morning summary. First genuinely shippable
 rung of `autonomous-agents-vision.md` on existing engine features.
 
-### C5. Lore graph visualization — OPEN
+### C5. OKF (Google Open Knowledge Format) alignment evaluation — OPEN
+Added 2026-07-20 from the landscape re-survey. OKF v0.1 (Google, 2026-06-12) standardizes
+markdown-in-git knowledge graphs — our substrate space. Evaluate: read the spec, then pick
+(a) topic frontmatter adoption, (b) `lore → OKF` export bridge, or (c) watch-and-wait.
+Cheap interop win if OKF gets traction; conflicts with our no-frontmatter-on-topics
+convention, so don't rush a convention change for a v0.1 spec. Backlog ref: § OKF
+Alignment; see `similar-projects-landscape.md`.
+
+### C6. Lore graph visualization — OPEN
 Script rendering the topic graph to HTML: nodes = topics, edges = references, color =
 staleness, orphans highlighted. Cheap, demo-sexy, doubles as the groom report's visual
 surface.

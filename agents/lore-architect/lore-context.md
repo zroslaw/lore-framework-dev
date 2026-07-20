@@ -61,6 +61,13 @@ directory copy + root `PRIVACY.md`) and precise separation between runtime relea
 submission-support files, and per-engine verified publication status. See `engine-marketplace-readiness.md`, `plugin-distribution.md`,
 `cursor-plugin-distribution-update-model.md`, `plugin-manifest-versioning.md`.
 
+Positioning copy for README/marketplace submission must lead with the **triad** (named
+role-based agents + deliberate reflect/merge curation + cross-agent collaboration), not
+cross-engine support — see `positioning-triad-differentiation.md`. **Re-survey the
+competitive landscape (`similar-projects-landscape.md`) before any positioning-sensitive
+ship** — README rewrite, marketplace submission, public announcement — the space moved
+materially in just 18 days as of the 2026-07-20 re-survey.
+
 ## Boot & Freshness
 
 Boot (`agent-boot.md`, single source of truth): discover agent → auto-pull repo → version check → read `role.md` + `lore-context.md` → detect teammate spawn → confirm. **Boot loads only those two files; topics are read on demand.** Repos auto-pull at every session-context boundary (boot, attach, pre-merge) to match the team's latest pushed state; `/lr:pull-lore` is the manual refresh. See `freshness-contracts-at-session-boundaries.md`, `auto-pull-mechanism.md`.
@@ -175,8 +182,13 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
   `lifecycle-testing-harness.md`, `codex-cli-plugin-loading-findings.md`,
   `codex-local-plugin-update.md`, `cursor-agent-cli-probe-findings.md`,
   `headless-cli-smoke-testing-discipline.md`, `haiku-ambiguity-detector.md`, and
-  `similar-projects-landscape.md` (the positioning case — no surveyed competitor federates
-  knowledge across different coding engines). **v22** then added top-level engine-readable install
+  `similar-projects-landscape.md`. The original positioning case for this direction — "no
+  surveyed competitor federates knowledge across different coding engines" — was invalidated
+  by the 2026-07-20 landscape re-survey (claude-mem, BYK/loreai, and rohitg00/agentmemory all
+  now claim multi-engine support); cross-engine is now a supporting fact, not the headline.
+  Canonical positioning framing going forward is the **triad** — named role-based agents as
+  the knowledge unit, deliberate reflect/merge curation, cross-agent collaboration — see
+  `positioning-triad-differentiation.md`. **v22** then added top-level engine-readable install
   guides (`INSTALL-CODEX.md`, `INSTALL-CURSOR.md`), a Codex refresh helper, and engine-specific
   `R > F` guidance — plus the durable per-engine hub topics `claude-engine-capabilities.md`,
   `codex-engine-capabilities.md`, and `cursor-engine-capabilities.md` so future engine work starts

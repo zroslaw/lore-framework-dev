@@ -1,27 +1,56 @@
-# Competitive Landscape — Similar Projects (surveyed 2026-07-02)
+# Competitive Landscape — Similar Projects (re-surveyed 2026-07-20)
 
-Survey of external projects occupying similar space to the lore framework, run alongside the multi-engine-portability assessment (`multi-engine-portability-direction.md`). **No project combines all of lore-framework's pieces** — named role-based agents + team-shared git repos + a reflect/merge lifecycle + attach/consult/recall cross-agent mechanisms — but the space is crowded on individual axes. Useful as a positioning reference, and as a landscape check before calling any framework mechanism "novel."
+Survey of external projects occupying similar space to the lore framework. First surveyed 2026-07-02 alongside the multi-engine-portability assessment; re-surveyed 2026-07-20 — the space moved noticeably in those 18 days. **No project combines all of lore-framework's pieces** — named role-based agents + team-shared git repos + a deliberate reflect/merge lifecycle + attach/consult/recall cross-agent mechanisms — but individual axes that were differentiators in early July are eroding fast (see "What changed" below).
 
-## Surveyed projects
+## Name collision: three external projects called "Lore" (new, 2026-07-20)
 
-- **claude-mem** — auto-captures Claude Code sessions, compresses, re-injects. Personal, fully automatic (no skill-triggered lifecycle), no roles, no team-sharing.
-- **claude-memory-compiler** — closest in spirit: hooks capture sessions, an LLM "compiler" organizes them into cross-referenced knowledge articles (Karpathy's LLM-KB idea). Its merge-equivalent is automated where lore-framework's is skill-triggered (reflect/merge as deliberate phases, not a background hook).
-- **agentmemory** (two unrelated projects, `jayzeng/` and `rohitg00/`) — markdown memory with semantic search; the `rohitg00` variant tags writes per-role (`AGENT_ID`) in multi-agent setups — the closest external analog to per-agent lore ownership.
-- **memsearch** (Zilliz) — markdown as source of truth with a Milvus vector index on top. A concrete model for the day lore-framework's own parked vector-search item activates. See `vector-db-search-parked.md` (trigger: >100 topics/agent — currently ~90).
-- **claude-supermemory**, Letta/MemGPT, mem0, Zep — hosted/DB-backed memory layers. Opposite pole from lore-framework's no-database, git-as-backend stance.
-- **Claude Code's own built-in auto memory** — the real competitive pressure on the *personal, single-project* use case; it will keep improving for free. Lore-framework's moat is explicitly the team-shared, multi-agent, cross-session-lifecycle story, not personal note-taking.
+The name "Lore" is now contested in exactly this niche — relevant to the "Lore Agents" product-name decision (`lore-agents-product-name.md`):
 
-## Positioning implication
+- **amarlearning/lore** — "institutional memory for your codebase." Closest in *spirit*: captures decision reasoning (rejected alternatives, constraints) via Claude Code lifecycle hooks into a version-controlled `.lore/` directory, so **teams inherit knowledge via git** — the same team-shared-via-git bet we made. Three-tier promotion (temp → staging/branch → decisions on merge); decisions anchor to symbols, not line numbers. But: Claude-Code-only (built on its hook system), fully automatic capture (no deliberate reflect/merge), codebase-scoped not agent-scoped, nascent (4 stars, v0.2.1).
+- **BYK/loreai** — most technically substantial. A transparent LLM-proxy doing incremental *distillation* (not summarization) into three tiers: SQLite FTS5 full history → timestamped observation logs → curated `.lore.md`/`AGENTS.md` maintained by a background curator agent. **Cross-engine** (Claude Code, Codex, OpenCode, Pi, any OpenAI/Anthropic-compatible API via gateway) with a *planned* team-sync feature literally called "Folk Lore." 85 stars, 69 releases, very active, self-declared experimental.
+- **getlore-ai** — hosted knowledge tools for agents (semantic search + citations). Vendor-hosted pole; least similar.
 
-Every listed competitor is bound to one engine (Claude Code) or to a vendor-hosted service. None federate knowledge across *different* coding agents sharing one git substrate. Once multi-engine ports exist (Codex, Cursor — see `multi-engine-portability-direction.md`), "a team with members on different AI coding tools shares one knowledge base" becomes a differentiator no surveyed competitor can match, because they're all engine-bound by construction. This is the sharpest answer yet to "how do we stand out" and should inform README/positioning language once a port ships.
+## Surveyed projects (2026-07-02 baseline, updated)
+
+- **claude-mem** — auto-captures sessions, compresses, re-injects (SQLite + ChromaDB vector search). **Now cross-engine** (Claude Code, Codex, Gemini, Copilot, OpenCode, more) and reportedly ~65K stars — no longer the Claude-bound personal tool of the first survey. Still: automatic capture, no roles, no team-sharing story.
+- **claude-memory-compiler** — hooks capture sessions, an LLM "compiler" organizes them into cross-referenced knowledge articles (Karpathy's LLM-KB idea). Merge-equivalent is automated where ours is skill-triggered.
+- **agentmemory** (two unrelated projects) — markdown memory, git-friendly, no database. `jayzeng/` targets Claude Code/Codex/Cursor with qmd semantic search; `rohitg00/` now claims **auto-install into 50+ agents' native skill directories** — the multi-engine packaging problem we solved by hand for 3 engines, solved there at breadth (though shallower per engine). Its per-role write-tagging (`AGENT_ID`) remains the closest external analog to per-agent lore ownership.
+- **memsearch** (Zilliz) — markdown source of truth + Milvus vector index. Still the concrete model for our parked vector-search item (`vector-db-search-parked.md`; note the >100-topics trigger has since fired at ~147).
+- **claude-supermemory, Letta/MemGPT, mem0, Zep** — hosted/DB-backed memory layers; opposite pole from our no-database, git-as-backend stance.
+- **Karpathy LLM-Wiki pattern implementations** — a growing family: `ar9av/obsidian-wiki`, `nvk/llm-wiki`, multiple practitioner write-ups of self-maintaining markdown KBs, plus "one git repo as shared team brain" guides appearing as blog prose. The *pattern* is mainstream; the deliberate lifecycle around it is not.
+- **Claude Code's own built-in auto memory** — still the real competitive pressure on the personal single-project use case; improves for free.
+
+## Standards-level developments (new, 2026-07-20)
+
+- **Google Open Knowledge Format (OKF)** — announced 2026-06-12, v0.1, Apache 2.0. Vendor-neutral spec for organizational knowledge as **markdown files + YAML frontmatter in directories**, linked by standard markdown links into a traversable knowledge graph, hostable in any git repo. Reserved filenames `index.md` / `log.md`; only required frontmatter field is `type`. Reference implementations shipped (sample bundles, BigQuery enrichment agent, HTML visualizer). This is a standards land-grab in exactly our substrate space. Note the direct convention conflict: OKF *requires* frontmatter on knowledge files; our lore topics are deliberately frontmatter-free. Tracked as a backlog item (evaluate alignment/adoption — see `framework-improvements-backlog.md` § OKF alignment).
+- **AGENTS.md standardized under the Linux Foundation** — 60K+ projects, read natively by essentially every coding agent. The memory-file half of our engine bindings is now commodity infrastructure.
+
+## What changed between 2026-07-02 and 2026-07-20
+
+- **"Cross-engine" alone is no longer a differentiator.** The first survey's positioning claim — "every competitor is engine-bound by construction" — is dead: claude-mem, loreai, and rohitg00/agentmemory all now claim multi-engine support.
+- **"Team-shared via git" is emerging elsewhere** — amarlearning/lore has it today; loreai plans it ("Folk Lore").
+- **The substrate is standardizing** (OKF, Linux-Foundation AGENTS.md) — plain-markdown-in-git knowledge is becoming commodity, which validates the bet and commoditizes it simultaneously.
+
+## Positioning implication (revised)
+
+The moat has narrowed to the triad no surveyed project has *any* element of, let alone all three:
+
+1. **Named role-based agents as the knowledge unit** — identity + role + own lore, vs. everyone else's codebase- or project-scoped memory.
+2. **Deliberate, skill-triggered reflect/merge lifecycle** — curation as an intentional act, vs. automatic hook/proxy capture.
+3. **Cross-agent collaboration mechanisms** — attach/consult/recall/spawn-teammate.
+
+Positioning language should lead with the triad, not with cross-engine or git-sharing alone. The "Lore" name collision is a real (if early-stage) brand consideration for `lore-agents-product-name.md`. Canonical write-up of this framing (advertising pitch line, risk assessment, re-survey-cadence rule): `positioning-triad-differentiation.md`.
 
 ## Status
 
-Point-in-time survey (2026-07-02). Re-survey periodically — this is a fast-moving space (note how much shipped between the framework's early design and this survey: SKILL.md standardization, AGENTS.md adoption, several of these memory tools).
+Re-surveyed 2026-07-20 (prior: 2026-07-02). This space moves in weeks, not months — re-survey before any positioning-sensitive ship (README rewrite, marketplace submission, public announcement).
 
 ## See Also
 
-- `multi-engine-portability-direction.md` — the direction this survey's positioning implication feeds.
-- `team-shared-knowledge-principle.md` — the foundational framing that is lore-framework's actual differentiator against every surveyed project.
-- `framework-as-engine-not-kb.md` — why lore-framework frames itself as an engine, not a KB tool like most of the surveyed projects.
-- `vector-db-search-parked.md` — the parked lore-framework item `memsearch` is a concrete model for.
+- `multi-engine-portability-direction.md` — the direction the original positioning implication fed; its uniqueness claim needs the 2026-07-20 revision above.
+- `positioning-triad-differentiation.md` — the canonical positioning framing derived from this survey (advertising pitch, risk assessment, re-survey cadence).
+- `team-shared-knowledge-principle.md` — foundational framing; now shared (in weaker form) by amarlearning/lore.
+- `framework-as-engine-not-kb.md` — why lore-framework frames itself as an engine, not a KB tool.
+- `lore-agents-product-name.md` — the product-name decision the "Lore" collision bears on.
+- `vector-db-search-parked.md` — parked item `memsearch` models; trigger (>100 topics) has fired.
+- `framework-improvements-backlog.md` § OKF alignment — the tracked improvement item from this survey.

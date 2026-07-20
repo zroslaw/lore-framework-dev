@@ -224,6 +224,10 @@ Cross-engine plugin-marketplace readiness. Anchor topics: `engine-marketplace-re
 - **Plugin logo assets.** Cursor and Codex consume PNG logo assets from `assets/logo*.png`. Claude has
   no logo field today; revisit if Claude adds one.
 
+### OKF (Google Open Knowledge Format) Alignment (2026-07-20)
+
+- **Evaluate OKF compatibility/adoption for lore topics.** Google announced OKF v0.1 (2026-06-12, Apache 2.0): a vendor-neutral spec for knowledge as markdown + YAML frontmatter in git-hostable directories, linked into a traversable graph — a standards-level move in exactly our substrate space. If it gains traction, "OKF-compatible lore" could be a cheap interop/adoption win (any OKF-consuming agent could read a lore repo). **Known conflict:** OKF requires frontmatter (`type` field) on every knowledge file; our lore topics are deliberately frontmatter-free (frontmatter only on descriptor files, per `conventions.md`). Options to weigh: (a) adopt minimal frontmatter on topics — a real convention change; (b) an export/bridge script (`lore → OKF bundle`) keeping our format canonical; (c) watch and do nothing until OKF shows real consumer traction. Read the actual spec first (single page, per announcement) — the survey worked from secondary coverage. No action until evaluated; don't let a v0.1 spec drive a convention change. See `similar-projects-landscape.md` § Standards-level developments.
+
 ### Consistency Checks (`/lr:check`) & Plugin Manifest (v14, v15)
 
 - **check #19 — skip a missing `marketplace.json` gracefully.** Check #19 reads `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/marketplace.json` unconditionally. It's co-located for this plugin (source `"./"`), but co-location isn't guaranteed for all install/cache layouts (a marketplace-install cache may carry only `plugin.json`). Make the `marketplace.json` half conditional on the file existing, rather than erroring. Low-severity `/code-review` finding, shipped as-is. See `consistency-checks.md`, `plugin-manifest-versioning.md`. (`docs/check.md`)
