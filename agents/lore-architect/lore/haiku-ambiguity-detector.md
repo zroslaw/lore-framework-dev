@@ -20,6 +20,15 @@ Root cause in the doc: `version-check.md` prints an alarming deferral message (*
 
 This fix is orthogonal to the port — a genuine robustness win on its own. It **shipped in v19** (commit `72b1b2a`); it was authored fresh at landing because it was staged separately from the codex build, not carried in it. Re-validated 6/6 on haiku against the real v19 tree — test_06 now defers cleanly without emitting the boot-failure sentinel. See `port-landing-next-steps.md`.
 
+## The axis is engine, not just model tier (session-archive feature, 2026-07-21)
+
+The detector has a **second axis**: the agent harness, not only the model tier. Concrete instance — a new `docs/summarize.md` sub-step ("Step 1.5"), inserted mid-procedure to drive a `session-takeover archive` call, executed correctly on **Claude Code (sonnet)** and **Codex (gpt-5.4-mini)**, but was **silently skipped, twice across independent runs, on Cursor (`cursor-agent`)** — which runs **sonnet underneath**. Same model tier that passed on Claude Code; the difference was purely the CLI agent loop wrapping it. So this is not a model-tier ambiguity gap — it's an **engine/harness fidelity gap**. Cursor and Codex are not just "cheaper/weaker Claude"; their agent loops have independently different procedural-fidelity characteristics.
+
+Two composed lessons:
+
+1. **Run lifecycle scenarios on multiple *engines*, not just multiple model tiers within one engine.** Engine-axis gaps are invisible to model-tier testing alone. This is the harness's real reach — "run on every engine" (see `lifecycle-testing-harness.md`).
+2. **Inserting a new step into the middle of an established, long, numbered procedure is empirically higher-risk than appending one, or adding a standalone doc** — a real-engine agent dropped the inserted step outright rather than misreading it. A failed mitigation confirmed the depth: sharpening the disambiguating sentence (adding "a stderr warning is NOT a skip signal") did **not** fix it — the model then never invoked the tool at all. So the fix is not "sharpen the wording," it's the *structure*: prefer append or standalone-doc over mid-procedure insertion; where insertion is unavoidable, only real-engine verification **on every target engine** catches a silent skip (code review and even sonnet self-review will not — the insertion reads correctly to a strong reader). Disposition on the original instance: documented as a known BETA gap, non-blocking (no partial/corrupted summary resulted; the archive script itself is correct on Cursor's log format).
+
 ## Generalizable rule
 
 **Wherever a procedure prints a scary "cannot X" message but the flow is meant to continue, put the "this is not a failure, keep going" directive immediately adjacent — never only in a trailing invariants section.** A weak (or hurried, or context-pressured) reader acts on the first strong signal it hits.
