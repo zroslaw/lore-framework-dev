@@ -62,6 +62,21 @@ message and stderr tail.
 In CI, provide engine auth (e.g. `ANTHROPIC_API_KEY`) and set `LR_LIFECYCLE=1`; run
 nightly/on-demand, not per-commit.
 
+For release gates, prefer the lifecycle matrix runner so each engine/module result is recorded
+under `tests/lifecycle/results/`:
+
+```bash
+python3 tests/lifecycle/run_matrix.py --dry-run
+LR_LIFECYCLE=1 python3 tests/lifecycle/run_matrix.py --engine-jobs 3 --module-jobs 1
+LR_LIFECYCLE=1 python3 tests/lifecycle/run_matrix.py --engines claude --modules test_finalize.py
+```
+
+The runner defaults to the cheapest per-engine models already used by the harness
+(claude -> haiku, codex -> gpt-5.4-mini, cursor -> composer-2.5). Engines may run in parallel by
+default; modules within one engine stay serial unless `--module-jobs` is raised, avoiding avoidable
+quota bursts. It writes `summary.json`, per-module stdout/stderr logs, and `LR_DEBUG_DIR` captures
+inside the run directory.
+
 Scenario catalog status (numbering per the draft):
 
 | # | Scenario | Status |

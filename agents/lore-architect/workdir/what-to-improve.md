@@ -65,13 +65,26 @@ damage — but a check invocation that mutates is a footgun, and `/lr:check` #21
 benefit from a real dry-run). **Do:** add `--check` (exit non-zero on drift, write
 nothing), reject unknown args.
 
-### A4. v27 partial test gate has no tracked follow-up — OPEN
+### A4. Structured test-run metrics across all suites — OPEN
+Today's v28 e2e gate made cost/time reporting too manual: lifecycle results now persist
+module durations, but not a unified cross-suite run record; Claude cost is extractable from
+stdout, while Codex/Cursor report no USD in the current logs. **Do:** add a structured
+test-run metrics layer covering deterministic unit tests, standard lifecycle e2e, Keeper
+lifecycle e2e, and quality benchmark runs. At minimum record suite, command, framework/dev
+commit SHAs, started/ended timestamps, wall time, per-module/per-test durations, engine,
+model, status, result paths, and per-engine/per-test cost where the engine exposes it; mark
+cost as unavailable rather than guessing where it does not. Output should be machine-readable
+JSON plus a short markdown summary suitable for checked-in release-gate notes. Evidence:
+2026-07-22 v28 run required manual reconstruction of total time/cost from lifecycle logs.
+
+### A5. v27 partial test gate has no tracked follow-up — ✅ done 2026-07-22, covered by v28 gate
 `release-notes/27.md` honestly records the skipped Claude/Haiku + Codex lifecycle runs,
 but nothing schedules them — the next ship would silently inherit an unverified base.
 **Do:** run the deferred suites (limits have reset), or the next ship's gate must cover
-the union of v27+v28 changes.
+the union of v27+v28 changes. Covered by the v28 standard lifecycle matrix plus targeted
+reruns recorded in `workdir/v28-e2e-gate-2026-07-22.md`; delete on the next refresh.
 
-### A5. `docs/engines/claude.md` ↔ `CLAUDE.md` case-collision on macOS — OPEN (low)
+### A6. `docs/engines/claude.md` ↔ `CLAUDE.md` case-collision on macOS — OPEN (low)
 Observed live 2026-07-18: on case-insensitive APFS, Claude Code auto-injects
 `docs/engines/claude.md` as *directory memory* whenever any file under `docs/engines/` is
 read (filename matches `CLAUDE.md` case-insensitively). Harmless today (duplicate
@@ -170,7 +183,7 @@ surface.
 
 ## Recommended Sequencing (as of 2026-07-18)
 
-1. **v28 hygiene ship:** A1–A4 + the rot cleanup (A5 optional).
+1. **v28 hygiene ship:** A1–A5 + the rot cleanup (A6 optional).
 2. **Quality ship:** B1 + B2 (merge safety + staleness).
 3. **UX ship:** C1 tier 1 + C2.
 4. **Own design sessions:** B5 (trust model), C3 (MCP server), C4 (autonomous

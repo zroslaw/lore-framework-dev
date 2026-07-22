@@ -1,7 +1,9 @@
-# Lifecycle Harness — Parallelization (Future Improvement)
+# Lifecycle Harness — Parallelization
 
 User-raised 2026-07-06. The layer-3 lifecycle suite (`lore-framework-dev/tests/lifecycle/`)
-is safe to parallelize in principle but runs **one scenario at a time** today.
+is safe to parallelize in principle. As of 2026-07-22, standard lifecycle release gates should use
+`tests/lifecycle/run_matrix.py`, which wraps the existing `unittest` modules in isolated subprocesses
+and records durable JSON/log evidence under `tests/lifecycle/results/`.
 
 ## Why parallelize
 
@@ -27,15 +29,38 @@ affect correctness because fixtures don't leak.
   test file, or 2 engines in separate terminals).
 - **Log noise** — parallel runs need per-worker log prefixes or separate log files.
 - **Cost bursts** — same total spend, but concentrated; may trip quotas faster.
-- **Stdlib ethos** — prefer `LR_LIFECYCLE_JOBS` + `ProcessPoolExecutor` over adding pytest/xdist
-  unless the team explicitly opts into a dev dependency.
+- **Stdlib ethos** — keep this as a stdlib runner around `unittest`, not pytest/xdist, unless the
+  team explicitly opts into a dev dependency.
 
-## Suggested approaches (pick one later)
+## Implemented approach
 
-1. **`LR_LIFECYCLE_JOBS=N` runner** — small script wrapping discover, one process per test module
-   (`test_boot.py`, …). Stays stdlib-only.
-2. **Parallel by engine** — run Claude and Cursor suites in two terminals (simplest, no code).
-3. **Optional pytest-xdist** — if dev-repo accepts a non-stdlib test extra.
+`tests/lifecycle/run_matrix.py` runs one process per `(engine, test module)` pair. Default standard
+suite: `test_boot.py`, `test_consult_attach.py`, `test_finalize.py`, `test_recall.py`,
+`test_repo_workspace.py`, and `test_takeover.py`. Keeper coverage remains a separate `--suite keeper`
+path because it is gated by `LR_LIFECYCLE_KEEPER=1` and has higher blast radius.
+
+Default concurrency is intentionally conservative: all selected engines may run in parallel, but
+modules within one engine run serially (`--module-jobs 1`) unless the operator raises it. This gives
+most of the wall-time win across separate provider accounts without causing avoidable same-account
+quota bursts.
+
+Typical release-gate command:
+
+```bash
+LR_LIFECYCLE=1 python3 tests/lifecycle/run_matrix.py --engine-jobs 3 --module-jobs 1
+```
+
+Targeted rerun after a failure:
+
+```bash
+LR_LIFECYCLE=1 python3 tests/lifecycle/run_matrix.py --engines codex --modules test_finalize.py
+```
+
+Each run writes a timestamped directory containing `summary.json`, per-module stdout/stderr logs,
+and `LR_DEBUG_DIR` captures. Use that artifact as the release evidence instead of reconstructing
+status from session summaries.
+
+## Still Open
 
 Also optional: rename test files so discover order matches catalog #1–21 (cosmetic for debugging
 only).
