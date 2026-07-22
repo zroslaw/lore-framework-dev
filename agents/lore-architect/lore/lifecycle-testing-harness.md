@@ -101,6 +101,19 @@ per-engine model: Claude Code -> `haiku`, Codex -> `gpt-5.4-mini`, Cursor -> `co
 The multi-step scenarios like attach, finalize end-to-end, and the dirty-tree-gate walk cost the
 most. Free layer-1/2 tests (script tests, lint checks) remain ungated and pass in ~4s.
 
+## Release Gate Evidence States
+
+Keep "safe to commit" and "release-green" separate in status reports. A **release-prep
+checkpoint** is acceptable when deterministic tests are green, targeted failing lifecycle scenarios
+pass after fixes, Keeper coverage is green by engine, and the remaining broad-suite failures are
+provider/account-limit signatures. That state is worth committing so the work is not stranded in a
+dirty tree.
+
+A release is **release-green** only when the full standard lifecycle gate has a clean pass, or the
+user explicitly accepts targeted evidence plus documented provider-limit failures as the release
+gate. Do not describe a provider-limited checkpoint as ready to push/tag without that explicit
+acceptance.
+
 ## Claude account-limit signature
 
 Claude Code account-limit exhaustion can masquerade as broad lifecycle breakage. The signature is:
