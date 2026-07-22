@@ -54,7 +54,8 @@ LR_LIFECYCLE=1 python3 tests/lifecycle/test_boot.py -v -k 01    # one scenario
 ```
 
 Env knobs: `LR_ENGINE` (default `claude`; supported: `claude`, `codex`, `cursor`),
-`LR_TEST_MODEL` (engine-specific default), `LR_RUN_TIMEOUT` (seconds, default 420),
+`LR_TEST_MODEL` (overrides the cheapest per-engine default: claude -> haiku,
+codex -> gpt-5.4-mini, cursor -> composer-2.5), `LR_RUN_TIMEOUT` (seconds, default 420),
 `LR_FRAMEWORK_DIR` (as above). For debugging real-engine variance, set `LR_KEEP_FIXTURES=1`
 to keep throwaway workspaces and `LR_DEBUG_DIR=/path/to/debug` to dump each run's final
 message and stderr tail.
@@ -129,19 +130,21 @@ Scenario catalog status (numbering per the draft):
   that blocks `ps` forces every PID-identity check down the "unknown" branch and can't exercise the
   confirmed-match logic the D1 scenario exists to prove (see `macos-ps-o-multi-field-single-line.md`).
 
-  Recommended-minimum tier (9 of the design's 13 scenarios):
+  11 of the design's 13 scenarios:
 
   | # | Scenario | Engine kind(s) | Status |
   |---|---|---|---|
   | A1 | Core loop: existential task fires → real spawn → cost charged → ledger `ok` | claude | ✅ |
   | A2 | Core loop: codex JSONL `turn.completed` parsed, flat cost charged | codex | ✅ |
-  | A3 | Core loop: cursor claude-shaped JSON parsed, real cost charged | cursor | ✅ (supersedes standalone `../test_lrb_cursor_real_e2e.py`, kept for now during migration) |
+  | A3 | Core loop: cursor claude-shaped JSON parsed, real cost charged | cursor | ✅ |
   | B1 | Timeout kill takes down the real process tree (grandchildren too) | claude | ✅ |
+  | B2 | Same as B1 — proves codex's own shell tool spawns a real, killable subprocess tree | codex | ✅ |
+  | B3 | Same as B1 — proves cursor's own shell tool spawns a real, killable subprocess tree | cursor | ✅ |
   | C1 | Self-scheduling round trip via real `lrb schedule` invocation | claude | ✅ |
   | C4 | Self-scheduling denied under `permission_mode: default` — no hang, no silent success | claude | ✅ |
   | D1 | Real PID-identity confirmed-match against a real engine's `ps` output | claude | ✅ |
   | E1 | Real `lrb daemon` subprocess: daemon.lock, SIGTERM shutdown, lock release | claude | ✅ (PATH-under-launchd/M7 minimal-PATH probe deliberately out of scope — see file docstring) |
-  | B2/B3/D2/D3 | Same as B1/D1, codex/cursor | codex, cursor | deferred — engine-agnostic mechanism, claude coverage is the representative proof (design §8) |
+  | D2/D3 | Same as D1, codex/cursor | codex, cursor | deferred — `_pid_identity`'s `ps` call is pure OS-level process inspection, independent of which engine spawned the PID, so D1's claude proof is representative (unlike B1, which B2/B3 proved was NOT safe to assume) |
 
 ## Quality benchmark (Layer: lore utilization)
 
@@ -156,12 +159,12 @@ Gated behind `LR_QUALITY=1` (real engine calls, costs money). Two ways to run:
 **Single config** — one engine/model, probe×arm parallel inside (`LR_QUALITY_JOBS`, default 3):
 
 ```bash
-LR_QUALITY=1 python3 tests/quality/test_quality.py -v                     # claude:sonnet
+LR_QUALITY=1 python3 tests/quality/test_quality.py -v                     # claude:haiku
 LR_QUALITY=1 LR_ENGINE=codex python3 tests/quality/test_quality.py -v     # codex:gpt-5.4-mini
 ```
 
 `LR_TEST_MODEL` overrides the model; unset, it defaults to the engine's regular model
-(claude:sonnet, codex:gpt-5.4-mini, cursor:composer-2.5).
+(claude:haiku, codex:gpt-5.4-mini, cursor:composer-2.5).
 
 **Matrix** — `run_matrix.py` drives many configs in parallel, each an isolated
 `test_quality.py` subprocess, across two concurrency axes:

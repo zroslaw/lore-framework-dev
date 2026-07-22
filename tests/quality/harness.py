@@ -15,7 +15,7 @@ Environment:
   LR_ENGINE           engine to drive (default: claude; supported: claude,
                       cursor, codex)
   LR_TEST_MODEL       model for the agent runs (default: the engine's
-                      REGULAR_MODEL — claude:sonnet, codex:gpt-5.4-mini,
+                      REGULAR_MODEL — claude:haiku, codex:gpt-5.4-mini,
                       cursor:composer-2.5)
   LR_JUDGE_MODEL      model for S3 judging — always runs on the claude CLI so
                       the judge is identical across engines (default: haiku)
@@ -66,7 +66,7 @@ ENGINE = os.environ.get("LR_ENGINE", "claude")
 # model) and `deep` (engine -> [models]) update per-engine entries. Set
 # LR_QUALITY_NO_LOCAL=1 (or run_matrix --no-local-config) to ignore it and force
 # the canonical defaults — this is what a release ship gate uses.
-_DEFAULT_REGULAR = {"claude": "sonnet", "codex": "gpt-5.4-mini", "cursor": "composer-2.5"}
+_DEFAULT_REGULAR = {"claude": "haiku", "codex": "gpt-5.4-mini", "cursor": "composer-2.5"}
 _DEFAULT_DEEP = {
     "claude": ["haiku", "sonnet", "opus-4.8"],
     "codex": ["gpt-5.4-mini", "gpt-5.4"],
@@ -102,7 +102,7 @@ def load_tiers():
 
 ENGINE_ORDER, REGULAR_MODEL, DEEP_MODELS = load_tiers()
 
-MODEL = os.environ.get("LR_TEST_MODEL", REGULAR_MODEL.get(ENGINE, "sonnet"))
+MODEL = os.environ.get("LR_TEST_MODEL", REGULAR_MODEL.get(ENGINE, "haiku"))
 JUDGE_MODEL = os.environ.get("LR_JUDGE_MODEL", "haiku")
 RUN_TIMEOUT = int(os.environ.get("LR_RUN_TIMEOUT", "420"))
 JOBS = int(os.environ.get("LR_QUALITY_JOBS", "3"))

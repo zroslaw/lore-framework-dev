@@ -1,6 +1,6 @@
 ---
 description: Lore agents dedicated to lore framework development
-version: "26"
+version: "28"
 repos:
   - git@github.com:zroslaw/lore-framework.git
 ---

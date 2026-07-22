@@ -31,6 +31,12 @@ the *complete* suite, not a proportionate subset (see `execution-testing-catches
 `harness.py` cursor + codex branches plus an engine-neutral `memory_file_name()` (dev commit
 `73876d1`).
 
+**Default model tier (v28, 2026-07-21):** real-engine ship gates use the cheapest practical model
+per engine by default: Claude Code -> `haiku`, Codex -> `gpt-5.4-mini`, Cursor -> `composer-2.5`.
+`LR_TEST_MODEL` remains an explicit override for deliberate higher-tier probes, but do not
+accidentally run the preship e2e gate on `sonnet` or another expensive/default account tier. This
+also applies to the sibling `tests/quality/` regular matrix default.
+
 **Sibling track (2026-07-07):** a third test track, the quality benchmark
 (`lore-framework-dev/tests/quality/`, gated `LR_QUALITY=1`), measures **lore utilization** — did
 the lore make the output better — where this harness measures **procedure fidelity**. Same repo
@@ -90,7 +96,10 @@ Assertions are structural, matching the design premise: git HEAD before/after, f
 
 ## Cost and gating
 
-Gated behind `LR_LIFECYCLE=1` (real API cost, ~$0.10–1.35 per scenario on sonnet depending on complexity — the multi-step ones like attach, finalize end-to-end, and the dirty-tree-gate walk cost the most). Free layer-1/2 tests (script tests, lint checks) remain ungated and pass in ~4s.
+Gated behind `LR_LIFECYCLE=1` (real API cost; the default tier is the cheapest practical
+per-engine model: Claude Code -> `haiku`, Codex -> `gpt-5.4-mini`, Cursor -> `composer-2.5`).
+The multi-step scenarios like attach, finalize end-to-end, and the dirty-tree-gate walk cost the
+most. Free layer-1/2 tests (script tests, lint checks) remain ungated and pass in ~4s.
 
 ## Claude account-limit signature
 

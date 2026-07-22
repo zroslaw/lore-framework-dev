@@ -13,7 +13,7 @@ Environment:
   LR_LIFECYCLE=1        enable the tests (required)
   LR_FRAMEWORK_DIR      plugin under test (default: sibling ../lore-framework)
   LR_ENGINE             engine to drive (default: claude; supported: claude, cursor, codex)
-  LR_TEST_MODEL         model for the engine run (default: sonnet; codex default: gpt-5.4-mini)
+  LR_TEST_MODEL         model override (default: cheapest per-engine, see MODEL_DEFAULTS)
   LR_RUN_TIMEOUT        per-run timeout in seconds (default: 420)
 
 TODO(parallelization): Scenarios are independent (each test gets its own temp fixture +
@@ -34,10 +34,8 @@ FRAMEWORK_DIR = os.path.abspath(
     os.environ.get("LR_FRAMEWORK_DIR", os.path.join(HERE, "..", "..", "..", "lore-framework"))
 )
 ENGINE = os.environ.get("LR_ENGINE", "claude")
-MODEL = os.environ.get(
-    "LR_TEST_MODEL",
-    "gpt-5.4-mini" if ENGINE == "codex" else "sonnet",
-)
+MODEL_DEFAULTS = {"claude": "haiku", "codex": "gpt-5.4-mini", "cursor": "composer-2.5"}
+MODEL = os.environ.get("LR_TEST_MODEL", MODEL_DEFAULTS.get(ENGINE, "haiku"))
 RUN_TIMEOUT = int(os.environ.get("LR_RUN_TIMEOUT", "420"))
 
 LIFECYCLE_ENABLED = os.environ.get("LR_LIFECYCLE") == "1"
@@ -143,14 +141,22 @@ CREATE_REPO_PROMPT = (
     "Invoke the lr:create-repo skill to scaffold a new lore agent repo named "
     "'new-fixture-repo' in this workspace. If asked for a description, use "
     "'Fixture repo created by lifecycle tests'. Do not ask for confirmation — "
-    "proceed directly using that description. Print DONE when complete."
+    "proceed directly using that description. Before printing DONE, verify that "
+    "'new-fixture-repo/lore-repo.md', 'new-fixture-repo/agents/', "
+    "'new-fixture-repo/.gitignore', 'new-fixture-repo/README.md', and "
+    "'new-fixture-repo/.git/' exist. Print DONE only after those paths exist."
 )
 
 CREATE_AGENT_PROMPT = (
     "Invoke the lr:create-agent skill to add a new agent named "
     "'second-fixture-agent' to the existing lore agent repo in this workspace. "
     "Its responsibility: 'Handles fixture testing tasks.' Do not ask for "
-    "confirmation — proceed directly using that description. Print DONE when complete."
+    "confirmation — proceed directly using that description. Before printing DONE, "
+    "verify that 'test-lore/agents/second-fixture-agent/role.md', "
+    "'test-lore/agents/second-fixture-agent/lore-context.md', "
+    "'test-lore/agents/second-fixture-agent/lore/', and "
+    "'test-lore/agents/second-fixture-agent/workdir/' exist. Print DONE only "
+    "after those paths exist."
 )
 
 INIT_PROMPT = (

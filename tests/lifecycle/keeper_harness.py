@@ -303,8 +303,7 @@ class KeeperFixture(object):
 
     def build_being(self, repo, agent, engine, model, daily_usd, task_name, task_text,
                      schedule=None, timeout_minutes=3):
-        """Minimal being fixture — being.md + task prompt only, matching the
-        already-validated ../test_lrb_cursor_real_e2e.py precedent (no
+        """Minimal being fixture — being.md + task prompt only (no
         role.md/lore-context.md: the Keeper's own spawn prompt tells the
         being to attempt agent-boot.md, but the Keeper mechanics under test
         here don't depend on that boot actually succeeding — every task

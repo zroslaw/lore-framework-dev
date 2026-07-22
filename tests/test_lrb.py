@@ -12,10 +12,12 @@ here touches the real machine's ~/.lore-beings or ~/Library/LaunchAgents.
 Run:  python3 tests/test_lrb.py -v
   or: python3 -m unittest discover -s tests -v
 """
+import argparse
 import importlib.util
 import json
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -799,19 +801,12 @@ class TestKeeperIntegration(LrbTestCase):
         entry["started"] = (datetime.now() - timedelta(minutes=5)).isoformat(timespec="seconds")
         lrb.save_state(self.workspace, state)
 
-        keeper.tick(cfg)  # detects overdue, sends SIGTERM
-        state = lrb.load_state(self.workspace)
-        self.assertTrue(len(state["beings"][being_id]["running"]) == 1)
-        self.assertIn("kill_sent_at", state["beings"][being_id]["running"][0])
-
-        # The process is this Keeper instance's own child (tracked in
-        # live_procs), so it stays a zombie — and still answers os.kill(pid,
-        # 0) — until the Keeper itself reaps it via proc.poll() on a later
-        # tick. Give the OS a moment to actually deliver/act on SIGTERM, then
-        # let the Keeper reap it the normal way rather than polling raw PID
-        # liveness from outside (which would never observe a same-process
-        # zombie's death).
-        time.sleep(0.3)
+        keeper.tick(cfg)  # detects overdue, sends SIGTERM (to the process group AND
+        # any descendant found by a ppid walk — see _kill/_descendant_pids). Whether
+        # this same tick's immediate recheck already observes the target dead, or a
+        # later tick does, is a signal-delivery timing detail, not a behavior this
+        # test needs to pin down — only the eventual reap + "timeout" outcome below
+        # is the actual contract.
 
         def reaped():
             keeper.tick(cfg)
@@ -982,6 +977,65 @@ class TestKeeperIntegration(LrbTestCase):
         self.assertEqual(len(state["beings"][being_id]["running"]), 0)
         self.assertEqual(state["beings"][being_id]["last_runs"], {})  # never fired at all
 
+    def test_kill_reaches_a_grandchild_that_escaped_into_a_new_session(self):
+        # Regression test for a real finding (B3, cursor-agent, 2026-07-20):
+        # cursor-agent's sandboxed tool execution runs each shell command in
+        # a freshly setsid'd session — a NEW process group — which escapes
+        # killpg(pgid-of-the-direct-child) entirely. The direct session dies
+        # on kill, but its real grandchild is silently orphaned and keeps
+        # running. Simulates that exact shape (a start_new_session=True
+        # grandchild spawned BY the direct child) without needing a real
+        # cursor-agent call — _kill's ppid-tree walk (_descendant_pids)
+        # must still reach it.
+        marker = os.path.join(self.tmp, "grandchild.pid")
+        proc = subprocess.Popen(
+            [sys.executable, "-c",
+             "import subprocess, time\n"
+             "p = subprocess.Popen(['sleep', '30'], start_new_session=True)\n"
+             "open(%r, 'w').write(str(p.pid))\n"
+             "time.sleep(30)\n" % marker],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True,
+        )
+        grandchild_pid = None
+        try:
+            self.assertTrue(self._wait_until(lambda: os.path.exists(marker), timeout=5),
+                             "setup: direct child never wrote the grandchild's pid")
+            with open(marker) as f:
+                grandchild_pid = int(f.read().strip())
+            self.assertTrue(self._is_process_alive(grandchild_pid))
+            self.assertNotEqual(
+                os.getpgid(proc.pid), os.getpgid(grandchild_pid),
+                "setup check: grandchild must have escaped into its own process group")
+            if grandchild_pid not in lrb._descendant_pids(proc.pid):
+                self.skipTest(
+                    "ps descendant enumeration unavailable in this environment; "
+                    "run the Keeper lifecycle B1/B2/B3 scenarios on a real shell "
+                    "for process-tree kill coverage")
+
+            keeper = lrb.Keeper()
+            keeper.live_procs[proc.pid] = proc
+            entry = {"pid": proc.pid, "task": "probe", "timeout_minutes": 1,
+                      "started": datetime.now().isoformat(timespec="seconds")}
+            keeper._kill(proc.pid, entry, datetime.now())  # SIGTERM: pgid + descendants
+            self._wait_until(lambda: not self._is_process_alive(grandchild_pid), timeout=2)
+            self.assertFalse(
+                self._is_process_alive(grandchild_pid),
+                "REGRESSION: a grandchild that escaped into its own session/group survived "
+                "the Keeper's kill — killpg(pgid) alone cannot reach it, only the ppid-tree "
+                "walk (_descendant_pids) can.")
+        finally:
+            for p in (proc.pid, grandchild_pid):
+                if p is None:
+                    continue
+                try:
+                    os.kill(p, signal.SIGKILL)
+                except OSError:
+                    pass
+            try:
+                proc.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                pass
+
     def test_sigkill_after_grace_period_when_sigterm_is_ignored(self):
         being_id = self.make_being(daily_usd=1.0, schedule=self.this_minute_cron())
         os.environ["STUB_IGNORE_SIGTERM"] = "1"
@@ -997,6 +1051,13 @@ class TestKeeperIntegration(LrbTestCase):
             state = lrb.load_state(self.workspace)
             entry = state["beings"][being_id]["running"][0]
             pid = entry["pid"]
+            # Give the freshly spawned stub real wall-clock time to actually
+            # reach its own `signal.signal(SIGTERM, SIG_IGN)` line before we
+            # send SIGTERM below — otherwise SIGTERM can race the child's own
+            # Python startup and hit it under the DEFAULT disposition
+            # (terminate), which is not what this test means to exercise (the
+            # child genuinely ignoring the signal, forcing SIGKILL escalation).
+            time.sleep(0.2)
             entry["started"] = (datetime.now() - timedelta(minutes=5)).isoformat(timespec="seconds")
             lrb.save_state(self.workspace, state)
 
@@ -1114,6 +1175,52 @@ class TestKeeperIntegration(LrbTestCase):
             self.assertEqual(len(running), 1)
             self.assertEqual(running[0]["kill_blocked_reason"], "pid identity check unavailable")
             self.assertTrue(self._is_process_alive(proc.pid))
+        finally:
+            lrb._pid_matches_entry = original
+            proc.terminate()
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait()
+
+    def test_unverifiable_readopted_pid_is_force_reaped_after_grace_window(self):
+        # Regression test: an entry whose identity can never be confirmed
+        # (ps permanently blocked/sandboxed) must not leak its concurrency
+        # slot forever — _is_alive says "alive" and _can_signal refuses to
+        # ever kill it, so without a time-boxed escape hatch this entry
+        # would stay in `running` indefinitely (never billed, never
+        # logged, `lrb status` reporting it as perpetually running). Once
+        # kill_blocked_since is older than UNVERIFIABLE_REAP_AFTER_HOURS,
+        # the Keeper force-finishes it instead.
+        being_id = self.make_being(daily_usd=1.0, schedule=self.NEVER_SCHEDULE)
+        proc = subprocess.Popen(
+            [sys.executable, "-c", "import time; time.sleep(30)"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+        original = lrb._pid_matches_entry
+        try:
+            lrb._pid_matches_entry = lambda pid, entry: None
+            state = lrb.default_state()
+            bstate = lrb.being_state(state, being_id)
+            long_ago = datetime.now() - timedelta(hours=lrb.UNVERIFIABLE_REAP_AFTER_HOURS + 1)
+            bstate["running"].append({
+                "task": "morning-wakeup", "pid": proc.pid,
+                "started": long_ago.isoformat(timespec="seconds"),
+                "timeout_minutes": 1, "log_path": os.path.join(self.tmp, "nonexistent.log"),
+                "command": "/unknown/because/ps/is/blocked",
+                "kill_blocked_since": long_ago.isoformat(timespec="seconds"),
+            })
+            keeper = lrb.Keeper()
+            keeper._poll_running(self.workspace, state, datetime.now())
+            running = state["beings"][being_id]["running"]
+            self.assertEqual(len(running), 0, "concurrency slot must be freed, not leaked forever")
+            with open(lrb.ledger_path(self.workspace, being_id)) as f:
+                lines = [json.loads(l) for l in f if l.strip()]
+            self.assertEqual(len(lines), 1)
+            self.assertTrue(lines[0]["force_reaped_unverifiable"])
+            self.assertTrue(self._is_process_alive(proc.pid))  # the real process itself is untouched
         finally:
             lrb._pid_matches_entry = original
             proc.terminate()
@@ -1243,7 +1350,10 @@ class TestCodexEngineKind(LrbTestCase):
 class TestCursorEngineKind(LrbTestCase):
     """Engines of kind 'cursor' use cursor-agent argv (--plugin-dir, --workspace,
     --trust, optional --force --sandbox disabled) and a claude-shaped JSON result
-    contract with optional flat-cost fallback when total_cost_usd is absent."""
+    contract with a mandatory flat-cost fallback (like codex) used whenever
+    total_cost_usd is absent — real cursor-agent responses have been observed
+    to omit it entirely, so the fallback is required at `engines add`, not
+    optional."""
 
     def cursor_cfg(self, plugin_dir=None, session_cost_usd=None, permission_mode="default"):
         if plugin_dir is None:
@@ -1382,11 +1492,25 @@ class TestCliSubprocess(LrbTestCase):
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("plugin-dir", r.stderr)
         r = self.run_lrb("engines", "add", "cursor", "--command", STUB_CURSOR,
-                          "--plugin-dir", FRAMEWORK_DIR)
+                          "--plugin-dir", FRAMEWORK_DIR, "--session-cost-usd", "0.05")
         self.assertEqual(r.returncode, 0, r.stderr)
         cfg = lrb.load_config()
         self.assertEqual(cfg["engines"]["cursor"]["kind"], "cursor")
         self.assertEqual(cfg["engines"]["cursor"]["plugin_dir"], os.path.abspath(FRAMEWORK_DIR))
+
+    def test_engines_add_cursor_kind_requires_session_cost(self):
+        self.run_lrb("install")
+        # Real cursor-agent responses have been observed to omit
+        # total_cost_usd entirely (token usage only) — same prompt-theater
+        # trap as codex, so a flat session cost is mandatory here too.
+        r = self.run_lrb("engines", "add", "cursor", "--command", STUB_CURSOR,
+                          "--plugin-dir", FRAMEWORK_DIR)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("session-cost-usd", r.stderr)
+        r = self.run_lrb("engines", "add", "cursor", "--command", STUB_CURSOR,
+                          "--plugin-dir", FRAMEWORK_DIR, "--session-cost-usd", "0.05")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertAlmostEqual(lrb.load_config()["engines"]["cursor"]["session_cost_usd"], 0.05, places=4)
 
     def test_engines_add_rejects_plugin_dir_for_claude_kind(self):
         self.run_lrb("install")
@@ -1502,6 +1626,118 @@ class TestCliSubprocess(LrbTestCase):
                 daemon_proc.stdout.close()
             if daemon_proc.stderr:
                 daemon_proc.stderr.close()
+
+
+class TestLaunchdInstall(LrbTestCase):
+    """`cmd_install`'s plist-writing path (real file, sandboxed dir, never
+    the real machine's ~/Library/LaunchAgents) is already covered by
+    TestCliSubprocess.test_install_is_sandboxed_and_idempotent. These tests
+    cover what that one doesn't: the actual plist CONTENT (Label,
+    ProgramArguments, captured PATH/LRB_HOME, XML escaping), and the
+    --launchd flag's launchctl bootstrap/bootout command construction and
+    error handling. `launchctl` itself is mocked — actually loading a job
+    into the real machine's launchd is a separate, deliberately
+    never-automated action (see keeper_harness.py's module docstring); this
+    only proves cmd_install builds the right commands and reacts correctly
+    to their exit codes, on a real, unmocked, sandboxed macOS host.
+
+    Requires darwin (cmd_install's launchd path is a no-op elsewhere)."""
+
+    def setUp(self):
+        super().setUp()
+        if sys.platform != "darwin":
+            self.skipTest("launchd install path is macOS-only")
+
+    def _plist_path(self):
+        return os.path.join(self.launchagents, "%s.plist" % lrb.LABEL)
+
+    def _read_plist(self):
+        import plistlib
+        with open(self._plist_path(), "rb") as f:
+            return plistlib.load(f)
+
+    def test_plist_content_matches_dest_and_environment(self):
+        lrb.cmd_install(argparse.Namespace(launchd=False))
+        plist = self._read_plist()
+        dest = os.path.join(self.home, "lrb.py")
+        self.assertEqual(plist["Label"], lrb.LABEL)
+        self.assertEqual(plist["ProgramArguments"], [sys.executable, dest, "daemon"])
+        self.assertTrue(plist["KeepAlive"])
+        self.assertTrue(plist["RunAtLoad"])
+        self.assertEqual(plist["EnvironmentVariables"]["LRB_HOME"], self.home)
+        self.assertEqual(plist["EnvironmentVariables"]["PATH"],
+                          os.environ.get("PATH", "/usr/bin:/bin:/usr/sbin:/sbin"))
+        self.assertEqual(plist["StandardOutPath"], os.path.join(self.home, "keeper.log"))
+        self.assertEqual(plist["StandardErrorPath"], os.path.join(self.home, "keeper.log"))
+
+    def test_plist_survives_xml_special_characters_in_path(self):
+        # A PATH/LRB_HOME containing '&' or '<' would otherwise produce
+        # invalid XML — plistlib.load itself would raise if escaping broke.
+        original_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = "/usr/bin:/a<b&c>d\"e'f"
+        try:
+            lrb.cmd_install(argparse.Namespace(launchd=False))
+        finally:
+            os.environ["PATH"] = original_path
+        plist = self._read_plist()
+        self.assertEqual(plist["EnvironmentVariables"]["PATH"], "/usr/bin:/a<b&c>d\"e'f")
+
+    def test_launchd_flag_bootstraps_via_launchctl(self):
+        lrb.cmd_install(argparse.Namespace(launchd=False))  # write the plist first
+        calls = []
+
+        def fake_run(cmd, **kwargs):
+            calls.append(cmd)
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+        original_run = lrb.subprocess.run
+        lrb.subprocess.run = fake_run
+        try:
+            lrb.cmd_install(argparse.Namespace(launchd=True))
+        finally:
+            lrb.subprocess.run = original_run
+        self.assertEqual(len(calls), 2, calls)
+        self.assertEqual(calls[0][:2], ["launchctl", "bootout"])
+        self.assertEqual(calls[0][2], "gui/%d/%s" % (os.getuid(), lrb.LABEL))
+        self.assertEqual(calls[1], ["launchctl", "bootstrap", "gui/%d" % os.getuid(), self._plist_path()])
+
+    def test_launchd_flag_without_bootout_target_still_bootstraps(self):
+        # bootout is expected to fail (nonzero) on first-ever install, since
+        # there is nothing loaded yet to tear down — must not abort the
+        # subsequent bootstrap call.
+        lrb.cmd_install(argparse.Namespace(launchd=False))
+        calls = []
+
+        def fake_run(cmd, **kwargs):
+            calls.append(cmd)
+            if cmd[:2] == ["launchctl", "bootout"]:
+                return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="no such service")
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+        original_run = lrb.subprocess.run
+        lrb.subprocess.run = fake_run
+        try:
+            lrb.cmd_install(argparse.Namespace(launchd=True))  # must not raise
+        finally:
+            lrb.subprocess.run = original_run
+        self.assertEqual(len(calls), 2, calls)
+
+    def test_launchctl_bootstrap_failure_dies_with_message(self):
+        lrb.cmd_install(argparse.Namespace(launchd=False))
+
+        def fake_run(cmd, **kwargs):
+            if cmd[:2] == ["launchctl", "bootout"]:
+                return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="")
+            return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="service already loaded")
+
+        original_run = lrb.subprocess.run
+        lrb.subprocess.run = fake_run
+        try:
+            with self.assertRaises(SystemExit) as ctx:
+                lrb.cmd_install(argparse.Namespace(launchd=True))
+            self.assertEqual(ctx.exception.code, 1)
+        finally:
+            lrb.subprocess.run = original_run
 
 
 if __name__ == "__main__":

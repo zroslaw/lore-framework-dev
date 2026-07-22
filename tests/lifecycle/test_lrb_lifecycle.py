@@ -2,12 +2,16 @@
 """Being Keeper real-engine lifecycle scenarios (design: lore-architect
 workdir/draft-lrb-lifecycle-tests.md).
 
-Recommended-minimum tier (9 of the design's 13 scenarios; B2/B3/D2/D3 —
-codex/cursor variants of the process-kill and PID-identity checks —
-deferred per the design §8: those mechanisms are engine-agnostic in the
-Keeper's own code, so claude coverage is the representative proof; add the
-others only on a real incident or before broadly enabling
-`permission_mode: full` across engines).
+11 of the design's 13 scenarios. B2/B3 (codex/cursor process-tree-kill
+variants of B1) added 2026-07-20 — the killpg mechanism is engine-agnostic
+in the Keeper's own code, but whether a given engine's OWN shell tool
+actually spawns a real subprocess tree the same shape claude's Bash tool
+does is an empirical question about THAT ENGINE, not provable from claude
+coverage alone (see lore `lore-beings-mvp-takeover-review.md`). D2/D3
+(codex/cursor PID-identity variants of D1) remain deferred: unlike B1's
+killpg, `_pid_identity`'s `ps` call is pure OS-level process inspection —
+it does not depend on which engine spawned the PID, so D1's claude proof is
+the representative case there. Add D2/D3 only on a real incident.
 
 Gated behind LR_LIFECYCLE_KEEPER=1 (separate from the framework's own
 LR_LIFECYCLE=1 — see keeper_harness.py's module docstring for why). Costs
@@ -16,12 +20,13 @@ process on this machine (always torn down via KeeperFixture, even on
 assertion failure).
 
   LR_LIFECYCLE_KEEPER=1 LR_ENGINE=claude python3 tests/lifecycle/test_lrb_lifecycle.py -v
-  LR_LIFECYCLE_KEEPER=1 LR_ENGINE=codex  python3 tests/lifecycle/test_lrb_lifecycle.py -v -k a2
-  LR_LIFECYCLE_KEEPER=1 LR_ENGINE=cursor python3 tests/lifecycle/test_lrb_lifecycle.py -v -k a3
+  LR_LIFECYCLE_KEEPER=1 LR_ENGINE=codex  python3 tests/lifecycle/test_lrb_lifecycle.py -v -k "a2 or b2"
+  LR_LIFECYCLE_KEEPER=1 LR_ENGINE=cursor python3 tests/lifecycle/test_lrb_lifecycle.py -v -k "a3 or b3"
 
 LR_ENGINE selects which single engine's scenarios run, same convention as
-every other file in this directory: claude-only scenarios (B1/C1/C4/D1/E1)
-skip cleanly under LR_ENGINE=codex or =cursor.
+every other file in this directory: claude-only scenarios (C1/C4/D1/E1)
+skip cleanly under LR_ENGINE=codex or =cursor, and B2/B3 skip cleanly
+outside their own engine the same way A2/A3 do.
 """
 import json
 import os
@@ -166,12 +171,14 @@ class TestCoreLoop(unittest.TestCase):
             # REAL FINDING (2026-07-20, real cursor-agent/composer-2.5): the live JSON result had
             # NO total_cost_usd field at all (only token usage) — contradicting the original
             # build's real-verification note that cursor reports real total_cost_usd. Per
-            # spawn_session's own cursor-kind cost logic, that means a cursor engine configured
-            # WITHOUT session_cost_usd silently charges $0.00 forever, never tripping the daily
-            # budget cap — the same "prompt-theater" gap the code already prevents for codex by
-            # dying at `engines add` time if --session-cost-usd is missing, but cursor's
-            # session_cost_usd is optional, not required. Configuring the flat fallback here
-            # (as any real deployment currently must) exercises exactly that fallback path.
+            # spawn_session's own cursor-kind cost logic, that meant a cursor engine configured
+            # WITHOUT session_cost_usd would silently charge $0.00 forever, never tripping the
+            # daily budget cap — the same "prompt-theater" gap the code already prevented for
+            # codex by dying at `engines add` time if --session-cost-usd is missing. FIXED
+            # 2026-07-20: `cmd_engines_add` now requires --session-cost-usd for cursor too (see
+            # docs/beings.md). This fixture still sets it explicitly (bypassing the CLI's own
+            # `engines add` validation via write_config) so the scenario exercises the flat
+            # fallback path regardless of CLI enforcement.
             cfg = fx.write_config({
                 "cursor": {"command": cursor_bin, "kind": "cursor", "permission_mode": "full",
                            "plugin_dir": kh.FRAMEWORK_DIR, "session_cost_usd": kh.CODEX_SESSION_COST_USD},
@@ -207,7 +214,7 @@ class TestCoreLoop(unittest.TestCase):
 
 
 class TestProcessTreeKill(unittest.TestCase):
-    """B1: the round-1 review finding ('a kill signaled only the direct
+    """B1/B2/B3: the round-1 review finding ('a kill signaled only the direct
     child... Bash/MCP-server grandchildren could survive a hard kill') was
     fixed with process-group killpg — but the stub engine is a flat single
     process and structurally cannot expose that regression. This is the
@@ -264,6 +271,113 @@ class TestProcessTreeKill(unittest.TestCase):
                 kh._pid_alive(sleep_pid),
                 "B1 REGRESSION: sleep grandchild survived the Keeper's hard kill — a kill that "
                 "only signals the direct child leaves detached descendants running.")
+
+    def test_b2_timeout_kills_real_process_tree_codex(self):
+        # B1's kill mechanism (killpg on the whole process group, see _kill
+        # in scripts/lrb.py) is Keeper-side and engine-agnostic in the
+        # Keeper's own code — but whether a given engine's OWN shell tool
+        # actually spawns its subprocess tree the same shape claude's Bash
+        # tool does is an empirical question about that engine, not the
+        # Keeper. This proves it for codex rather than assuming it.
+        reason = kh.skip_reason("codex")
+        if reason:
+            self.skipTest(reason)
+        with kh.KeeperFixture() as fx:
+            codex_bin = shutil.which("codex")
+            marker = os.path.join(fx.tmp, "b2-sleep.pid")
+            task = (
+                "Using your shell/command-execution tool, run exactly this single command as "
+                "ONE blocking tool call (do not run it in the background yourself, do not "
+                "shorten it, do not work around it — the long wait is required for this test):"
+                "\n\nsh -c 'sleep 180 & echo $! > %s; wait $!'\n\n"
+                "Wait for that tool call to return before doing anything else. Under normal "
+                "circumstances it will not return before this session is stopped — that is "
+                "expected." % marker
+            )
+            being_id = fx.build_being(
+                repo="b2repo", agent="b2being", engine="codex", model=kh.MODEL,
+                daily_usd=1.0, task_name="probe", task_text=task, timeout_minutes=1,
+            )
+            cfg = fx.write_config({
+                "codex": {"command": codex_bin, "kind": "codex", "permission_mode": "full",
+                          "session_cost_usd": kh.CODEX_SESSION_COST_USD},
+            })
+            keeper = fx.track_keeper(kh.lrb.Keeper())
+
+            got_marker = fx.run_tick_loop_until(
+                keeper, cfg, lambda: os.path.exists(marker), deadline_s=180)
+            self.assertTrue(got_marker, "B2: sleep child never wrote its pid marker")
+            with open(marker) as f:
+                sleep_pid = int(f.read().strip())
+            self.assertTrue(kh._pid_alive(sleep_pid), "B2: sleep child not alive right after spawn")
+
+            def finished():
+                bstate = kh.lrb.load_state(fx.workspace)["beings"].get(being_id, {})
+                return not bstate.get("running")
+
+            self.assertTrue(fx.run_tick_loop_until(keeper, cfg, finished, deadline_s=180),
+                             "B2: session was not reaped within the poll deadline")
+
+            finished_lines = [l for l in kh.read_ledger(fx.workspace, being_id)
+                               if l.get("outcome") in kh.FINISHED_OUTCOMES]
+            self.assertTrue(finished_lines, "B2: no finished ledger entry")
+            self.assertEqual(finished_lines[-1]["outcome"], "timeout", "B2: %r" % finished_lines[-1])
+
+            self.assertFalse(
+                kh._pid_alive(sleep_pid),
+                "B2 REGRESSION: sleep grandchild survived the Keeper's hard kill under codex — "
+                "codex's own subprocess tree shape does not behave like claude's here.")
+
+    def test_b3_timeout_kills_real_process_tree_cursor(self):
+        # See test_b2's docstring — same question, cursor's own shell tool.
+        reason = kh.skip_reason("cursor")
+        if reason:
+            self.skipTest(reason)
+        with kh.KeeperFixture() as fx:
+            cursor_bin = shutil.which("cursor-agent")
+            marker = os.path.join(fx.tmp, "b3-sleep.pid")
+            task = (
+                "Using your shell/command-execution tool, run exactly this single command as "
+                "ONE blocking tool call (do not run it in the background yourself, do not "
+                "shorten it, do not work around it — the long wait is required for this test):"
+                "\n\nsh -c 'sleep 180 & echo $! > %s; wait $!'\n\n"
+                "Wait for that tool call to return before doing anything else. Under normal "
+                "circumstances it will not return before this session is stopped — that is "
+                "expected." % marker
+            )
+            being_id = fx.build_being(
+                repo="b3repo", agent="b3being", engine="cursor", model=kh.MODEL,
+                daily_usd=1.0, task_name="probe", task_text=task, timeout_minutes=1,
+            )
+            cfg = fx.write_config({
+                "cursor": {"command": cursor_bin, "kind": "cursor", "permission_mode": "full",
+                           "plugin_dir": kh.FRAMEWORK_DIR, "session_cost_usd": kh.CODEX_SESSION_COST_USD},
+            })
+            keeper = fx.track_keeper(kh.lrb.Keeper())
+
+            got_marker = fx.run_tick_loop_until(
+                keeper, cfg, lambda: os.path.exists(marker), deadline_s=180)
+            self.assertTrue(got_marker, "B3: sleep child never wrote its pid marker")
+            with open(marker) as f:
+                sleep_pid = int(f.read().strip())
+            self.assertTrue(kh._pid_alive(sleep_pid), "B3: sleep child not alive right after spawn")
+
+            def finished():
+                bstate = kh.lrb.load_state(fx.workspace)["beings"].get(being_id, {})
+                return not bstate.get("running")
+
+            self.assertTrue(fx.run_tick_loop_until(keeper, cfg, finished, deadline_s=180),
+                             "B3: session was not reaped within the poll deadline")
+
+            finished_lines = [l for l in kh.read_ledger(fx.workspace, being_id)
+                               if l.get("outcome") in kh.FINISHED_OUTCOMES]
+            self.assertTrue(finished_lines, "B3: no finished ledger entry")
+            self.assertEqual(finished_lines[-1]["outcome"], "timeout", "B3: %r" % finished_lines[-1])
+
+            self.assertFalse(
+                kh._pid_alive(sleep_pid),
+                "B3 REGRESSION: sleep grandchild survived the Keeper's hard kill under cursor — "
+                "cursor's own subprocess tree shape does not behave like claude's here.")
 
 
 class TestSelfScheduling(unittest.TestCase):
