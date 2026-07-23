@@ -11,6 +11,13 @@ keep them in mind for any future eval harness:
    the runner marks the cell invalid ("-"), excludes it from scoring, and fails the suite
    loudly listing the invalid cells. A partial scorecard still prints — valid cells remain
    usable.
+   **Reporting corollary (2026-07-22): partial evidence is scoreable, but only as
+   incomplete.** Engine timeouts/non-zero exits and judge/provider/session outages are technical
+   failures, not S3 behavioral failures. Matrix reports now split `Engine OK` from `Scored` and
+   split technical failures by source (`Tech E/J`) so a release reviewer can distinguish "engines
+   ran, judging was partial" from "engines failed to execute." Any partial matrix that is used as
+   release evidence must make the incomplete rows explicit and include targeted rerun commands.
+   See `quality-benchmark-reporting-contract.md`.
 2. **One slow engine run must not kill the suite.** codex at 16-way concurrency blew the
    420s per-run timeout and the raw TimeoutExpired crashed the whole unittest. Fix: catch
    per-probe, score that probe as a failed run (exit 124), continue.
@@ -68,6 +75,8 @@ gaps involving file-writing engines with this history in mind; new runs use the 
 ## See Also
 
 - `quality-benchmark-feature.md` — the benchmark these lessons come from (cluster anchor).
+- `quality-benchmark-reporting-contract.md` — report artifacts, field guide, and partial-run
+  semantics.
 - `benchmark-measurement-design-principles.md` — the design-level companion (fix the judge; deterministic-first).
 - `benchmark-findings-engines-models.md` — the findings these artifacts qualify.
 - `quality-benchmark-v2-catalog.md` — the v2 catalog these lessons apply to going forward.

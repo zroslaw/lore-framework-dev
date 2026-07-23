@@ -11,12 +11,12 @@ scheduling math, budget gating, outbox validation, and PID-identity *logic*
 against a zero-cost stub — this module deliberately does not re-test any of
 that.
 
-Gated SEPARATELY from the framework's own LR_LIFECYCLE=1 (see
-../README.md's Layer-3 table): Keeper scenarios have a strictly higher
+Gated as the separate Lore Beings lifecycle suite (see ../README.md's Layer-3
+table): Keeper scenarios have a strictly higher
 blast-radius class than "one headless call that costs money" — some spawn a
 real background process (a real process tree to kill, or a real `lrb
 daemon` subprocess) that can outlive a naive test if teardown isn't
-guaranteed. Skipped unless LR_LIFECYCLE_KEEPER=1.
+guaranteed. Skipped unless LR_LIFECYCLE_BEINGS=1.
 
 Sandboxing: every scenario redirects $LRB_HOME/$LRB_LAUNCHAGENTS_DIR into a
 throwaway tempdir via KeeperFixture — never the real machine's
@@ -35,7 +35,7 @@ about that code path. See lore `macos-ps-o-multi-field-single-line.md` and
 framework once already.
 
 Environment:
-  LR_LIFECYCLE_KEEPER=1   enable these tests (required)
+  LR_LIFECYCLE_BEINGS=1   enable these tests (required)
   LR_FRAMEWORK_DIR        plugin under test (default: sibling ../../../lore-framework)
   LR_ENGINE               engine to drive (default: claude; claude/codex/cursor)
   LR_TEST_MODEL           model override (default: cheapest per-engine, see MODEL_DEFAULTS)
@@ -62,7 +62,10 @@ FRAMEWORK_DIR = os.path.abspath(
 LRB = os.path.join(FRAMEWORK_DIR, "scripts", "lrb.py")
 
 ENGINE = os.environ.get("LR_ENGINE", "claude")
-LIFECYCLE_KEEPER_ENABLED = os.environ.get("LR_LIFECYCLE_KEEPER") == "1"
+LIFECYCLE_BEINGS_ENABLED = (
+    os.environ.get("LR_LIFECYCLE_BEINGS") == "1"
+    or os.environ.get("LR_LIFECYCLE_KEEPER") == "1"  # legacy alias
+)
 
 # Cheapest model real-verified through the Keeper tick loop during the
 # original build for each engine kind (draft-lore-beings.md §16).
@@ -127,8 +130,8 @@ def engine_available(kind=None):
 def skip_reason(required_kind=None):
     """Non-empty reason string if a Keeper lifecycle scenario for
     `required_kind` (default: ENGINE) should be skipped, else ''."""
-    if not LIFECYCLE_KEEPER_ENABLED:
-        return "Keeper lifecycle tests disabled (set LR_LIFECYCLE_KEEPER=1)"
+    if not LIFECYCLE_BEINGS_ENABLED:
+        return "Lore Beings lifecycle tests disabled (set LR_LIFECYCLE_BEINGS=1)"
     kind = required_kind or ENGINE
     if kind != ENGINE:
         return "scenario is %s-only (LR_ENGINE=%s)" % (kind, ENGINE)

@@ -48,8 +48,8 @@ discipline; it adds a pinned LLM judge only for the behavior stage. See
 
 Until 2026-07-20 the harness had **zero** coverage of Lore Beings / the Being Keeper — the only
 real-engine Keeper test was a standalone Cursor-only script (`test_lrb_cursor_real_e2e.py`, since
-deleted, superseded by A3). Closed that gap with `tests/lifecycle/keeper_harness.py` +
-`tests/lifecycle/test_lrb_lifecycle.py`: originally 8 scenarios — A1–A3 (core spawn→result→ledger
+deleted, superseded by A3). Closed that gap with the now-separated `tests/lifecycle_beings/`
+suite (`keeper_harness.py`, `test_lrb_lifecycle.py`, `run_matrix.py`): originally 8 scenarios — A1–A3 (core spawn→result→ledger
 loop, one per engine kind), B1 (real process-tree kill, claude), C1 (self-scheduling round trip via
 the outbox), C4 (self-scheduling denied under the default permission mode), D1 (real PID-identity
 confirmed-match), E1 (real `lrb daemon` subprocess) — then B2/B3 added the same day (codex/cursor
@@ -59,15 +59,21 @@ in exactly the per-engine-asymmetry blind spot B2/B3 exist to close, sharpening 
 for a mechanism (killpg) whose risk lives in the SPAWNED process tree's shape, not the Keeper's
 call site. D2/D3 (PID-identity variants) remain deferred — `ps` is pure OS-level inspection,
 independent of which engine spawned the PID, so that argument does hold there. See
-`lore-beings-mvp-takeover-review.md`, `test_lrb_lifecycle.py` module docstring.
+`lore-beings-mvp-takeover-review.md`, `tests/lifecycle_beings/test_lrb_lifecycle.py` module
+docstring.
 
-**Gated behind a *separate* flag, `LR_LIFECYCLE_KEEPER=1` — deliberately not folded into
+**Gated behind a *separate* flag, `LR_LIFECYCLE_BEINGS=1` — deliberately not folded into
 `LR_LIFECYCLE=1`.** Keeper scenarios are a strictly higher blast-radius class: some spawn a real
 background process (`lrb daemon`, launchd-style) that must be torn down even on assertion failure,
 not just "one headless call that costs money." Keep the two gates distinct so a routine full-suite
 pre-push run doesn't silently start daemons. The Keeper's own `$LRB_HOME` / `$LRB_LAUNCHAGENTS_DIR`
 env-var sandboxing (already built into `lrb.py`, no prerequisite code change) is what makes these
 scenarios safe to run against a throwaway home.
+
+As of the v29 Lore Beings UX work, these tests are a separate test package and runner, not a
+Keeper sub-suite inside `tests/lifecycle/run_matrix.py`. Results belong under
+`tests/lifecycle_beings/results/`; run `python3 tests/lifecycle_beings/run_matrix.py --dry-run` for
+planning without spend.
 
 **Real-engine-verified 2026-07-20** at the recommended-minimum tier (9 of the design's 13
 scenarios): **claude 6/6** (A1, B1, C1, C4, D1, E1), **codex 1/1** (A2), **cursor 1/1** (A3, after
@@ -129,6 +135,12 @@ procedure docs suddenly broke.
 
 `tests/` sits at the `lore-framework-dev` repo root, not under `agents/lore-architect/` — finalize's Phase 4 commit is scoped to `agents/` only (per `finalize.md` Phase 4 step 1: `git add agents/`), so harness code needs its own separate commit, outside the finalize flow.
 
+Root-level documentation matters for the same reason. External-reader-facing test docs must be
+reachable from the repo root, not only from deep test directories: root `README.md` ->
+`tests/README.md` -> strategy/reporting docs -> source files. Keep root `README.md` and
+`lore-repo.md` pointing at the major testing docs when new strategy/reporting pages are added. See
+`testing-docs-root-discoverability.md`.
+
 ## What's still open
 
 - **Parallelize the suite** — scenarios are fixture-isolated; today they run serially via
@@ -184,7 +196,9 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `headless-cli-smoke-testing-discipline.md` — how to run manual engine probes without a hard-kill timeout destroying the evidence.
 - `lifecycle-harness-parallelization.md` — future improvement: parallel scenario execution.
 - `quality-benchmark-feature.md` — the sibling quality track (`tests/quality/`): lore utilization, planted-needle probes, treatment/control uplift.
+- `testing-docs-root-discoverability.md` — root README / `lore-repo.md` pointer discipline for
+  testing docs.
 - `benchmark-measurement-design-principles.md` — the measurement-design principles shared with (and extending) this harness's assertion style.
-- `lore-beings-design.md` — the feature the `LR_LIFECYCLE_KEEPER=1` track exercises; `keeper-spawn-prompt-boilerplate-distraction.md`, `cursor-agent-real-invocation-contract.md` — the two issues hit getting the Keeper scenarios green.
+- `lore-beings-design.md` — the feature the `LR_LIFECYCLE_BEINGS=1` track exercises; `keeper-spawn-prompt-boilerplate-distraction.md`, `cursor-agent-real-invocation-contract.md` — the two issues hit getting the Keeper scenarios green.
 - `testing-simulate-process-escape-without-setsid-binary.md` — a fast synthetic-process-tree technique that complements this harness's real-engine B1/B2/B3 scenarios when only the process-tree *shape* (not real engine behavior) needs reproducing.
 - `kill-tree-enumerate-before-signal-ordering.md`, `hot-path-latency-can-expose-latent-test-timing-races.md` — operational lessons from the B2/B3 Keeper kill-tree fix that produced this harness's cursor coverage.

@@ -38,7 +38,7 @@ the engine's actual behavior. It's macOS-portable (no GNU-only binary dependency
 `portable-shell-in-framework-docs.md`), doesn't require network or API cost, and runs in
 milliseconds versus the real-engine lifecycle harness's cost/time budget
 (`lifecycle-testing-harness.md`). Reserve real-engine invocation for scenarios that need to verify
-the engine's *actual* observed behavior (e.g. the A3/B3 Keeper lifecycle scenarios), not just the
+the engine's *actual* observed behavior (e.g. the A3/B3 Lore Beings lifecycle scenarios), not just the
 shape a bug fix needs to handle.
 
 ## See Also

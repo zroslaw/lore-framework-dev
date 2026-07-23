@@ -1460,7 +1460,53 @@ class TestCliSubprocess(LrbTestCase):
         r = self.run_lrb("status", "--json")
         self.assertEqual(r.returncode, 0, r.stderr)
         out = json.loads(r.stdout)
+        self.assertEqual(out["engines"], ["stub"])
         self.assertIn(os.path.realpath(self.workspace), out["workspaces"])
+
+    def test_validate_passes_then_reports_missing_prompt(self):
+        self.run_lrb("install")
+        self.run_lrb("workspaces", "add", self.workspace)
+        self.run_lrb("engines", "add", "stub", "--command", STUB)
+        self.make_being(daily_usd=1.0)
+
+        r = self.run_lrb("validate")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("lrb validate: ok", r.stdout)
+
+        os.remove(os.path.join(self.workspace, "testrepo", "agents", "testbeing", "task.md"))
+        r = self.run_lrb("validate")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("prompt file missing", r.stdout)
+
+        r = self.run_lrb("validate", "--json")
+        self.assertNotEqual(r.returncode, 0)
+        payload = json.loads(r.stdout)
+        self.assertFalse(payload["ok"])
+        self.assertTrue(any("prompt file missing" in issue for issue in payload["issues"]))
+
+    def test_logs_reports_recent_ledger_entries(self):
+        self.run_lrb("install")
+        self.run_lrb("workspaces", "add", self.workspace)
+        being_id = self.make_being(daily_usd=1.0)
+        lrb.ledger_append(self.workspace, being_id, {
+            "task": "morning-wakeup",
+            "outcome": "ok",
+            "cost_usd": 0.05,
+            "finished_at": "2026-07-23T08:31:00",
+            "log_path": os.path.join(self.workspace, ".lr-beings", "logs", "sample.log"),
+        })
+
+        r = self.run_lrb("logs", being_id)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("being: %s" % being_id, r.stdout)
+        self.assertIn("outcome=ok", r.stdout)
+        self.assertIn("cost=$0.0500", r.stdout)
+
+        r = self.run_lrb("logs", being_id, "--json")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        payload = json.loads(r.stdout)
+        self.assertEqual(payload["being"], being_id)
+        self.assertEqual(payload["entries"][-1]["outcome"], "ok")
 
     def test_engines_add_codex_kind_requires_session_cost(self):
         self.run_lrb("install")

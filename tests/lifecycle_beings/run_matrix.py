@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
-"""Parallel runner for Lore lifecycle gates.
+"""Parallel runner for Lore Beings lifecycle gates.
 
-The lifecycle scenario files read LR_ENGINE / LR_TEST_MODEL at import time and
-run one engine configuration per process. This wrapper keeps that isolation but
-adds the missing release-gate mechanics:
-
-- run the standard lifecycle suite across multiple engines in one command
-- optionally shard by test module inside each engine
-- write durable JSON + per-module logs under lifecycle/results/
-
-Default concurrency is conservative: engines run in parallel, modules for one
-engine run sequentially. Raise --module-jobs only when the provider quota can
-handle the burst.
+This is intentionally separate from tests/lifecycle/run_matrix.py. Lore Beings
+tests have a higher blast radius than the standard framework lifecycle suite:
+they spawn real Keeper sessions, may briefly run background process trees, and
+cost real API money. The runner refuses to execute unless
+LR_LIFECYCLE_BEINGS=1 is set; --dry-run is always safe.
 """
 
 import argparse
@@ -28,14 +22,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TESTS_DIR = os.path.dirname(HERE)
 REPO_ROOT = os.path.dirname(TESTS_DIR)
 
-STANDARD_MODULES = [
-    "test_boot.py",
-    "test_consult_attach.py",
-    "test_finalize.py",
-    "test_recall.py",
-    "test_repo_workspace.py",
-    "test_takeover.py",
-]
+MODULES = ["test_lrb_lifecycle.py"]
 ENGINE_DEFAULTS = ["claude", "codex", "cursor"]
 MODEL_DEFAULTS = {"claude": "haiku", "codex": "gpt-5.4-mini", "cursor": "composer-2.5"}
 
@@ -97,7 +84,7 @@ def write_text(path, text):
 def run_module(engine, module, test_filter, base_env, run_dir):
     result = ModuleResult(engine, module)
     result.model = base_env.get("LR_TEST_MODEL") or MODEL_DEFAULTS.get(engine, "haiku")
-    env = {**base_env, "LR_ENGINE": engine, "LR_LIFECYCLE": "1"}
+    env = {**base_env, "LR_ENGINE": engine, "LR_LIFECYCLE_BEINGS": "1"}
     if "LR_TEST_MODEL" not in env:
         env["LR_TEST_MODEL"] = result.model
 
@@ -165,7 +152,7 @@ def summarize(results):
     ok = sum(1 for r in results if r.status == "ok")
     failed = [r for r in results if r.status != "ok"]
     print("\n" + "=" * 72)
-    print("  LIFECYCLE RUN SUMMARY")
+    print("  LORE BEINGS LIFECYCLE RUN SUMMARY")
     print("=" * 72)
     print("  %-8s %-28s %-8s %s" % ("engine", "module", "status", "seconds"))
     print("-" * 72)
@@ -185,17 +172,17 @@ def summarize(results):
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(description="Run Lore lifecycle gates with sharding and JSON results.")
+    parser = argparse.ArgumentParser(description="Run Lore Beings lifecycle gates.")
     parser.add_argument("--engines", default=",".join(ENGINE_DEFAULTS),
                         help="comma-separated engines to run (default: claude,codex,cursor)")
     parser.add_argument("--modules",
-                        help="comma-separated test module filenames; default is the suite's module set")
+                        help="comma-separated test module filenames; default is all beings modules")
     parser.add_argument("--engine-jobs", type=int, default=0,
                         help="max engines running at once (default: all selected engines)")
     parser.add_argument("--module-jobs", type=int, default=1,
                         help="max modules per engine at once (default: 1)")
     parser.add_argument("--results-dir", default=os.path.join(HERE, "results"),
-                        help="directory for run JSON and logs (default: lifecycle/results)")
+                        help="directory for run JSON and logs (default: lifecycle_beings/results)")
     parser.add_argument("--test-filter",
                         help="unittest -k filter applied inside each selected module")
     parser.add_argument("--dry-run", action="store_true",
@@ -207,7 +194,7 @@ def main(argv=None):
     args = build_parser().parse_args(argv)
     try:
         engines = parse_csv(args.engines)
-        modules = parse_csv(args.modules, allowed=STANDARD_MODULES) if args.modules else list(STANDARD_MODULES)
+        modules = parse_csv(args.modules, allowed=MODULES) if args.modules else list(MODULES)
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 2
@@ -220,7 +207,7 @@ def main(argv=None):
     engine_jobs = args.engine_jobs if args.engine_jobs > 0 else len(groups)
     module_jobs = args.module_jobs
 
-    print("suite: standard")
+    print("suite: lore-beings")
     print("engines: %s" % ", ".join(engines))
     print("modules: %s" % ", ".join(modules))
     if args.test_filter:
@@ -233,13 +220,13 @@ def main(argv=None):
         print("\n[dry-run] no tests executed.")
         return 0
 
-    if os.environ.get("LR_LIFECYCLE") != "1":
-        print("refusing to run: set LR_LIFECYCLE=1 to enable this suite (or use --dry-run)",
-              file=sys.stderr)
+    if os.environ.get("LR_LIFECYCLE_BEINGS") != "1":
+        print("refusing to run: set LR_LIFECYCLE_BEINGS=1 to enable this suite "
+              "(or use --dry-run)", file=sys.stderr)
         return 2
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    run_dir = os.path.join(args.results_dir, "%s-standard" % stamp)
+    run_dir = os.path.join(args.results_dir, "%s-lore-beings" % stamp)
     os.makedirs(run_dir, exist_ok=False)
 
     base_env = dict(os.environ)
@@ -250,7 +237,7 @@ def main(argv=None):
 
     summary = {
         "schema_version": 1,
-        "suite": "standard",
+        "suite": "lore-beings",
         "started_at": stamp,
         "duration_s": duration_s,
         "framework_dir": os.path.abspath(base_env.get(

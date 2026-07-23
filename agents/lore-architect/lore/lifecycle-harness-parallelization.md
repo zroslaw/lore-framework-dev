@@ -36,8 +36,9 @@ affect correctness because fixtures don't leak.
 
 `tests/lifecycle/run_matrix.py` runs one process per `(engine, test module)` pair. Default standard
 suite: `test_boot.py`, `test_consult_attach.py`, `test_finalize.py`, `test_recall.py`,
-`test_repo_workspace.py`, and `test_takeover.py`. Keeper coverage remains a separate `--suite keeper`
-path because it is gated by `LR_LIFECYCLE_KEEPER=1` and has higher blast radius.
+`test_repo_workspace.py`, and `test_takeover.py`. Lore Beings coverage is no longer a `--suite`
+mode inside this runner; it lives in the separate `tests/lifecycle_beings/run_matrix.py` entry
+point because it is gated by `LR_LIFECYCLE_BEINGS=1` and has higher blast radius.
 
 Default concurrency is intentionally conservative: all selected engines may run in parallel, but
 modules within one engine run serially (`--module-jobs 1`) unless the operator raises it. This gives
@@ -54,6 +55,13 @@ Targeted rerun after a failure:
 
 ```bash
 LR_LIFECYCLE=1 python3 tests/lifecycle/run_matrix.py --engines codex --modules test_finalize.py
+```
+
+Lore Beings dry-run and gated run:
+
+```bash
+python3 tests/lifecycle_beings/run_matrix.py --dry-run
+LR_LIFECYCLE_BEINGS=1 python3 tests/lifecycle_beings/run_matrix.py --engine-jobs 3 --module-jobs 1
 ```
 
 Each run writes a timestamped directory containing `summary.json`, per-module stdout/stderr logs,

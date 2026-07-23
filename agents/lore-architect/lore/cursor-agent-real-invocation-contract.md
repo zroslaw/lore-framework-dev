@@ -2,7 +2,8 @@
 
 Documents the headless contract the Being Keeper's `cursor` engine kind implements. Primary
 empirical basis: the lifecycle harness driver (`lore-framework-dev/tests/lifecycle/harness.py`),
-the A3 Keeper lifecycle scenario (2026-07-20, live `cursor-agent`), and prior Cursor CLI probes
+the A3 Lore Beings lifecycle scenario (`tests/lifecycle_beings/test_lrb_lifecycle.py`,
+2026-07-20, live `cursor-agent`), and prior Cursor CLI probes
 (`cursor-agent-cli-probe-findings.md`, `cursor-cli-and-harness-operational-notes.md`). The earlier
 standalone `tests/test_lrb_cursor_real_e2e.py` script (superseded by A3, weaker teardown
 guarantees) was deleted 2026-07-20 once A3 fully covered its ground.
@@ -86,8 +87,8 @@ Landed in `scripts/lrb.py`: `ENGINE_KINDS` includes `cursor`; `spawn_session` cu
 `_kill`'s ppid-descendant-tree walk (`_descendant_pids`, 2026-07-20) closes the setsid-escape gap
 above — engine-agnostic in the code, but empirically load-bearing for cursor specifically.
 
-**Pre-ship checklist:** run `LR_LIFECYCLE_KEEPER=1 LR_ENGINE=cursor python3
-tests/lifecycle/test_lrb_lifecycle.py -v -k a3` on a machine where `cursor-agent status` shows
+**Pre-ship checklist:** run `LR_LIFECYCLE_BEINGS=1 LR_ENGINE=cursor python3
+tests/lifecycle_beings/test_lrb_lifecycle.py -v -k a3` on a machine where `cursor-agent status` shows
 logged in; capture a real stdout JSON sample and confirm `total_cost_usd` presence/absence before
 claiming empirical verification complete.
 

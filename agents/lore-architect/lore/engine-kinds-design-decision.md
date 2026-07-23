@@ -29,8 +29,8 @@ kind", on top of the PID-identity fix, below the v28 release commit `44bc57d`).
 
 ## Real-engine findings that sharpen the kind contracts (2026-07-20)
 
-Two gaps surfaced building the Keeper lifecycle scenarios (`lifecycle-testing-harness.md`
-§ Keeper coverage) — both are per-kind contract asymmetries the current `cmd_engines_add` schema
+Two gaps surfaced building the Lore Beings lifecycle scenarios (`tests/lifecycle_beings/`;
+see `lifecycle-testing-harness.md` § Keeper coverage) — both are per-kind contract asymmetries the current `cmd_engines_add` schema
 doesn't yet match:
 
 - **`cursor` is empirically cost-blind too.** Real `cursor-agent` (2026.07.16, `composer-2.5`,

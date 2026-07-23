@@ -13,15 +13,14 @@ killpg, `_pid_identity`'s `ps` call is pure OS-level process inspection —
 it does not depend on which engine spawned the PID, so D1's claude proof is
 the representative case there. Add D2/D3 only on a real incident.
 
-Gated behind LR_LIFECYCLE_KEEPER=1 (separate from the framework's own
-LR_LIFECYCLE=1 — see keeper_harness.py's module docstring for why). Costs
-real API money and, for a few scenarios, briefly runs a real background
-process on this machine (always torn down via KeeperFixture, even on
-assertion failure).
+Gated behind LR_LIFECYCLE_BEINGS=1 (separate from the framework's own
+LR_LIFECYCLE=1 — see keeper_harness.py's module docstring for why). Costs real
+API money and, for a few scenarios, briefly runs a real background process on
+this machine (always torn down via KeeperFixture, even on assertion failure).
 
-  LR_LIFECYCLE_KEEPER=1 LR_ENGINE=claude python3 tests/lifecycle/test_lrb_lifecycle.py -v
-  LR_LIFECYCLE_KEEPER=1 LR_ENGINE=codex  python3 tests/lifecycle/test_lrb_lifecycle.py -v -k "a2 or b2"
-  LR_LIFECYCLE_KEEPER=1 LR_ENGINE=cursor python3 tests/lifecycle/test_lrb_lifecycle.py -v -k "a3 or b3"
+  LR_LIFECYCLE_BEINGS=1 LR_ENGINE=claude python3 tests/lifecycle_beings/test_lrb_lifecycle.py -v
+  LR_LIFECYCLE_BEINGS=1 LR_ENGINE=codex  python3 tests/lifecycle_beings/test_lrb_lifecycle.py -v -k "a2 or b2"
+  LR_LIFECYCLE_BEINGS=1 LR_ENGINE=cursor python3 tests/lifecycle_beings/test_lrb_lifecycle.py -v -k "a3 or b3"
 
 LR_ENGINE selects which single engine's scenarios run, same convention as
 every other file in this directory: claude-only scenarios (C1/C4/D1/E1)

@@ -20,3 +20,12 @@ The intent is to extract this directory into its own GitHub repository — it li
 - Contributors who want to converse with the framework's accumulated design knowledge clone this repo as a sibling in their domain and boot `lore-architect`.
 
 See the lore-framework's README for the team-shared-knowledge framing that underlies all lore agents.
+
+## Documentation
+
+- `README.md` — external-reader entry point for this dev repo.
+- `tests/README.md` — practical guide to running the test suites.
+- `tests/testing-strategy.md` — overall testing strategy and release-gate policy.
+- `tests/lifecycle_beings/run_matrix.py` — separate Lore Beings real-engine lifecycle runner.
+- `tests/quality/strategy.md` — quality benchmark strategy.
+- `tests/quality/reporting.md` — quality report field guide and metric glossary.

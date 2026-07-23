@@ -9,9 +9,10 @@ procedure fidelity. Built and validated 2026-07-06/07. Design doc:
 This topic is the anchor for the benchmark cluster: `benchmark-findings-engines-models.md`
 (what the v1 runs showed), `benchmark-harness-operational-lessons.md` (failure-derived harness
 rules), `benchmark-measurement-design-principles.md` (the reusable measurement-design
-principles behind it), `quality-benchmark-v2-catalog.md` (the 18-probe v2 catalog), and
-`quality-benchmark-v2-known-probe-gaps.md` (two v2 probes still open, ceiling-effect fix
-needed).
+principles behind it), `quality-benchmark-reporting-contract.md` (matrix report artifacts,
+metric vocabulary, and partial-run semantics), `quality-benchmark-v2-catalog.md` (the 18-probe
+v2 catalog), and `quality-benchmark-v2-known-probe-gaps.md` (two v2 probes still open,
+ceiling-effect fix needed).
 
 ## Mechanics
 
@@ -33,6 +34,11 @@ needed).
 - **Metrics.** LUS = stage points %, per arm; **Behavior Uplift** = S3%(treatment) −
   S3%(control) is the headline and the only number that is cross-engine comparable
   (S1 is unscorable on cursor).
+- **Matrix reports.** `tests/quality/run_matrix.py` writes a run directory with `summary.json`,
+  `summary.md`, `release-notes.md`, per-config logs, and per-config JSON. Generated summaries
+  should link to `tests/quality/reporting.md`; release-note blocks use stable
+  `lr-quality-report` markers for extraction/replacement. See
+  `quality-benchmark-reporting-contract.md`.
 - **Run on request:** `LR_QUALITY=1 [LR_ENGINE=claude|cursor|codex] [LR_TEST_MODEL=…]
   python3 tests/quality/test_quality.py -v`. The judge is always claude+haiku
   (`LR_JUDGE_MODEL`) regardless of engine, for comparability. Results JSONs land in
@@ -75,6 +81,8 @@ Interpretation of these numbers: `benchmark-findings-engines-models.md`.
 - `benchmark-harness-operational-lessons.md` — judge-invalidation, timeout, quota-batching, and
   null-byte-sanitization rules.
 - `benchmark-measurement-design-principles.md` — the industry-eval principles the design borrows.
+- `quality-benchmark-reporting-contract.md` — durable report shape, vocabulary field guide,
+  technical-failure/partial-run semantics, and rerun-command requirements.
 - `quality-benchmark-v2-catalog.md` — the 18-probe v2 catalog and the harness changes it needed.
 - `quality-benchmark-v2-known-probe-gaps.md` — the two v2 probes still needing rework.
 - `lifecycle-testing-harness.md` — the sibling track: procedure fidelity vs lore utilization.
