@@ -41,6 +41,11 @@ explains the benchmark design. Generated `summary.md`, `release-notes.md`, and
 decode the metrics without spelunking through source.
 
 When the report format changes, update the field guide in the same change.
+Keep this glossary scoped to quality benchmark reports. Lifecycle evidence has
+its own artifact vocabulary under `tests/lifecycle/results/`, and Lore Beings
+lifecycle evidence has the parallel but separate `tests/lifecycle_beings/results/`
+track. Mixing those into the quality glossary makes release evidence harder to
+audit because the three tracks answer different questions.
 
 ## Technical failures are scoreable incompleteness
 

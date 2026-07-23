@@ -17,6 +17,14 @@ A doc that only lives under `tests/quality/` or another deep test directory is
 effectively invisible to release reviewers and new contributors unless the root
 map points at it.
 
+The root map must preserve track boundaries. Standard lifecycle docs point at
+`tests/lifecycle/` and `tests/lifecycle/results/`; Lore Beings lifecycle docs
+point at `tests/lifecycle_beings/` and `tests/lifecycle_beings/results/`; quality
+benchmark docs point at `tests/quality/` and the generated quality report
+artifacts (`summary.md`, `release-notes.md`, `summary.json`). Do not make the
+quality glossary decode lifecycle artifacts, and do not document Lore Beings as
+a `tests/lifecycle/run_matrix.py --suite keeper` mode.
+
 ## See Also
 
 - `lifecycle-testing-harness.md` - main procedural-fidelity test track.

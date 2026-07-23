@@ -75,6 +75,22 @@ Keeper sub-suite inside `tests/lifecycle/run_matrix.py`. Results belong under
 `tests/lifecycle_beings/results/`; run `python3 tests/lifecycle_beings/run_matrix.py --dry-run` for
 planning without spend.
 
+When testing documentation changes in parallel with Lore Beings work, reconcile this suite as a
+first-class lifecycle layer rather than folding it back into the standard lifecycle runner. The
+current boundary is:
+
+- Standard lifecycle: `tests/lifecycle/`, `LR_LIFECYCLE=1`, results under
+  `tests/lifecycle/results/`.
+- Lore Beings lifecycle: `tests/lifecycle_beings/`, `LR_LIFECYCLE_BEINGS=1`, results under
+  `tests/lifecycle_beings/results/`.
+- Quality benchmark: `tests/quality/`, `LR_QUALITY=1`; quality report artifacts and glossaries
+  belong to that track, not to lifecycle evidence.
+
+After merging another testing-docs branch, run a stale-reference sweep for `LR_LIFECYCLE_KEEPER`,
+old `tests/lifecycle/test_lrb_lifecycle.py` / `tests/lifecycle/keeper_harness.py` paths, and
+`--suite keeper`. Minimum no-spend verification: standard runner dry-run, Beings runner dry-run,
+the Beings runner's no-flag refusal, and ungated unittest discovery.
+
 **Real-engine-verified 2026-07-20** at the recommended-minimum tier (9 of the design's 13
 scenarios): **claude 6/6** (A1, B1, C1, C4, D1, E1), **codex 1/1** (A2), **cursor 1/1** (A3, after
 adding a `session_cost_usd` fallback to the test's engine config — see
