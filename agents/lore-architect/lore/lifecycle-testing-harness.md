@@ -129,6 +129,12 @@ procedure docs suddenly broke.
 
 `tests/` sits at the `lore-framework-dev` repo root, not under `agents/lore-architect/` — finalize's Phase 4 commit is scoped to `agents/` only (per `finalize.md` Phase 4 step 1: `git add agents/`), so harness code needs its own separate commit, outside the finalize flow.
 
+Root-level documentation matters for the same reason. External-reader-facing test docs must be
+reachable from the repo root, not only from deep test directories: root `README.md` ->
+`tests/README.md` -> strategy/reporting docs -> source files. Keep root `README.md` and
+`lore-repo.md` pointing at the major testing docs when new strategy/reporting pages are added. See
+`testing-docs-root-discoverability.md`.
+
 ## What's still open
 
 - **Parallelize the suite** — scenarios are fixture-isolated; today they run serially via
@@ -184,6 +190,8 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `headless-cli-smoke-testing-discipline.md` — how to run manual engine probes without a hard-kill timeout destroying the evidence.
 - `lifecycle-harness-parallelization.md` — future improvement: parallel scenario execution.
 - `quality-benchmark-feature.md` — the sibling quality track (`tests/quality/`): lore utilization, planted-needle probes, treatment/control uplift.
+- `testing-docs-root-discoverability.md` — root README / `lore-repo.md` pointer discipline for
+  testing docs.
 - `benchmark-measurement-design-principles.md` — the measurement-design principles shared with (and extending) this harness's assertion style.
 - `lore-beings-design.md` — the feature the `LR_LIFECYCLE_KEEPER=1` track exercises; `keeper-spawn-prompt-boilerplate-distraction.md`, `cursor-agent-real-invocation-contract.md` — the two issues hit getting the Keeper scenarios green.
 - `testing-simulate-process-escape-without-setsid-binary.md` — a fast synthetic-process-tree technique that complements this harness's real-engine B1/B2/B3 scenarios when only the process-tree *shape* (not real engine behavior) needs reproducing.

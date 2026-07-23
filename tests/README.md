@@ -6,6 +6,12 @@ Dev-Only Artifacts and the `plugin-vs-agent-repo-separation` lore principle).
 
 ## Running
 
+Strategy docs:
+
+- [`testing-strategy.md`](testing-strategy.md) — whole test suite strategy and release-gate policy.
+- [`quality/strategy.md`](quality/strategy.md) — detailed quality benchmark strategy.
+- [`quality/reporting.md`](quality/reporting.md) — quality report field guide and column glossary.
+
 Stdlib only — no pytest, no install.
 
 ```bash
@@ -169,6 +175,9 @@ the answer, and scores three stages — S1 retrieval, S2 grounding, S3 applicati
 across a treatment arm (fact present) and a control arm (fact removed). The headline number is
 **behavior uplift**: S3 pass-rate(treatment) − S3 pass-rate(control).
 
+Quality strategy: `quality/strategy.md`. Report field guide: `quality/reporting.md` explains the
+terms and columns used in matrix reports and release-note blocks.
+
 Gated behind `LR_QUALITY=1` (real engine calls, costs money). Two ways to run:
 
 **Single config** — one engine/model, probe×arm parallel inside (`LR_QUALITY_JOBS`, default 3):
@@ -190,6 +199,7 @@ LR_QUALITY=1 python3 tests/quality/run_matrix.py --matrix deep --model-jobs 3
 LR_QUALITY=1 python3 tests/quality/run_matrix.py --matrix deep --skip codex
 LR_QUALITY=1 python3 tests/quality/run_matrix.py --model claude=opus-4.8
 LR_QUALITY=1 python3 tests/quality/run_matrix.py --configs claude:haiku,claude:opus-4.8
+LR_QUALITY=1 python3 tests/quality/run_matrix.py --configs codex:gpt-5.4-mini --probes P4-paraphrase-recall,P10-parametric-gotcha --arms control
 python3 tests/quality/run_matrix.py --matrix deep --dry-run                 # plan only, no spend
 ```
 
@@ -213,7 +223,10 @@ Its keys layer over the defaults — `engine_order` (list) replaces the engine s
 `LR_QUALITY_NO_LOCAL=1`) ignores the file and forces the canonical defaults — **this is what a
 release ship gate uses, so ships always pick up the default set regardless of any local file.**
 Per-run overrides need no file: `--model claude=opus-4.8` (swap one engine's model), `--configs`
-(any explicit set), `--skip`/`--only` (drop/keep engines or `engine:model` pairs).
+(any explicit set), `--skip`/`--only` (drop/keep engines or `engine:model` pairs). For targeted
+reruns, `--probes` and `--arms` filter the probe ids and treatment/control arms inside each
+selected config; the same filters are available directly through `LR_QUALITY_PROBES` and
+`LR_QUALITY_ARMS` for `test_quality.py`.
 
 **Concurrency.**
 - `--engine-jobs N` — engines in parallel (default: all; different engines hit different token
@@ -221,7 +234,36 @@ Per-run overrides need no file: `--model claude=opus-4.8` (swap one engine's mod
 - `--model-jobs N` — models of one engine in parallel (default: 1/sequential; models share an
   engine's token pool, so parallelizing them is what risks token/rate exhaustion).
 
-**Failure tolerance.** A config that fails mid-run (e.g. token exhaustion) is recorded and the
-rest of the matrix continues; the runner exits non-zero only if an *attempted* config failed
-(`--skip`ped configs don't count). Per-config JSON lands in `quality/results/`; the runner prints
-each scorecard plus a matrix summary.
+**Failure tolerance.** A probe-arm row that fails technically (engine timeout, provider/account
+error, non-zero engine exit, or judge outage) is recorded as `technical_failure` and excluded from
+the affected scoring stage; the engine/model config is marked `partial`, and LUS/S3 rates are
+computed from fully scored rows with coverage counts shown beside them. A config is `failed` only
+when it cannot produce any usable score artifact. The runner exits non-zero only for `failed`
+configs; `partial` configs are valid incomplete benchmark evidence. `--skip`ped configs do not
+count against the exit code. Per-config JSON lands in `quality/results/`; the runner prints each
+scorecard plus a matrix summary.
+
+**Execution records.** `run_matrix.py` writes one durable run directory under
+`quality/results/matrix-<timestamp>-<matrix>/`:
+
+- `summary.json` — machine-readable ledger: command, timestamps, wall time, framework/dev repo
+  SHAs and dirty flags, selected configs, skips, status, per-config durations, log paths,
+  per-config result paths, known cost totals, unavailable-cost counts, technical failures, and
+  rerun commands.
+- `summary.md` — operator-facing run summary with artifacts and rerun commands.
+- `release-notes.md` — paste-ready release-note section, wrapped in stable
+  `<!-- lr-quality-report:start ... -->` / `<!-- lr-quality-report:end ... -->` markers so a later
+  release process can extract or replace it mechanically. It carries the compact visual matrix
+  (status, engine completion, fully scored completion, engine/judge technical-failure split,
+  treatment/control LUS, treatment/control S3, uplift, cost, time), a grouped technical-failure
+  category table, and exact failed-subset rerun commands. LUS is still reported when S3 judging is
+  unavailable, so incomplete configs remain scoreable and visually distinct from rows the engine
+  never completed. Each generated report links back to `tests/quality/reporting.md` as the field
+  guide for these terms.
+- `logs/*.stdout.txt` / `logs/*.stderr.txt` — raw subprocess output per engine/model.
+- `configs/quality-*.json` — the per-config score JSON from `test_quality.py`.
+
+Cost is split into agent-run cost and judge-call cost. Engines that do not expose USD stay marked
+unavailable; the runner reports known spend plus an unavailable-field count rather than guessing.
+`test_quality.py` also writes its per-config JSON on engine failure before raising, so failed
+configs can be diagnosed and rerun from the matrix summary.

@@ -443,11 +443,15 @@ def judge_s3(task, response, rubric, artifacts=""):
     (LR_JUDGE_MODEL), independent of LR_ENGINE, so scores stay comparable
     across engines and benchmark runs.
 
-    Returns (passed, judge_line). `passed` is None when the judge call itself
-    failed (non-zero exit, usage limit, or a reply that is not PASS/FAIL) —
-    a broken judge must INVALIDATE the score, never count as FAIL. Learned
-    the hard way: a session-limit message scored as FAIL corrupts every S3
-    silently."""
+    Returns (passed, judge_line, meta). `passed` is None when the judge call
+    itself failed (non-zero exit, usage limit, or a reply that is not
+    PASS/FAIL) — a broken judge must INVALIDATE the score, never count as
+    FAIL. Learned the hard way: a session-limit message scored as FAIL
+    corrupts every S3 silently.
+
+    The judge is a real engine call, so meta separately tracks every attempt's
+    reported cost/duration. If the engine omits a cost field, callers must
+    preserve that as unavailable rather than estimating."""
     # Last-line-of-defense: response/artifacts are stripped at capture time,
     # but this call is the one that crashes on a stray \x00 (execve requires
     # NUL-terminated args), so re-guard here too.
@@ -469,18 +473,43 @@ def judge_s3(task, response, rubric, artifacts=""):
         "one short reason. No other text."
     )
     first = ""
+    attempts = []
     for _attempt in range(2):  # one retry for transient failures
         proc = subprocess.run(
             ["claude", "-p", prompt, "--model", JUDGE_MODEL, "--output-format", "json"],
             capture_output=True, text=True, timeout=120,
         )
         verdict_line = ""
+        cost_usd, duration_ms = None, None
         try:
-            verdict_line = (json.loads(proc.stdout).get("result") or "").strip()
+            payload = json.loads(proc.stdout)
+            verdict_line = (payload.get("result") or "").strip()
+            cost_usd = payload.get("total_cost_usd")
+            duration_ms = payload.get("duration_ms")
         except json.JSONDecodeError:
             verdict_line = proc.stdout.strip()
+        attempts.append({
+            "exit_code": proc.returncode,
+            "cost_usd": cost_usd,
+            "duration_ms": duration_ms,
+        })
         first = verdict_line.splitlines()[0].strip() if verdict_line else ""
         up = first.upper()
         if proc.returncode == 0 and (up.startswith("PASS") or up.startswith("FAIL")):
-            return up.startswith("PASS"), first
-    return None, first or f"judge call failed (exit={proc.returncode})"
+            return up.startswith("PASS"), first, _judge_meta(attempts)
+    return None, first or f"judge call failed (exit={proc.returncode})", _judge_meta(attempts)
+
+
+def _judge_meta(attempts):
+    cost_values = [a["cost_usd"] for a in attempts if a.get("cost_usd") is not None]
+    duration_values = [
+        a["duration_ms"] for a in attempts if a.get("duration_ms") is not None
+    ]
+    return {
+        "attempts": attempts,
+        "cost_usd": round(sum(cost_values), 6) if cost_values else None,
+        "duration_ms": sum(duration_values) if duration_values else None,
+        "cost_unavailable_attempts": sum(
+            1 for a in attempts if a.get("cost_usd") is None
+        ),
+    }
