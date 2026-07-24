@@ -10,9 +10,8 @@ Run:  LR_LIFECYCLE=1 python3 tests/lifecycle/test_finalize.py -v
 One:  LR_LIFECYCLE=1 python3 tests/lifecycle/test_finalize.py -v -k 10
 """
 
-import gzip
-import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -60,8 +59,8 @@ ARCHIVE_STEP_RELIABLE = {"claude", "codex"}
 
 
 def assert_archive_and_usage(test, agent_dir, summary_text):
-    """Assert Feature A + B landed: a month-partitioned gzip archive whose
-    header UUID matches the summary, and a well-formed usage frontmatter block.
+    """Assert Feature A + B landed: a month-partitioned Markdown archive whose
+    frontmatter UUID matches the summary, and a well-formed usage block exists.
 
     In the lifecycle fixture the engine really runs and writes a native log
     containing the Step-1 UUID, so Step 1.5's happy path is expected to hold on
@@ -70,11 +69,15 @@ def assert_archive_and_usage(test, agent_dir, summary_text):
     assert the non-blocking contract held (the summary was still written intact).
     """
     archive_dir = os.path.join(agent_dir, "archive")
-    gz_files = []
+    md_files = []
     for root, _dirs, files in os.walk(archive_dir):
-        gz_files += [os.path.join(root, f) for f in files if f.endswith(".jsonl.gz")]
+        md_files += [
+            os.path.join(root, f)
+            for f in files
+            if f.endswith(".md") and f != "AGENTS.md"
+        ]
 
-    if not gz_files and ENGINE not in ARCHIVE_STEP_RELIABLE:
+    if not md_files and ENGINE not in ARCHIVE_STEP_RELIABLE:
         # Known BETA gap (e.g. cursor): archive step skipped by the engine agent.
         # The non-blocking design must still have produced a valid summary with
         # no partial usage/archive keys.
@@ -88,18 +91,22 @@ def assert_archive_and_usage(test, agent_dir, summary_text):
             "(no archive); summary written intact (non-blocking held). "
             "Script works on this engine's logs when driven directly."
         )
-    test.assertTrue(gz_files, "no session archive .jsonl.gz was written")
-    archive = gz_files[0]
+    test.assertTrue(md_files, "no session archive .md was written")
+    archive = md_files[0]
 
     # month-partitioned like sessions/: archive/<YYYY>/<MM>/<file>
     rel = os.path.relpath(archive, archive_dir).split(os.sep)
     test.assertEqual(len(rel), 3, f"archive not YYYY/MM partitioned: {rel}")
     test.assertTrue(rel[0].isdigit() and len(rel[0]) == 4, f"bad year dir: {rel}")
 
-    with gzip.open(archive, "rt", encoding="utf-8") as fh:
-        header = json.loads(fh.readline())
-    test.assertEqual(header.get("schema_version"), 1)
-    test.assertIn(header.get("engine"), ("claude", "codex", "cursor"))
+    with open(archive, encoding="utf-8") as fh:
+        archive_text = fh.read()
+    test.assertTrue(archive_text.startswith("---\n"), "archive missing frontmatter")
+    test.assertIn("# Full Session Log", archive_text)
+    test.assertTrue(
+        os.path.exists(os.path.join(archive_dir, "AGENTS.md")),
+        "archive/AGENTS.md caution missing",
+    )
 
     # header lore_uuid must equal the summary's uuid frontmatter
     uuid_line = next(
@@ -108,9 +115,9 @@ def assert_archive_and_usage(test, agent_dir, summary_text):
     )
     summary_uuid = uuid_line.split(":", 1)[1].strip() if ":" in uuid_line else ""
     test.assertTrue(summary_uuid, "summary missing uuid frontmatter")
-    test.assertEqual(
-        header.get("lore_uuid"), summary_uuid,
-        "archive header lore_uuid does not match the summary uuid",
+    test.assertRegex(
+        archive_text,
+        rf"(?m)^uuid:\s*[\"']?{re.escape(summary_uuid)}[\"']?$",
     )
 
     # archive.path frontmatter must be portable, not an absolute temp path.
@@ -127,6 +134,12 @@ def assert_archive_and_usage(test, agent_dir, summary_text):
     repo_root = os.path.dirname(os.path.dirname(agent_dir))
     expected = os.path.relpath(archive, repo_root)
     test.assertEqual(archive_path, expected)
+    test.assertRegex(
+        archive_text,
+        rf"(?m)^\s*path:\s*[\"']?{re.escape(archive_path)}[\"']?$",
+    )
+    test.assertIn("framework_version:", summary_text)
+    test.assertIn("framework_version:", archive_text)
 
     # usage frontmatter block with a valid cost_source enum. Cursor is a known
     # BETA fidelity gap: it may execute the archive half of Step 1.5 but omit

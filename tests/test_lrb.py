@@ -1461,6 +1461,49 @@ class TestCliSubprocess(LrbTestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         out = json.loads(r.stdout)
         self.assertIn(os.path.realpath(self.workspace), out["workspaces"])
+        self.assertIn("stub", out["engines"])
+
+    def test_validate_json_reports_ok_for_configured_being(self):
+        self.run_lrb("install")
+        self.run_lrb("workspaces", "add", self.workspace)
+        self.run_lrb("engines", "add", "stub", "--command", STUB)
+        self.make_being(daily_usd=1.0)
+        r = self.run_lrb("validate", "--json")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        out = json.loads(r.stdout)
+        self.assertTrue(out["ok"])
+        self.assertEqual(out["beings"], 1)
+        self.assertEqual(out["engines"], ["stub"])
+
+    def test_validate_reports_missing_prompt_file(self):
+        self.run_lrb("install")
+        self.run_lrb("workspaces", "add", self.workspace)
+        self.run_lrb("engines", "add", "stub", "--command", STUB)
+        being_id = self.make_being(daily_usd=1.0)
+        agent_dir = os.path.join(self.workspace, "testrepo", "agents", "testbeing")
+        os.unlink(os.path.join(agent_dir, "task.md"))
+        r = self.run_lrb("validate")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn(being_id, r.stdout)
+        self.assertIn("prompt file missing", r.stdout)
+
+    def test_logs_reports_paths_and_recent_entries(self):
+        self.run_lrb("install")
+        self.run_lrb("workspaces", "add", self.workspace)
+        self.run_lrb("engines", "add", "stub", "--command", STUB)
+        being_id = self.make_being(daily_usd=1.0)
+        lrb.ledger_append(self.workspace, being_id, {
+            "task": "morning-wakeup",
+            "outcome": "ok",
+            "cost_usd": 0.05,
+            "log_path": os.path.join(self.workspace, ".lr-beings", "logs", "x.log"),
+        })
+        r = self.run_lrb("logs", being_id, "--json")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        out = json.loads(r.stdout)
+        self.assertEqual(out["being"], being_id)
+        self.assertTrue(out["ledger"].endswith("ledger.jsonl"))
+        self.assertEqual(out["entries"][-1]["outcome"], "ok")
 
     def test_engines_add_codex_kind_requires_session_cost(self):
         self.run_lrb("install")

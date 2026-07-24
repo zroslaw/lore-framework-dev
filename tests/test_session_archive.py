@@ -7,7 +7,6 @@ Points at the framework script via LR_FRAMEWORK_DIR (default: sibling
 lore-framework). Uses synthetic Claude/Codex parse fixtures in fixtures/.
 """
 
-import gzip
 import importlib.util
 import json
 import os
@@ -198,36 +197,50 @@ class ArchiveBuildTests(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
-    def test_header_and_gzip_roundtrip(self):
+    def test_markdown_frontmatter_and_write(self):
         log = os.path.join(self.tmp, "c.jsonl")
         info = write_claude_log(log)
         meta, messages = self.mod.parse_claude(log)
-        header, lines = self.mod.build_archive(meta, messages, info["lore_uuid"])
-        self.assertEqual(header["schema_version"], self.mod.ARCHIVE_SCHEMA_VERSION)
-        self.assertEqual(header["engine"], "claude")
-        self.assertEqual(header["lore_uuid"], info["lore_uuid"])
-        self.assertIn("generated_at", header)
+        out = os.path.join(self.tmp, "archive", "2026", "07", "a.md")
+        frontmatter = {
+            "uuid": info["lore_uuid"],
+            "framework_version": "29",
+            "host_agent": "lore-architect",
+            "archive": {"path": "agents/lore-architect/archive/2026/07/a.md",
+                        "schema_version": 1},
+            "usage": {"models": ["claude-sonnet-5"],
+                      "models_source": "per-message",
+                      "cost_source": "computed"},
+        }
+        md = self.mod.render_archive_markdown(
+            meta, messages, out, info["lore_uuid"], frontmatter
+        )
+        self.assertTrue(md.startswith("---\n"))
+        self.assertIn('framework_version: "29"', md)
+        self.assertIn('host_agent: "lore-architect"', md)
+        self.assertIn("archive:", md)
+        self.assertIn("usage:", md)
+        self.assertIn("# Full Session Log", md)
 
-        out = os.path.join(self.tmp, "a.jsonl.gz")
-        self.mod.write_archive(out, header, lines)
-        with gzip.open(out, "rt", encoding="utf-8") as fh:
-            recs = [json.loads(ln) for ln in fh if ln.strip()]
-        self.assertEqual(recs[0]["schema_version"], self.mod.ARCHIVE_SCHEMA_VERSION)
-        self.assertEqual(len(recs) - 1, len(lines))
+        self.mod.write_archive(out, md)
+        self.assertTrue(os.path.isfile(out))
+        agents_md = os.path.join(self.tmp, "archive", "AGENTS.md")
+        self.assertTrue(os.path.isfile(agents_md))
+        with open(agents_md) as fh:
+            self.assertIn("Do not search this directory by default", fh.read())
 
     def test_archive_preserves_raw_and_sidechain(self):
         log = os.path.join(self.tmp, "c.jsonl")
         info = write_claude_log(log)
         meta, messages = self.mod.parse_claude(log)
-        _, lines = self.mod.build_archive(meta, messages, info["lore_uuid"])
-        tool = next(r for r in lines if r["type"] == "tool_call")
-        # raw (untruncated) args/results, not the clipped one-liners
-        self.assertIsInstance(tool["args"], dict)
-        self.assertEqual(tool["result"], info["lore_uuid"])
-        self.assertTrue(any(r.get("sidechain") for r in lines))
-        self.assertTrue(
-            any("SUBAGENT-SECRET" in (r.get("text") or "") for r in lines)
+        md = self.mod.render_archive_markdown(
+            meta, messages, os.path.join(self.tmp, "a.md"), info["lore_uuid"]
         )
+        # raw (untruncated) args/results, not the clipped one-liners
+        self.assertIn('"command":', md)
+        self.assertIn(info["lore_uuid"], md)
+        self.assertIn("sidechain", md)
+        self.assertIn("SUBAGENT-SECRET", md)
 
 
 class FindByUuidTests(unittest.TestCase):
@@ -281,23 +294,37 @@ class CliArchiveVerbTests(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
-    def test_archive_verb_writes_gz_and_stats(self):
+    def test_archive_verb_writes_markdown_and_stats(self):
         log = os.path.join(self.tmp, "rollout.jsonl")
         info = write_codex_log(log)
-        out = os.path.join(self.tmp, "2026", "07", "sess.jsonl.gz")
+        out = os.path.join(self.tmp, "archive", "2026", "07", "sess.md")
         stats = os.path.join(self.tmp, "stats.json")
+        fm = os.path.join(self.tmp, "frontmatter.json")
+        with open(fm, "w") as fh:
+            json.dump({
+                "uuid": "LORE-CLI-1",
+                "framework_version": "29",
+                "archive": {
+                    "path": "agents/a/archive/2026/07/sess.md",
+                    "schema_version": 1,
+                },
+            }, fh)
         proc = subprocess.run(
             [sys.executable, SCRIPT, "archive", log,
              "-o", out, "--stats", stats,
+             "--frontmatter-json", fm,
              "--lore-uuid", "LORE-CLI-1", "--engine", "codex"],
             capture_output=True, text=True,
         )
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertTrue(os.path.isfile(out))  # dirs auto-created
-        with gzip.open(out, "rt", encoding="utf-8") as fh:
-            header = json.loads(fh.readline())
-        self.assertEqual(header["lore_uuid"], "LORE-CLI-1")
-        self.assertEqual(header["engine"], "codex")
+        with open(out) as fh:
+            archive_md = fh.read()
+        self.assertIn('uuid: "LORE-CLI-1"', archive_md)
+        self.assertIn('framework_version: "29"', archive_md)
+        self.assertIn("# Full Session Log", archive_md)
+        self.assertIn("Tool Call", archive_md)
+        self.assertTrue(os.path.isfile(os.path.join(self.tmp, "archive", "AGENTS.md")))
         with open(stats) as fh:
             s = json.load(fh)
         self.assertEqual(s["tokens"]["input"], 300)
@@ -306,6 +333,45 @@ class CliArchiveVerbTests(unittest.TestCase):
         # stats carries the archive locator for frontmatter assembly
         self.assertEqual(s["archive"]["path"], out)
         self.assertEqual(s["archive"]["schema_version"], 1)
+        self.assertEqual(s["framework_version"], "29")
+
+    def test_stats_verb_writes_usage_without_archive_file(self):
+        log = os.path.join(self.tmp, "rollout.jsonl")
+        write_codex_log(log)
+        out = os.path.join(self.tmp, "archive", "2026", "07", "sess.md")
+        stats = os.path.join(self.tmp, "stats-only.json")
+        proc = subprocess.run(
+            [sys.executable, SCRIPT, "stats", log,
+             "--stats", stats, "--archive-output", out, "--engine", "codex"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertFalse(os.path.exists(out))
+        with open(stats) as fh:
+            s = json.load(fh)
+        self.assertEqual(s["archive"]["path"], out)
+        self.assertEqual(s["tokens"]["input"], 300)
+
+    def test_stats_verb_normalizes_lore_archive_path(self):
+        log = os.path.join(self.tmp, "rollout.jsonl")
+        write_codex_log(log)
+        out = os.path.join(
+            self.tmp, "test-lore", "agents", "test-agent",
+            "archive", "2026", "07", "sess.md",
+        )
+        stats = os.path.join(self.tmp, "stats-normalized.json")
+        proc = subprocess.run(
+            [sys.executable, SCRIPT, "stats", log,
+             "--stats", stats, "--archive-output", out, "--engine", "codex"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        with open(stats) as fh:
+            s = json.load(fh)
+        self.assertEqual(
+            s["archive"]["path"],
+            "agents/test-agent/archive/2026/07/sess.md",
+        )
 
     def test_find_by_uuid_cli_exit_codes(self):
         codex_home = os.path.join(self.tmp, "codex")
