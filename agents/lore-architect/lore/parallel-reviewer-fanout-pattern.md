@@ -1,5 +1,31 @@
 When shipping a substantive change (script, skill, doc set), run **three parallel reviewers with mutually-exclusive lenses**. Different from `sonnet-subagent-review-pattern.md`, which is single-lens role-as-perspective; this is multi-lens adversarial fan-out specifically for shipped artifacts.
 
+## This pattern is now a shipped skill — run `/lr:trilens-loop`
+
+Since framework **v30** the loop has a plugin implementation: **`/lr:trilens-loop`**
+(`trilens-loop-feature.md`, `lore-framework/docs/trilens-loop.md`). It was promoted directly from this
+topic. **Reach for the skill rather than hand-assembling the fan-out** — the doc enforces what a
+hand-run pass forgets:
+
+- Reviewer independence (cold-context subagents; context-inheriting forks forbidden).
+- The APPLIED / DECLINED / ACCEPTED-not-applied ledger fed back to each later round, so settled items
+  stay settled.
+- The three termination guards — round cap, reviewer-gated stop on any latest `BLOCK`, and "a silent
+  round is not a clean round."
+- Routing the executor through the engine's `subagent-spawn` binding, which is exactly how I *stopped*
+  hitting the named-teammate trap below (I hit it live while hand-running the v30 review).
+- Disclosure of any rail the invocation switched off, and a convergence ledger that comes out as a
+  record rather than something reconstructed from memory at summary time.
+
+**What stays here:** the judgement layer. The skill picks *that* three lenses are chosen and enforces
+the loop's mechanics; it does not tell you *which* lenses fit this change, how to read a convergence
+profile, what to do when reviewers disagree or stall, or when not to fan out at all. That is the rest
+of this topic. Read it for lens choice and triage; invoke the skill to execute.
+
+Hand-running is still legitimate for cases outside the skill's change-scoped default — e.g. reviewing a
+committed artifact, or a fan-out that is not a review at all
+(`use-cases-via-parallel-consult-pattern.md`).
+
 ## Triggers
 
 Use this when shipping:
@@ -48,6 +74,33 @@ Effective briefs share this shape:
 6. **Output format** — severity (BLOCKER / HIGH / MEDIUM / LOW), file:line, issue, one-sentence fix, final verdict.
 7. **Cap on length** — ~600 words per reviewer. Keeps reports digestible.
 
+## Brief the goal, not the rationale
+
+Give the reviewer the **goal** of the change — what the artifact is for, so it can judge fitness for
+purpose — but **not your rationale for each decision**.
+
+Rationale pre-empts the criticism you are paying the reviewer to produce. A reviewer told *why* you
+chose X evaluates whether your reasoning is internally coherent; a reviewer told only *what X is for*
+evaluates whether X actually serves the purpose. The second is the useful question.
+
+This is the same independence rule applied at two levels, and both are needed:
+
+- **Spawn level** — the subagent must not inherit the caller's conversation (no context-inheriting
+  fork). See `subagent-as-optimization-vs-subagent-as-semantics.md`.
+- **Brief level** — the brief must not hand over the caller's justifications. A cold-context subagent
+  handed a brief full of "we did X because Y" is only nominally independent.
+
+Concretely, in item 1 of the brief structure above, **Context** means *what changed and what it is
+for* — not the design argument. The shape used in v30's own self-review (21 findings across 4 rounds):
+context = what changed and what it is for; files = absolute paths including adjacent out-of-scope
+material; this lens = what to look for; what to skip = nits plus what the *other* lenses own; output
+format = severity / `file:line` / issue / one-sentence fix, then a verdict line.
+
+**Caveat worth keeping:** on later rounds you *do* deliberately feed back dispositions
+(APPLIED / DECLINED + reason). That is not rationale for the design — it is the record of what was
+already adjudicated, and without it fresh reviewers re-raise settled items every round. See
+§ Persistent reviewers across rounds below.
+
 ## Result delivery differs by spawn kind (named teammate vs background subagent)
 
 The v18 `lr-wait` ship validated this pattern on **feature code**, not just doc releases: a 3-lens fan-out (correctness / framework-fit / product-UX) over the script + MCP server surfaced a genuine MUST-FIX (an `lr-emit` infinite-loop hang, empirically reproduced by the reviewer) plus several should-fixes; all three verdicts were ship-with-fixes.
@@ -58,6 +111,17 @@ That run also exposed a spawn-mechanics gotcha — **how a reviewer's report com
 - **Named teammates (given a `name`, so they run as Agent-Teams teammates)** — do **not** auto-return their final report to the lead. In the v18 run one teammate proactively `SendMessage`'d its findings; the other two only sent idle notifications and each had to be `SendMessage`'d to request the report. If you use named teammates for review, **explicitly instruct them in the spawn prompt to `SendMessage` their full findings to the lead before going idle.**
 
 Either way, the downstream discipline is unchanged — distinct lens + exact file paths + "read-only, report don't edit," then synthesize per "How to apply findings" below.
+
+**This trap now lives where an executor actually reads it.** Recording it here since v18 did not stop
+me hitting it: while hand-running the v30 review I spawned all three reviewers with `name`s, all three
+went idle without reporting, and the round had to be re-run unnamed. Knowledge in agent lore protects
+you only if you think to recall it. v30 moved the fact into `docs/engines/claude.md`'s `subagent-spawn`
+binding — the doc read *at the moment of spawning* — along with the `fork` context-inheritance trap.
+See `docs-engines-convention.md` § Engine traps belong in the binding, not only in agent lore.
+
+The engine-neutral form of the requirement, which is what the skill states: **the report must actually
+come back to you.** Phrased that way, a trap in any engine is caught by the requirement rather than by
+an engine-specific warning that only covers the engine you thought about.
 
 ## How to apply findings
 
@@ -164,6 +228,10 @@ Often complementary: use sonnet-subagent for the lore-side polish; use parallel-
 
 ## See Also
 
+- `trilens-loop-feature.md` — **the shipped skill this pattern was promoted into (v30)**; invoke it rather than hand-assembling the fan-out.
+- `subagent-as-optimization-vs-subagent-as-semantics.md` — why reviewer independence has no host-side fallback.
+- `post-convergence-edits-need-their-own-gate.md` — a clean round certifies only the artifact state the reviewers read.
+- `docs-engines-convention.md` — where engine spawn traps belong (the named-teammate trap's real home).
 - `sonnet-subagent-review-pattern.md` — single-lens role-as-perspective review (different shape, often complementary).
 - `use-cases-via-parallel-consult-pattern.md` — adjacent: parallel fan-out for *content gathering*, not review.
 - `yaml-parser-shell-hardening-checklist.md` — operational distillation of the security lens; pre-applies what reviewers would otherwise catch.

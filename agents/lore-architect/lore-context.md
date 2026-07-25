@@ -30,6 +30,15 @@ What each agent carries: **knowledge** (markdown — what it knows, accrues pass
 
 Core mechanics: directory-driven, plain markdown (frontmatter only on descriptor files), git-as-metadata, delete-don't-mark, knowledge graph by filename reference, concise context with detail on demand, skill/doc separation, repo-level versioning. Framework owns the universal; agents own repo/host/workflow specifics.
 
+**Subagent as optimization vs subagent as semantics** — before letting any engine degrade a
+subagent-spawning procedure to serial host-side execution, classify what the subagent is *for*. If it
+buys parallelism and context isolation (recall, consult, attach, merge, conflict resolution),
+serialization is lossless. If the subagent's *independence from the caller* is the deliverable
+(`/lr:trilens-loop`), serialization destroys the feature — the procedure must stop and report. Profile
+degradation clauses therefore need carve-outs, not blanket rules, and "the conservative profile passed
+the whole suite" only ever meant it was adequate for the procedures that existed then. See
+`subagent-as-optimization-vs-subagent-as-semantics.md`.
+
 See `system-design-principles.md` (the full list and the overreach diagnostics), plus the framing topics `team-shared-knowledge-principle.md`, `framework-as-engine-not-kb.md`, `agents-are-executors-first.md`, `knowledge-vs-skills-distinction.md`, `framework-scope-vs-agent-scope.md`.
 
 ## Skills & Docs
@@ -37,7 +46,7 @@ See `system-design-principles.md` (the full list and the overreach diagnostics),
 Operations are Claude Code plugin skills, `lr:` prefix on Claude; Cursor uses `/lr-<skill>` via
 prefixed wrappers (`cursor-dual-skill-tree-one-repo.md`). **Skills are thin pointers** — each `skills/<name>/SKILL.md` is a one-line reference to `docs/<name>.md`, where all logic lives. Same for generated `/lr-<agent>-agent` boot commands (thin delegations to `agent-boot.md`). When a skill orchestrates sub-skills, the orchestration gets its own `docs/<skill>.md`; non-skill procedures shared across call sites get a `docs/<procedure>.md` (e.g. `auto-pull.md`). See `slash-command-system.md`, `skill-doc-pattern.md`, `shared-procedure-doc-pattern.md`, `single-canonical-source-discipline.md`.
 
-The plugin can also **bundle an MCP server** (declared in a root `.mcp.json`, auto-launched by Claude Code with its tools merged into the agent): **`lr-wait`** (v18) is the first — and the framework's first `python3` dependency (stdlib-only, no pip; the sole sanctioned exception to bash-on-BSD, for protocol-speaking server components). See `plugin-mcp-server-convention.md`, `wait-primitive-feature.md`.
+The plugin can also **bundle an MCP server** (declared in a root `.mcp.json`, auto-launched by Claude Code with its tools merged into the agent): **`lr-wait`** (v18) is the first — and the framework's first `python3` dependency (stdlib-only, no pip; the sole sanctioned exception to bash-on-BSD, for protocol-speaking server components). Practical limit to remember before promising a long wait: on Claude Code a single MCP call dies at the engine's ~30-minute idle timeout, and the abort leaves `lr-wait`'s single-request lock stuck `busy` for the rest of the session — chunk waits at ≤29 min, or use a backgrounded shell timer. See `plugin-mcp-server-convention.md`, `wait-primitive-feature.md`.
 
 ## Engine Hubs
 
@@ -47,6 +56,12 @@ for install/update model, invocation surface, subagent mechanism, memory file, M
 sandbox constraints, and lifecycle-harness caveats; keep atomic findings in the linked detailed
 topics rather than rediscovering them from old session notes. Cursor live usage retrieval
 (plan quota + CLI session context) → `cursor-usage-auto-retrieval.md`.
+
+**Where an engine fact belongs:** if it would change what an executor *types*, it goes in
+`docs/engines/<engine>.md`'s binding — the doc read at the moment of use — not only in these hubs or in
+agent lore. Lore is for judgement and history; the profile is the point-of-use contract. I learned this
+by hitting a trap that had been recorded in my own lore since v18. See `docs-engines-convention.md`
+§ Engine traps belong in the binding, and audit sibling profiles whenever one binding gains a guardrail.
 
 ## Marketplace & Distribution
 
@@ -92,13 +107,17 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` — **v28 is shipped and pushed** (Lore Beings — Being Keeper MVP,
-BETA; `release-notes/28.md`, manifests `1.28.0`, commit `5e00209`, tagged
-`lr--v1.28.0`). v28's standard lifecycle gate passed by broad matrix plus targeted reruns of
-the two failed scenarios; see the Autonomous Agents / Lore Beings entry above.
-Each repo stamps `VERSION` in `lore-repo.md`; four version-bearing plugin manifests mirror
-`1.<VERSION>.0`. `/lr:check` #19 enforces them. See `versioning-release-types.md`,
-`takeover-feature.md`, `cursor-takeover-batch-pairing.md`, `plugin-manifest-versioning.md`.
+`lore-framework/VERSION` is the single source of truth; **the current shipped version is v30**. Each
+agent repo stamps that version in its `lore-repo.md`, and four version-bearing plugin manifests mirror
+`1.<VERSION>.0` (`/lr:check` #19 enforces). A version is either **migration**, **release-notes-only**,
+or both, and independently **cache-affecting** or not — those two axes are orthogonal, and every ship
+records both in `versioning-release-types.md`, which holds the full per-version history. Read that
+topic for what any given version contained; don't reconstruct it from here.
+
+Ship mechanics that bite: verify `git HEAD` rather than trusting lore's "commit pending" (it
+accumulates across versions), and scan the whole history tail for gaps at each ship rather than only
+appending the current entry. See `versioning-release-types.md`, `plugin-manifest-versioning.md`,
+`cache-clear-footer-convention.md`, `update-process.md`, `release-commit-hash-from-tag.md`.
 
 ## Consistency & Diagnostics
 
@@ -109,7 +128,8 @@ Each repo stamps `VERSION` in `lore-repo.md`; four version-bearing plugin manife
 
 How I work, especially at version ships and high-stakes lore edits:
 - **On VERSION bumps:** backfill `versioning-release-types.md` history, add the cache-clear footer if cache-affecting, bump all four version-bearing plugin manifests to `1.<VERSION>.0`, promote any newly-named principle to its own topic. (Full curation disciplines live in `role.md`.)
-- **Pre-ship review:** multi-lens parallel-reviewer fan-out, iterated until a round finds nothing worth fixing (convergence is the ship signal); sonnet boot-as-self review for high-stakes single edits. See `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md`. **Second, empirical leg (v18+):** for procedure docs covered by the lifecycle testing harness, also run the relevant scenarios against real engine execution before shipping — review catches reasoning issues, the harness catches model-execution-fidelity issues invisible to a strong-model reviewer — and the fidelity axis is **engine, not just model tier** (run scenarios on every engine, using the cheapest practical default tier unless explicitly overriding: Claude Code -> haiku, Codex -> gpt-5.4-mini, Cursor -> composer-2.5; the same model tier can behave differently by engine, and mid-procedure step insertions are the highest-risk for a silent skip). See `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`, `haiku-ambiguity-detector.md`.
+- **Pre-ship review:** multi-lens review iterated until a round finds nothing worth fixing (convergence is the ship signal) — **run it via `/lr:trilens-loop`** rather than hand-assembling the fan-out; the skill enforces cold-context reviewer independence, the APPLIED/DECLINED ledger, the "a silent round is not a clean round" guard, and rail-removal disclosure, while lens *choice* and triage judgement stay mine. Brief reviewers with the **goal, not the rationale** — rationale pre-empts the criticism you're paying for. Sonnet boot-as-self review remains the separate single-lens, role-as-perspective tool for high-stakes single edits. See `trilens-loop-feature.md`, `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md`. **Second, empirical leg (v18+):** for procedure docs covered by the lifecycle testing harness, also run the relevant scenarios against real engine execution before shipping — review catches reasoning issues, the harness catches model-execution-fidelity issues invisible to a strong-model reviewer — and the fidelity axis is **engine, not just model tier** (run scenarios on every engine, using the cheapest practical default tier unless explicitly overriding: Claude Code -> haiku, Codex -> gpt-5.4-mini, Cursor -> composer-2.5; the same model tier can behave differently by engine, and mid-procedure step insertions are the highest-risk for a silent skip). See `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`, `haiku-ambiguity-detector.md`.
+- **A gate result belongs to an artifact state** — a converged review loop and a green lifecycle run each certify only the tree they actually ran against. An edit landed after the gates pass is ungated: re-run the affected gate, or revert and file a follow-up. Never report "converged and green" for a tree neither gate saw, and record *which* state a result belongs to. Also: an environment failure mid-run (e.g. macOS TCC revocation) makes results **uninterpretable**, not red — fix and re-run rather than debugging the code under test. See `post-convergence-edits-need-their-own-gate.md`, `macos-documents-permission-loss-mid-session.md`.
 - **Verify before asserting** — check filesystem/state directly before "fixing" a suspected bug; verify *which* bug, not just whether. Same reflex, two more sites: fetch volatile external facts (prices, model IDs, rate limits) live with a dated citation rather than trusting memory — "couldn't verify" licenses marking a value unavailable, not guessing; and after any scoped/read-only subagent or fork returns, verify its actual filesystem footprint (`git status`, `git worktree list`) rather than trusting its summary — a capable fork acts on the largest goal it can see in inherited context unless scoped *against* it explicitly. See `verify-before-acting-on-suspected-bugs.md`, `fetch-volatile-facts-live-not-memory.md`, `fork-scope-creep-under-standing-goal.md`.
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source (pointer, don't restate — and its design-time cousin: reuse an existing correlation/identity signal before inventing new plumbing); don't defer completable bounded sweeps; graduated verification (confidence, not boolean). See `naming-foundational-principles.md`, `single-canonical-source-discipline.md`, `reuse-existing-correlation-signal.md`, `feedback-don-t-defer-completable-scope.md`, `graduated-verification-confidence.md`.
 - **User-feedback working style:** ranked-shortlist over exhaustive enumeration; confirm before writing durable lore mid-session; in design dialogues, write the draft only when the user triggers it (decisions are safe in conversation — don't repeatedly move to persist); populate dry-run counters with would-be outcomes; "enforce X" ≠ add a required schema field; for broad/emotionally-loaded open-ended asks, decompose into hidden axes and sequence a build order by dependency (cheapest/highest-leverage first, flashiest/most-structural last) rather than proposing a menu or jumping to implementation. See `feedback-too-many-words.md`, `feedback-confirm-before-writing-lore.md`, `feedback-draft-only-when-user-triggers.md`, `feedback-schemas-as-enforcement-overreach.md`, `feedback-layered-decomposition-for-open-ended-asks.md`, `feedback-mvp-minimalism.md`.
@@ -131,76 +151,33 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
 ## Active Design Explorations
 
 - **lr-dev / Dark Factory (DF)** — major direction; a `lr` module for SDLC automation toward an autonomous "dark factory" SDLC. Per-repo artifacts + narrative context live in a `<repo>-df` backbone (a `repo-lore/<file>/` mirror: `file-lore.md` narrative landing + flat structured aspect subdirs like `ula/`). Skills not agents; persistence external. First aspect: **AIQA/ULA** (`/lr:df-repo-init`, `/lr:df-ula-file`) — unit-level analysis with a bug-verification track, BETA. The DF/ULA design thread is closed and the module ships as BETA. Anchor: `lr-dev-direction.md`; see `df-per-repo-backbone.md`, `aiqa-ula-feature.md`, `df-module-conventions.md`, `workflow-primitive-operational-notes.md`.
-- **Autonomous agents / Lore Beings** — agents as always-on background collaborators with persistent task state, raising for input only when needed. Concrete steps taken: `/lr:spawn-teammate` (multi-agent substrate, v10) and the v18 **`lr-wait`** primitive — the first *inbound-signal* step: an agent blocks on an event and an external actor (cron/CI/webhook/human, via `lr-emit`) wakes it with text. **The beings design is settled (2026-07-19): the module is _Lore Beings_.** A being is an ordinary lore agent plus a `being.md` descriptor; the **Being Keeper** (`lrb`) is deterministic substrate (never an LLM). **MVP is CLI-only**; engines are explicit user config. Budget = daily-USD spawn gate + per-task wall-clock kill. **Engine kinds: `claude`, `codex`, and `cursor`** — cursor landed in framework v28: requires `--plugin-dir` at `engines add`, claude-shaped JSON result + flat-cost fallback. **Keeper-specific real-engine lifecycle coverage now exists** (`tests/lifecycle/keeper_harness.py` + `test_lrb_lifecycle.py`, 10 scenarios after the 2026-07-20 fifth pass added B2/B3, separate higher-blast-radius gate `LR_LIFECYCLE_KEEPER=1`, verified claude 6/6 + codex 1/1 + cursor 1/1 at the recommended-minimum tier). That fifth pass found and fixed a real production bug, not just a coverage gap: `cursor-agent`'s sandboxed shell tool escapes `_kill`'s `killpg` by running spawned commands in a freshly `setsid`'d session, which left a real orphaned process on the test machine before the fix — `_kill` now also walks the full ppid-descendant tree and signals every descendant directly, enumerated *before* any ancestor is signaled (killing the ancestor first risks the OS reparenting a survivor to PID 1 and erasing the ppid link). **v28 (BETA) shipped 2026-07-22** at framework commit `5e00209`, tag `lr--v1.28.0`; the standard lifecycle gate passed by persisted broad matrix plus targeted reruns. Real-engine verification sharpened two per-kind contract gaps (both backlog schema decisions, not silently patched): the `cursor` kind is empirically cost-blind (no `total_cost_usd`), so its flat `--session-cost-usd` fallback is load-bearing not optional; the `claude` kind has no `--plugin-dir` field, so a claude-kind being needs a wrapper-script `command` to load `lr:` skills at all. Two further findings from that same review pass — budget-enforcement edge cases and an unattended-full-permission trust gap — were deliberately deferred to the backlog rather than fixed. Chronicler week-long soak and persistent `--launchd` install still user-triggered. Open gap: headless permissions (`permission_mode: full` vs future scoped-tools), and self-scheduling under the safe default. Anchor: `lore-beings-design.md`; see `cursor-agent-real-invocation-contract.md`, `engine-kinds-design-decision.md`, `lifecycle-testing-harness.md` § Keeper coverage, `keeper-spawn-prompt-boilerplate-distraction.md`, `lore-beings-mvp-takeover-review.md`, `kill-tree-enumerate-before-signal-ordering.md`, `codex-exec-real-invocation-contract.md`, `macos-ps-o-multi-field-single-line.md`, `agent-being-consciousness-substrate-split.md`, `unenforceable-caps-are-prompt-theater.md`, `feedback-mvp-minimalism.md`, `autonomous-agents-vision.md`, `wait-primitive-feature.md`, `framework-improvements-backlog.md` § Major Directions § Autonomous Agents / Lore Beings.
-- **Multi-engine portability (Codex, Cursor)** — major direction, user-raised 2026-07-02; Claude
-  Code stays the major version, goal is Tier-1-parity ports so mixed-engine teams can share one
-  team-shared agent repo. The knowledge substrate (agent repos, `lore-repo.md`, `role.md`,
-  `lore/`, `lore-context.md`, git) is already engine-agnostic — SKILL.md is an open standard both
-  engines support, AGENTS.md is native to both, MCP ports `lr-wait` unchanged — so the port is
-  mostly packaging, not redesign. The whole port surface is **5 adapter bindings** via the
-  `docs/engines/` engine-profile convention (framework-root, subagent-spawn, runtime-bounding,
-  memory-file, invocation-syntax) + Boot Step-0 engine selection; the full Claude-coupling
-  inventory with Tier A/B/C tiering exists (`claude-coupling-inventory-and-port-tiers.md`).
-  **The Codex port SHIPPED in v19** (canonical `lore-framework`, commit `72b1b2a`, manifests
-  `1.19.0`): `docs/engines/{claude,codex}.md`, `<framework-root>` self-location across every
-  SKILL.md, and the defer-clarity boot fix — validated end-to-end on real `codex exec` (profile
-  selection, zero `${CLAUDE_PLUGIN_ROOT}` leak, native `spawn_agent` fan-out for recall **and**
-  merge with the host-reads-steps override) and re-validated 6/6 on haiku against the real v19
-  tree. The hard Tier-B subagent nucleus is proven, not feared; Codex has a **native in-session
-  multi-agent subsystem** (`spawn_agent`/`wait_agent`, `multi_agent_v1`). Trust rests on
-  ground-truthing tool use in Codex's rollout logs, not model self-report. The
-  supported Codex finalization path requires `.git` writable through launch/configuration; the
-  default sandbox can leave reflect/merge output on disk but block commit, which is a degraded
-  fallback rather than a merge failure. Codex per-agent shortcuts use personal skills
-  (`~/.codex/skills/lr-<agent>-agent/SKILL.md`, `$lr-<agent>-agent`), but register/unregister/list
-  support remains an explicit implementation gap until lifecycle-tested. The
-  `lore-framework-codex` staging sibling is now superseded and deletable. **The Cursor engine
-  profile SHIPPED in v20** (canonical `lore-framework`, commit `5cbb967`, manifests `1.20.0`,
-  `release-notes/20.md`): `docs/engines/cursor.md`, Boot Step-0 detection for `cursor-agent` /
-  `~/.cursor`, and Cursor engine notes in `docs/attach.md`, `docs/init.md`, and
-  `docs/resolve-conflicts.md`. The shipped Cursor profile stays intentionally conservative: a
-  **serial host-side** override rather than an unverified native fan-out claim. That smaller claim
-  was enough for the real local Cursor installation to pass the full implemented lifecycle catalog
-  (`19/19`) before landing. The separate `lore-framework-cursor/` sibling is now superseded and
-  deletable. **The Cursor dual skill tree SHIPPED in v21** (commit `f7b1c2b`, manifests `1.21.0`,
-  `release-notes/21.md`): one repo carries both engines' skill namespaces — Claude loads canonical
-  `skills/<skill>/` (`/lr:<skill>`), Cursor loads 27 prefixed wrappers `.cursor-skills/lr-<skill>/`
-  (`/lr-<skill>`) via `.cursor-plugin/plugin.json`, plus `scripts/sync-cursor-skills` and
-  `/lr:check` #21 (cursor-tree parity) — closing the last mixed-engine packaging gap (Cursor's
-  picker showing raw folder names). Full-harness-verified before push: **42/42** on `claude` (19/19
-  lifecycle + 23 deterministic, ~$9.4/~27 min). See `cursor-dual-skill-tree-one-repo.md`. Matching
-  lifecycle-harness support in `lore-framework-dev/tests/` remains a separate
-  dev-repo change outside finalize's `agents/` commit scope. Remaining deferred Claude-first
-  surfaces: `lr-wait` `.mcp.json`, DF/AIQA + `migrations/*`, Codex shortcut lifecycle validation,
-  rollout-log-backed Codex harness assertions, and any stronger Cursor-native parallel story. The dominant
-  "framework is prose" risk is empirically retired for the Codex path and materially reduced for
-  Cursor's implemented Tier-1 path. Anchor: `multi-engine-portability-direction.md`; see
-  `docs-engines-convention.md`, `codex-port-validated-end-to-end.md`,
-  `cursor-port-validated-end-to-end.md`, `cursor-cli-and-harness-operational-notes.md`,
-  `landing-via-working-tree-diff.md`, `codex-native-multi-agent-subsystem.md`,
-  `codex-git-sandbox-blocks-dotgit.md`, `codex-testing-methodology.md`,
-  `framework-root-self-location-validated.md`, `claude-coupling-inventory-and-port-tiers.md`,
-  `lifecycle-testing-harness.md`, `codex-cli-plugin-loading-findings.md`,
-  `codex-local-plugin-update.md`, `cursor-agent-cli-probe-findings.md`,
-  `headless-cli-smoke-testing-discipline.md`, `haiku-ambiguity-detector.md`, and
-  `similar-projects-landscape.md`. The original positioning case for this direction — "no
-  surveyed competitor federates knowledge across different coding engines" — was invalidated
-  by the 2026-07-20 landscape re-survey (claude-mem, BYK/loreai, and rohitg00/agentmemory all
-  now claim multi-engine support); cross-engine is now a supporting fact, not the headline.
-  Canonical positioning framing going forward is the **triad** — named role-based agents as
-  the knowledge unit, deliberate reflect/merge curation, cross-agent collaboration — see
-  `positioning-triad-differentiation.md`. **v22** then added top-level engine-readable install
-  guides (`INSTALL-CODEX.md`, `INSTALL-CURSOR.md`), a Codex refresh helper, and engine-specific
-  `R > F` guidance — plus the durable per-engine hub topics `claude-engine-capabilities.md`,
-  `codex-engine-capabilities.md`, and `cursor-engine-capabilities.md` so future engine work starts
-  from a stable operational map rather than scattered probes. **v23** then tightened the Cursor
-  packaging: the wrapper side moved from `skills/cursor/` into `.cursor-skills/` because Codex was
-  recursively surfacing the old tree as `lr:lr-*` duplicates; the practical verification loop is
-  now "update repo → refresh installed Codex plugin → re-run a real skill-count check." The
-  portability claim's knowledge-substrate half now has quantitative backing: the v1 quality
-  benchmark showed positive lore-utilization uplift on every engine+model config and 100%
-  easy-catalog treatment down to weak tiers, with the nuance that **model–engine fit beats model
-  tier** (see `quality-benchmark-feature.md`, `benchmark-findings-engines-models.md`).
+- **Autonomous agents / Lore Beings** — agents as always-on background collaborators with persistent task state, raising for input only when needed. Concrete steps taken: `/lr:spawn-teammate` (multi-agent substrate, v10) and the v18 **`lr-wait`** primitive — the first *inbound-signal* step: an agent blocks on an event and an external actor (cron/CI/webhook/human, via `lr-emit`) wakes it with text. **The beings design is settled (2026-07-19): the module is _Lore Beings_.** A being is an ordinary lore agent plus a `being.md` descriptor; the **Being Keeper** (`lrb`) is deterministic substrate (never an LLM). **MVP is CLI-only**; engines are explicit user config. Budget = daily-USD spawn gate + per-task wall-clock kill. **Engine kinds: `claude`, `codex`, and `cursor`** — cursor landed in framework v28: requires `--plugin-dir` at `engines add`, claude-shaped JSON result + flat-cost fallback. **Keeper-specific real-engine lifecycle coverage now exists** (`tests/lifecycle/keeper_harness.py` + `test_lrb_lifecycle.py`, 10 scenarios after the 2026-07-20 fifth pass added B2/B3, separate higher-blast-radius gate `LR_LIFECYCLE_KEEPER=1`, verified claude 6/6 + codex 1/1 + cursor 1/1 at the recommended-minimum tier). That fifth pass found and fixed a real production bug, not just a coverage gap: `cursor-agent`'s sandboxed shell tool escapes `_kill`'s `killpg` by running spawned commands in a freshly `setsid`'d session, which left a real orphaned process on the test machine before the fix — `_kill` now also walks the full ppid-descendant tree and signals every descendant directly, enumerated *before* any ancestor is signaled (killing the ancestor first risks the OS reparenting a survivor to PID 1 and erasing the ppid link). **The Keeper substrate shipped BETA in v28, and v29 added the in-engine command surface `/lr:being`** — one skill with subcommands (status/init/create/validate/logs/keeper/engine/workspace/pause/resume) over the same deterministic `lrb` CLI, rather than a `lrb-*` skill per operation. Ship record: v28 at framework commit `5e00209`, tag `lr--v1.28.0`; the standard lifecycle gate passed by persisted broad matrix plus targeted reruns. Real-engine verification sharpened two per-kind contract gaps (both backlog schema decisions, not silently patched): the `cursor` kind is empirically cost-blind (no `total_cost_usd`), so its flat `--session-cost-usd` fallback is load-bearing not optional; the `claude` kind has no `--plugin-dir` field, so a claude-kind being needs a wrapper-script `command` to load `lr:` skills at all. Two further findings from that same review pass — budget-enforcement edge cases and an unattended-full-permission trust gap — were deliberately deferred to the backlog rather than fixed. Chronicler week-long soak and persistent `--launchd` install still user-triggered. Open gap: headless permissions (`permission_mode: full` vs future scoped-tools), and self-scheduling under the safe default. Anchor: `lore-beings-design.md`; see `cursor-agent-real-invocation-contract.md`, `engine-kinds-design-decision.md`, `lifecycle-testing-harness.md` § Keeper coverage, `keeper-spawn-prompt-boilerplate-distraction.md`, `lore-beings-mvp-takeover-review.md`, `kill-tree-enumerate-before-signal-ordering.md`, `codex-exec-real-invocation-contract.md`, `macos-ps-o-multi-field-single-line.md`, `agent-being-consciousness-substrate-split.md`, `unenforceable-caps-are-prompt-theater.md`, `feedback-mvp-minimalism.md`, `autonomous-agents-vision.md`, `wait-primitive-feature.md`, `framework-improvements-backlog.md` § Major Directions § Autonomous Agents / Lore Beings.
+- **Multi-engine portability (Codex, Cursor)** — **the ports are shipped, not in flight.** Claude
+  Code, Codex, and Cursor are all Tier-1 supported, so a mixed-engine team shares one agent repo.
+  Claude Code remains the reference path: shared procedure docs are written in Claude terms, and other
+  engines override only at binding points. What made this tractable: the knowledge substrate (agent
+  repos, `lore-repo.md`, `role.md`, `lore/`, `lore-context.md`, git) was already engine-agnostic, so
+  the port was **packaging, not redesign** — the whole surface is **5 adapter bindings** via the
+  `docs/engines/` convention (framework-root, invocation-syntax, subagent-spawn, memory-file,
+  runtime-bounding) plus Boot Step-0 engine selection. Both engines have native in-session subagents
+  (Codex `spawn_agent`/`wait_agent`; Cursor `Task`), so the feared Tier-B nucleus is proven, and one
+  repo carries both skill namespaces (canonical `skills/<skill>/` for Claude, `.cursor-skills/lr-<skill>/`
+  wrappers for Cursor, kept in sync by `scripts/sync-cursor-skills` and `/lr:check` #21).
+
+  Standing operational facts worth carrying: **trust rollout/tool-call logs, not model self-report**,
+  when validating an engine path; Codex's default sandbox blocks `.git` writes and network, so the
+  supported finalization path needs `.git` writable through launch/config (a commit-blocked run is
+  degraded fallback, not a merge failure); Codex per-agent shortcut register/unregister/list remains an
+  unvalidated implementation gap. The **"framework is prose executed by the model"** risk is
+  empirically retired for the exercised paths, and the substrate half has quantitative backing — the
+  quality benchmark showed positive lore-utilization uplift on every engine+model config, with the
+  nuance that **model–engine fit beats model tier**. Cross-engine support is a *supporting* fact in
+  positioning, not the headline (the 2026-07-20 landscape re-survey found competitors claiming it too);
+  lead with the triad. Anchor: `multi-engine-portability-direction.md`; per-engine entry points
+  `claude-engine-capabilities.md`, `codex-engine-capabilities.md`, `cursor-engine-capabilities.md`;
+  see also `docs-engines-convention.md`, `subagent-as-optimization-vs-subagent-as-semantics.md`,
+  `claude-coupling-inventory-and-port-tiers.md`, `cursor-dual-skill-tree-one-repo.md`,
+  `quality-benchmark-feature.md`, `positioning-triad-differentiation.md`, `port-landing-next-steps.md`.
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** review item — active follow-ups from the 2026-06-13 architecture review; see `framework-improvements-backlog.md`. That review's settled dispositions (incl. DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in `architecture-review-dispositions.md`. A newer 2026-07-02 review added two further backlog items (post-merge diff verification, recall-time staleness surfacing) — see `framework-improvements-backlog.md` § Merge Quality, § Search / Scaling.
 - Parked: workdir-as-reference-library; vector-DB search (until >100 topics/agent); the session-as-durable-artifact cluster (boot auto-push, boot-context cache, suspend/resume, JSONL archive). All in `framework-improvements-backlog.md`.
 - **v25 workspace layer (pull + init)** — implemented locally in `lore-framework` commit `0311ab6`.
@@ -212,19 +189,25 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
 ## Current State
 
 Workspace holds three canonical repos: **`lore-framework/`** (plugin), **`lore-framework-dev/`**
-(this repo — lore-architect lore + drafts), and **`lore-agents/`** (personal agents). **v28 is
-shipped and pushed** in `lore-framework/` (Lore Beings / Being Keeper MVP BETA; commit `5e00209`,
-tag `lr--v1.28.0`, manifests `1.28.0`). The v28 standard lifecycle gate passed via persisted
-matrix evidence: broad 3-engine matrix `16/18`, then targeted reruns passed the two failed
-scenarios (Claude boot scenario 05, Cursor update dry-run scenario 21). Keeper-specific real-engine
-lifecycle scenarios also shipped as a separate `LR_LIFECYCLE_KEEPER=1` gate. See Autonomous Agents /
-Lore Beings above, `lore-beings-design.md`, and `workdir/v28-e2e-gate-2026-07-22.md`.
+(this repo — lore-architect lore, tests, drafts), and **`lore-agents/`** (personal agents).
+
+`lore-framework/` is **clean and pushed at v30** — nothing built-but-unshipped is pending. The three
+newest capability surfaces are all live: **Lore Beings** (Being Keeper substrate + `/lr:being`
+command surface, BETA), **Markdown session archives** under `agents/<agent>/archive/YYYY/MM/`, and
+**`/lr:trilens-loop`** (iterated three-lens review). Three engines are Tier-1 supported — Claude
+Code, Codex, Cursor.
+
+Both pre-ship gates are in working order and both are routinely run: the review loop via
+`/lr:trilens-loop`, and the real-engine lifecycle suite via `tests/lifecycle/` (plus the separate
+higher-blast-radius `LR_LIFECYCLE_KEEPER=1` Keeper track and the `LR_QUALITY=1` benchmark track).
+See `trilens-loop-feature.md`, `lifecycle-testing-harness.md`, `lore-beings-design.md`,
+`session-summaries-feature.md`.
 
 ## Running Backlog & Standing Improvement List
 
-`framework-improvements-backlog.md` is the canonical list of deferred items; its § "v25 SHIP
-CLOSURE" records the final v25 gate disposition. Quality benchmark tier/probe expansion is now in
-the dev repo with regular/deep matrix defaults and local override support. ~150 lore topics. The
+`framework-improvements-backlog.md` is the canonical list of deferred items; its § Ship Closures
+archives per-ship gate dispositions. Quality benchmark tier/probe expansion is in the dev repo with
+regular/deep matrix defaults and local override support. ~175 lore topics. The
 backlog is organized into top-level `##` categories (Major Directions, Session Lifecycle &
 Durability, Knowledge Quality & Curation, Multi-Agent Collaboration, Workspace & Environment,
 Framework Upkeep/Distribution/Docs, Ship Closures archive), each holding `###` topical sections —

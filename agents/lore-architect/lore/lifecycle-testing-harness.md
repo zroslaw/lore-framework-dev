@@ -37,6 +37,27 @@ per engine by default: Claude Code -> `haiku`, Codex -> `gpt-5.4-mini`, Cursor -
 accidentally run the preship e2e gate on `sonnet` or another expensive/default account tier. This
 also applies to the sibling `tests/quality/` regular matrix default.
 
+**`/lr:trilens-loop` coverage (v30, 2026-07-25):** scenarios **28–29** in
+`tests/lifecycle/test_trilens_loop.py` drive the skill end-to-end. A planted uncommitted lore topic
+carrying a dangling cross-reference and a contradiction against committed fixture lore is reviewed in a
+single round; scenario 28 allows fixes and asserts the file was edited, scenario 29 amends the flow to
+report-only and asserts the file is byte-identical afterwards — a **filesystem** check of the free-text
+rail rather than a self-report, which is the assertion shape worth copying for any future rail. Both
+assert three distinct lenses were chosen. Green 3/3 engines at the default cheap tiers. Known
+weak-tier flakiness shipped as-is: codex/gpt-5.4-mini intermittently returns `FINDINGS: none` on
+scenario 28 (1 failure in 2 repeat runs, unchanged doc). See `trilens-loop-feature.md`.
+
+**A gate result belongs to an artifact state.** Record the commit or working-tree state a run
+certifies. An edit landed after the suite went green is ungated work — re-run or revert, and never
+report "green" for a tree the suite never saw. See
+`post-convergence-edits-need-their-own-gate.md`.
+
+**Environment failures make a run uninterpretable, not red.** A macOS TCC revocation mid-invocation
+took out one scenario as a full 900s subprocess hang (the engine could not read the plugin under test)
+and the next in `build_fixture` reading `VERSION`. Results spanning such a transition say nothing about
+the code under test — fix the environment and re-run rather than debugging the framework. See
+`macos-documents-permission-loss-mid-session.md`.
+
 **Sibling track (2026-07-07):** a third test track, the quality benchmark
 (`lore-framework-dev/tests/quality/`, gated `LR_QUALITY=1`), measures **lore utilization** — did
 the lore make the output better — where this harness measures **procedure fidelity**. Same repo
@@ -181,7 +202,9 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `port-landing-next-steps.md` — the landing record plus the remaining follow-ups not yet folded
   into the automated suite.
 - `multi-engine-portability-direction.md` — the anchor topic this harness serves (Phase 0.5).
-- `parallel-reviewer-fanout-pattern.md` — the model-review pre-ship discipline this complements with empirical regression testing.
+- `parallel-reviewer-fanout-pattern.md`, `trilens-loop-feature.md` — the model-review pre-ship discipline this complements with empirical regression testing (and the v30 feature scenarios 28–29 cover).
+- `post-convergence-edits-need-their-own-gate.md` — a green run certifies only the artifact state it ran against.
+- `macos-documents-permission-loss-mid-session.md` — the environment ailment that renders a run's verdict uninterpretable.
 - `codex-cli-plugin-loading-findings.md`, `cursor-agent-cli-probe-findings.md` — first empirical
   per-engine probes.
 - `codex-port-validated-end-to-end.md`, `codex-testing-methodology.md` — the manual end-to-end Codex validation and its rollout-log ground-truthing (what the automated codex driver must replicate).

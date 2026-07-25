@@ -33,7 +33,12 @@ The knowledge substrate itself — agent repos, `lore-repo.md`, `role.md`, `lore
   One real risk remains before advertising Cursor's parallel-agent support: Cursor auto-manages
   its own git worktrees for parallel agents, which may interact with the framework's existing
   worktree convention (`worktrees-convention.md`) in ways that are still not checked. The separate
-  `lore-framework-cursor/` sibling is now **superseded**. See `workdir/draft-port-cursor.md`,
+  `lore-framework-cursor/` sibling is now **superseded**. **Corrected in v30:** the conservative
+  binding had gone stale — Cursor shipped native subagents in 2.4 (2026-01-22, `Task` tool) — and,
+  more importantly, "serial host-side" is only a *lossless* degradation for procedures where the
+  subagent is an optimization. The binding now keeps serial as the validated default and carves out
+  semantics-class procedures; see `subagent-as-optimization-vs-subagent-as-semantics.md`,
+  `docs-engines-convention.md` § v30 profile corrections. See `workdir/draft-port-cursor.md`,
   `cursor-agent-cli-probe-findings.md`, `cursor-port-validated-end-to-end.md`,
   `cursor-cli-and-harness-operational-notes.md`.
 - **Engine-specific durable entry points** — after the first wave of ports landed, the lore graph
@@ -42,6 +47,19 @@ The knowledge substrate itself — agent repos, `lore-repo.md`, `role.md`, `lore
   caveats. Use `claude-engine-capabilities.md`, `codex-engine-capabilities.md`, and
   `cursor-engine-capabilities.md` as those entry points; keep atomic facts in the linked detailed
   topics.
+
+## Parity is per-procedure-class, not per-engine (v30)
+
+A profile that passes the whole lifecycle suite is adequate **for the procedures that existed when it
+was validated.** Every new procedure re-opens the question, because a degradation clause that is
+lossless for one class of procedure can be feature-destroying for another: serial host-side execution
+reaches the same answer as a parallel `/lr:recall`, but a host reviewing its own changes is not a slower
+review — it is not a review. Classify a new subagent-spawning procedure before assuming any engine's
+existing binding covers it. See `subagent-as-optimization-vs-subagent-as-semantics.md`.
+
+Adjacent rule from the same ship: **facts about how an engine's mechanism misbehaves belong in that
+engine's profile binding**, not only in agent lore — the profile is what an executor reads at the moment
+of use. See `docs-engines-convention.md` § Engine traps belong in the binding.
 
 ## Dominant shared risk
 
@@ -124,7 +142,9 @@ The harness's first real use already found two genuine doc-fidelity bugs in `age
 - `agent-boot-doc-fidelity-fixes.md`, `execution-testing-catches-blind-ambiguity.md`, `haiku-ambiguity-detector.md` — the harness's real finds and the general/weak-model principles behind them.
 - `claude-coupling-inventory-and-port-tiers.md` — the full coupling inventory + Tier A/B/C map.
 - `framework-root-self-location-validated.md` — the biggest Tier A slice, validated on Claude/haiku and now on real Codex.
-- `docs-engines-convention.md` — the implemented five-binding engine-profile adapter layer.
+- `docs-engines-convention.md` — the implemented five-binding engine-profile adapter layer, plus the v30 Cursor/Claude `subagent-spawn` corrections and the engine-traps placement rule.
+- `subagent-as-optimization-vs-subagent-as-semantics.md` — parity is per-procedure-class; which procedures an engine may serialize.
+- `trilens-loop-feature.md` — the first semantics-class procedure, and what it forced in the profiles.
 - `codex-port-validated-end-to-end.md` — the Codex port proven end-to-end on real `codex exec`.
 - `codex-native-multi-agent-subsystem.md` — Codex's in-session subagent fan-out (corrects "no native subagents").
 - `codex-git-sandbox-blocks-dotgit.md` — the `.git`-write gate and supported finalization contract.

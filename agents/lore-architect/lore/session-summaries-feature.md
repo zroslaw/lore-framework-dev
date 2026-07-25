@@ -41,11 +41,36 @@ The design chose pointer-preferring minimalism over full narrative duplication a
 
 **No migration required for the feature.** `sessions/` directories are created on demand. Both v7 and v8 extensions of this feature are additive — no schema changes to existing repos.
 
+## Full session archives (v28 → Markdown-only in v29)
+
+Summaries have a sibling: the **full session log**, committed alongside them under
+`<lore-agent-repo>/agents/<agent>/archive/<YYYY>/<MM>/`. v28 introduced these as compressed
+`.jsonl.gz`; **v29 replaced that with unified committed Markdown** — one human-readable, greppable,
+diffable artifact kind instead of an opaque blob the lore graph could not read.
+
+- **Shared frontmatter.** The summary and the full log carry the same frontmatter vocabulary,
+  including `framework_version`, `usage`, and `archive` (the summary's pointer to its full log). The
+  session UUID still correlates everything (host summary, guest summaries, full log).
+- **Out of default recall, by policy.** `agent-boot.md` § Searching Your Lore and `lore-search.md`
+  keep `archive/` (and `sessions/`) out of ordinary lore search: default lore search means `lore/`
+  only. Read `archive/` only when a human explicitly asks about a session log, or when session-log
+  evidence is concretely needed. Without that rule, a single full log would dominate any recall.
+- **Privacy is asymmetric and deliberate.** Summary composition now explicitly checks for private
+  PII, secrets, credentials, and internal client names. **Full logs remain unredacted** — so a raw
+  transcript that is not shareable must be skipped or deleted *before* commit. The review gate is the
+  only defence; there is no automated scrubbing.
+- **No migration.** `archive/` directories and `archive/AGENTS.md` are created on demand.
+
+This is the resolution of the "session as durable artifact" thread for the *log* half — see
+`session-as-durable-artifact-cluster.md` for the parts still parked (boot-context cache, suspend/resume).
+
 ## Why we didn't parse the JSONL
 
 The initial proposal was to parse Claude Code's internal session JSONL files, filter technical noise, and use the result for both reflection and archive. Investigation (captured in `jsonl-session-files-investigation.md`) showed real obstacles: format is proprietary, `~/.claude/sessions/<pid>.json` goes stale after `/clear`, cwd encoding is lossy, filtering decisions are non-obvious, and any archive becomes a long-lived copy of sensitive material.
 
 The pivot to model-composed markdown sidesteps all of these. The cost is that summaries reflect the model's in-context memory of the session (lossy on long sessions due to compaction), tracked as improvement rather than blocker.
+
+**Partially revisited since.** `/lr:takeover` (v24) *does* read engine-native session logs — but as a one-shot conversion into a digest for continuing interrupted work, not as the durable record (`takeover-feature.md`, `engine-session-log-formats.md`). And the v29 archive above keeps a full log, just authored as Markdown rather than parsed from a proprietary format. The original objections held; the answer was a different artifact, not JSONL parsing.
 
 ## Integration with finalize (v8)
 

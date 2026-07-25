@@ -10,7 +10,8 @@ This topic is the anchor: the settled decisions at a glance, with the draft as t
 
 - The module is **Lore Beings**; an autonomous agent is a **being** — an ordinary lore agent plus a `being.md` descriptor (`agents/<name>/being.md`).
 - The supervisor daemon is the **Being Keeper**. It must **not** be personified — it is keeper-of-beings, unconscious substrate, not an entity with agency. "Lore-keeper" was rejected because it reads as keeper-of-the-lore. This rationale binds future features: never give the Keeper voice or judgment.
-- CLI **`lrb`**. **MVP is CLI-only** — `lrb-*` skills are deferred with the namespace reserved (module-prefix precedent from `df-*`). Machine home `~/.lore-beings/`; workspace state `<workspace>/.lr-beings/` (gitignored).
+- CLI **`lrb`** is the substrate's interface. Machine home `~/.lore-beings/`; workspace state `<workspace>/.lr-beings/` (gitignored).
+- **The MVP shipped CLI-only (v28); v29 added the in-engine command surface `/lr:being`** — a single entry point over the same deterministic `lrb` substrate (`help`, `status`, `init`, `create`, `validate`, `logs`, `keeper`, `engine`, `workspace`, `pause`, `resume`; canonical doc `docs/being.md`). Note the shape: **one skill with subcommands, not a `lrb-*` skill per operation.** The reserved `lrb-*` namespace stayed unused, so the module-prefix precedent from `df-*` did *not* apply here — a substrate whose operations are already a coherent CLI maps better onto one dispatching skill. The substrate stays deterministic: the skill is a thin surface over `lrb`, and the Keeper is still never an LLM.
 
 ## MVP shape (post-simplification-pass)
 

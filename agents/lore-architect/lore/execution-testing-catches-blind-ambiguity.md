@@ -37,6 +37,22 @@ before the push" and "run all tests before we ship."
   ~$9–10 / ~25–30 min (v21 reference: 42/42, ~$9.4, ~27 min). Run it in the background, wait, push
   only on green. See `lifecycle-testing-harness.md`, `versioning-release-types.md`.
 
+## The two legs are genuinely independent (v30 evidence)
+
+v30 is the cleanest demonstration that neither leg substitutes for the other, in *both* directions:
+
+- The review loop **converged clean** — four rounds, 14 → 6 → 1 → 0 findings, on the very doc under
+  test — and the subsequent lifecycle run still exposed a weak-model fidelity gap (codex's cheapest
+  tier declaring a silent round clean instead of following the retry-then-report rule) that four rounds
+  of prose review had not predicted.
+- The lifecycle run went **green 3/3 engines** on scenarios that a review lens had separately caught
+  real defects in — a self-contradiction between two rules, and a profile that did not actually
+  document the trap the procedure doc pointed at.
+
+Corollary that bit me in the same ship: **each leg certifies the artifact state it actually ran
+against.** Two doc edits made after both gates passed were ungated work, and the recheck was destroyed
+by an environment failure. See `post-convergence-edits-need-their-own-gate.md`.
+
 ## The weak-model sharpening
 
 The execution-fidelity leg of this principle has a named, sharper form: **the weakest available model (haiku) is an *ambiguity detector*.** Where it stumbles, the doc is usually under-specified — a stronger model silently resolves the gap. The operative bar is therefore not "works on sonnet" but "explanatory enough that even haiku executes it faithfully," which doubles as a port-readiness bar (non-Claude engines are also not top-tier). See `haiku-ambiguity-detector.md` for the principle, its concrete instance (the defer-clarity fix), and the generalizable "put reassurance adjacent to the alarming message" rule.
@@ -53,6 +69,8 @@ When a procedure doc has been reviewed multiple times and still ships with an ex
 - `lifecycle-testing-harness.md` — the tool that operationalizes execution testing.
 - `multi-engine-portability-direction.md` — the "framework is prose executed by the model" risk this is direct first-hand evidence for.
 - `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md` — the prose-review disciplines this complements, not replaces.
+- `trilens-loop-feature.md` — the shipped instrument for the review leg (v30); the harness remains the empirical leg.
+- `post-convergence-edits-need-their-own-gate.md` — both legs certify a specific artifact state; edits after a gate are ungated.
 - `haiku-ambiguity-detector.md` — the sharpened weak-model form of the execution-fidelity leg.
 - `naming-foundational-principles.md` — the meta-rule this topic's own existence follows.
 - `quality-benchmark-feature.md`, `benchmark-measurement-design-principles.md` — the same "measure by running, not by reviewing" premise applied to lore *utilization* (did knowledge change behavior) rather than procedure fidelity.

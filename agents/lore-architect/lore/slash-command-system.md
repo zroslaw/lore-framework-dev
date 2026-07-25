@@ -2,7 +2,7 @@ The framework packages operations as `lr` plugin skills. User-facing invocation 
 per-agent shortcut artifacts follow each engine's native conventions.
 
 **Plugin skill naming (Claude Code syntax):**
-- `/lr:<action>` — all framework operations: boot, reflect, merge, summarize, finalize, register-repo, unregister-repo, create-repo, create-agent, list-agents, list-repos, check, workspace-sync, update, recall, attach, consult, init, spawn-teammate (BETA)
+- `/lr:<action>` — all framework operations. Current set (v30, `ls lore-framework/skills/` is the ground truth — don't trust this list over the filesystem): boot, reflect, merge, summarize, finalize, recall, attach, consult, pull-lore, register-agent, unregister-agent, register-repo, unregister-repo, create-repo, create-agent, list-agents, list-repos, check, doctor, update, trilens-loop, wait, workspace-init, workspace-pull, plus BETA: spawn-teammate, takeover, being, df-repo-init, df-ula-file. Plus the three style skills below.
 - `/lr-<agent-name>-agent` — optional per-agent boot commands, generated into `.claude/commands/`
 
 **Cursor plugin skill naming (folder = picker identity):**

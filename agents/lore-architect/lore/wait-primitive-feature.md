@@ -31,6 +31,34 @@ It is the **inbound** counterpart to the outbound signal hooks (`Stop` / `Notifi
 - **Live headless:** a `claude -p` run held a foreground `wait_for_event` open through the wait and resumed with the event content — the agent even acted on an instruction embedded in the event. This confirmed the one open assumption from the plan (that a foreground MCP call blocks cleanly under `-p`).
 - **Tests:** stdlib `unittest` in the dev repo (`lore-framework-dev/tests/test_wait.py` — see `plugin-vs-agent-repo-separation.md` § Dev-Only Artifacts), 23 tests (unit + integration), all green.
 
+## Long-wait operational limits (Claude Code, measured 2026-07-25)
+
+The "MCP gives the clean long block" reasoning above is right in principle but **the engine's own MCP
+idle timeout, not `MCP_TOOL_TIMEOUT`, is the binding constraint in practice.** Findings from holding a
+session idle ~2 hours (waiting out a token-limit window while keeping the prompt cache warm):
+
+- **`sleep` is capped at ~30 minutes.** A `sleep(3480)` was aborted with `MCP server
+  "plugin:lr:lr-wait" tool "sleep" sent no response or progress for 1800s`. The killer is the engine's
+  MCP idle timeout (`CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT`, default 1 800 000 ms), not the server. Use
+  ≤29-minute chunks, or raise the per-server `timeout` in MCP settings.
+- **The single-request lock survives an aborted call.** `lr-wait` serializes requests by design (a
+  mid-wait stray request gets `-32603 busy`), but after the timeout kill *every* later call returned
+  `lr-wait: busy waiting on another request; retry when it returns`, and the task id was already gone
+  so `TaskStop` could not clear it. The server was effectively unusable for the rest of the session —
+  the busy guard is not reentrant and has no recovery path from an engine-side abort.
+- **Fallback that works:** a backgrounded shell timer — `sleep <n>` via the Bash tool's
+  `run_in_background`. It notifies on completion, has no MCP idle timeout, and can be re-armed on each
+  wake. Foreground `sleep` is blocked by the harness, so the background flag is required.
+- **Re-arm one wait at a time** on each wake rather than scheduling many upfront; each wake costs only
+  a couple of hundred tokens if the reply is one line.
+
+**Framework implication, not fixed in v30:** `docs/wait.md` should state the idle-timeout ceiling and
+the non-reentrant lock, since a being or headless agent asking for a multi-hour wait will hit both, and
+the second one silently disables the primitive for the rest of the session. Filed in
+`framework-improvements-backlog.md`. Per `docs-engines-convention.md` § Engine traps belong in the
+binding, the ceiling itself is an engine fact and is recorded in `claude-engine-capabilities.md`; only
+the primitive's contract belongs in `docs/wait.md`.
+
 ## Status
 
 Shipped as **v18** (commit `e7514db`, 2026-07-05; manifests `1.18.0`) — committed and pushed to `github.com/zroslaw/lore-framework`. The v18 ship staged the lr-wait files *excluding* the three style skills, which were reserved for v19 (see `versioning-release-types.md`). Versioning classification + backfill in `versioning-release-types.md` (v18 entry: release-notes-only, cache-affecting). Conventions it established live in `plugin-mcp-server-convention.md`.
@@ -42,3 +70,5 @@ Shipped as **v18** (commit `e7514db`, 2026-07-05; manifests `1.18.0`) — commit
 - `versioning-release-types.md` — v18 classification (release-notes-only, cache-affecting: yes).
 - `plugin-vs-agent-repo-separation.md` — where the tests live (dev repo, not plugin).
 - `parallel-reviewer-fanout-pattern.md` — the 3-lens review that hardened this feature (validated the pattern for feature code, not just doc releases).
+- `claude-engine-capabilities.md` — the MCP idle-timeout ceiling as an engine fact.
+- `lore-beings-design.md` — the Keeper owns *between-session* existence; these limits bound the *in-session* wait a being can ask for.

@@ -51,7 +51,7 @@ The original framing, now demoted. Kept for the reasoning trail and because indi
 - New **`dev-repo-lore.md`** descriptor + new repo *kind* (separate now → mergeable into the source repo later), 2-level product/technical taxonomy stored separately, per-artifact `.lore.md` mirror.
 - Cross-cutting: migrations/auto-pull/version-check had to learn to walk the new repo kind.
 
-Surviving framings that are *not* superseded (carried into the leading direction): **test scenarios as a bidirectional IR** (what-to-test decoupled from how; coverage ≠ meaningfulness — every "expected" must cite product-lore intent or tests merely canonize current/buggy behavior); **lr-dev as a growing feature catalog** (accretion discipline, same shape as `ailment-catalog-pattern.md`); **multi-lens review promoted to a reusable skill** (`lr:dev-review`, the user independently reinvented `parallel-reviewer-fanout-pattern.md`); **standardized deliverable-format rules** (stable IDs, `class: product|technical`, intent-source citation, confidence/status, real dry-run counts not zeros).
+Surviving framings that are *not* superseded (carried into the leading direction): **test scenarios as a bidirectional IR** (what-to-test decoupled from how; coverage ≠ meaningfulness — every "expected" must cite product-lore intent or tests merely canonize current/buggy behavior); **lr-dev as a growing feature catalog** (accretion discipline, same shape as `ailment-catalog-pattern.md`); **multi-lens review promoted to a reusable skill** (filed here as `lr:dev-review` after the user independently reinvented `parallel-reviewer-fanout-pattern.md` — **shipped in framework v30 as core `/lr:trilens-loop`**, not as a DF-module skill, because the pattern is domain-agnostic; DF/AIQA is a consumer, see `trilens-loop-feature.md`); **standardized deliverable-format rules** (stable IDs, `class: product|technical`, intent-source citation, confidence/status, real dry-run counts not zeros).
 
 ## Artifact + knowledge store: the DF repo (was three-repo, now two)
 
@@ -114,7 +114,7 @@ Key design decisions: `df-` skill prefix required (supersedes `dev-`; not just g
 - `framework-as-engine-not-kb.md`, `agents-are-executors-first.md` — why a context agent (executor carrying knowledge) is more on-identity than a repo-bound passive KB.
 - `team-shared-knowledge-principle.md` — the agent-agnostic property the context agent preserves by being housed in a shared per-repo agent repo.
 - `knowledge-vs-skills-distinction.md` — skills travel with specialist agents; the context agent is knowledge custody only.
-- `parallel-reviewer-fanout-pattern.md` — the review pattern promoted into the `lr:dev-review` skill.
+- `parallel-reviewer-fanout-pattern.md`, `trilens-loop-feature.md` — the review pattern and the core skill it was promoted into (v30, `/lr:trilens-loop`); DF consumes it rather than owning a `lr:dev-review` of its own.
 - `ailment-catalog-pattern.md` — accretion discipline modeled for the lr-dev feature catalog.
 - `framework-improvements-backlog.md` § lr-dev — running backlog.
 - `architecture-review-dispositions.md` — the 2026-06-13 architecture-review triage; records the DF-inside-`lr` and team-shared framings as deliberate current decisions (DF-split a known future option).

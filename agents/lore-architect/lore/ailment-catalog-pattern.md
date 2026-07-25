@@ -61,3 +61,4 @@ When designing a new framework skill, ask whether the cases are exhaustive (phas
 - `framework-scope-vs-agent-scope.md` — the principle the universality gate applies.
 - `cache-clear-footer-convention.md` — the v12 convention that landed alongside the first ailment catalog.
 - `feedback-don-t-defer-completable-scope.md` — discipline for adding catalog members at the moment they're discovered, not deferring.
+- `macos-documents-permission-loss-mid-session.md` — a live accretion candidate (mid-session TCC loss on `~/Documents`): distinctive symptom, one-line probe, one-line user fix, clears the universality gate. Tracked in `framework-improvements-backlog.md` § Ailment Catalog.

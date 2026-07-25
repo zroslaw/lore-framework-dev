@@ -55,3 +55,4 @@ All three exploit the same `role.md` + `lore-context.md` boot to give the subage
 - `reflect-merge-execution-asymmetry.md` — when to delegate vs run inline
 - `design-doc-before-implement.md` — composes naturally: review the design draft before publishing
 - `parallel-reviewer-fanout-pattern.md` — the **multi-lens** counterpart: three reviewers with disjoint lenses for shipped framework artifacts (scripts, doc sweeps, schema changes). Different shape, often complementary.
+- `trilens-loop-feature.md` — the multi-lens counterpart's shipped skill (v30). This pattern stays hand-run and unchanged: it is deliberately *role-as-lens*, and its reviewer boots as the agent rather than starting from a neutral cold context.

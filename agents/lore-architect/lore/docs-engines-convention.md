@@ -29,7 +29,8 @@ manifests `1.20.0`). The local sibling build proved the shape before landing:
 - **framework-root:** self-location, `${CLAUDE_PLUGIN_ROOT}` empty
 - **invocation-syntax:** slash skills work under `cursor-agent --plugin-dir`
 - **subagent-spawn:** conservative **serial host-side** override for v1, rather than claiming an
-  unverified native Cursor subagent mechanism
+  unverified native Cursor subagent mechanism — **corrected in v30** to a serial *default* plus a
+  semantics-class carve-out using Cursor's native `Task`; see § v30 profile corrections below
 - **memory-file:** `AGENTS.md`
 - **runtime-bounding:** rely on Cursor job controls / approvals, not a Claude-style Bash timeout
 
@@ -71,6 +72,60 @@ and deletable** after the v20 landing. Design record: workdir `codex-binding-des
 deferred (carry `${CLAUDE_PLUGIN_ROOT}`, out of core scope): `.mcp.json` / lr-wait,
 `migrations/*`, `df`/`aiqa` — see `port-landing-next-steps.md` § Remaining follow-ups.
 
+## v30 profile corrections — the `subagent-spawn` binding on Cursor and Claude
+
+Both corrections came out of shipping `/lr:trilens-loop` (`trilens-loop-feature.md`), and both are
+about the same binding.
+
+**Cursor — a carve-out, not a blanket rule.** The v20 binding's conservative "execute host-side,
+serially" clause was epistemic caution rather than a discovered limitation, and it had gone stale:
+Cursor shipped subagents in **2.4** (2026-01-22; editor, CLI and Cloud Agents), dispatched via a `Task`
+tool, with async subagents and the nesting rule following in 2.5. The corrected binding keeps serial
+host-side execution as the *validated default* for the procedures that already pass that way (recall,
+consult, attach, merge, conflict resolution) and carves out one exception: procedures where **subagent
+independence is the semantics rather than an optimization** use `Task`. `trilens-loop.md` is the only
+such procedure today and is named explicitly; extension to the serial-default procedures is forbidden
+without their own validation run. See `subagent-as-optimization-vs-subagent-as-semantics.md` — that
+distinction is the whole reason the carve-out exists.
+
+A new **§ Native subagents** section separates *what Cursor documents* from *what this framework has
+actually validated*, and flags the load-bearing unknown: whether `Task` accepts a free-text brief or
+only dispatches pre-defined agent files by name. That separation is the convention-level lesson — a
+profile may host an unvalidated documented capability as long as the section says which is which.
+
+**Claude — the two traps.** `docs/engines/claude.md`'s `subagent-spawn` binding now names all three
+subagent types (`general-purpose`, `Explore`, `fork`) and their two traps: `fork` **inherits the
+caller's full conversation context** (unusable wherever independence is required), and passing a
+**`name`** makes the call an Agent-Teams teammate, which **does not auto-return its report to the
+caller**. Both were previously undocumented in the profile and both are easy to hit.
+
+## Engine traps belong in the binding, not only in agent lore
+
+The Claude correction above exists because of a live failure worth generalizing.
+
+`parallel-reviewer-fanout-pattern.md` had recorded the named-teammate non-return trap since **v18**. I
+hit it anyway, live, while dogfooding `/lr:trilens-loop`: three reviewers spawned with `name`s, all
+three went idle without reporting, round re-run unnamed. The knowledge failed to protect me because it
+lived in **agent lore** — recallable, but only if you think to recall it — instead of in the binding an
+executor reads *at the moment of spawning*. It was one lookup away from the exact instruction that
+would have avoided it. A reviewer lens independently flagged the same gap from the other side: the
+warning in `trilens-loop.md` had no basis in the profile it pointed at.
+
+**Rule: a fact about how an engine's mechanism misbehaves belongs in that engine's profile binding.**
+Agent lore is for judgement and history; the profile is the point-of-use contract. The test is
+mechanical — *if the fact would change what an executor types, it goes in the profile.*
+
+Two corollaries for procedure docs:
+
+- **Don't restate the mechanism** (`single-canonical-source-discipline.md`) — but *do* tell the
+  executor to **read the whole binding before spawning**.
+- **State the outcome requirement in engine-neutral terms** — e.g. "the report must actually come back
+  to you" — so a trap in *any* engine is caught by the requirement rather than by an engine-specific
+  warning that only covers the engine you happened to think about.
+
+This composes with § Cross-profile guardrail audits below: having written a trap into one binding, check
+the sibling bindings for the same class of trap.
+
 ## Cross-profile guardrail audits
 
 When one engine profile documents a named guardrail against a class of error, check every sibling profile for the same latent bug rather than assuming the guardrail was only ever needed once. Since all three profiles share the same five bindings by design, a fix in one binding's handling on one profile is a strong signal to audit the same binding on the others. Concrete instance: `docs/engines/cursor.md` had long guarded against guessing `docs/<skill>.md` from a skill name (skill-name and doc-filename diverge, e.g. `boot` → `agent-boot.md`), but `docs/engines/codex.md`'s invocation-syntax binding had the identical latent bug, undetected until an AI-installer review pass traced it against real files on disk. See `skill-doc-filename-divergence-bug-class.md`.
@@ -86,3 +141,7 @@ When one engine profile documents a named guardrail against a class of error, ch
 - `claude-coupling-inventory-and-port-tiers.md` — the five bindings as the whole port surface.
 - `port-landing-next-steps.md` — the landing record and remaining Claude-first follow-ups.
 - `skill-doc-filename-divergence-bug-class.md` — the concrete cross-profile guardrail bug, caught by an AI-installer review pass.
+- `subagent-as-optimization-vs-subagent-as-semantics.md` — the principle behind the v30 Cursor carve-out; classifies a procedure before an engine is allowed to degrade it.
+- `trilens-loop-feature.md` — the v30 feature that forced both profile corrections.
+- `parallel-reviewer-fanout-pattern.md` — where the named-teammate trap used to live alone.
+- `claude-engine-capabilities.md`, `cursor-engine-capabilities.md` — the per-engine hubs these bindings feed.

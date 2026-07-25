@@ -54,6 +54,7 @@ This rule composes with:
 - `team-shared-knowledge-principle.md` — the topic born from this lesson; the canonical example
 - `haiku-ambiguity-detector.md` — a later principle named per this meta-rule (surfaced by a concrete harness result rather than a missing-topic gap)
 - `agent-being-consciousness-substrate-split.md` — another later principle named per this meta-rule (surfaced during the 2026-07-19 Agent Beings brainstorm — the direction now settled as Lore Beings, see `lore-beings-design.md`; named immediately rather than left implicit in the supervisor sketch)
+- `subagent-as-optimization-vs-subagent-as-semantics.md` — named per this meta-rule during the v30 `/lr:trilens-loop` ship: the rationale for forbidding a host-side fallback kept bottoming out in an unnamed distinction between two kinds of subagent use, so the distinction got its own topic before the feature shipped
 - `system-design-principles.md` — where new named principles get indexed
 - `lore-topic-format.md` — mechanics of topic structure
 - `framework-scope-vs-agent-scope.md` — another principle that crystallized only when named

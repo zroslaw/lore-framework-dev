@@ -109,3 +109,5 @@ First observed instance: spawn-teammate post-v10 boot-prompt reframe (see `spawn
 - `dirty-tree-gates-write-vs-read-distinction.md` — v15 extends the write-side with the collision-check refinement.
 - `spawn-teammate-feature.md` — v15 Step 7 disambiguation, Step 7c verification, teammate-conventions integration.
 - `graduated-verification-confidence.md`, `single-canonical-source-discipline.md` — v15-promoted foundational topics.
+- `trilens-loop-feature.md` — the v30 feature; `subagent-as-optimization-vs-subagent-as-semantics.md` — the v30-promoted foundational topic.
+- `post-convergence-edits-need-their-own-gate.md` — the artifact-state discipline that keeps a ship's recorded validation honest.
