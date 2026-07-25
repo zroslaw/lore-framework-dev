@@ -107,3 +107,7 @@ first-class part of the feature. Rejected: `/lr:review` (collides conceptually w
 - `versioning-release-types.md` — the v30 entry (release-notes-only, cache-affecting: yes).
 - `lr-dev-direction.md` — where this was originally filed as `lr:dev-review`.
 - `sonnet-subagent-review-pattern.md` — the single-lens sibling, unchanged by v30.
+- `trilens-loop-deliberately-minimal-2026-07-25.md` — a further compression of `docs/trilens-loop.md`
+  (325 lines → one paragraph) is drafted and parked on `wip/lr-core-v31`, **not** on main; this topic
+  describes the doc as it stands on main today. See `v31-lr-core-parked-2026-07-25.md` for the parking
+  location before assuming the compressed version is live.

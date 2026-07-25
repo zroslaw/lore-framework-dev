@@ -32,3 +32,5 @@ The workdir draft becomes a candidate for `/lr:consult`-style retrieval if a fut
 - `shared-procedure-doc-pattern.md` — backlog entry + workdir draft mirror its index-vs-body split.
 - `framework-improvements-backlog.md` § Boot-Time Auto-Commit + Auto-Push of Upgrades — the cataloged instance.
 - `session-as-durable-artifact-cluster.md` — the drill produced one of four cluster members this session.
+- `v31-lr-core-parked-2026-07-25.md` — a sibling parking flavor for *complete, reviewed* work: branch/
+  worktree parking instead of revert-and-draft, used when reverting would discard real finished work.

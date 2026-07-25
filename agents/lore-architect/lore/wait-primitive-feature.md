@@ -59,6 +59,24 @@ the second one silently disables the primitive for the rest of the session. File
 binding, the ceiling itself is an engine fact and is recorded in `claude-engine-capabilities.md`; only
 the primitive's contract belongs in `docs/wait.md`.
 
+## Chained wait-loop needs proactive resumption (2026-07-25)
+
+A standing wait-loop goal (e.g. "sleep in 28-min chunks until 17:00, then proceed") does not survive an
+interleaved side conversation on its own. Each `sleep` call returns once, as one turn; if the user sends
+an unrelated message before the next `sleep` is re-invoked, answering it and stopping the turn silently
+ends the loop — there is no automatic resumption, and no error signals the drift.
+
+Instance: set up exactly this loop at 14:54 targeting 17:00. The first 28-min chunk completed around
+15:24. Two side conversations followed (skill size, model question) and were answered without
+re-invoking `sleep`. By the time the user noticed, it was 20:37 — three and a half hours past target,
+loop long dead, with nothing having flagged the drift.
+
+**How to apply:** when a standing wait-loop goal exists, treat resuming the sleep call as the default
+last action of every turn during that window, not an afterthought. Answer the tangential question, then
+re-invoke `sleep` before ending the turn, unless the user's message was itself about ending or changing
+the loop. If a turn ends without resuming and the loop matters, say so explicitly rather than staying
+silent about the gap.
+
 ## Status
 
 Shipped as **v18** (commit `e7514db`, 2026-07-05; manifests `1.18.0`) — committed and pushed to `github.com/zroslaw/lore-framework`. The v18 ship staged the lr-wait files *excluding* the three style skills, which were reserved for v19 (see `versioning-release-types.md`). Versioning classification + backfill in `versioning-release-types.md` (v18 entry: release-notes-only, cache-affecting). Conventions it established live in `plugin-mcp-server-convention.md`.

@@ -107,7 +107,9 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` is the single source of truth; **the current shipped version is v30**. Each
+`lore-framework/VERSION` is the single source of truth; **the current shipped version is v30** — v31
+(`lr-core`) is fully built but parked, not shipped (see Current State above,
+`v31-lr-core-parked-2026-07-25.md`). Each
 agent repo stamps that version in its `lore-repo.md`, and four version-bearing plugin manifests mirror
 `1.<VERSION>.0` (`/lr:check` #19 enforces). A version is either **migration**, **release-notes-only**,
 or both, and independently **cache-affecting** or not — those two axes are orthogonal, and every ship
@@ -132,7 +134,7 @@ How I work, especially at version ships and high-stakes lore edits:
 - **A gate result belongs to an artifact state** — a converged review loop and a green lifecycle run each certify only the tree they actually ran against. An edit landed after the gates pass is ungated: re-run the affected gate, or revert and file a follow-up. Never report "converged and green" for a tree neither gate saw, and record *which* state a result belongs to. Also: an environment failure mid-run (e.g. macOS TCC revocation) makes results **uninterpretable**, not red — fix and re-run rather than debugging the code under test. See `post-convergence-edits-need-their-own-gate.md`, `macos-documents-permission-loss-mid-session.md`.
 - **Verify before asserting** — check filesystem/state directly before "fixing" a suspected bug; verify *which* bug, not just whether. Same reflex, two more sites: fetch volatile external facts (prices, model IDs, rate limits) live with a dated citation rather than trusting memory — "couldn't verify" licenses marking a value unavailable, not guessing; and after any scoped/read-only subagent or fork returns, verify its actual filesystem footprint (`git status`, `git worktree list`) rather than trusting its summary — a capable fork acts on the largest goal it can see in inherited context unless scoped *against* it explicitly. See `verify-before-acting-on-suspected-bugs.md`, `fetch-volatile-facts-live-not-memory.md`, `fork-scope-creep-under-standing-goal.md`.
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source (pointer, don't restate — and its design-time cousin: reuse an existing correlation/identity signal before inventing new plumbing); don't defer completable bounded sweeps; graduated verification (confidence, not boolean). See `naming-foundational-principles.md`, `single-canonical-source-discipline.md`, `reuse-existing-correlation-signal.md`, `feedback-don-t-defer-completable-scope.md`, `graduated-verification-confidence.md`.
-- **User-feedback working style:** ranked-shortlist over exhaustive enumeration; confirm before writing durable lore mid-session; in design dialogues, write the draft only when the user triggers it (decisions are safe in conversation — don't repeatedly move to persist); populate dry-run counters with would-be outcomes; "enforce X" ≠ add a required schema field; for broad/emotionally-loaded open-ended asks, decompose into hidden axes and sequence a build order by dependency (cheapest/highest-leverage first, flashiest/most-structural last) rather than proposing a menu or jumping to implementation. See `feedback-too-many-words.md`, `feedback-confirm-before-writing-lore.md`, `feedback-draft-only-when-user-triggers.md`, `feedback-schemas-as-enforcement-overreach.md`, `feedback-layered-decomposition-for-open-ended-asks.md`, `feedback-mvp-minimalism.md`.
+- **User-feedback working style:** ranked-shortlist over exhaustive enumeration; confirm before writing durable lore mid-session; in design dialogues, write the draft only when the user triggers it (decisions are safe in conversation — don't repeatedly move to persist); populate dry-run counters with would-be outcomes; "enforce X" ≠ add a required schema field; for broad/emotionally-loaded open-ended asks, decompose into hidden axes and sequence a build order by dependency (cheapest/highest-leverage first, flashiest/most-structural last) rather than proposing a menu or jumping to implementation; on a second round of pushback on the same axis (length, tone, scope), act on the next ask instead of re-justifying — a second "no" is not a request for more reasoning. See `feedback-too-many-words.md`, `feedback-confirm-before-writing-lore.md`, `feedback-draft-only-when-user-triggers.md`, `feedback-schemas-as-enforcement-overreach.md`, `feedback-layered-decomposition-for-open-ended-asks.md`, `feedback-mvp-minimalism.md`, `feedback-comply-promptly-after-repeated-pushback.md`.
 
 ## Key Constraints
 
@@ -191,11 +193,18 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
 Workspace holds three canonical repos: **`lore-framework/`** (plugin), **`lore-framework-dev/`**
 (this repo — lore-architect lore, tests, drafts), and **`lore-agents/`** (personal agents).
 
-`lore-framework/` is **clean and pushed at v30** — nothing built-but-unshipped is pending. The three
-newest capability surfaces are all live: **Lore Beings** (Being Keeper substrate + `/lr:being`
-command surface, BETA), **Markdown session archives** under `agents/<agent>/archive/YYYY/MM/`, and
-**`/lr:trilens-loop`** (iterated three-lens review). Three engines are Tier-1 supported — Claude
-Code, Codex, Cursor.
+`lore-framework/` is **clean and pushed at v30** on `main`. The three newest *shipped* capability
+surfaces are all live: **Lore Beings** (Being Keeper substrate + `/lr:being` command surface, BETA),
+**Markdown session archives** under `agents/<agent>/archive/YYYY/MM/`, and **`/lr:trilens-loop`**
+(iterated three-lens review). Three engines are Tier-1 supported — Claude Code, Codex, Cursor.
+
+**v31 `lr-core` is built but PARKED, not shipped.** Deterministic substrate script + boot/attach/
+consult/pull-lore/process-merge/lore-search doc rewiring + the Script Fallback Contract, plus a
+compressed `docs/trilens-loop.md` — fully implemented, twice trilens-reviewed, but held uncommitted
+on branch `wip/lr-core-v31` (worktrees at `<workspace>/.worktrees/{lore-framework,lore-framework-dev}/lr-core-v31/`)
+per explicit user instruction after a rough 2026-07-25 session. `main` in both repos is unaffected.
+Check `v31-lr-core-parked-2026-07-25.md` (resume steps in that worktree's
+`workdir/GOAL-2026-07-25.md`) before starting related work.
 
 Both pre-ship gates are in working order and both are routinely run: the review loop via
 `/lr:trilens-loop`, and the real-engine lifecycle suite via `tests/lifecycle/` (plus the separate
