@@ -22,6 +22,10 @@ validation and probe notes in the linked topics below.
 - **Doctor** — `doctor-cursor-session-without-plugin` for missing skills entirely (v25).
 - **Three-manifest discipline** — `.cursor-plugin/plugin.json` bumped with Claude manifests;
   check #19 enforces; hygiene only — not a verified Cursor cache lever.
+- **Usage auto-retrieval** — plan quota scriptable via undocumented `usage-summary` API
+  (`sub::jwt` cookie); session context % via CLI statusline only (interactive, not headless `-p`);
+  IDE context ring is manual. See `cursor-usage-auto-retrieval.md`; draft probe in
+  `workdir/cursor-cli-usage/`.
 
 ## Why this hub exists
 

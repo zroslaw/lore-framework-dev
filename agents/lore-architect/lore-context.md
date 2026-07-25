@@ -45,7 +45,8 @@ Engine-specific operational knowledge now has one hub topic per engine: `claude-
 `codex-engine-capabilities.md`, and `cursor-engine-capabilities.md`. Use them as the entry points
 for install/update model, invocation surface, subagent mechanism, memory file, MCP/plugin loading,
 sandbox constraints, and lifecycle-harness caveats; keep atomic findings in the linked detailed
-topics rather than rediscovering them from old session notes.
+topics rather than rediscovering them from old session notes. Cursor live usage retrieval
+(plan quota + CLI session context) → `cursor-usage-auto-retrieval.md`.
 
 ## Marketplace & Distribution
 
