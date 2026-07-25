@@ -15,7 +15,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import harness
 from harness import (
     AGENT_NAME, BOOT_PROMPT, BOOT_UNKNOWN_PROMPT, CTX_CANARY, FRESH_CANARY,
-    ROLE_CANARY, SKIP_REASON, break_origin, build_fixture, dirty_role_md, head,
+    ROLE_CANARY, SKIP_REASON, boot_prompt_for_framework, break_origin,
+    build_fixture, dirty_role_md, framework_with_broken_script, head,
     is_clean, make_origin_ahead, read_repo_version, run_engine,
 )
 
@@ -75,6 +76,52 @@ class BootScenarios(unittest.TestCase):
         self.assertIn(
             AGENT_NAME, r.text,
             f"error did not list the real available agent '{AGENT_NAME}':\n{r.text}",
+        )
+
+
+@unittest.skipIf(SKIP_REASON, SKIP_REASON)
+class ScriptFallbackScenarios(unittest.TestCase):
+    """Scenario 8: the Script Fallback Contract (conventions.md).
+
+    A broken script must not break the flow it accelerates. This is the gate for
+    the contract itself: without it, a script regression would surface as boots
+    failing in the field rather than as a red test.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix="lr-lifecycle-")
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+
+    def test_08_boot_completes_when_preflight_script_is_broken(self):
+        """lr-core is corrupt; the engine notifies, takes over, and still boots."""
+        fx = build_fixture(self.tmp)
+        broken_fw = framework_with_broken_script(self.tmp, "lr-core")
+
+        r = run_engine(fx.workspace, boot_prompt_for_framework(broken_fw),
+                       framework_dir=broken_fw)
+        print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
+
+        self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
+        self.assertNotIn(
+            "BOOT-FAILED", r.text,
+            f"a broken script must never fail the boot:\n{r.text}",
+        )
+        # The manual takeover has to reach the same end state as the fast path.
+        self.assertIn(ROLE_CANARY, r.text, f"role.md not read manually:\n{r.text}")
+        self.assertIn(CTX_CANARY, r.text,
+                      f"lore-context.md not read manually:\n{r.text}")
+
+        # Requirement 1 of the contract: tell the user. Silent recovery is a
+        # failure of the contract even when the boot itself succeeds.
+        lowered = r.text.lower()
+        self.assertTrue(
+            "lr-core" in lowered or "preflight" in lowered,
+            f"user was not told which script failed:\n{r.text}",
+        )
+        self.assertTrue(
+            any(w in lowered for w in
+                ("manual", "by hand", "fallback", "fall back", "failed")),
+            f"user was not told a manual takeover happened:\n{r.text}",
         )
 
 
