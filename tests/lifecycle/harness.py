@@ -62,6 +62,7 @@ MERGE_TOOL_CANARY = "otter-deploy-8823"      # pre-seeded reflection fact to be 
 HELPER_FACT = "flux-widget-6620"      # in helper-agent's lore; consult/attach target
 FINALIZE_TOOL_CANARY = "juniper-monitor-3390"  # fact reflected+merged by finalize e2e
 BROKEN_REF = "nonexistent-topic-xyz.md"        # seeded broken cross-reference for /lr:check
+REVIEW_DEFECT_CANARY = "ghost-topic-4417.md"   # dangling ref planted in the trilens-loop review target
 
 AGENT_NAME = "test-agent"
 HELPER_AGENT_NAME = "helper-agent"
@@ -199,6 +200,32 @@ UNREGISTER_AGENT_PROMPT = (
 UNREGISTER_REPO_PROMPT = (
     f"Invoke the lr:unregister-repo skill to remove every direct boot shortcut for repo "
     f"'{REPO_NAME}'. Print DONE when complete."
+)
+
+# trilens-loop: both scenarios bound the loop to a single round so the run stays cheap.
+# The reviewable change is planted by plant_reviewable_change() and left uncommitted.
+_TRILENS_TAIL = (
+    "When the skill finishes, print exactly these lines:\n"
+    "LENSES: <lens 1> | <lens 2> | <lens 3>\n"
+    "FINDINGS: <one line per finding, naming the file or topic filename it concerns>\n"
+    "TRILENS-DONE\n"
+    "Do not reflect, merge, finalize, commit, or push."
+)
+
+TRILENS_PROMPT = (
+    f"Invoke the lr:boot skill to boot as lore agent '{AGENT_NAME}'. "
+    "This workspace has uncommitted changes that need reviewing. Invoke the "
+    "lr:trilens-loop skill with this free-text amendment: \"one round only\". "
+    "Follow the procedure exactly, including applying the fixes you accept. "
+    + _TRILENS_TAIL
+)
+
+TRILENS_REPORT_ONLY_PROMPT = (
+    f"Invoke the lr:boot skill to boot as lore agent '{AGENT_NAME}'. "
+    "This workspace has uncommitted changes that need reviewing. Invoke the "
+    "lr:trilens-loop skill with this free-text amendment: \"one round only, no fixes "
+    "— report the findings but do not edit any file\". Follow the procedure exactly. "
+    + _TRILENS_TAIL
 )
 
 TAKEOVER_CURSOR_FACT = BUILD_TOOL_FACT
@@ -565,6 +592,29 @@ def seed_broken_reference(fx):
     path = os.path.join(fx.agent_dir, "lore-context.md")
     with open(path, "a") as f:
         f.write(f"\nAlso see `{BROKEN_REF}`.\n")
+
+
+def plant_reviewable_change(fx):
+    """Write an uncommitted new lore topic carrying two planted defects, as the review target
+    for the trilens-loop scenarios. Returns the absolute path.
+
+    Defect 1 (the assertion anchor): a cross-reference to `REVIEW_DEFECT_CANARY`, a topic that
+    does not exist — any competent reviewer lens names the filename, which makes the finding
+    deterministically assertable.
+    Defect 2: the topic contradicts committed lore (`espresso-build-tool.md` says the build tool
+    is `espresso-tamper`), giving a second, differently-shaped defect for a second lens.
+
+    Left uncommitted so the skill's scope resolution has to find it via `git status`.
+    """
+    path = os.path.join(fx.agent_dir, "lore", "deploy-pipeline.md")
+    with open(path, "w") as f:
+        f.write(
+            "# Deploy Pipeline\n\n"
+            "The fixture project deploys through a two-stage pipeline.\n\n"
+            "The build step is run by **portafilter**, the project's build tool.\n\n"
+            f"For the rollback contract see `{REVIEW_DEFECT_CANARY}`.\n"
+        )
+    return path
 
 
 def declare_sibling_repo(fx, sibling_bare_path):

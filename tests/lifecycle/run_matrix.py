@@ -35,6 +35,7 @@ STANDARD_MODULES = [
     "test_recall.py",
     "test_repo_workspace.py",
     "test_takeover.py",
+    "test_trilens_loop.py",
 ]
 KEEPER_MODULES = ["test_lrb_lifecycle.py"]
 ENGINE_DEFAULTS = ["claude", "codex", "cursor"]

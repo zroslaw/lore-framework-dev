@@ -114,6 +114,8 @@ Scenario catalog status (numbering per the draft):
 | 25 | unregister-agent | ✅ `lifecycle/test_repo_workspace.py` |
 | 26 | unregister-repo | ✅ `lifecycle/test_repo_workspace.py` |
 | 27 | Cursor takeover (direct JSONL path) | ✅ `lifecycle/test_takeover.py` |
+| 28 | trilens-loop, one round with fixes | ✅ `lifecycle/test_trilens_loop.py` |
+| 29 | trilens-loop, report-only makes no edits | ✅ `lifecycle/test_trilens_loop.py` |
 | Tier 2 | wait/emit | covered by `test_wait.py` (protocol-level, not a lifecycle scenario) |
 | Tier 2 | spawn-teammate | deferred — not headless-scriptable (multi-pane UI) |
 | Tier 2 | df-repo-init, df-ula-file | deferred — BETA, out of scope for this pass |
