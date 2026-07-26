@@ -202,9 +202,12 @@ surfaces are all live: **Lore Beings** (Being Keeper substrate + `/lr:being` com
 consult/pull-lore/process-merge/lore-search doc rewiring + the Script Fallback Contract, plus a
 compressed `docs/trilens-loop.md` — fully implemented, twice trilens-reviewed, but held uncommitted
 on branch `wip/lr-core-v31` (worktrees at `<workspace>/.worktrees/{lore-framework,lore-framework-dev}/lr-core-v31/`)
-per explicit user instruction after a rough 2026-07-25 session. `main` in both repos is unaffected.
-Check `v31-lr-core-parked-2026-07-25.md` (resume steps in that worktree's
-`workdir/GOAL-2026-07-25.md`) before starting related work.
+per explicit user instruction after a rough 2026-07-25 session. A 2026-07-26 follow-on redesigned the
+Accelerator category as **literate** (the script's own comments are now the fallback spec, ~9 docs
+thinned to pointers) on the same parked branch — that addendum's surface is **not yet
+trilens-reviewed**. `main` in both repos is unaffected. Check `v31-lr-core-parked-2026-07-25.md`
+(resume steps in that worktree's `workdir/GOAL-2026-07-25.md`, but widen its "trilens round 3" step —
+it predates the addendum) before starting related work.
 
 Both pre-ship gates are in working order and both are routinely run: the review loop via
 `/lr:trilens-loop`, and the real-engine lifecycle suite via `tests/lifecycle/` (plus the separate
