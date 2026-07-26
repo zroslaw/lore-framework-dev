@@ -32,7 +32,17 @@ The two hazards are complementary: `cd` drifts cwd for *later* tool calls; `-C` 
 
 This is a domain-specific operational rule for agents that work across multiple sibling repos in a single domain — the entire reason lore-architect exists. Agents scoped to a single repo can ignore it.
 
+## A third hazard: `-C` can silently retarget which repo, not just which path
+
+The two hazards above (drift, relative-path reframing) both assume `git -C <dir>` at least operates
+on `<dir>`'s own repo. It doesn't always: if `<dir>` is merely a directory *inside* a git repo rather
+than that repo's root, `git -C <dir>` silently walks up to the enclosing repo and operates on *that*
+— under exit 0, still reporting `<dir>` as the target. See `git-dash-c-needs-toplevel-guard.md` for
+the fix (verify `rev-parse --show-toplevel` matches `realpath(<dir>)` before any mutating op) and a
+concrete instance that hit exactly this in a workspace meta-repo layout.
+
 ## See Also
 
 - `dirty-tree-gates-write-vs-read-distinction.md` — adjacent "name what the gate is protecting against" git-discipline. CWD safety and dirty-tree gates are both cases of **articulating the hazard precisely** rather than reflexively applying defensive boilerplate.
 - `worktrees-convention.md` — the worktree placement rule the `git -C` relative-path trap silently violates; its own example commands (`cd` + relative) are already safe.
+- `git-dash-c-needs-toplevel-guard.md` — the third `-C` hazard (silent repo-retargeting), distinct from the two above.

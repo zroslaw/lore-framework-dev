@@ -108,7 +108,7 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 ## Versioning & Migration
 
 `lore-framework/VERSION` is the single source of truth; **the current shipped version is v30** — v31
-(`lr-core`) is fully built but parked, not shipped (see Current State above,
+(`lr-core`) is fully built, reviewed, and parked, not shipped (see Current State above,
 `v31-lr-core-parked-2026-07-25.md`). Each
 agent repo stamps that version in its `lore-repo.md`, and four version-bearing plugin manifests mirror
 `1.<VERSION>.0` (`/lr:check` #19 enforces). A version is either **migration**, **release-notes-only**,
@@ -198,16 +198,23 @@ surfaces are all live: **Lore Beings** (Being Keeper substrate + `/lr:being` com
 **Markdown session archives** under `agents/<agent>/archive/YYYY/MM/`, and **`/lr:trilens-loop`**
 (iterated three-lens review). Three engines are Tier-1 supported — Claude Code, Codex, Cursor.
 
-**v31 `lr-core` is built but PARKED, not shipped.** Deterministic substrate script + boot/attach/
-consult/pull-lore/process-merge/lore-search doc rewiring + the Script Fallback Contract, plus a
-compressed `docs/trilens-loop.md` — fully implemented, twice trilens-reviewed, but held uncommitted
-on branch `wip/lr-core-v31` (worktrees at `<workspace>/.worktrees/{lore-framework,lore-framework-dev}/lr-core-v31/`)
-per explicit user instruction after a rough 2026-07-25 session. A 2026-07-26 follow-on redesigned the
-Accelerator category as **literate** (the script's own comments are now the fallback spec, ~9 docs
-thinned to pointers) on the same parked branch — that addendum's surface is **not yet
-trilens-reviewed**. `main` in both repos is unaffected. Check `v31-lr-core-parked-2026-07-25.md`
-(resume steps in that worktree's `workdir/GOAL-2026-07-25.md`, but widen its "trilens round 3" step —
-it predates the addendum) before starting related work.
+**v31 `lr-core` is built, reviewed, but PARKED, not shipped.** Deterministic substrate script +
+boot/attach/consult/pull-lore/process-merge/lore-search doc rewiring + the Script Fallback Contract,
+plus a compressed `docs/trilens-loop.md` — held uncommitted on branch `wip/lr-core-v31` (worktrees at
+`<workspace>/.worktrees/{lore-framework,lore-framework-dev}/lr-core-v31/`) per explicit user
+instruction after a rough 2026-07-25 session. A 2026-07-26 follow-on redesigned the Accelerator
+category as **literate** (the script's own comments are now the fallback spec, ~9 docs thinned to
+pointers), then a same-day round-1 review pass (three cold lenses, deliberately scoped across the
+*entire* v31 surface including that addendum) found and fixed 8 real bugs — a nested-repo `git -C`
+escape (`git-dash-c-needs-toplevel-guard.md`), signal-death/sentinel collisions, encoding/BOM bugs, a
+version-comparison bug, and boot-procedure/release-notes gaps — plus added two mutation-verified
+regression tests (`verify-regression-tests-via-mutation.md`); tests 38→51, all green. User then
+stopped the loop deliberately (no round 2, no lifecycle suite, nothing committed/pushed). One item
+remains an open, undecided deferral: `docs/engines/cursor.md`'s `trilens-loop.md` binding pointer is
+now stale against the compressed doc. `main` in both repos is unaffected. Check
+`v31-lr-core-parked-2026-07-25.md` before starting related work — its "Resuming" section is current
+(decide the cursor.md deferral, run the full lifecycle suite, then ship); the in-worktree
+`workdir/GOAL-2026-07-25.md` predates round 1 and is stale on two points, don't follow it as-is.
 
 Both pre-ship gates are in working order and both are routinely run: the review loop via
 `/lr:trilens-loop`, and the real-engine lifecycle suite via `tests/lifecycle/` (plus the separate

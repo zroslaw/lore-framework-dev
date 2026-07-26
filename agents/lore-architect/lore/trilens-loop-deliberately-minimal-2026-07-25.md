@@ -18,6 +18,14 @@ mishandling the ledger continuity or the silent-round distinction), that's a new
 user-approved decision to re-expand specific parts — not a default reversion to the old shape. Old
 content is recoverable from git history if genuinely needed; that is not license to put it back unasked.
 
+**First concrete instance of exactly this (2026-07-26 round-1 review):** two cold review lenses
+independently found that `docs/engines/cursor.md`'s `subagent-spawn` binding still names
+`trilens-loop.md` as the carve-out for "subagent independence is the semantics," but the compressed
+doc no longer states any engine-binding instruction or the "no subagent mechanism → stop" rule. This
+is real ambiguity surfaced by review, not a hypothetical — but per this topic's rule it was
+**surfaced and left as an open, undecided deferral**, not auto-fixed. See
+`v31-lr-core-parked-2026-07-25.md` § Open item for the current disposition.
+
 This is the concrete instance behind `feedback-comply-promptly-after-repeated-pushback.md` — the
 pushback that produced this compression is the same episode that lesson generalizes from.
 

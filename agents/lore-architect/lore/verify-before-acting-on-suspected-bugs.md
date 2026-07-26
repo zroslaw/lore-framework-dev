@@ -42,8 +42,17 @@ Distinguish adjacent concepts before asserting (clean-room-vs-tests ≠ context-
 
 Same spirit as the review/verification disciplines: look before you assert, and look again before you act. The reviewer fan-out's filesystem-verification lens (`parallel-reviewer-fanout-pattern.md`) is this rule applied at review time; the sonnet-subagent review (`sonnet-subagent-review-pattern.md`) is a second pair of eyes for the same reason.
 
+## The same reflex applied to trusting a regression test, not just a diagnosis (2026-07-26)
+
+The rule extends one more step: don't trust "the test passes" as proof a regression test actually
+pins the bug it claims to — a test can pass vacuously by never reaching the code path under test.
+Verify by mutation (revert the fix, confirm the new test specifically fails, restore). See
+`verify-regression-tests-via-mutation.md` for the technique and two real instances where it caught a
+vacuous test.
+
 ## See Also
 
+- `verify-regression-tests-via-mutation.md` — the mutation-verification technique for regression tests specifically; same "don't trust the first green" reflex, applied one layer earlier (to the test itself, not just the fix).
 - `consistency-checks.md` — carries the standing `check.md` vs `consistency-checks.md` naming reminder that triggered the near-miss
 - `tooling-cwd-safety.md` — the empty-result-means-wrong-state sibling (empty Glob ⇒ wrong CWD, not missing file); same "verify before concluding broken" reflex
 - `parallel-reviewer-fanout-pattern.md` — the correctness lens runs real bash (filesystem verification) precisely to catch what prose review infers wrongly

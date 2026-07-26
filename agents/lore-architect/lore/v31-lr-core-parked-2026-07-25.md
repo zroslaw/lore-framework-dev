@@ -1,10 +1,13 @@
-# v31 `lr-core` — Parked, Not Shipped (2026-07-25, extended 2026-07-26)
+# v31 `lr-core` — Parked, Not Shipped (2026-07-25; addendum + round-1 review 2026-07-26)
 
 The v31 `lr-core` work — a deterministic substrate script plus boot/attach/consult/pull-lore/
 process-merge/lore-search doc rewiring, plus the Script Fallback Contract — is fully implemented and
-has been through two trilens review rounds (all findings applied). It is **not shipped**. The user
-parked it explicitly, mid-session, after a rough and frustrating session — not pushed to completion,
-not discarded.
+has been through two trilens review rounds (all findings applied), plus a further 2026-07-26 review
+round (below) that closed the gap the addendum had opened. It is **not shipped**. The user parked it
+explicitly, mid-session on 2026-07-25, after a rough and frustrating session — not pushed to
+completion, not discarded. A 2026-07-26 follow-on session resumed the parked work twice: first for
+the literate-accelerator addendum, then for a review-and-fix pass (both below). Still nothing is
+committed or pushed as of either session's end.
 
 ## 2026-07-26 addendum: literate-accelerator redesign
 
@@ -38,16 +41,57 @@ fallback doc.
 - `release-notes/31.md` updated to describe the new shape instead of the old "prose is normative"
   framing.
 
-**Trilens-review gap — read before shipping.** The resume list below (regression tests, trilens
-round 3, lifecycle suite, ship) predates this addendum and does **not** cover it. The existing
-"trilens round 3" resume step was scoped only to the round-2 correctness-fix delta — it does **not**
-cover today's comment/doc rewrite. Per `post-convergence-edits-need-their-own-gate.md`'s framing, a
-review that ran before an edit lands doesn't gate that edit: **none of the literate-accelerator
-surface (the script's new docstrings plus the ~9 touched doc files) has been trilens-reviewed yet.**
-Before shipping, widen round 3's scope to include this addendum, or run a dedicated extra pass —
-either way, don't treat the pre-existing round-3 plan as sufficient on its own. Verification already
-done this session that round 3 can build on rather than re-derive: tests green (38/38), `py_compile`
-clean, a live CLI spot-check, and a grep sweep for stale "is normative" phrasing.
+**Trilens-review gap — CLOSED by the 2026-07-26 round-1 review below.** At the time this addendum
+landed, the resume list (regression tests, trilens round 3, lifecycle suite, ship) predated it and
+did not cover it — the existing "trilens round 3" resume step was scoped only to the round-2
+correctness-fix delta, not this comment/doc rewrite. Per `post-convergence-edits-need-their-own-gate.md`'s
+framing, a review that ran before an edit lands doesn't gate that edit. **This gap is now closed**:
+the round-1 review (see next section) deliberately scoped its cold-lens pass across the *entire* v31
+surface — committed WIP + this addendum + the session's new tests — as a superset of the narrower
+"round 3" plan, specifically so the reviewed artifact state equals the shippable one. Verification
+that round used as its baseline (already done before the addendum landed, not re-derived): tests
+green (38/38), `py_compile` clean, a live CLI spot-check, and a grep sweep for stale "is normative"
+phrasing.
+
+## 2026-07-26 round-1 review: closes the addendum gap, finds and fixes real bugs
+
+A same-day follow-on session ran the review pass the addendum above flagged as missing, plus filled
+in the two regression tests the round-2 resume list had already called out as outstanding:
+
+1. **The two missing round-2 regression tests were added**: the `GIT_UNRUNNABLE`-at-every-call-site
+   distinction, and `scan` not misreporting an unreadable git history as "uncommitted or untracked".
+   Both verified by mutation (revert the fix, confirm the new test fails, restore) rather than
+   trusting a pass — see `verify-regression-tests-via-mutation.md`.
+2. **One trilens review round was run**, explicitly using the **v31 compressed**
+   `docs/trilens-loop.md` (the parked one-paragraph version on `wip/lr-core-v31`, per user
+   instruction — see `trilens-loop-deliberately-minimal-2026-07-25.md`), not the shipped 325-line v30
+   version on `main`. Scope was the *entire* v31 change set in both repos (committed WIP + this
+   addendum + the session's new tests) — the deliberate superset described above.
+3. Three cold lenses (hand-executor, adversarial correctness, corpus coherence) all returned
+   `SHIP-WITH-FIXES`, zero BLOCKERs, 5 HIGH total. All verified against real files (most reproduced)
+   before fixing. Applied: a real mutating-git-operation bug where `pull_repo`/`scan` ran `git -C`
+   against a directory that wasn't its own repo's toplevel and silently walked up into an enclosing
+   repo (see `git-dash-c-needs-toplevel-guard.md`), a signal-death/unrunnable-sentinel collision, a
+   non-ASCII git-quotepath bug, an int-equal-but-string-different version-comparison bug, a BOM
+   silently voiding frontmatter, an exit-2 payload indistinguishable from a determinate failure, a
+   Manual Boot Procedure path that skipped the version-check/teammate-conventions step, and the
+   literate-accelerator contract having no floor for "the script file itself is gone" — plus release
+   notes that contradicted the accelerator's own definition and omitted the `trilens-loop.md` rewrite
+   entirely. Tests: 38 → 51, all green.
+4. **The user then stopped the loop deliberately**: no round 2, no further review iteration,
+   lifecycle suite not run, nothing committed or pushed. This was an explicit "keep it minimal, don't
+   loop — just finish what you already found" instruction, not a quality judgment on the round.
+
+### Open item: `cursor.md` subagent-spawn binding — deferred, not decided
+
+`docs/engines/cursor.md`'s `subagent-spawn` binding still names `trilens-loop.md` as the carve-out
+for "subagent independence is the semantics" — but the compressed 15-line doc no longer states any
+engine-binding instruction or the "no subagent mechanism → stop" rule. Both the hand-executor and
+corpus-coherence lenses found this independently, so it is a real gap. Per
+`trilens-loop-deliberately-minimal-2026-07-25.md`, re-expanding any part of the compressed doc needs
+a fresh, explicit user decision — **this was surfaced, not applied.** Resolve before shipping v31,
+one way or another: either fix `cursor.md`'s pointer to stop claiming a rule the doc no longer
+states, or re-expand the relevant slice of `trilens-loop.md`.
 
 ## Where it lives
 
@@ -60,13 +104,17 @@ branch/session.
 
 ## Resuming
 
-Don't reconstruct the plan from scratch. Resume steps — missing regression tests for two round-2
-fixes, trilens round 3, the full lifecycle suite, then commit+push — are recorded in
-`agents/lore-architect/workdir/GOAL-2026-07-25.md` **inside that worktree** (not in the main checkout's
-workdir). Read that file first, **but treat its "trilens round 3" step as under-scoped**: it predates
-the 2026-07-26 literate-accelerator addendum above and was written to cover only the round-2
-correctness-fix delta. Widen it (or add a dedicated pass) to also cover the addendum's surface before
-shipping.
+Don't reconstruct the plan from scratch. **The regression-tests-and-review portion of the previous
+resume list is now done — don't redo it.** `agents/lore-architect/workdir/GOAL-2026-07-25.md` **inside
+that worktree** (not the main checkout's workdir) still describes the *pre-round-1* plan and is now
+stale on two points: it lists the two round-2 regression tests as outstanding (they're written and
+mutation-verified) and describes "trilens round 3" as scoped only to the round-2 delta (the round-1
+review above superseded it with a full-surface pass instead). Resume steps as of this session's end:
+
+1. Decide the `cursor.md` subagent-spawn deferral (see above) — fix the stale pointer or re-expand
+   the relevant slice of `trilens-loop.md`.
+2. Run the full lifecycle suite (`LR_LIFECYCLE=1`) — not yet run against this state.
+3. Ship: commit + push both worktrees, per the normal version-ship discipline in `role.md`.
 
 Before starting *any* fresh work on `lr-core`, the Script Fallback Contract, or `trilens-loop.md`, check
 for this branch/worktree pair first — a second attempt at the same design without checking would
@@ -92,7 +140,12 @@ held rather than pushed through or discarded.
 - `feedback-comply-promptly-after-repeated-pushback.md` — the working-style lesson from the same rough
   session.
 - `post-convergence-edits-need-their-own-gate.md` — the framing behind why the addendum's surface
-  needs its own trilens pass rather than inheriting round 2's clearance.
+  needed its own trilens pass rather than inheriting round 2's clearance — satisfied by the round-1
+  review above.
+- `git-dash-c-needs-toplevel-guard.md` — the mutating-git-operation bug found and fixed in round 1
+  (nested-repo `git -C` escape).
+- `verify-regression-tests-via-mutation.md` — how the two round-2 regression tests added in round 1
+  were verified to actually pin their bugs.
 - `literate-accelerator-pattern.md` — **not yet in this repo's lore**; lives only in the worktree's
   `lore/` until v31 ships (see 2026-07-26 addendum above). Look for it there, not here, if you need
   the pattern before then.
