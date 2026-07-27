@@ -523,8 +523,15 @@ def _identity_fix_message(framework_dir, *, detail):
     )
 
 
-def assert_plugin_identity_match(reported_version, reported_root, framework_dir):
-    """Raise PluginIdentityError unless the probe matches framework_dir's VERSION/root."""
+def assert_plugin_identity_match(reported_version, reported_root, framework_dir,
+                                 *, require_root=True):
+    """Raise PluginIdentityError unless the probe matches framework_dir's VERSION/root.
+
+    require_root: when False, only VERSION is asserted. Codex installs into a
+    cache copy of the marketplace source, so FRAMEWORK-ROOT is never the
+    worktree realpath even when the tree under test is correct — the
+    deterministic marketplace/cache preflight already covers that case.
+    """
     expected_version = read_framework_version(framework_dir)
     expected_norm = normalize_framework_version(expected_version)
     reported_norm = normalize_framework_version(reported_version)
@@ -536,7 +543,7 @@ def assert_plugin_identity_match(reported_version, reported_root, framework_dir)
         problems.append(
             f"PLUGIN-VERSION {reported_version!r} != expected {expected_version!r}"
         )
-    if reported_root:
+    if require_root and reported_root:
         try:
             got_root = os.path.realpath(reported_root)
         except OSError:
@@ -687,7 +694,11 @@ def verify_plugin_identity(workspace=None, framework_dir=None, *, force=False):
                 )
             )
         root, version = parse_plugin_identity(result.text or "")
-        assert_plugin_identity_match(version, root, framework_dir)
+        # Codex: marketplace/cache preflight already proved source identity;
+        # the install root is always a cache copy, not the worktree realpath.
+        assert_plugin_identity_match(
+            version, root, framework_dir, require_root=(ENGINE != "codex"),
+        )
         _IDENTITY_CHECKED_FOR.add(key)
         return {
             "skipped": False,

@@ -83,6 +83,13 @@ class AssertPluginIdentityMatch(unittest.TestCase):
     def test_root_optional_when_version_matches(self):
         harness.assert_plugin_identity_match("31", None, self.tmp)
 
+    def test_require_root_false_ignores_path_mismatch(self):
+        other = tempfile.mkdtemp(prefix="lr-id-other-")
+        self.addCleanup(lambda: __import__("shutil").rmtree(other, ignore_errors=True))
+        harness.assert_plugin_identity_match(
+            "31", other, self.tmp, require_root=False,
+        )
+
 
 class CodexMarketplaceSource(unittest.TestCase):
     SAMPLE = """
