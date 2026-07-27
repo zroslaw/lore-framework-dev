@@ -36,32 +36,44 @@ bar — the *shape* (environment quietly invalidates a gate result without error
 
 ## Fix (harness) — applied
 
-`tests/lifecycle/harness.py` now gates on plugin identity before trusting results:
+`tests/lifecycle/harness.py` now gates on plugin identity before trusting results
+(merged to `lore-framework-dev` `main` 2026-07-27: A7 + follow-up hotfixes):
 
 1. **`verify_plugin_identity`** — once per process, asks the engine to report
    `FRAMEWORK-ROOT` / `PLUGIN-VERSION` for the plugin that actually supplies lr skills, and
-   asserts both against `LR_FRAMEWORK_DIR` (VERSION required; root when reported).
-2. **Codex deterministic preflight** — because Codex has no `--plugin-dir`, also checks that
-   an enabled `lr@lore-framework` marketplace `source` realpath-equals `LR_FRAMEWORK_DIR` and
-   that the plugin cache has a matching VERSION, before any scenario runs.
-3. **`run_matrix.py`** — runs the check once per engine and **skips that engine's modules** on
+   asserts against `LR_FRAMEWORK_DIR`.
+2. **VERSION form normalization** — accept bare `VERSION` (`30`) and plugin-manifest
+   `1.30.0` as the same identity (`normalize_framework_version`). Live Claude probes reported
+   the manifest form.
+3. **Codex deterministic preflight** — because Codex has no `--plugin-dir`, check that an
+   enabled `lr@lore-framework` marketplace `source` realpath-equals `LR_FRAMEWORK_DIR` and
+   that the plugin cache has a matching VERSION. After that preflight, the engine probe uses
+   **VERSION-only** (`require_root=False`): Codex always installs into a cache copy, so
+   `FRAMEWORK-ROOT` never equals the worktree realpath even when correct.
+4. **`run_matrix.py`** — runs the check once per engine and **skips that engine's modules** on
    failure (exit 2), so a wrong install cannot produce a false green across 7 modules.
-4. **`run_engine`** — lazy same check on direct module invocation (`python3 tests/lifecycle/test_*.py`).
+5. **`run_engine`** — lazy same check on direct module invocation (`python3 tests/lifecycle/test_*.py`).
 
 Opt-out: `LR_SKIP_PLUGIN_IDENTITY=1` (debug only). Unit coverage:
 `tests/test_lifecycle_plugin_identity.py`.
 
+**Cursor operational companion:** disabling/repointing alone is incomplete — Cursor's cloud
+marketplace install rehydrates the cache from GitHub over `--plugin-dir`. See
+`cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
+
 ## Concrete instance this bit
 
-The 2026-07-27 lifecycle run against the parked v31 branch (`v31-lr-core-parked-2026-07-25.md`):
+The 2026-07-27 *first* lifecycle run against the parked v31 branch (`v31-lr-core-parked-2026-07-25.md`):
 Claude/haiku produced the only trustworthy result (6/7 green, one flaky scenario root-caused and fixed
-— see `macos-var-symlink-realpath-ambiguity.md`); Codex and Cursor's results from that same run are
-**invalid, not red** — both must be re-run once their sources are repointed at the actual worktree.
+— see `macos-var-symlink-realpath-ambiguity.md`); Codex and Cursor's results from that same run were
+**invalid, not red**. After A7 + engine repoint, a second run produced valid (partially green) results —
+see that parking topic's later addendum / `v31-lifecycle-rerun-partial-green-2026-07-27.md`.
 
 ## See Also
 
 - `lifecycle-testing-harness.md` — the harness this gap lives in.
-- `v31-lr-core-parked-2026-07-25.md` — the concrete run this invalidated.
+- `cursor-cloud-plugin-rehydrates-over-plugin-dir.md` — Cursor-specific rehydration over `--plugin-dir`.
+- `v31-lr-core-parked-2026-07-25.md` — the concrete run this invalidated, plus the valid re-run.
 - `lore-beings-mvp-takeover-review.md` — the sibling sandboxed-review blind spot (blocked capability,
   not artifact substitution).
 - `post-convergence-edits-need-their-own-gate.md` — the adjacent framing that a gate result belongs to

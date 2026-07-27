@@ -68,10 +68,11 @@ agent lore. Lore is for judgement and history; the profile is the point-of-use c
 by hitting a trap that had been recorded in my own lore since v18. See `docs-engines-convention.md`
 § Engine traps belong in the binding, and audit sibling profiles whenever one binding gains a guardrail.
 
-**Codex/Cursor plugin identity is not self-verifying.** The lifecycle harness passes `--plugin-dir` to
-every engine, but an installed/cached plugin can silently win over that flag on Codex and Cursor,
-substituting a different tree for the one under test with no loud failure — confirmed live 2026-07-27
-running the suite against the parked v31 branch. See `lifecycle-harness-plugin-identity-unverified.md`.
+**Codex/Cursor plugin identity is gated (A7).** The lifecycle harness asserts loaded plugin VERSION
+against `LR_FRAMEWORK_DIR` before trusting results; Codex also gets a marketplace-source/cache
+preflight. Cursor still needs the cloud marketplace install disabled/moved aside when testing a
+non-main checkout — it rehydrates from GitHub over `--plugin-dir` otherwise. See
+`lifecycle-harness-plugin-identity-unverified.md`, `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
 
 ## Marketplace & Distribution
 
@@ -217,13 +218,13 @@ surfaces are all live: **Lore Beings** (Being Keeper substrate + `/lr:being` com
 **v31 `lr-core` is built and reviewed; agent-repo side is on `lore-framework-dev` `main`, plugin
 still PARKED.** Deterministic substrate + literate Script Fallback Contract + reworked
 `docs/trilens-loop.md` live on `lore-framework` branch `wip/lr-core-v31` @ `cd8ece1` (worktree
-`.worktrees/lore-framework/lr-core-v31/`) — **not merged, not a ship**. `lore-framework-dev`
-merged that WIP to `main` 2026-07-27 (`f73f57d`+). Ship gate remains: repoint Codex/Cursor plugin
-sources at the framework worktree, re-run lifecycle (Claude/haiku already green;
-`lifecycle-harness-plugin-identity-unverified.md`), then version-ship the plugin. Check
-`v31-lr-core-parked-2026-07-25.md` before related work. See also
-`trilens-loop-v31-restructured.md`, `literate-accelerator-pattern.md`,
-`parallel-edit-git-add-race-conflict-resolve.md`.
+`.worktrees/lore-framework/lr-core-v31/`) — **not merged, not a ship**. A7 plugin-identity gate
+is on `lore-framework-dev` main; valid Codex/Cursor re-run after repoint: Codex **6/7**, Cursor
+**4/7** (`v31-lifecycle-rerun-partial-green-2026-07-27.md`). Ship gate: triage remaining failures,
+then version-ship the plugin. Check `v31-lr-core-parked-2026-07-25.md` before related work. See
+also `lifecycle-harness-plugin-identity-unverified.md`,
+`cursor-cloud-plugin-rehydrates-over-plugin-dir.md`, `trilens-loop-v31-restructured.md`,
+`literate-accelerator-pattern.md`.
 
 Both pre-ship gates are in working order and both are routinely run: the review loop via
 `/lr:trilens-loop`, and the real-engine lifecycle suite via `tests/lifecycle/` (plus the separate

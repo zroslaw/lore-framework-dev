@@ -8,20 +8,17 @@ pushed to completion, not discarded. Follow-on sessions resumed it three times: 
 literate-accelerator addendum, a review-and-fix pass, and the `trilens-loop.md` restructure (all
 below).
 
-**Current state as of 2026-07-27 (later session): asymmetric merge.**
-`lore-framework-dev` `wip/lr-core-v31` was **merged to `main` and pushed** (merge `f73f57d`,
-conflict-marker cleanup `0112890`, `.DS_Store` gitignore `592d04a`). One content conflict resolved
-in `trilens-loop-feature.md` (kept main's Codex **gpt-5.4** wording); accidental WIP file `p`
-dropped. **`lore-framework` plugin is still parked** on `wip/lr-core-v31` at `cd8ece1` — not
-merged, not pushed, not a v31 ship. The historical sections below still describe the earlier
-"both branches committed, neither merged" end state; treat this paragraph as authoritative for
-*where the work lives now*. Lifecycle: Claude/haiku green only; Codex/Cursor still need
-plugin-identity re-run — see § 2026-07-27: first real lifecycle-suite run.
+**Current state as of 2026-07-27 evening session:** A7 plugin-identity gate is on
+`lore-framework-dev` `main`. Codex marketplace + Cursor (cloud plugin disabled) were
+repointed at the v31 worktree; a **valid** lifecycle re-run produced Codex **6/7** and
+Cursor **4/7** — see `v31-lifecycle-rerun-partial-green-2026-07-27.md`. Plugin remains
+parked on `wip/lr-core-v31` @ `cd8ece1`. Ship gate: triage remaining boot/Script-Fallback /
+Cursor-sees-30 failures, then version-ship.
 
 | Repo | Where it lives now | Notes |
 |---|---|---|
-| `lore-framework` | `wip/lr-core-v31` @ `cd8ece1` (worktree) | Still the ship gate. Plugin + lifecycle re-runs stay here. |
-| `lore-framework-dev` | **`main`** (includes former WIP) | Agent-repo side landed; worktree branch tip still `c63da4a` historically. |
+| `lore-framework` | `wip/lr-core-v31` @ `cd8ece1` (worktree) | Still the ship gate. |
+| `lore-framework-dev` | **`main`** (includes former WIP + A7) | Harness identity gate live. |
 
 ## 2026-07-26 addendum: literate-accelerator redesign
 
@@ -172,18 +169,18 @@ behavior. Verified false via `git merge-tree --write-tree`: zero conflicts, both
 in the resulting tree. Overridden, disclosed, and generalized as its own topic — see
 `diverged-branch-diff-misread-as-merge-outcome.md`.
 
-**Outstanding for v31 as of the lore-framework-dev merge session** (supersedes older resume lists):
+**Outstanding for v31 as of the post-A7 lifecycle re-run** (supersedes older resume lists):
 
-1. Repoint Codex's (`~/.codex/config.toml` marketplace source) and Cursor's (cached plugin) sources at
-   the `lore-framework` `wip/lr-core-v31` worktree, then re-run those two engines' lifecycle suites —
-   still the real precondition to a valid three-engine green.
-2. Reconcile the Codex reviewer-tier model name — **done**: v31 notes carry **gpt-5.4**; v30 shipped
-   notes left as-is.
-3. Version-ship discipline once all three engines are green: four manifests to `1.31.0`, the
+1. Triage/fix the partial-green failures in `v31-lifecycle-rerun-partial-green-2026-07-27.md`
+   (Codex R>F wording + Script Fallback notify; Cursor stamp/update-dry-run seeing 30; takeover
+   identity-probe timeout).
+2. Version-ship discipline once the gate is acceptably green: four manifests to `1.31.0`, the
    `versioning-release-types.md` v31 entry, the cache-clear footer (cache-affecting), then merge
-   **`lore-framework`** `wip/lr-core-v31` → `main` and push. (`lore-framework-dev` already on main.)
-4. Fold `trilens-loop-v31-restructured.md` into `trilens-loop-feature.md` when the plugin doc ships;
-   `literate-accelerator-pattern.md` is already on `lore-framework-dev` main via the merge.
+   **`lore-framework`** `wip/lr-core-v31` → `main` and push. (`lore-framework-dev` already on main,
+   including A7.)
+3. Fold `trilens-loop-v31-restructured.md` into `trilens-loop-feature.md` when the plugin doc ships.
+4. Restore Cursor cloud-plugin backup (`~/.cursor/plugins-backup-v31-*`) after parked-branch testing
+   if normal IDE installs should return — see `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
 
 Plugin branch tip still `cd8ece1` on `wip/lr-core-v31`, clean, not merged/pushed.
 
@@ -201,29 +198,18 @@ for the standing don't-auto-restore rule.
 
 ## Resuming
 
-Don't reconstruct the plan from scratch. **The regression-tests, review, and `cursor.md`-deferral
-portions of the previous resume lists are now done — don't redo them.**
-`agents/lore-architect/workdir/GOAL-2026-07-25.md` **inside that worktree** (not the main checkout's
-workdir) describes the *pre-round-1* plan and is stale on three points now: the two round-2
-regression tests (written and mutation-verified), "trilens round 3" scoped only to the round-2 delta
-(superseded twice by full-surface passes), and the `cursor.md` open item (resolved). Resume steps as
-of 2026-07-27:
+Don't reconstruct the plan from scratch. **A7, Codex/Cursor repoint, and a valid lifecycle
+re-run are done** — see `v31-lifecycle-rerun-partial-green-2026-07-27.md` for the failure list
+that is now the ship gate. Older resume bullets about "never ran lifecycle" / "repoint sources"
+are stale.
 
-1. ~~Run the full lifecycle suite (`LR_LIFECYCLE=1`) against branch head~~ — **done 2026-07-27, but
-   only partially valid.** Claude Code/haiku is green (6/7, the 7th's flakiness root-caused and fixed —
-   see § 2026-07-27 (later) above); Codex and Cursor both ran against a silently-wrong installed v30
-   plugin instead of the worktree and must be re-run once their sources are repointed at
-   `wip/lr-core-v31`. Per `post-convergence-edits-need-their-own-gate.md`, the *next* run must target
-   `cd8ece1`/`c63da4a`, not the earlier `c3d418d`/`8fc46f0`.
-2. ~~Reconcile the Codex reviewer-tier model name before shipping~~ — **done 2026-07-27**: v31's notes
-   carry the correction (**gpt-5.4**, not gpt-4.5); v30's shipped notes were left as-is, not retro-edited.
-3. Repoint Codex's and Cursor's plugin sources at the **`lore-framework`** `wip/lr-core-v31`
-   worktree and re-run those two engines' lifecycle suites — still the remaining three-engine gate.
-4. Ship the **plugin**: version-ship discipline in `role.md` (manifests, `versioning-release-types.md`
-   backfill, cache-clear footer), then merge `lore-framework` `wip/lr-core-v31` → main and push.
-   (`lore-framework-dev` already merged.)
-5. When the plugin ships, collapse `trilens-loop-v31-restructured.md` into `trilens-loop-feature.md`.
-   `literate-accelerator-pattern.md` is already on `lore-framework-dev` main.
+Next:
+1. Triage/fix the partial-green failures (Script Fallback notify, Codex R>F wording, Cursor
+   seeing framework 30 in update/boot scenarios, takeover identity-probe timeout).
+2. Ship the plugin when the gate is acceptably green (manifests, version-history, cache-clear,
+   merge `wip/lr-core-v31` → main).
+3. Collapse `trilens-loop-v31-restructured.md` into `trilens-loop-feature.md` on ship; restore
+   Cursor cloud-plugin backup if normal installs should return.
 
 Before starting *any* fresh work on `lr-core`, the Script Fallback Contract, or `trilens-loop.md`, check
 for this branch/worktree pair first — a second attempt at the same design without checking would
