@@ -129,13 +129,46 @@ After the fan-out completes:
 
 1. **Verify each BLOCKER/HIGH** before acting — read the file, confirm the reviewer's claim. Reviewers occasionally hallucinate or work from stale state.
 2. **Apply BLOCKER + HIGH first**, then MEDIUM, then triage LOW.
-3. **Cross-check overlap.** If two reviewers flagged the same issue from different angles, fix once and note both.
+3. **Cross-check overlap — and weight it up, don't dedupe it away.** If two reviewers flagged the same issue from different angles, fix once and note both. **Convergence across independent lenses is strong evidence the finding is real**, and is the signal most likely to be lost during triage: the second report reads as redundant right when the first one is being argued with. Two lenses on the same sentence gets reworded, not defended — that agreement is what the fan-out is being paid for. See `check-own-lore-before-dismissing-a-finding.md`.
 4. **Flag deferred items to backlog** explicitly — don't lose them.
 5. **Acknowledge what was deferred** in the final summary so the user knows what's not in scope.
 
 ## Cost
 
 Three parallel agents typically run 30s–3min. Cost is real but not prohibitive — appropriate for substantive ships including doc-only `VERSION` bumps. Don't over-use; reserve for changes that warrant the scrutiny.
+
+### The wire is cheap; the reasoning is what you pay for (measured 2026-07-27)
+
+One `/lr:trilens-loop` round, three cold sonnet reviewers over **two** changed doc files:
+
+| Lens | Tokens | Tool calls |
+|---|---|---|
+| hand-executor fidelity | 44.2k | 4 |
+| internal consistency | 31.1k | 2 |
+| corpus coherence | 98.8k | 30 |
+| **total** | **174.1k** | **36** |
+
+Host side: ~1.6k out in briefs, ~3.5k back in findings, ~5–8k for verification and edits. **Roughly
+94% of the loop's cost happened inside subagents and never entered host context.**
+
+Three things follow, and the first two are corrections to how I used to reason about this:
+
+1. **A reviewer's budget is dominated by its own reasoning, not by the material handed to it.** The
+   two lenses that mostly read the two changed files (~4k of actual content between them) still spent
+   44k and 31k. So the "don't send the diff, let the reviewer discover the changes" rule is close to
+   **cost-neutral**; pasting the diff would have saved a rounding error. **Never justify the exchange
+   contract as a token-saving measure** — that framing is measurably weak and will not survive
+   scrutiny. Justify it on what it actually buys: *independence* (a reviewer that reads the tree
+   itself is not steered by the author's framing) and *host-context preservation* (174k of reading
+   returned as ~3.5k of pointers; reviewers narrating their reasoning back would have put maybe
+   30–50k into the host mid-review, while it holds the ledger, moving it materially closer to
+   compaction).
+2. **Trimming the brief buys nothing.** At ~1.6k out for three briefs, the brief is noise-level. Budget
+   belongs in *rounds* and *lens independence*, not in model size and not in brief length.
+3. **The expensive lens earned it.** Corpus coherence at 99k / 30 tool calls produced the round's
+   `BLOCKER` and its stale-release-note finding, precisely because it spent its budget reading
+   *other* files to compare against. A diff would not have shortened that work. Cost per lens is a
+   poor proxy for value per lens.
 
 ## When the reviewers disagree
 
@@ -229,6 +262,8 @@ Often complementary: use sonnet-subagent for the lore-side polish; use parallel-
 ## See Also
 
 - `trilens-loop-feature.md` — **the shipped skill this pattern was promoted into (v30)**; invoke it rather than hand-assembling the fan-out.
+- `trilens-loop-v31-restructured.md` — the parked v31 doc, whose host/reviewer exchange contract the § Cost measurement above was taken against.
+- `check-own-lore-before-dismissing-a-finding.md` — triage-time discipline: verify the rule a finding rests on before calling it moot; convergent lenses get the benefit of the doubt.
 - `subagent-as-optimization-vs-subagent-as-semantics.md` — why reviewer independence has no host-side fallback.
 - `post-convergence-edits-need-their-own-gate.md` — a clean round certifies only the artifact state the reviewers read.
 - `docs-engines-convention.md` — where engine spawn traps belong (the named-teammate trap's real home).

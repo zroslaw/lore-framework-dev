@@ -27,6 +27,13 @@ The user re-asserts a style by invoking its trigger phrase; nothing is surfaced 
 
 The three stack cleanly (sentence / turn / thinking-direction), so they can be active together.
 
+**Reading a multi-skill invocation.** Because the levels are orthogonal, invoking two or three at
+once is not a menu selection — it says the last reply was wrong on each of those axes
+simultaneously, and it is the strongest form of the "too many words" feedback. Treat it as a stop
+signal: re-assert all of them and hold the style for the rest of the session rather than drifting
+back after a turn or two. Instance: 2026-07-27, all three at once after a measurement question got
+an essay — see `feedback-too-many-words.md`.
+
 ## Status
 
 All three are **built but uncommitted**, deliberately held to ship with the **codex-adoption
@@ -37,6 +44,7 @@ port version when it's cut. Tracking + resume detail in `port-landing-next-steps
 
 ## See Also
 
+- `feedback-too-many-words.md` — the standing feedback these skills are the user's lever for; carries the multi-skill-invocation instance.
 - `soft-skill-follow-me-mode.md` — follow-me's design history (seed of the abandoned soft-skills concept).
 - `skill-request-defaults-to-regular-skill.md` — the "make it a skill" = regular skill default that shaped this category.
 - `slash-command-system.md` — the `/lr:` skill naming and thin-pointer mechanics these follow.

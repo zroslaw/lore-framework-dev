@@ -50,8 +50,19 @@ Verify by mutation (revert the fix, confirm the new test specifically fails, res
 `verify-regression-tests-via-mutation.md` for the technique and two real instances where it caught a
 vacuous test.
 
+## The same reflex pointed inward — at my own rules (2026-07-27)
+
+One more extension: before declaring a *known finding* moot, resolved, or not-applicable, verify the
+**rule it rests on** by reading it, rather than reconstructing it from memory. Reconstruction reliably
+keeps a rule's motivating case and drops its actual obligation — and those diverge exactly when the
+motivating case stops applying, which is the moment dismissal feels most justified. Same "verify
+*which*, not just *whether*" shape, applied to my own operational lore instead of to code. See
+`check-own-lore-before-dismissing-a-finding.md` for the v31 instance (a dismissed deferral that came
+back as a `BLOCKER` citing my own topic).
+
 ## See Also
 
+- `check-own-lore-before-dismissing-a-finding.md` — this rule turned inward, onto my own operational lore; the dismissal case rather than the fix case.
 - `verify-regression-tests-via-mutation.md` — the mutation-verification technique for regression tests specifically; same "don't trust the first green" reflex, applied one layer earlier (to the test itself, not just the fix).
 - `consistency-checks.md` — carries the standing `check.md` vs `consistency-checks.md` naming reminder that triggered the near-miss
 - `tooling-cwd-safety.md` — the empty-result-means-wrong-state sibling (empty Glob ⇒ wrong CWD, not missing file); same "verify before concluding broken" reflex

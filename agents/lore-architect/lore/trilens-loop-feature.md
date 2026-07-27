@@ -49,7 +49,10 @@ All of these were earned during the ship, not assumed:
   misreport agreed findings as rejected.
 - **Reviewers default to regular model tiers** — sonnet on Claude Code, gpt-4.5 on Codex,
   composer-2.5 on Cursor — escalating a single lens only on demonstrated need. Budget belongs in
-  rounds and independence, not model size (user decision, 2026-07-25).
+  rounds and independence, not model size (user decision, 2026-07-25; measured backing in
+  `parallel-reviewer-fanout-pattern.md` § Cost). *The Codex name is contested:* the user says
+  **gpt-5.4**, these notes and `release-notes/30.md:49` say gpt-4.5. Reconcile forward in v31's
+  release notes, not by retro-editing v30's — see `trilens-loop-v31-restructured.md` § Caveat.
 - **Lenses are ways of looking, not places to look.** Splitting by file or target gives three
   reviewers doing identical thinking on different slices. Codex's cheapest tier did exactly that
   (`diff` / `lore-context` / `references`) until the doc said otherwise explicitly. The three lenses
@@ -107,7 +110,9 @@ first-class part of the feature. Rejected: `/lr:review` (collides conceptually w
 - `versioning-release-types.md` — the v30 entry (release-notes-only, cache-affecting: yes).
 - `lr-dev-direction.md` — where this was originally filed as `lr:dev-review`.
 - `sonnet-subagent-review-pattern.md` — the single-lens sibling, unchanged by v30.
-- `trilens-loop-deliberately-minimal-2026-07-25.md` — a further compression of `docs/trilens-loop.md`
-  (325 lines → one paragraph) is drafted and parked on `wip/lr-core-v31`, **not** on main; this topic
-  describes the doc as it stands on main today. See `v31-lr-core-parked-2026-07-25.md` for the parking
-  location before assuming the compressed version is live.
+- `trilens-loop-v31-restructured.md` — **`docs/trilens-loop.md` has been reworked twice on the parked
+  `wip/lr-core-v31` branch** (325 lines → one paragraph → a ~75-line structured doc with an explicit
+  host/reviewer exchange contract). None of it is on main; this topic describes the doc as it stands
+  on main today. Check `v31-lr-core-parked-2026-07-25.md` for the parking location before assuming
+  either later version is live.
+- `trilens-loop-deliberately-minimal-2026-07-25.md` — the don't-auto-restore rule governing that doc.

@@ -1,22 +1,31 @@
-# v31 `lr-core` — Parked, Not Shipped (2026-07-25; addendum + round-1 review 2026-07-26)
+# v31 `lr-core` — Parked, Not Shipped (2026-07-25; addendum, review, and restructure through 2026-07-27)
 
 The v31 `lr-core` work — a deterministic substrate script plus boot/attach/consult/pull-lore/
 process-merge/lore-search doc rewiring, plus the Script Fallback Contract — is fully implemented and
-has been through two trilens review rounds (all findings applied), plus a further 2026-07-26 review
-round (below) that closed the gap the addendum had opened. It is **not shipped**. The user parked it
-explicitly, mid-session on 2026-07-25, after a rough and frustrating session — not pushed to
-completion, not discarded. A 2026-07-26 follow-on session resumed the parked work twice: first for
-the literate-accelerator addendum, then for a review-and-fix pass (both below). Still nothing is
-committed or pushed as of either session's end.
+has been through several trilens review rounds (all findings adjudicated). It is **not shipped**. The
+user parked it explicitly, mid-session on 2026-07-25, after a rough and frustrating session — not
+pushed to completion, not discarded. Follow-on sessions resumed it three times: the
+literate-accelerator addendum, a review-and-fix pass, and the `trilens-loop.md` restructure (all
+below).
+
+**Current state as of 2026-07-27: everything is committed on `wip/lr-core-v31` in both repos, with
+clean working trees. The branch is NOT merged to main and NOT pushed.** This changed from earlier
+sessions, where the work sat uncommitted in the worktrees — the "nothing is committed" framing in the
+sections below describes those sessions' end states, not today's.
+
+| Repo | Branch head | Contents |
+|---|---|---|
+| `lore-framework` | `c3d418d` | restructure trilens-loop, correct Cursor subagent notes (on top of `63d2d86` WIP) |
+| `lore-framework-dev` | `8fc46f0` | regression tests + `literate-accelerator-pattern.md` + a lore-context addition (on top of `cd71c76` WIP) |
 
 ## 2026-07-26 addendum: literate-accelerator redesign
 
-A follow-on session (same parked branch/worktree pair, no new commits — still fully uncommitted)
-applied a further design change, user-directed: make `scripts/lr-core` the source of truth for its
-own procedures via instructional comments *inside* the script, rather than a separate prose
-fallback doc.
+A follow-on session (same parked branch/worktree pair; uncommitted at the time, committed on
+2026-07-27) applied a further design change, user-directed: make `scripts/lr-core` the source of
+truth for its own procedures via instructional comments *inside* the script, rather than a separate
+prose fallback doc.
 
-**What changed** (all still parked/uncommitted):
+**What changed** (all still parked, now committed on the branch):
 - `scripts/lr-core`'s module docstring now names the script's own comments as the spec (previously:
   "procedure docs remain normative"). `cmd_preflight`, `cmd_discover`, `cmd_scan`, and helpers
   (`pull_repo`, `compare_versions`, `detect_teammate`, `_resolve_agent`) gained numbered,
@@ -82,16 +91,41 @@ in the two regression tests the round-2 resume list had already called out as ou
    lifecycle suite not run, nothing committed or pushed. This was an explicit "keep it minimal, don't
    loop — just finish what you already found" instruction, not a quality judgment on the round.
 
-### Open item: `cursor.md` subagent-spawn binding — deferred, not decided
+### Open item: `cursor.md` subagent-spawn binding — **RESOLVED 2026-07-27**
 
-`docs/engines/cursor.md`'s `subagent-spawn` binding still names `trilens-loop.md` as the carve-out
-for "subagent independence is the semantics" — but the compressed 15-line doc no longer states any
-engine-binding instruction or the "no subagent mechanism → stop" rule. Both the hand-executor and
-corpus-coherence lenses found this independently, so it is a real gap. Per
-`trilens-loop-deliberately-minimal-2026-07-25.md`, re-expanding any part of the compressed doc needs
-a fresh, explicit user decision — **this was surfaced, not applied.** Resolve before shipping v31,
-one way or another: either fix `cursor.md`'s pointer to stop claiming a rule the doc no longer
-states, or re-expand the relevant slice of `trilens-loop.md`.
+The gap (the Cursor profile naming `trilens-loop.md` as the semantics-class carve-out while the
+compressed doc stated neither the classification nor the "no host-side fallback" rule) is closed. The
+restructured doc now states its own semantics-class classification and the no-fallback rule in step
+3, and `docs/engines/cursor.md` was corrected in the same commit. See § 2026-07-27 below and
+`trilens-loop-v31-restructured.md`.
+
+Worth remembering *how* it nearly went the other way: mid-session I reasoned that since all three
+Tier-1 engines have native subagents the rule had no live case, and told the user the item could come
+off the pre-ship list. The next review round returned it as a `BLOCKER` citing my own lore. See
+`check-own-lore-before-dismissing-a-finding.md`.
+
+## 2026-07-27: `trilens-loop.md` restructured, everything committed to the branch
+
+A short follow-on session, entirely user-directed:
+
+1. **`docs/trilens-loop.md` rewritten** from the parked one-paragraph version into a ~75-line
+   structured doc — numbered loop, stopping rules, an explicit host/reviewer **exchange contract**,
+   overrides. Three lenses restored as the stated default; severity/verdict/disposition vocabulary
+   reinstated; hard three-round ceiling; regular-tier reviewer models restored. Full detail in
+   `trilens-loop-v31-restructured.md`. This did **not** violate
+   `trilens-loop-deliberately-minimal-2026-07-25.md` — every expansion was asked for step by step.
+2. **One trilens round over the restructure** (hand-executor fidelity, internal consistency, corpus
+   coherence): 18 findings, 11 applied, 5 declined, 1 accepted. It produced the `BLOCKER` that closed
+   the `cursor.md` deferral above and a stale-release-note finding. Cost profile measured — see
+   `parallel-reviewer-fanout-pattern.md` § Cost.
+3. **`docs/engines/cursor.md` and `release-notes/31.md` corrected** in the same commit.
+4. **Both repos committed on `wip/lr-core-v31`** (`c3d418d`, `8fc46f0`); working trees clean. Still
+   not merged to main, still not pushed. Lifecycle suite still not run against this state.
+
+Note for the eventual merge to main: `8fc46f0` includes a 5-line addition to the *branch's*
+`agents/lore-architect/lore-context.md` (§ Skills & Docs, the literate-accelerator paragraph). Main's
+`lore-context.md` has since moved in other sections, so expect a merge, not a fast-forward, on that
+file.
 
 ## Where it lives
 
@@ -99,22 +133,30 @@ Branch `wip/lr-core-v31` in both `lore-framework` and `lore-framework-dev`, each
 worktree at `<workspace>/.worktrees/<repo>/lr-core-v31/` (per `worktrees-convention.md`). Both
 top-level `main` checkouts are clean — nothing of this work is visible from a normal boot on main.
 `docs/trilens-loop.md` on main is still the full 325-line version described in `trilens-loop-feature.md`
-— see `trilens-loop-deliberately-minimal-2026-07-25.md` for the parked compression of that doc, same
-branch/session.
+— see `trilens-loop-v31-restructured.md` for the parked branch's current version of that doc, and
+`trilens-loop-deliberately-minimal-2026-07-25.md` for the standing don't-auto-restore rule.
 
 ## Resuming
 
-Don't reconstruct the plan from scratch. **The regression-tests-and-review portion of the previous
-resume list is now done — don't redo it.** `agents/lore-architect/workdir/GOAL-2026-07-25.md` **inside
-that worktree** (not the main checkout's workdir) still describes the *pre-round-1* plan and is now
-stale on two points: it lists the two round-2 regression tests as outstanding (they're written and
-mutation-verified) and describes "trilens round 3" as scoped only to the round-2 delta (the round-1
-review above superseded it with a full-surface pass instead). Resume steps as of this session's end:
+Don't reconstruct the plan from scratch. **The regression-tests, review, and `cursor.md`-deferral
+portions of the previous resume lists are now done — don't redo them.**
+`agents/lore-architect/workdir/GOAL-2026-07-25.md` **inside that worktree** (not the main checkout's
+workdir) describes the *pre-round-1* plan and is stale on three points now: the two round-2
+regression tests (written and mutation-verified), "trilens round 3" scoped only to the round-2 delta
+(superseded twice by full-surface passes), and the `cursor.md` open item (resolved). Resume steps as
+of 2026-07-27:
 
-1. Decide the `cursor.md` subagent-spawn deferral (see above) — fix the stale pointer or re-expand
-   the relevant slice of `trilens-loop.md`.
-2. Run the full lifecycle suite (`LR_LIFECYCLE=1`) — not yet run against this state.
-3. Ship: commit + push both worktrees, per the normal version-ship discipline in `role.md`.
+1. Run the full lifecycle suite (`LR_LIFECYCLE=1`) against branch head — still not run against any
+   v31 state. This is the outstanding gate; per `post-convergence-edits-need-their-own-gate.md` it
+   must run against `c3d418d`/`8fc46f0`, not an earlier tree.
+2. Reconcile the Codex reviewer-tier model name before shipping — the user says **gpt-5.4**,
+   `release-notes/30.md:49` and `trilens-loop-feature.md` say **gpt-4.5**. Fix forward in v31's notes;
+   don't retro-edit shipped notes. See `trilens-loop-v31-restructured.md` § Caveat.
+3. Ship: version-ship discipline in `role.md` (manifests, `versioning-release-types.md` backfill,
+   cache-clear footer), then merge `wip/lr-core-v31` to main in both repos and push.
+4. On merge, fold `literate-accelerator-pattern.md` and `trilens-loop-v31-restructured.md` into
+   main's lore properly — the former arrives with the branch, the latter should collapse into
+   `trilens-loop-feature.md` once the doc it describes is the shipped one.
 
 Before starting *any* fresh work on `lr-core`, the Script Fallback Contract, or `trilens-loop.md`, check
 for this branch/worktree pair first — a second attempt at the same design without checking would
@@ -132,8 +174,11 @@ held rather than pushed through or discarded.
 
 ## See Also
 
-- `trilens-loop-deliberately-minimal-2026-07-25.md` — the parked `docs/trilens-loop.md` compression,
-  same branch/session.
+- `trilens-loop-v31-restructured.md` — what `docs/trilens-loop.md` looks like on this branch now.
+- `trilens-loop-deliberately-minimal-2026-07-25.md` — the standing don't-auto-restore rule for that
+  doc, and the record of the original compression.
+- `check-own-lore-before-dismissing-a-finding.md` — the near-miss that would have dropped the
+  `cursor.md` item unresolved.
 - `parked-design-preservation-pattern.md` — the sibling parking pattern for early-draft (not complete)
   work.
 - `worktrees-convention.md` — the underlying worktree mechanism.

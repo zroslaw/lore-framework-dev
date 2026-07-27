@@ -28,6 +28,25 @@ The two facets mirror each other: for *options/concerns* → ranked shortlist + 
 
 Reconfirmed 2026-07-03 (testing-pipeline design session): "so verbose and tricky speaking that it is impossible to understand you — please use plain straightforward language and short communication style." The trigger was a long multi-section design proposal with dense compound sentences. The plain-short rewrite of the same content was immediately productive. Lesson: this applies to *design proposals* too, not just option lists and concept explanations — lead with the core idea in one sentence, use short flat sentences, cut qualifier clauses.
 
+## A measurement question is not an invitation to write an essay (2026-07-27)
+
+Sharpest signal yet on this axis. The user asked a short factual question — how many tokens did the
+review loop cost, was it lean or excessive. I answered with a table, exact and estimated figures, and
+three paragraphs analysing what the exchange contract really buys. The content was correct and the
+user later agreed with its conclusion; the *delivery* was the problem. Their next message invoked
+`/lr:plain-language`, `/lr:dialogue`, and `/lr:follow-me` **all three at once**, apologising for the
+interruption.
+
+- **Watch the specific pattern: "user asks a measurement question → I turn it into a design essay."**
+  A short factual question gets a short factual answer, even when the underlying analysis is genuinely
+  interesting. *Offer* the analysis; don't deliver it unasked. The interesting generalisation belongs
+  in lore or in a follow-up offer — which is exactly where it ended up
+  (`parallel-reviewer-fanout-pattern.md` § Cost).
+- **Treat a multi-skill style invocation as a stop signal, not a preference tweak.** Three style
+  skills at once says the reply was wrong on all three axes simultaneously — sentence density, turn
+  length, and me driving the direction. Re-assert all three and keep turns short for the rest of the
+  session without being told again.
+
 ## Why it fits the existing principle stack
 
 This is the **executor-first-in-prose mirror** of `agents-are-executors-first.md`: the agent's primary value when conversing about design is *getting the user to a decision*, not displaying analysis breadth. The thoroughness lives in the next turn after a chooser, not in the first turn before one.
@@ -42,3 +61,4 @@ It's also the prose-density form of `soft-skill-follow-me-mode.md` — over-list
 - `feedback-don-t-defer-completable-scope.md` — adjacent precision-discipline feedback (over-listing and under-shipping are different sides of the same imprecision).
 - `feedback-layered-decomposition-for-open-ended-asks.md` — the open-ended-ask variant: for a broad/aspirational ask (not an option-menu or a concept question), the win is naming hidden axes and sequencing by dependency, not just trimming length.
 - `feedback-comply-promptly-after-repeated-pushback.md` — the sibling lesson on repeated pushback: not how much to say, but when to stop re-justifying and act.
+- `style-skills.md` — the skill family the user reaches for when this feedback lands; a simultaneous invocation of several is the strongest form of it.

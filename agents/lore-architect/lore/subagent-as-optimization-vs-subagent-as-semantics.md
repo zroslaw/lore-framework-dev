@@ -23,7 +23,11 @@ correct in one case and invalid in the other.
 
 1. **Classify before writing the doc.** When adding a procedure that spawns subagents, decide which
    kind it is. If it is semantics-class, say so in the doc and state that there is **no host-side
-   fallback** — the procedure stops and reports instead of degrading.
+   fallback** — the procedure stops and reports instead of degrading. **The obligation is on the doc
+   stating its own classification, and it does not lapse when every current engine happens to have a
+   native subagent mechanism.** I misread it that way once and nearly closed a real gap as moot; a
+   review round returned it as a `BLOCKER` citing this rule. See
+   `check-own-lore-before-dismissing-a-finding.md`.
 2. **A profile's degradation clause needs a carve-out, not a blanket rule.** v30 added exactly that to
    `docs/engines/cursor.md`: it keeps serial host-side execution as the validated default for the
    procedures that already pass that way, and carves out semantics-class procedures (naming
@@ -56,4 +60,6 @@ This is a **third axis** on the engine-degradation question, orthogonal to the t
   not per-engine.
 - `codex-native-multi-agent-subsystem.md`, `claude-engine-capabilities.md` — the engines whose native
   mechanisms satisfy the semantics class today.
+- `check-own-lore-before-dismissing-a-finding.md` — the near-miss where Rule 1 was reconstructed from memory and lost its obligation.
+- `trilens-loop-v31-restructured.md` — where the semantics-class classification now lives in the doc itself (parked on `wip/lr-core-v31`).
 - `naming-foundational-principles.md` — the meta-rule under which this earned its own topic.
