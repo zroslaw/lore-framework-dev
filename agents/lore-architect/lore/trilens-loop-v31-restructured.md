@@ -41,12 +41,14 @@ longer described as unverified; Host-Side Override Rules no longer claim to appl
 contradicted the trilens carve-out) and `release-notes/31.md` (it still described a
 single-paragraph doc that no longer exists).
 
-## Caveat to raise before v31 ships
+## Codex reviewer tier — RECONCILED 2026-07-27
 
-The user named **gpt-5.4** as the Codex reviewer tier; `release-notes/30.md:49` and
-`trilens-loop-feature.md` say **gpt-4.5**. Left unreconciled on purpose — shipped release notes are a
-historical record, so the correction (if any) belongs in v31's notes, not a retroactive edit. Raise
-it explicitly at ship time.
+**`gpt-5.4` is correct** (user decision, restated 2026-07-27). The v31 doc already said so; the
+stale sites were `release-notes/30.md:49` and `trilens-loop-feature.md`. Resolved the fix-forward
+way: `release-notes/31.md` now carries an explicit correction-of-record line, `trilens-loop-feature.md`
+was corrected on the v31 branch, and **shipped v30 notes were left untouched** — a shipped release
+note is a historical record of what that version said, not a live reference. `versioning-release-types.md`'s
+v30 entry likewise keeps `gpt-4.5` because it records v30's shipped scope faithfully.
 
 ## See Also
 

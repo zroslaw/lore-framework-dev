@@ -63,6 +63,11 @@ agent lore. Lore is for judgement and history; the profile is the point-of-use c
 by hitting a trap that had been recorded in my own lore since v18. See `docs-engines-convention.md`
 § Engine traps belong in the binding, and audit sibling profiles whenever one binding gains a guardrail.
 
+**Codex/Cursor plugin identity is not self-verifying.** The lifecycle harness passes `--plugin-dir` to
+every engine, but an installed/cached plugin can silently win over that flag on Codex and Cursor,
+substituting a different tree for the one under test with no loud failure — confirmed live 2026-07-27
+running the suite against the parked v31 branch. See `lifecycle-harness-plugin-identity-unverified.md`.
+
 ## Marketplace & Distribution
 
 Shipping one repo to multiple engines' plugin marketplaces means handling **each engine's packaging
@@ -87,6 +92,12 @@ materially in just 18 days as of the 2026-07-20 re-survey.
 ## Boot & Freshness
 
 Boot (`agent-boot.md`, single source of truth): discover agent → auto-pull repo → version check → read `role.md` + `lore-context.md` → detect teammate spawn → confirm. **Boot loads only those two files; topics are read on demand.** Repos auto-pull at every session-context boundary (boot, attach, pre-merge) to match the team's latest pushed state; `/lr:pull-lore` is the manual refresh. See `freshness-contracts-at-session-boundaries.md`, `auto-pull-mechanism.md`.
+
+`version-check.md`'s nested-repo guard has a macOS-specific trap: "resolve both to real paths" is not
+self-executing prose — a weak model filled the gap with bare `pwd`, which disagrees with git's
+`--show-toplevel` under macOS's `/var`→`/private/var` symlink, producing a false "not its own git root"
+verdict. Fixed by naming the exact `os.path.realpath()` one-liner instead of the vague instruction. See
+`macos-var-symlink-realpath-ambiguity.md`.
 
 ## Cross-Agent Collaboration
 
@@ -205,15 +216,23 @@ fallback spec, ~9 docs thinned to pointers), plus a reworked `docs/trilens-loop.
 branch `wip/lr-core-v31` in both repos (worktrees at
 `<workspace>/.worktrees/{lore-framework,lore-framework-dev}/lr-core-v31/`), **committed there, working
 trees clean, not merged to main and not pushed** — parked per explicit user instruction after a rough
-2026-07-25 session. Two full-surface review rounds have run: the first fixed 8 real bugs (a
-nested-repo `git -C` escape, `git-dash-c-needs-toplevel-guard.md`; signal-death/sentinel collisions;
-encoding/BOM bugs; a version-comparison bug; boot-procedure and release-notes gaps) and added two
-mutation-verified regression tests (`verify-regression-tests-via-mutation.md`), tests 38→51 green;
-the second covered the `trilens-loop.md` restructure and closed the last open deferral. **The
-outstanding gate is the lifecycle suite, which has never been run against any v31 state.** `main` in
-both repos is unaffected. Check `v31-lr-core-parked-2026-07-25.md` before starting related work — its
-"Resuming" section is current; the in-worktree `workdir/GOAL-2026-07-25.md` is stale on three points,
-don't follow it as-is. See also `trilens-loop-v31-restructured.md`.
+2026-07-25 session. Three full-surface trilens rounds have now run over the branch (25 findings, 21
+applied, 3 declined, 1 accepted, zero sustained BLOCKERs; round 3 hit the 3-round ceiling with 2 HIGHs
+left ungated and disclosed as such), fixing real bugs along the way — a nested-repo `git -C` escape
+both in the script (`git-dash-c-needs-toplevel-guard.md`) and, found separately this round, in
+`version-check.md`'s parallel prose gate; signal-death/sentinel collisions; encoding/BOM bugs; a
+version-comparison bug; boot-procedure and release-notes gaps — plus two mutation-verified regression
+tests (`verify-regression-tests-via-mutation.md`), tests 38→51 green. **The lifecycle suite has now
+run once (2026-07-27), with a partial result: Claude Code/haiku is green (6/7 modules; the 7th's
+flakiness root-caused as a macOS `pwd`-vs-`realpath` ambiguity, `macos-var-symlink-realpath-ambiguity.md`,
+and fixed) and is the only trustworthy data point — Codex and Cursor both silently resolved an
+*installed* v30 plugin instead of the `--plugin-dir` worktree under test, invalidating both engines'
+results (`lifecycle-harness-plugin-identity-unverified.md`).** Repointing those two engines' sources at
+the worktree and re-running them is the actual remaining precondition to a valid three-engine green,
+still deferred to the user. `main` in both repos is unaffected. Check `v31-lr-core-parked-2026-07-25.md`
+before starting related work — its "Resuming" section is current; the in-worktree
+`workdir/GOAL-2026-07-25.md` is stale on three points, don't follow it as-is. See also
+`trilens-loop-v31-restructured.md`.
 
 Both pre-ship gates are in working order and both are routinely run: the review loop via
 `/lr:trilens-loop`, and the real-engine lifecycle suite via `tests/lifecycle/` (plus the separate

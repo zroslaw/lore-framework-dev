@@ -158,6 +158,14 @@ reachable from the repo root, not only from deep test directories: root `README.
 
 ## What's still open
 
+- **Verify plugin identity before trusting a result (2026-07-27)** — `run_engine()` passes
+  `--plugin-dir <framework_dir>`, but on Codex and Cursor an installed/cached plugin can silently win
+  over that flag, so the suite runs to completion against the wrong tree with no loud failure. Found
+  running the suite against the parked v31 branch: Codex and Cursor both resolved an installed v30
+  plugin instead of the v31 worktree, invalidating both engines' results while Claude Code (nothing
+  installed globally on that machine) was unaffected only incidentally. Fix: probe the loaded plugin's
+  actual `VERSION` and assert it equals `framework_version()` of `LR_FRAMEWORK_DIR`, failing loudly on
+  mismatch. See `lifecycle-harness-plugin-identity-unverified.md`.
 - **Parallelize the suite** — scenarios are fixture-isolated; today they run serially via
   `unittest discover` (~15–45 min/engine). Future: `LR_LIFECYCLE_JOBS`, parallel by test file, or
   parallel by engine in separate terminals; cap concurrency for API limits. See
@@ -205,6 +213,7 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `parallel-reviewer-fanout-pattern.md`, `trilens-loop-feature.md` — the model-review pre-ship discipline this complements with empirical regression testing (and the v30 feature scenarios 28–29 cover).
 - `post-convergence-edits-need-their-own-gate.md` — a green run certifies only the artifact state it ran against.
 - `macos-documents-permission-loss-mid-session.md` — the environment ailment that renders a run's verdict uninterpretable.
+- `lifecycle-harness-plugin-identity-unverified.md` — the harness never verifies which plugin actually loaded on Codex/Cursor, so an installed plugin can silently substitute a different artifact for the one under test.
 - `codex-cli-plugin-loading-findings.md`, `cursor-agent-cli-probe-findings.md` — first empirical
   per-engine probes.
 - `codex-port-validated-end-to-end.md`, `codex-testing-methodology.md` — the manual end-to-end Codex validation and its rollout-log ground-truthing (what the automated codex driver must replicate).

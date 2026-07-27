@@ -8,15 +8,17 @@ pushed to completion, not discarded. Follow-on sessions resumed it three times: 
 literate-accelerator addendum, a review-and-fix pass, and the `trilens-loop.md` restructure (all
 below).
 
-**Current state as of 2026-07-27: everything is committed on `wip/lr-core-v31` in both repos, with
-clean working trees. The branch is NOT merged to main and NOT pushed.** This changed from earlier
-sessions, where the work sat uncommitted in the worktrees — the "nothing is committed" framing in the
-sections below describes those sessions' end states, not today's.
+**Current state as of 2026-07-27 (end of session): everything is committed on `wip/lr-core-v31` in
+both repos, with clean working trees. The branch is NOT merged to main and NOT pushed.** This changed
+from earlier sessions, where the work sat uncommitted in the worktrees — the "nothing is committed"
+framing in the sections below describes those sessions' end states, not today's. **The lifecycle
+suite has now run once against this branch** — see § 2026-07-27: first real lifecycle-suite run,
+below — with a partial (Claude-only) valid result.
 
 | Repo | Branch head | Contents |
 |---|---|---|
-| `lore-framework` | `c3d418d` | restructure trilens-loop, correct Cursor subagent notes (on top of `63d2d86` WIP) |
-| `lore-framework-dev` | `8fc46f0` | regression tests + `literate-accelerator-pattern.md` + a lore-context addition (on top of `cd71c76` WIP) |
+| `lore-framework` | `cd8ece1` | trilens rounds 1–3 fixes (nested-repo `git -C` escape in `version-check.md`'s prose gate, etc.) + the `macos-var-symlink-realpath-ambiguity.md` fix, on top of `c3d418d` (trilens-loop restructure, Cursor subagent notes, on top of `63d2d86` WIP) |
+| `lore-framework-dev` | `c63da4a` | same trilens rounds' fixes, on top of `8fc46f0` (regression tests + `literate-accelerator-pattern.md` + a lore-context addition, on top of `cd71c76` WIP) |
 
 ## 2026-07-26 addendum: literate-accelerator redesign
 
@@ -127,6 +129,64 @@ Note for the eventual merge to main: `8fc46f0` includes a 5-line addition to the
 `lore-context.md` has since moved in other sections, so expect a merge, not a fast-forward, on that
 file.
 
+## 2026-07-27 (later): trilens rounds 1–3, then the first real lifecycle-suite run against v31
+
+A same-day follow-on session ran the review-loop resume step from the section above, then — for the
+first time — the outstanding empirical gate.
+
+**Trilens-loop, three rounds, over v31's committed state:** 25 findings across 3 rounds, 21 applied, 3
+declined, 1 accepted, zero sustained BLOCKERs. Round 1 found a genuine data-loss bug: a nested-repo
+`git -C` escape in `version-check.md`'s **prose** migration gate — the same bug class round 1 of the
+2026-07-26 session had already fixed in `scripts/lr-core` (`git-dash-c-needs-toplevel-guard.md`), but
+the prose gate that runs in the same boot flow had never gotten the matching fix. Round 2 found that a
+round-1 fix (a runtime-headroom note) had landed at only one of four call sites that needed it — caught
+independently by two lenses in the same round, which is corroborating evidence, not redundant noise
+(per `role.md`'s "convergent findings from two independent lenses" framing). **Round 3 did not
+converge** — it hit the loop's hard 3-round ceiling with 2 HIGHs still outstanding; those two fixes are
+committed but explicitly **ungated** (no round reviewed them) and disclosed as such rather than implied
+clean. Commits: `cb24024`, `26dec86` (lore-framework); `49503ce`, `c63da4a` (lore-framework-dev).
+
+**Real-engine lifecycle suite run for the first time against v31** (the gate the Resuming section above
+flagged as never having run against any v31 state):
+
+- **Claude Code / haiku is the only valid result**: 6/7 modules green; the 7th (`test_boot`) had one
+  flaky scenario (`test_05`). Root-caused and fixed — a macOS-specific `pwd`-vs-`realpath` ambiguity in
+  `version-check.md`'s nested-repo guard, not a v31 regression (confirmed via an A/B baseline run
+  against shipped v30, which hit the identical bug at a similar rate). See
+  `macos-var-symlink-realpath-ambiguity.md` and `flaky-scenario-diagnosis-needs-ab-baseline.md` for the
+  bug and the diagnosis methodology, respectively. Fix committed as `cd8ece1` (lore-framework).
+- **Codex and Cursor runs are invalid, not red** — both engines silently resolved an *installed* v30
+  plugin instead of the `--plugin-dir` worktree the harness passed them, so all 7 modules on each ran
+  against the wrong tree while looking like a normal pass/fail result. This is a harness/environment
+  gap, not a v31 defect — see `lifecycle-harness-plugin-identity-unverified.md` for the mechanism and
+  the fix needed in the harness itself. **Net effect: today's suite produced exactly one trustworthy
+  data point (Claude/haiku), not three.**
+
+A trilens reviewer this session also raised a `BLOCKER` claiming the branch's divergence from `main`
+(four commits ahead on `main` since the fork point) meant a future merge would silently discard those
+four commits — misreading `git diff main..HEAD`'s two-way rendering of divergence as a preview of merge
+behavior. Verified false via `git merge-tree --write-tree`: zero conflicts, both sides' content present
+in the resulting tree. Overridden, disclosed, and generalized as its own topic — see
+`diverged-branch-diff-misread-as-merge-outcome.md`.
+
+**Outstanding for v31 as of this session's end** (supersedes the "Resume steps" list below where the
+two overlap — that list's step 1 is now partially done, not fully open):
+
+1. Repoint Codex's (`~/.codex/config.toml` marketplace source) and Cursor's (cached plugin) sources at
+   the `wip/lr-core-v31` worktree, then actually re-run those two engines' lifecycle suites against the
+   corrected target — undecided, deferred to the user.
+2. Reconcile the Codex reviewer-tier model name in `release-notes/30.md` / `versioning-release-types.md`
+   — **done this session**: v30's shipped notes are left as-shipped (no retro-edit), v31 carries the
+   correction of record.
+3. Version-ship discipline once all three engines are actually green: four manifests to `1.31.0`, the
+   `versioning-release-types.md` v31 entry, the cache-clear footer (this release touches `scripts/` and
+   skill-referenced docs — cache-affecting), merge `wip/lr-core-v31` to `main` in both repos, push.
+4. Fold `literate-accelerator-pattern.md` and `trilens-loop-v31-restructured.md` into main's lore on
+   merge, per this topic's own "Where it lives" / "See Also" pointers.
+
+Branch state at this session's end: `wip/lr-core-v31` at `cd8ece1` (lore-framework) / `c63da4a`
+(lore-framework-dev), both clean, still not merged, still not pushed.
+
 ## Where it lives
 
 Branch `wip/lr-core-v31` in both `lore-framework` and `lore-framework-dev`, each checked out in its own
@@ -146,15 +206,19 @@ regression tests (written and mutation-verified), "trilens round 3" scoped only 
 (superseded twice by full-surface passes), and the `cursor.md` open item (resolved). Resume steps as
 of 2026-07-27:
 
-1. Run the full lifecycle suite (`LR_LIFECYCLE=1`) against branch head — still not run against any
-   v31 state. This is the outstanding gate; per `post-convergence-edits-need-their-own-gate.md` it
-   must run against `c3d418d`/`8fc46f0`, not an earlier tree.
-2. Reconcile the Codex reviewer-tier model name before shipping — the user says **gpt-5.4**,
-   `release-notes/30.md:49` and `trilens-loop-feature.md` say **gpt-4.5**. Fix forward in v31's notes;
-   don't retro-edit shipped notes. See `trilens-loop-v31-restructured.md` § Caveat.
-3. Ship: version-ship discipline in `role.md` (manifests, `versioning-release-types.md` backfill,
+1. ~~Run the full lifecycle suite (`LR_LIFECYCLE=1`) against branch head~~ — **done 2026-07-27, but
+   only partially valid.** Claude Code/haiku is green (6/7, the 7th's flakiness root-caused and fixed —
+   see § 2026-07-27 (later) above); Codex and Cursor both ran against a silently-wrong installed v30
+   plugin instead of the worktree and must be re-run once their sources are repointed at
+   `wip/lr-core-v31`. Per `post-convergence-edits-need-their-own-gate.md`, the *next* run must target
+   `cd8ece1`/`c63da4a`, not the earlier `c3d418d`/`8fc46f0`.
+2. ~~Reconcile the Codex reviewer-tier model name before shipping~~ — **done 2026-07-27**: v31's notes
+   carry the correction (**gpt-5.4**, not gpt-4.5); v30's shipped notes were left as-is, not retro-edited.
+3. Repoint Codex's and Cursor's plugin sources at the `wip/lr-core-v31` worktree and re-run those two
+   engines' lifecycle suites — the actual remaining precondition to a valid three-engine green.
+4. Ship: version-ship discipline in `role.md` (manifests, `versioning-release-types.md` backfill,
    cache-clear footer), then merge `wip/lr-core-v31` to main in both repos and push.
-4. On merge, fold `literate-accelerator-pattern.md` and `trilens-loop-v31-restructured.md` into
+5. On merge, fold `literate-accelerator-pattern.md` and `trilens-loop-v31-restructured.md` into
    main's lore properly — the former arrives with the branch, the latter should collapse into
    `trilens-loop-feature.md` once the doc it describes is the shipped one.
 
@@ -194,3 +258,12 @@ held rather than pushed through or discarded.
 - `literate-accelerator-pattern.md` — **not yet in this repo's lore**; lives only in the worktree's
   `lore/` until v31 ships (see 2026-07-26 addendum above). Look for it there, not here, if you need
   the pattern before then.
+- `lifecycle-harness-plugin-identity-unverified.md` — the 2026-07-27 finding that Codex/Cursor silently
+  resolved an installed v30 plugin instead of the worktree under test, invalidating both engines'
+  results from this session's lifecycle run.
+- `macos-var-symlink-realpath-ambiguity.md` — the macOS `pwd`-vs-`realpath` bug behind `test_boot`'s
+  flaky scenario, found and fixed during the same run.
+- `flaky-scenario-diagnosis-needs-ab-baseline.md` — the methodology correction (A/B against the v30
+  baseline) that distinguished "pre-existing flaky scenario" from "v31 regression" for that same bug.
+- `diverged-branch-diff-misread-as-merge-outcome.md` — the overridden `BLOCKER` from this session's
+  trilens round, misreading `main`'s divergence from this branch as a preview of merge behavior.

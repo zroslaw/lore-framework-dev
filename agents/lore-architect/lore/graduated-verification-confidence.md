@@ -47,6 +47,33 @@ Each invents its own labels for the same shape. Without the principle named as i
 5. **Be race-tolerant** when the check races against a write-side operation. Spawn-teammate uses 5×~50ms retry; pick the equivalent for your check.
 6. **Choose severity by blast radius** when reporting graduated failures (check #20's pattern). All three substeps degrade the same way → all at error.
 
+## Addendum: diagnosing flakiness needs an A/B baseline, not just more samples (2026-07-27)
+
+A concrete technique for a specific failure shape this principle's spirit extends to: attributing an
+**intermittent** engine-run failure to a suspected regression.
+
+Diagnosing `test_boot.py`'s flaky `test_05` scenario against the parked v31 branch, I called one
+failing run "a definitive v31 regression," then treated three more mostly-failing runs as
+confirmation. Both calls were wrong. Only running the same scenario against the **shipped v30
+baseline** — where it failed at a similar rate (v30: 5/8, v31: 5/10 at that point) — showed the
+flakiness was pre-existing in the doc both versions shared, not something v31 introduced. The real bug
+turned out to be `macos-var-symlink-realpath-ambiguity.md`, unrelated to any v31 change.
+
+**The rule:** for a suspected regression that manifests as an intermittent (not deterministic) failure,
+a sample from the candidate alone can't distinguish "this version regressed" from "this scenario is
+just flaky at this model tier" — at weak-tier pass rates around 50%, n=1 or n=3 is nearly worthless
+evidence either way. The only way to attribute causation is a same-size-or-larger sample against the
+**pre-change baseline**, run under identical conditions (same model, same scenario, same fixture
+shape). A matching failure rate on the baseline means the suspected regression isn't one — go looking
+for a pre-existing bug in the shared surface instead.
+
+This is the same "confidence, not boolean" spirit as the instances above, applied one layer earlier:
+before this principle's verification-surface can even report an honest confidence state, the
+*diagnosis* that produces the input needs its own confidence discipline — budget for a baseline run
+before drawing any conclusion, not just more candidate runs. See
+`flaky-scenario-diagnosis-needs-ab-baseline.md` for the full instance, and
+`macos-var-symlink-realpath-ambiguity.md` for the bug the baseline run uncovered.
+
 ## Connection to existing lore
 
 - **`dirty-tree-gates-write-vs-read-distinction.md`** — adjacent, distinct: that topic is about *whether* to gate; this topic is about *how to report* gate outcomes. The two compose: a gate decides to refuse, a verification decides what confidence to attach to the gate's outcome.
@@ -61,3 +88,6 @@ Each invents its own labels for the same shape. Without the principle named as i
 - `consistency-checks.md` — third instance (check #20, graduated by blast radius)
 - `spawn-teammate-feature.md` — fourth instance (Step 7c, graduated by detection confidence)
 - `naming-foundational-principles.md` — meta-rule licensing the promotion
+- `flaky-scenario-diagnosis-needs-ab-baseline.md` — the A/B-baseline technique addendum (2026-07-27):
+  diagnosing intermittent failures needs a baseline sample, not just more candidate samples.
+- `macos-var-symlink-realpath-ambiguity.md` — the real bug the baseline technique surfaced.

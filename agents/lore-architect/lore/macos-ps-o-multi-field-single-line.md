@@ -23,3 +23,6 @@ layout — portable across whatever `ps` variant is on PATH. Fixed in `scripts/l
 - `lore-beings-mvp-takeover-review.md` — the review history this bug surfaced in
 - `portable-shell-in-framework-docs.md` — the broader BSD/macOS portability discipline
 - `lore-beings-design.md` — the parent feature
+- `macos-var-symlink-realpath-ambiguity.md` — sibling macOS environment trap (found 2026-07-27):
+  `/var` being a symlink makes bare `pwd` and git's `--show-toplevel` disagree on real-path form.
+  Worth consolidating under a hub topic if a fourth instance of this class turns up.

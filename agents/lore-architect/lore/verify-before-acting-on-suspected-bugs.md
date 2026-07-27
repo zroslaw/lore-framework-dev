@@ -60,9 +60,20 @@ motivating case stops applying, which is the moment dismissal feels most justifi
 `check-own-lore-before-dismissing-a-finding.md` for the v31 instance (a dismissed deferral that came
 back as a `BLOCKER` citing my own topic).
 
+## The same reflex applied to a diff's rendering convention, not just to code (2026-07-27)
+
+One more instance: a two-way `git diff` between diverged branches renders the other side's exclusive
+commits as deletions — that's a rendering convention, not a preview of what a merge would produce. A
+trilens reviewer misread exactly this as a `BLOCKER` (a merge would "silently discard" four commits);
+`git merge-tree --write-tree` showed zero conflicts and both sides' content preserved. Promoted to its
+own topic because the trap (diff-rendering-as-ground-truth) is distinct and nameable. See
+`diverged-branch-diff-misread-as-merge-outcome.md`.
+
 ## See Also
 
 - `check-own-lore-before-dismissing-a-finding.md` — this rule turned inward, onto my own operational lore; the dismissal case rather than the fix case.
+- `diverged-branch-diff-misread-as-merge-outcome.md` — this rule applied to misreading a diverged
+  branch's two-way diff as a merge preview, rather than to a suspected code bug.
 - `verify-regression-tests-via-mutation.md` — the mutation-verification technique for regression tests specifically; same "don't trust the first green" reflex, applied one layer earlier (to the test itself, not just the fix).
 - `consistency-checks.md` — carries the standing `check.md` vs `consistency-checks.md` naming reminder that triggered the near-miss
 - `tooling-cwd-safety.md` — the empty-result-means-wrong-state sibling (empty Glob ⇒ wrong CWD, not missing file); same "verify before concluding broken" reflex

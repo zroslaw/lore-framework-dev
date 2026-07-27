@@ -47,12 +47,12 @@ All of these were earned during the ship, not assumed:
 - **Three-state ledger:** `APPLIED` / `DECLINED` / `ACCEPTED (not applied — report-only)`. The third
   state exists because "no fixes" is a legitimate amendment, and folding those into `DECLINED` would
   misreport agreed findings as rejected.
-- **Reviewers default to regular model tiers** — sonnet on Claude Code, gpt-4.5 on Codex,
+- **Reviewers default to regular model tiers** — sonnet on Claude Code, **gpt-5.4** on Codex,
   composer-2.5 on Cursor — escalating a single lens only on demonstrated need. Budget belongs in
   rounds and independence, not model size (user decision, 2026-07-25; measured backing in
-  `parallel-reviewer-fanout-pattern.md` § Cost). *The Codex name is contested:* the user says
-  **gpt-5.4**, these notes and `release-notes/30.md:49` say gpt-4.5. Reconcile forward in v31's
-  release notes, not by retro-editing v30's — see `trilens-loop-v31-restructured.md` § Caveat.
+  `parallel-reviewer-fanout-pattern.md` § Cost). *Codex name reconciled 2026-07-27:* **gpt-5.4** is
+  correct; `release-notes/30.md:49` says gpt-4.5 and stays that way — shipped notes are a historical
+  record, and the correction of record is in `release-notes/31.md`.
 - **Lenses are ways of looking, not places to look.** Splitting by file or target gives three
   reviewers doing identical thinking on different slices. Codex's cheapest tier did exactly that
   (`diff` / `lore-context` / `references`) until the doc said otherwise explicitly. The three lenses

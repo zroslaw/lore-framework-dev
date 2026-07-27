@@ -58,3 +58,6 @@ it. Filed in `framework-improvements-backlog.md` § Ailment Catalog.
 - `post-convergence-edits-need-their-own-gate.md` — why a destroyed recheck is not a neutral event.
 - `execution-testing-catches-blind-ambiguity.md` — TCC prompts also surfaced in the original
   `agent-boot.md` fidelity work, when haiku escalated to a filesystem-wide `find`.
+- `macos-var-symlink-realpath-ambiguity.md` — sibling macOS environment trap (found 2026-07-27):
+  `/var`'s symlink makes `pwd` and git's `--show-toplevel` disagree, causing a flaky lifecycle
+  scenario rather than an outright block. Worth a hub topic on a fourth instance of this class.
