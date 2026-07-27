@@ -454,17 +454,42 @@ PLUGIN_IDENTITY_PROMPT = (
     "PLUGIN-IDENTITY-PROBE\n"
     "You are identifying which lore-framework / lr plugin is loaded for this session. "
     "Do not boot an agent. Do not invent a path.\n"
-    "1. Resolve the lore-framework plugin root the same way /lr-boot (or /lr:boot) Step 0 "
-    "would — the directory that contains VERSION and supplies your lr skills / docs for "
-    "this session (installed/cached plugin if that wins over any --plugin-dir flag).\n"
-    "2. Read that directory's VERSION file.\n"
+    "1. Resolve the lore-framework plugin root that actually supplies your lr skills / docs "
+    "for this session. If this process was launched with --plugin-dir, check that path first; "
+    "if an installed/cached plugin overrode it, report the override path instead.\n"
+    "2. Read that directory's VERSION file (a plain integer such as 30 — not plugin.json's "
+    "1.N.0 field).\n"
     "3. Print exactly two lines and stop:\n"
     "FRAMEWORK-ROOT: <absolute path>\n"
-    "PLUGIN-VERSION: <version string>\n"
+    "PLUGIN-VERSION: <integer from VERSION>\n"
     "If you cannot resolve a plugin root, print PLUGIN-IDENTITY-FAILED: <reason>."
 )
 
 _IDENTITY_CHECKED_FOR = set()  # realpaths already verified in this process
+
+
+def normalize_framework_version(value):
+    """Map VERSION / manifest forms onto the bare framework integer.
+
+    Accepts ``30`` and plugin-manifest ``1.30.0`` (and ``1.30``) as the same
+    identity. Other shapes pass through unchanged so mismatches stay visible.
+    """
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    if text.isdigit():
+        return text
+    parts = text.split(".")
+    if (
+        len(parts) in (2, 3)
+        and parts[0] == "1"
+        and parts[1].isdigit()
+        and (len(parts) == 2 or parts[2].isdigit())
+    ):
+        return parts[1]
+    return text
 
 
 def parse_plugin_identity(text):
@@ -501,11 +526,13 @@ def _identity_fix_message(framework_dir, *, detail):
 def assert_plugin_identity_match(reported_version, reported_root, framework_dir):
     """Raise PluginIdentityError unless the probe matches framework_dir's VERSION/root."""
     expected_version = read_framework_version(framework_dir)
+    expected_norm = normalize_framework_version(expected_version)
+    reported_norm = normalize_framework_version(reported_version)
     expected_root = os.path.realpath(framework_dir)
     problems = []
     if not reported_version:
         problems.append("PLUGIN-VERSION line missing from engine reply")
-    elif reported_version != expected_version:
+    elif reported_norm != expected_norm:
         problems.append(
             f"PLUGIN-VERSION {reported_version!r} != expected {expected_version!r}"
         )

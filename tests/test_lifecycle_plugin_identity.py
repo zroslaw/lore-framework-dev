@@ -33,6 +33,21 @@ class ParsePluginIdentity(unittest.TestCase):
         self.assertEqual(harness.parse_plugin_identity(None), (None, None))
 
 
+class NormalizeFrameworkVersion(unittest.TestCase):
+    def test_bare_integer(self):
+        self.assertEqual(harness.normalize_framework_version("30"), "30")
+        self.assertEqual(harness.normalize_framework_version(" 31\n"), "31")
+
+    def test_manifest_form(self):
+        self.assertEqual(harness.normalize_framework_version("1.30.0"), "30")
+        self.assertEqual(harness.normalize_framework_version("1.31"), "31")
+
+    def test_unknown_passthrough(self):
+        self.assertEqual(harness.normalize_framework_version("2.30.0"), "2.30.0")
+        self.assertIsNone(harness.normalize_framework_version(None))
+        self.assertIsNone(harness.normalize_framework_version(""))
+
+
 class AssertPluginIdentityMatch(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="lr-id-")
@@ -42,6 +57,9 @@ class AssertPluginIdentityMatch(unittest.TestCase):
 
     def test_match_passes(self):
         harness.assert_plugin_identity_match("31", self.tmp, self.tmp)
+
+    def test_manifest_version_matches_bare_version(self):
+        harness.assert_plugin_identity_match("1.31.0", self.tmp, self.tmp)
 
     def test_version_mismatch_raises(self):
         with self.assertRaises(harness.PluginIdentityError) as ctx:
