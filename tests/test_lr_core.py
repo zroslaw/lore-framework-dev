@@ -59,6 +59,15 @@ def run_core(*args):
     return proc.returncode, parsed, raw
 
 
+def load_lr_core():
+    """Import lr-core as a module — it has no .py suffix, so load it by path."""
+    spec = importlib.util.spec_from_loader(
+        "lr_core", importlib.machinery.SourceFileLoader("lr_core", LR_CORE))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def write(path, content):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as fh:
@@ -220,6 +229,48 @@ class TestPreflight(LrCoreTestBase):
                                    "--workspace", self.workspace, "--no-pull")
             self.assertEqual(rc, 0)
             self.assertEqual(out["data"]["version"]["verdict"], verdict, agent)
+
+    def test_int_equal_versions_spelled_differently_are_a_match(self):
+        """`031` and `31` are the same version.
+
+        Without an equality check after the int parse this lands in the
+        `repo-ahead` branch, and version-check.md's R > F path tells the user to
+        go reinstall a plugin that is already correct.
+        """
+        repo = make_repo(self.workspace, "repo-one", agents=("alpha",))
+        write(os.path.join(repo, "lore-repo.md"), """
+            ---
+            description: T
+            version: "030"
+            ---
+            """)
+        rc, out, _ = self.core("preflight", "--agent", "alpha",
+                               "--workspace", self.workspace, "--no-pull")
+        self.assertEqual(out["data"]["version"]["verdict"], "match")
+        self.assertFalse([w for w in out["warnings"] if "skew" in w])
+
+    def test_bom_does_not_silently_void_the_frontmatter(self):
+        """A UTF-8 BOM used to make `lines[0] == "---"` fail, voiding every field.
+
+        The result was `verdict: unknown` with no warning at all — silence that
+        reads as "versions agree".
+        """
+        repo = make_repo(self.workspace, "repo-one", agents=("alpha",))
+        with open(os.path.join(repo, "lore-repo.md"), "wb") as fh:
+            fh.write(b'\xef\xbb\xbf---\ndescription: T\nversion: "30"\n---\n')
+        rc, out, _ = self.core("preflight", "--agent", "alpha",
+                               "--workspace", self.workspace, "--no-pull")
+        self.assertEqual(out["data"]["version"]["verdict"], "match")
+
+    def test_unknown_version_verdict_is_warned_about(self):
+        """`unknown` means "could not read a stamp" — staying silent implies agreement."""
+        repo = make_repo(self.workspace, "repo-one", agents=("alpha",))
+        write(os.path.join(repo, "lore-repo.md"), "# no frontmatter here\n")
+        rc, out, _ = self.core("preflight", "--agent", "alpha",
+                               "--workspace", self.workspace, "--no-pull")
+        self.assertEqual(out["data"]["version"]["verdict"], "unknown")
+        self.assertTrue([w for w in out["warnings"] if "version" in w.lower()],
+                        "an unreadable version stamp must be surfaced")
 
     def test_missing_version_stamp_is_unknown_not_fatal(self):
         repo = make_repo(self.workspace, "repo-one", agents=("alpha",))
@@ -391,7 +442,205 @@ class TestPreflightPull(LrCoreTestBase):
         self.assertEqual(status.strip(), "", "the stamp must not dirty the working tree")
 
 
+class TestGitUnrunnableAtEveryCallSite(unittest.TestCase):
+    """A git that cannot *run* is "failed" at every call site, not just the first.
+
+    `test_missing_git_binary_is_failed_not_skipped` empties PATH, so it aborts at
+    the very first git call (`rev-parse`) and never reaches the second one. But a
+    toolchain can also break *between* calls — a per-call timeout on a flaky
+    network mount is the realistic case — and collapsing that into "no origin
+    remote" would let a broken toolchain masquerade as a legitimate skip while
+    exit 0 promises the data is authoritative.
+
+    These drive `pull_repo` directly with a stubbed `git`, because the distinction
+    under test is which of two rc values a call site branches on; a subprocess
+    cannot be made to fail at one call site and succeed at another without
+    contortions that test the contortion rather than the branch.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.mod = load_lr_core()
+
+    def _pull_with_stub(self, remote_result, repo="/tmp"):
+        """Run the real pull_repo with every git call before `remote get-url` OK."""
+        calls = []
+
+        def fake_git(repo_arg, args, timeout=None, env_extra=None):
+            calls.append(list(args))
+            if args[:2] == ["rev-parse", "--is-inside-work-tree"]:
+                return (0, "true\n", "")
+            if args[:2] == ["rev-parse", "--show-toplevel"]:
+                # Report this path as its own git root so the guard passes and
+                # execution reaches the call actually under test.
+                return (0, os.path.realpath(repo) + "\n", "")
+            if args[:2] == ["remote", "get-url"]:
+                return remote_result
+            raise AssertionError("pull_repo should have stopped by now: %r" % (args,))
+
+        original = self.mod.git
+        self.mod.git = fake_git
+        try:
+            result = self.mod.pull_repo(repo, ttl=0)
+        finally:
+            self.mod.git = original
+        return result, calls
+
+    def test_unrunnable_remote_get_url_is_failed_not_no_origin(self):
+        result, calls = self._pull_with_stub(
+            (self.mod.GIT_UNRUNNABLE, "", "timed out after 15s"))
+        self.assertEqual(result["status"], "failed")
+        self.assertIn("could not run git", result["detail"])
+        self.assertNotIn("no origin", result["detail"])
+        self.assertEqual([" ".join(c[:2]) for c in calls],
+                         ["rev-parse --is-inside-work-tree",
+                          "rev-parse --show-toplevel",
+                          "remote get-url"],
+                         "must stop at the failed call, not press on to the pull")
+
+    def test_signal_killed_git_is_failed_not_skipped(self):
+        """A negative rc is a signal death, not an answer — and not `-1` alone.
+
+        The unrunnable sentinel used to be the integer -1, which is also how
+        `subprocess` reports death by SIGHUP; every other signal (SIGKILL -> -9)
+        fell through to the `rc != 0` branch and became "not a git repo".
+        """
+        for signum in (1, 9, 11):
+            calls = []
+
+            def fake_git(repo_arg, args, timeout=None, env_extra=None):
+                calls.append(list(args))
+                return (-signum, "", "")
+
+            original = self.mod.git
+            self.mod.git = fake_git
+            try:
+                result = self.mod.pull_repo("/tmp", ttl=0)
+            finally:
+                self.mod.git = original
+            self.assertEqual(result["status"], "failed", "signal %d" % signum)
+            self.assertIn("killed by signal %d" % signum, result["detail"])
+
+    def test_git_ran_and_said_no_origin_is_still_skipped(self):
+        """The other side of the same distinction — this one really is a skip."""
+        result, _ = self._pull_with_stub((2, "", "error: No such remote 'origin'"))
+        self.assertEqual(result["status"], "skipped")
+        self.assertIn("no origin remote", result["detail"])
+
+    def test_rev_parse_failing_for_a_non_repo_reason_is_not_called_a_non_repo(self):
+        """Only git's own "not a git repository" wording establishes a non-repo.
+
+        A `git` wrapper that exits non-zero for its own reasons (a version
+        manager with no git installed for this directory) otherwise becomes a
+        silent `skipped — not a git repo`, which boot is documented to print
+        nothing about at all.
+        """
+        def fake_git(repo_arg, args, timeout=None, env_extra=None):
+            return (1, "", "mise: git is not installed for this directory")
+
+        original = self.mod.git
+        self.mod.git = fake_git
+        try:
+            result = self.mod.pull_repo("/tmp", ttl=0)
+        finally:
+            self.mod.git = original
+        self.assertEqual(result["status"], "failed")
+        self.assertIn("mise", result["detail"])
+
+    def test_pull_failure_detail_names_the_cause_not_the_hint(self):
+        """git prints the cause first and an indented hint block after it.
+
+        Taking the last line yields a fragment of the suggested remedy and
+        discards the reason — and both triggering states (detached HEAD, no
+        upstream) are ordinary in the framework's own worktree convention.
+        """
+        stderr = (
+            "fatal: You are not currently on a branch.\n"
+            "To pull the remote branch, use:\n"
+            "\n"
+            "    git pull <remote> <branch>\n"
+        )
+
+        def fake_git(repo_arg, args, timeout=None, env_extra=None):
+            if args[:2] == ["rev-parse", "--is-inside-work-tree"]:
+                return (0, "true\n", "")
+            if args[:2] == ["rev-parse", "--show-toplevel"]:
+                return (0, os.path.realpath("/tmp") + "\n", "")
+            if args[:2] == ["remote", "get-url"]:
+                return (0, "git@example.com:x/y.git\n", "")
+            if args[0] == "pull":
+                return (1, "", stderr)
+            return (0, "", "")
+
+        original = self.mod.git
+        self.mod.git = fake_git
+        try:
+            result = self.mod.pull_repo("/tmp", ttl=0)
+        finally:
+            self.mod.git = original
+        self.assertEqual(result["status"], "failed")
+        self.assertIn("not currently on a branch", result["detail"])
+        self.assertNotIn("git pull <remote>", result["detail"])
+
+
+class TestNestedLoreRepo(LrCoreTestBase):
+    """A lore repo that is a plain directory inside someone else's git repo.
+
+    `git -C <dir>` silently walks UP to the enclosing repository, so without an
+    explicit root check every git operation retargets at the outer repo while
+    the output still names the lore repo — a mutating pull attributed to a path
+    it never touched, under exit 0.
+    """
+
+    def setUp(self):
+        super(TestNestedLoreRepo, self).setUp()
+        self.repo = make_repo(self.workspace, "repo-one", agents=("alpha",))
+        # The WORKSPACE is the git repo; repo-one is just a directory in it.
+        git_init(self.workspace, with_origin=False)
+
+    def test_pull_refuses_rather_than_acting_on_the_enclosing_repo(self):
+        before = git(self.workspace, "rev-parse", "HEAD").stdout
+        rc, out, _ = self.core("preflight", "--agent", "alpha",
+                               "--workspace", self.workspace)
+        self.assertEqual(rc, 0)
+        self.assertEqual(out["data"]["pull"]["status"], "skipped")
+        self.assertIn("not the root of its own git repo", out["data"]["pull"]["detail"])
+        self.assertEqual(git(self.workspace, "rev-parse", "HEAD").stdout, before,
+                         "the enclosing repo must not be touched")
+        self.assertFalse(os.path.isfile(
+            os.path.join(self.workspace, ".git", "lr-last-pull")),
+            "the TTL stamp must not land on the enclosing repo either")
+
+    def test_scan_still_reads_dates_via_the_real_git_toplevel(self):
+        """scan is read-only, so it resolves against the toplevel rather than refusing."""
+        rc, out, _ = self.core("scan", "--agent", "alpha", "--workspace", self.workspace)
+        self.assertEqual(rc, 0)
+        self.assertEqual(out["data"]["undated_count"], 0,
+                         "committed topics must not read as untracked")
+        for topic in out["data"]["topics"]:
+            self.assertIsNotNone(topic["last_modified"])
+
+
 class TestScan(LrCoreTestBase):
+    def test_non_ascii_topic_filenames_get_dates(self):
+        """git C-quotes non-ASCII paths in --name-only unless quotepath is off.
+
+        The quoted key never matches the raw filename, so the topic reads as
+        never committed and is permanently exempt from the staleness flag that
+        recall acts on. LC_ALL=C does not affect quotepath.
+        """
+        repo = make_repo(self.workspace, "repo-one", agents=("alpha",))
+        write(os.path.join(repo, "agents", "alpha", "lore", "café-naïve.md"),
+              "# Café naïve\n")
+        git_init(repo, with_origin=False)
+        rc, out, _ = self.core("scan", "--agent", "alpha", "--workspace", self.workspace)
+        self.assertEqual(rc, 0)
+        by_file = {t["file"]: t for t in out["data"]["topics"]}
+        self.assertIn("café-naïve.md", by_file)
+        self.assertIsNotNone(by_file["café-naïve.md"]["last_modified"],
+                             "a committed non-ASCII topic must not read as undated")
+        self.assertEqual(out["data"]["undated_count"], 0)
+
     def test_lists_topics_with_titles(self):
         repo = make_repo(self.workspace, "repo-one", agents=("alpha",))
         rc, out, _ = self.core("scan", "--agent", "alpha", "--workspace", self.workspace)
@@ -430,6 +679,35 @@ class TestScan(LrCoreTestBase):
         self.assertEqual(out["data"]["undated_count"], 1)
         self.assertTrue(out["warnings"])
 
+    def test_unreadable_git_history_is_not_reported_as_untracked(self):
+        """Committed topics must never be described as "uncommitted or untracked".
+
+        Every topic here IS committed; only git is unavailable. "No dates could
+        be read" and "these files were never committed" are different claims, and
+        emitting the second one turns a broken toolchain into a confident wrong
+        explanation that a caller would act on (e.g. by "fixing" it with a commit).
+        """
+        repo = make_repo(self.workspace, "repo-one", agents=("alpha",))
+        git_init(repo, with_origin=False)
+        empty_bin = os.path.join(self.tmp, "empty-bin")
+        os.makedirs(empty_bin)
+        env = os.environ.copy()
+        env["PATH"] = empty_bin
+        proc = subprocess.run(
+            [sys.executable, LR_CORE, "--framework-root", self.fw, "scan",
+             "--agent", "alpha", "--workspace", self.workspace],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, check=False)
+        out = json.loads(proc.stdout.decode())
+        self.assertEqual(proc.returncode, 0)
+        self.assertTrue(out["ok"], "an unreadable history still yields a usable manifest")
+        self.assertTrue(out["data"]["git_error"],
+                        "the git failure must be recorded in data, not only in prose")
+        # The topics are still listed — only their dates are unavailable.
+        self.assertEqual(out["data"]["count"], 2)
+        warnings = " ".join(out["warnings"])
+        self.assertIn("could not read git history", warnings)
+        self.assertNotIn("uncommitted or untracked", warnings)
+
     def test_missing_lore_dir(self):
         repo = make_repo(self.workspace, "repo-one", agents=("alpha",))
         subprocess.run(["rm", "-rf", os.path.join(repo, "agents", "alpha", "lore")],
@@ -467,11 +745,7 @@ class TestTeammateMarkerMatching(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        import importlib.util
-        spec = importlib.util.spec_from_loader(
-            "lr_core", importlib.machinery.SourceFileLoader("lr_core", LR_CORE))
-        cls.mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(cls.mod)
+        cls.mod = load_lr_core()
 
     def test_matches_real_marker(self):
         for args in (
@@ -509,6 +783,27 @@ class TestOutputContract(LrCoreTestBase):
     def test_no_subcommand_exits_2(self):
         rc, _, _ = self.core()
         self.assertEqual(rc, 2)
+
+    def test_fatal_payloads_are_distinguishable_from_determinate_negatives(self):
+        """Exit 2 and a determinate `ok:false` demand opposite handling.
+
+        `ok:false` at exit 0 means stop the boot ("no such agent"); exit 2 means
+        take over by hand. With identical payload shapes the exit code was the
+        only discriminator, and a caller reading stdout alone would abort a boot
+        the contract says to complete manually.
+        """
+        make_repo(self.workspace, "repo-one", agents=("alpha",))
+        rc_fatal, fatal, _ = self.core("preflight")          # unusable invocation
+        rc_determinate, determinate, _ = self.core(
+            "preflight", "--agent", "nope", "--workspace", self.workspace, "--no-pull")
+
+        self.assertEqual(rc_fatal, 2)
+        self.assertEqual(rc_determinate, 0)
+        self.assertFalse(fatal["ok"])
+        self.assertFalse(determinate["ok"])
+        # ...and the payloads themselves must differ, not just the exit codes.
+        self.assertTrue(fatal.get("fatal"))
+        self.assertFalse(determinate.get("fatal", False))
 
     def test_usage_errors_still_emit_json(self):
         """Even argparse-level failures honor the one-JSON-object contract."""
