@@ -4,7 +4,10 @@
 Lives in lore-framework-dev (dev repo), not the plugin repo — see
 lore-framework/docs/conventions.md § Dev-Only Artifacts. Stdlib-only
 (unittest), matching test_lrb.py. The plugin under test is located via
-$LR_FRAMEWORK_DIR, defaulting to the sibling ../lore-framework.
+$LR_FRAMEWORK_DIR, defaulting to the sibling ../lore-framework. That default is
+wrong under the worktree convention (docs/worktrees.md) — set the variable
+explicitly there, or every subprocess fails to find scripts/lr-core and the
+suite reports bare "AssertionError: 2 != 0" instead of the real cause.
 
 Everything runs in per-test tempdirs with local-only git remotes — no network,
 nothing touching the real workspace.
