@@ -46,6 +46,11 @@ See `system-design-principles.md` (the full list and the overreach diagnostics),
 Operations are Claude Code plugin skills, `lr:` prefix on Claude; Cursor uses `/lr-<skill>` via
 prefixed wrappers (`cursor-dual-skill-tree-one-repo.md`). **Skills are thin pointers** — each `skills/<name>/SKILL.md` is a one-line reference to `docs/<name>.md`, where all logic lives. Same for generated `/lr-<agent>-agent` boot commands (thin delegations to `agent-boot.md`). When a skill orchestrates sub-skills, the orchestration gets its own `docs/<skill>.md`; non-skill procedures shared across call sites get a `docs/<procedure>.md` (e.g. `auto-pull.md`). See `slash-command-system.md`, `skill-doc-pattern.md`, `shared-procedure-doc-pattern.md`, `single-canonical-source-discipline.md`.
 
+An **accelerator** script (Script Fallback Contract) can go one step further and become
+**literate**: the procedure lives in the script's own instructional comments rather than in a
+companion doc, so there's one artifact instead of two that can drift apart. First applied to
+`scripts/lr-core` in v31. See `literate-accelerator-pattern.md`.
+
 The plugin can also **bundle an MCP server** (declared in a root `.mcp.json`, auto-launched by Claude Code with its tools merged into the agent): **`lr-wait`** (v18) is the first — and the framework's first `python3` dependency (stdlib-only, no pip; the sole sanctioned exception to bash-on-BSD, for protocol-speaking server components). Practical limit to remember before promising a long wait: on Claude Code a single MCP call dies at the engine's ~30-minute idle timeout, and the abort leaves `lr-wait`'s single-request lock stuck `busy` for the rest of the session — chunk waits at ≤29 min, or use a backgrounded shell timer. See `plugin-mcp-server-convention.md`, `wait-primitive-feature.md`.
 
 ## Engine Hubs

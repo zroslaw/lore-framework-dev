@@ -257,6 +257,8 @@ def codex_prompt(prompt):
     """Translate engine-neutral harness prompts into the Codex doc-driven path."""
     if isinstance(prompt, str) and "docs/takeover.md" in prompt:
         return prompt
+    if isinstance(prompt, str) and "docs/agent-boot.md" in prompt:
+        return prompt  # already doc-driven (e.g. boot_prompt_for_framework)
     if prompt == BOOT_PROMPT:
         return _codex_boot_prompt(
             AGENT_NAME,
@@ -551,6 +553,45 @@ def break_origin(fx):
          os.path.join(fx.root, "no-such-origin.git"))
 
 
+def framework_with_broken_script(tmpdir, script="lr-core"):
+    """Copy the framework and corrupt one script, returning the copy's path.
+
+    Exercises the Script Fallback Contract (conventions.md): the engine must
+    notice the script died, tell the user, and complete the flow by hand from
+    the canonical prose. The real FRAMEWORK_DIR stays untouched — every other
+    scenario shares it.
+    """
+    dest = os.path.join(tmpdir, "framework-copy")
+    shutil.copytree(FRAMEWORK_DIR, dest, ignore=shutil.ignore_patterns(
+        ".git", "__pycache__", "*.pyc"))
+    target = os.path.join(dest, "scripts", script)
+    with open(target, "w", encoding="utf-8") as fh:
+        # A syntax error, not a clean exit code: the contract must hold for
+        # "the script is broken", not merely "the script reported failure".
+        fh.write("this is not valid python(\n")
+    return dest
+
+
+def boot_prompt_for_framework(framework_dir, agent_name=AGENT_NAME):
+    """BOOT_PROMPT against an arbitrary framework root.
+
+    Claude and Cursor resolve the skill through --plugin-dir, so the standard
+    prompt already points at the copy. Codex is doc-driven and needs the path
+    spelled out.
+    """
+    if ENGINE == "codex":
+        return (
+            f"Read the file at '{framework_dir}/docs/agent-boot.md' and boot as lore "
+            f"agent '{agent_name}'. Follow the boot procedure exactly. After boot "
+            "completes, print two lines:\n"
+            "BOOT-CODEWORD: <the boot codeword stated in your role>\n"
+            "CONTEXT-CODEWORD: <the context codeword stated in your lore-context>\n"
+            "If boot fails, print BOOT-FAILED followed by the reason. "
+            "Do not reflect, merge, finalize, commit, or push."
+        )
+    return BOOT_PROMPT
+
+
 def seed_reflection(fx, filename, content):
     """Write a reflection topic directly (bypassing the model) so a merge
     scenario can test integration without depending on reflect having run
@@ -691,13 +732,18 @@ def _debug_dump(result):
         )
 
 
-def run_engine(workspace, prompt):
-    """Run the engine headless in `workspace` and return a RunResult."""
+def run_engine(workspace, prompt, framework_dir=None):
+    """Run the engine headless in `workspace` and return a RunResult.
+
+    framework_dir overrides the plugin under test for one run — used by the
+    Script Fallback Contract scenario, which needs a deliberately broken copy.
+    """
+    framework_dir = framework_dir or FRAMEWORK_DIR
     env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
     if ENGINE == "claude":
         cmd = [
             "claude", "-p", prompt,
-            "--plugin-dir", FRAMEWORK_DIR,
+            "--plugin-dir", framework_dir,
             "--model", MODEL,
             "--output-format", "json",
             "--dangerously-skip-permissions",
@@ -709,7 +755,7 @@ def run_engine(workspace, prompt):
     elif ENGINE == "cursor":
         cmd = [
             "cursor-agent", "-p", prompt,
-            "--plugin-dir", FRAMEWORK_DIR,
+            "--plugin-dir", framework_dir,
             "--model", MODEL,
             "--output-format", "json",
             "--force",

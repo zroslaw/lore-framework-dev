@@ -39,6 +39,15 @@ capture would change how the system feels more than anything else here.
 
 ## A. Verified inconsistencies — fix now (bounded, "v28 hygiene ship" tier)
 
+### A0. `lr-core` CLI — script-back the mechanical halves of high-frequency skills — DESIGN DRAFTED
+Design + phased execution plan in `workdir/draft-lr-core-cli.md` (2026-07-25 design dialogue;
+implementation deferred by the user — resume from the draft). One python3-stdlib CLI
+(`scripts/lr-core`: `discover`/`preflight`/`scan`/`finalize-git`/`check`) replacing the prose
+choreography of boot/attach/consult/recall/finalize-phase-4, with pull-TTL caching and a new
+framework-level **Script Fallback Contract** in `conventions.md` (script fails → engine notifies
+user, takes over manually per the canonical prose spec). Subsumes/serves A1, A2, B2, and feeds
+B3/B4. Evidence: this boot measured 9 tool calls / ~450 prose lines for ~2 lines of judgment.
+
 ### A1. Reference rot + `/lr:check` mechanical-check reliability — OPEN
 Deterministic sweep (2026-07-18) flagged 14 unresolved topic-style references in
 lore-architect's 147-topic graph; ≥8 are genuine rot from renames/deletions:

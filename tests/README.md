@@ -30,6 +30,18 @@ Tests find the plugin under test via `$LR_FRAMEWORK_DIR`, defaulting to the sibl
 LR_FRAMEWORK_DIR=/path/to/lore-framework python3 tests/test_wait.py -v
 ```
 
+**Running from a worktree? You must set it.** The default assumes both repos are checked out as
+direct siblings, which is *not* true under this framework's own worktree convention
+(`lore-framework/docs/worktrees.md`): from `<workspace>/.worktrees/lore-framework-dev/<slug>/`
+the default resolves to `.worktrees/lore-framework-dev/lore-framework`, which does not exist.
+Every subprocess then fails to find `scripts/lr-core` and the suite reports dozens of bare
+`AssertionError: 2 != 0` failures — the exit-2 payload, not a regression. If a suite goes broadly
+red right after you switch to a worktree, check this before you check the code:
+
+```bash
+LR_FRAMEWORK_DIR=<workspace>/.worktrees/lore-framework/<slug> python3 -m unittest discover -s tests -v
+```
+
 ## Suites
 
 - **`test_wait.py`**
