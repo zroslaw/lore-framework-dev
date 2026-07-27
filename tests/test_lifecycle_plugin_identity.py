@@ -178,6 +178,75 @@ enabled = true
         )
 
 
+class CursorPluginSources(unittest.TestCase):
+    """The 2026-07-27 silent-v30 bug, from the Cursor side.
+
+    Cursor's identity gate was a model self-report only: the probe reported
+    `PLUGIN-IDENTITY-OK 31 <worktree>` while cached v30 trees served the actual
+    run. These cover the deterministic filesystem preflight that catches it.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix="lr-cursor-id-")
+        self.addCleanup(lambda: __import__("shutil").rmtree(self.tmp, ignore_errors=True))
+        self.fw = os.path.join(self.tmp, "worktree")
+        os.makedirs(self.fw)
+        with open(os.path.join(self.fw, "VERSION"), "w", encoding="utf-8") as f:
+            f.write("31\n")
+        self.plugins = os.path.join(self.tmp, "plugins")
+
+    def _tree(self, relpath, version):
+        path = os.path.join(self.plugins, relpath)
+        os.makedirs(path)
+        with open(os.path.join(path, "VERSION"), "w", encoding="utf-8") as f:
+            f.write(f"{version}\n")
+        return path
+
+    def test_missing_plugins_root_is_a_noop(self):
+        harness.check_cursor_plugin_sources(self.fw, plugins_root=self.plugins)
+
+    def test_matching_version_passes(self):
+        self._tree("local/lore-framework", "31")
+        harness.check_cursor_plugin_sources(self.fw, plugins_root=self.plugins)
+
+    def test_cached_stale_tree_is_a_conflict(self):
+        self._tree("cache/zroslaw-lore-framework/lr/11ec0df", "30")
+        with self.assertRaises(harness.PluginIdentityError) as ctx:
+            harness.check_cursor_plugin_sources(self.fw, plugins_root=self.plugins)
+        self.assertIn("outrank --plugin-dir", str(ctx.exception))
+        self.assertIn("v30", str(ctx.exception))
+
+    def test_marketplace_tree_is_a_conflict(self):
+        self._tree("marketplaces/github.com/zroslaw/lore-framework/11ec0df", "30")
+        with self.assertRaises(harness.PluginIdentityError):
+            harness.check_cursor_plugin_sources(self.fw, plugins_root=self.plugins)
+
+    def test_reproduces_the_20260727_layout(self):
+        """v31 local worktree link alongside two v30 trees — the run that lied."""
+        self._tree("cache/zroslaw-lore-framework/lr/11ec0df", "30")
+        self._tree("marketplaces/github.com/zroslaw/lore-framework/11ec0df", "30")
+        self._tree("local/lore-framework", "31")
+        with self.assertRaises(harness.PluginIdentityError) as ctx:
+            harness.check_cursor_plugin_sources(self.fw, plugins_root=self.plugins)
+        detail = str(ctx.exception)
+        # Both stale trees must be named; a partial report sends the user to move
+        # one aside and re-run into the same failure.
+        self.assertIn("cache/zroslaw-lore-framework", detail)
+        self.assertIn("marketplaces/github.com", detail)
+        self.assertNotIn("local/lore-framework", detail)
+
+    def test_tree_resolving_to_framework_dir_is_not_a_conflict(self):
+        """`local/` is normally a link to the tree under test; realpath equality wins."""
+        os.makedirs(os.path.join(self.plugins, "local"))
+        link = os.path.join(self.plugins, "local", "lore-framework")
+        os.symlink(self.fw, link)
+        harness.check_cursor_plugin_sources(self.fw, plugins_root=self.plugins)
+
+    def test_manifest_form_version_normalizes(self):
+        self._tree("cache/zroslaw-lore-framework/lr/abc", "1.31.0")
+        harness.check_cursor_plugin_sources(self.fw, plugins_root=self.plugins)
+
+
 class CodexPromptPassthrough(unittest.TestCase):
     def test_identity_probe_does_not_inject_framework_dir(self):
         rewritten = harness.codex_prompt(harness.PLUGIN_IDENTITY_PROMPT)

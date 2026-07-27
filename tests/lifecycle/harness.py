@@ -650,8 +650,90 @@ def check_codex_plugin_sources(framework_dir, config_text=None, cache_root=None)
             )
 
 
+def cursor_plugin_trees(plugins_root):
+    """Yield (path, version) for every lore-framework tree Cursor could serve.
+
+    Cursor keeps three roots that can each supply the lr plugin, and any of them
+    can win over --plugin-dir: `local/<name>` (a directory or worktree link),
+    `marketplaces/<host>/<owner>/<repo>/<commit>`, and the resolved
+    `cache/<owner>-<repo>/<plugin>/<commit>`. A tree is identified by carrying a
+    VERSION file; depth varies by root, so walk rather than assume a layout.
+    """
+    found = []
+    for sub in ("local", "marketplaces", "cache"):
+        root = os.path.join(plugins_root, sub)
+        if not os.path.isdir(root):
+            continue
+        for dirpath, dirnames, filenames in os.walk(root):
+            if "VERSION" not in filenames:
+                continue
+            # A tree that carries VERSION is a plugin root; don't descend further.
+            dirnames[:] = []
+            vpath = os.path.join(dirpath, "VERSION")
+            try:
+                with open(vpath, encoding="utf-8") as f:
+                    version = normalize_framework_version(f.read())
+            except OSError:
+                continue
+            if version:
+                found.append((dirpath, version))
+    return found
+
+
+def check_cursor_plugin_sources(framework_dir, plugins_root=None):
+    """Fail loudly when an installed Cursor plugin tree could outrank --plugin-dir.
+
+    Cursor accepts --plugin-dir per invocation, but an installed/cached tree can
+    silently serve the lr skills instead (cursor-cloud-plugin-rehydrates-over-
+    plugin-dir). The engine-side identity probe cannot catch this: it asks the
+    model which plugin root supplied its skills, and a model pointed at
+    --plugin-dir reports that path truthfully while a cached tree is what it
+    actually read. So gate on the filesystem, deterministically, before any
+    engine call — the same shape as check_codex_plugin_sources.
+
+    Any tree whose VERSION differs from framework_dir's is a conflict. Trees that
+    resolve to framework_dir itself (a `local/` worktree link, typically) are fine.
+    """
+    if plugins_root is None:
+        plugins_root = os.path.expanduser("~/.cursor/plugins")
+    if not os.path.isdir(plugins_root):
+        return
+    expected = read_framework_version(framework_dir)
+    target = os.path.realpath(framework_dir)
+    conflicts = [
+        (path, version)
+        for path, version in cursor_plugin_trees(plugins_root)
+        if os.path.realpath(path) != target and version != expected
+    ]
+    if conflicts:
+        listed = "; ".join(f"{p}=v{v}" for p, v in conflicts)
+        raise PluginIdentityError(
+            _identity_fix_message(
+                framework_dir,
+                detail=(
+                    f"Cursor plugin tree(s) with a VERSION other than {expected} are "
+                    f"installed and can outrank --plugin-dir: {listed}. Move them aside "
+                    f"(e.g. `mv {plugins_root} {plugins_root}-backup-$(date +%Y%m%d%H%M%S)`) "
+                    "and re-run. Note a disabled cloud plugin can rehydrate within seconds "
+                    "of being moved — re-check this after the move, not before."
+                ),
+            )
+        )
+
+
+def check_installed_plugin_sources(framework_dir):
+    """Run the current engine's deterministic installed-plugin preflight, if it has one.
+
+    Filesystem-only, no engine call — safe to run per-run as well as per-process.
+    """
+    if ENGINE == "codex":
+        check_codex_plugin_sources(framework_dir)
+    elif ENGINE == "cursor":
+        check_cursor_plugin_sources(framework_dir)
+
+
 def verify_plugin_identity(workspace=None, framework_dir=None, *, force=False):
-    """Probe (and for Codex, pre-check) that the loaded plugin matches framework_dir.
+    """Probe (and for Codex/Cursor, pre-check) that the loaded plugin matches framework_dir.
 
     Called once per process per framework_dir from run_engine / run_matrix.
     Raises PluginIdentityError on mismatch. Returns a small status dict.
@@ -663,8 +745,7 @@ def verify_plugin_identity(workspace=None, framework_dir=None, *, force=False):
     if not force and os.environ.get("LR_SKIP_PLUGIN_IDENTITY") == "1":
         return {"skipped": True, "framework_dir": framework_dir}
 
-    if ENGINE == "codex":
-        check_codex_plugin_sources(framework_dir)
+    check_installed_plugin_sources(framework_dir)
 
     own_tmp = None
     if workspace is None:
@@ -1028,13 +1109,19 @@ def run_engine(workspace, prompt, framework_dir=None, _skip_identity_check=False
 
     On the first call per process (unless LR_SKIP_PLUGIN_IDENTITY=1), verifies
     the engine's loaded/installed plugin matches LR_FRAMEWORK_DIR — see
-    verify_plugin_identity. Per-run framework_dir overrides are not re-checked
-    (they are absolute-path copies of the same tree). _skip_identity_check is
-    for the probe's own call.
+    verify_plugin_identity. _skip_identity_check is for the probe's own call.
+
+    A per-run framework_dir override still gets the deterministic installed-source
+    check (cheap, no engine call), because an override is precisely the case the
+    once-per-process model probe cannot cover: the probe ran against a different
+    tree, so a competing install would silently serve the override's scenario. It
+    does not get its own model probe — that would cost a round-trip per run.
     """
     framework_dir = framework_dir or FRAMEWORK_DIR
     if not _skip_identity_check:
         verify_plugin_identity(workspace=workspace, framework_dir=FRAMEWORK_DIR)
+        if os.path.realpath(framework_dir) != os.path.realpath(FRAMEWORK_DIR):
+            check_installed_plugin_sources(framework_dir)
     env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
     if ENGINE == "claude":
         cmd = [
