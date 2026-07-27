@@ -15,6 +15,7 @@ Environment:
   LR_ENGINE             engine to drive (default: claude; supported: claude, cursor, codex)
   LR_TEST_MODEL         model override (default: cheapest per-engine, see MODEL_DEFAULTS)
   LR_RUN_TIMEOUT        per-run timeout in seconds (default: 420)
+  LR_SKIP_PLUGIN_IDENTITY=1  skip the loaded-plugin VERSION gate (debug only)
 
 TODO(parallelization): Scenarios are independent (each test gets its own temp fixture +
 local bare origin; FRAMEWORK_DIR is read-only). Today unittest discover runs them strictly
@@ -255,6 +256,17 @@ def _codex_boot_prompt(agent_name, extra):
 
 def codex_prompt(prompt):
     """Translate engine-neutral harness prompts into the Codex doc-driven path."""
+    if isinstance(prompt, str) and prompt.startswith("PLUGIN-IDENTITY-PROBE"):
+        # Must not inject FRAMEWORK_DIR — the probe is what detects a wrong install.
+        return (
+            "Identify which lore-framework / lr plugin Codex has installed for this "
+            "machine (the enabled lr@lore-framework plugin / its marketplace source), "
+            "not a path from this prompt. Read that plugin's VERSION file. "
+            "Print exactly two lines and stop:\n"
+            "FRAMEWORK-ROOT: <absolute path of that plugin root>\n"
+            "PLUGIN-VERSION: <version string>\n"
+            "If no lr plugin is installed, print PLUGIN-IDENTITY-FAILED: no lr plugin installed."
+        )
     if isinstance(prompt, str) and "docs/takeover.md" in prompt:
         return prompt
     if isinstance(prompt, str) and "docs/agent-boot.md" in prompt:
@@ -419,9 +431,247 @@ class Fixture:
         self.agent_dir = os.path.join(self.repo, "agents", AGENT_NAME)
 
 
-def framework_version():
-    with open(os.path.join(FRAMEWORK_DIR, "VERSION")) as f:
+def read_framework_version(framework_dir):
+    """Return the stripped VERSION contents of a framework checkout."""
+    with open(os.path.join(framework_dir, "VERSION"), encoding="utf-8") as f:
         return f.read().strip()
+
+
+def framework_version():
+    return read_framework_version(FRAMEWORK_DIR)
+
+
+class PluginIdentityError(RuntimeError):
+    """The engine resolved a different lore-framework plugin than LR_FRAMEWORK_DIR.
+
+    A green or red lifecycle result under this condition is uninterpretable — see
+    lore `lifecycle-harness-plugin-identity-unverified.md`.
+    """
+
+
+# Sentinel prefix so codex_prompt leaves the probe alone (must not inject FRAMEWORK_DIR).
+PLUGIN_IDENTITY_PROMPT = (
+    "PLUGIN-IDENTITY-PROBE\n"
+    "You are identifying which lore-framework / lr plugin is loaded for this session. "
+    "Do not boot an agent. Do not invent a path.\n"
+    "1. Resolve the lore-framework plugin root the same way /lr-boot (or /lr:boot) Step 0 "
+    "would — the directory that contains VERSION and supplies your lr skills / docs for "
+    "this session (installed/cached plugin if that wins over any --plugin-dir flag).\n"
+    "2. Read that directory's VERSION file.\n"
+    "3. Print exactly two lines and stop:\n"
+    "FRAMEWORK-ROOT: <absolute path>\n"
+    "PLUGIN-VERSION: <version string>\n"
+    "If you cannot resolve a plugin root, print PLUGIN-IDENTITY-FAILED: <reason>."
+)
+
+_IDENTITY_CHECKED_FOR = set()  # realpaths already verified in this process
+
+
+def parse_plugin_identity(text):
+    """Extract FRAMEWORK-ROOT / PLUGIN-VERSION from an identity-probe reply.
+
+    Returns (root_or_None, version_or_None). Missing lines yield None for that field.
+    """
+    root = version = None
+    if not text:
+        return root, version
+    for raw in text.splitlines():
+        line = raw.strip()
+        if line.startswith("FRAMEWORK-ROOT:"):
+            root = line.split(":", 1)[1].strip().strip('"').strip("'") or None
+        elif line.startswith("PLUGIN-VERSION:"):
+            version = line.split(":", 1)[1].strip().strip('"').strip("'") or None
+    return root, version
+
+
+def _identity_fix_message(framework_dir, *, detail):
+    expected = read_framework_version(framework_dir)
+    return (
+        "lifecycle plugin-identity check failed — refusing to trust this engine's results.\n"
+        f"  LR_FRAMEWORK_DIR: {os.path.realpath(framework_dir)}\n"
+        f"  expected VERSION: {expected}\n"
+        f"  detail: {detail}\n"
+        "  Fix: point this engine's installed/cached lore-framework source at "
+        "LR_FRAMEWORK_DIR (Codex: marketplace source in ~/.codex/config.toml; "
+        "Cursor: local plugin / cache), then re-run. "
+        "Or set LR_SKIP_PLUGIN_IDENTITY=1 only for debugging."
+    )
+
+
+def assert_plugin_identity_match(reported_version, reported_root, framework_dir):
+    """Raise PluginIdentityError unless the probe matches framework_dir's VERSION/root."""
+    expected_version = read_framework_version(framework_dir)
+    expected_root = os.path.realpath(framework_dir)
+    problems = []
+    if not reported_version:
+        problems.append("PLUGIN-VERSION line missing from engine reply")
+    elif reported_version != expected_version:
+        problems.append(
+            f"PLUGIN-VERSION {reported_version!r} != expected {expected_version!r}"
+        )
+    if reported_root:
+        try:
+            got_root = os.path.realpath(reported_root)
+        except OSError:
+            got_root = reported_root
+        if got_root != expected_root:
+            problems.append(
+                f"FRAMEWORK-ROOT {reported_root!r} (realpath {got_root!r}) "
+                f"!= {expected_root!r}"
+            )
+    if problems:
+        raise PluginIdentityError(
+            _identity_fix_message(framework_dir, detail="; ".join(problems))
+        )
+
+
+def read_codex_lore_marketplace_source(config_text):
+    """Return the `source =` path under [marketplaces.lore-framework], or None."""
+    in_section = False
+    for raw in config_text.splitlines():
+        line = raw.strip()
+        if line.startswith("[") and line.endswith("]"):
+            in_section = line == "[marketplaces.lore-framework]"
+            continue
+        if not in_section or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        if key.strip() == "source":
+            return value.strip().strip('"').strip("'") or None
+    return None
+
+
+def codex_lr_plugin_enabled(config_text):
+    """True if [plugins.\"lr@lore-framework\"] has enabled = true (or section absent → False)."""
+    in_section = False
+    for raw in config_text.splitlines():
+        line = raw.strip()
+        if line.startswith("[") and line.endswith("]"):
+            in_section = line in (
+                '[plugins."lr@lore-framework"]',
+                "[plugins.'lr@lore-framework']",
+            )
+            continue
+        if in_section and line.startswith("enabled") and "=" in line:
+            return line.split("=", 1)[1].strip().lower() in ("true", "1", "yes")
+    return False
+
+
+def check_codex_plugin_sources(framework_dir, config_text=None, cache_root=None):
+    """Fail loudly when Codex's installed lore marketplace is not LR_FRAMEWORK_DIR.
+
+    Codex has no per-invocation --plugin-dir; an enabled lr plugin from another
+    checkout silently substitutes that tree. Deterministic — no engine call.
+    """
+    if config_text is None:
+        path = os.path.expanduser("~/.codex/config.toml")
+        if not os.path.isfile(path):
+            return  # no config → nothing installed to conflict
+        with open(path, encoding="utf-8") as f:
+            config_text = f.read()
+    if not codex_lr_plugin_enabled(config_text):
+        return
+    source = read_codex_lore_marketplace_source(config_text)
+    if not source:
+        raise PluginIdentityError(
+            _identity_fix_message(
+                framework_dir,
+                detail="lr@lore-framework is enabled but [marketplaces.lore-framework] "
+                "has no source path",
+            )
+        )
+    if os.path.realpath(source) != os.path.realpath(framework_dir):
+        raise PluginIdentityError(
+            _identity_fix_message(
+                framework_dir,
+                detail=(
+                    f"Codex marketplace source {source!r} (realpath "
+                    f"{os.path.realpath(source)!r}) is not LR_FRAMEWORK_DIR — "
+                    "installed plugin would win over the tree under test"
+                ),
+            )
+        )
+    # Cache may lag the marketplace source after a checkout bump; require VERSION match too.
+    if cache_root is None:
+        cache_root = os.path.expanduser("~/.codex/plugins/cache/lore-framework/lr")
+    if os.path.isdir(cache_root):
+        versions = []
+        for name in os.listdir(cache_root):
+            vpath = os.path.join(cache_root, name, "VERSION")
+            if os.path.isfile(vpath):
+                with open(vpath, encoding="utf-8") as f:
+                    versions.append((name, f.read().strip()))
+        expected = read_framework_version(framework_dir)
+        if versions and not any(ver == expected for _, ver in versions):
+            raise PluginIdentityError(
+                _identity_fix_message(
+                    framework_dir,
+                    detail=(
+                        "Codex plugin cache has no VERSION matching LR_FRAMEWORK_DIR "
+                        f"(cache entries: {', '.join(f'{n}={v}' for n, v in versions)}; "
+                        "run: codex plugin marketplace upgrade lore-framework && "
+                        "codex plugin add lr@lore-framework)"
+                    ),
+                )
+            )
+
+
+def verify_plugin_identity(workspace=None, framework_dir=None, *, force=False):
+    """Probe (and for Codex, pre-check) that the loaded plugin matches framework_dir.
+
+    Called once per process per framework_dir from run_engine / run_matrix.
+    Raises PluginIdentityError on mismatch. Returns a small status dict.
+    """
+    framework_dir = os.path.abspath(framework_dir or FRAMEWORK_DIR)
+    key = os.path.realpath(framework_dir)
+    if not force and key in _IDENTITY_CHECKED_FOR:
+        return {"skipped": False, "cached": True, "framework_dir": framework_dir}
+    if not force and os.environ.get("LR_SKIP_PLUGIN_IDENTITY") == "1":
+        return {"skipped": True, "framework_dir": framework_dir}
+
+    if ENGINE == "codex":
+        check_codex_plugin_sources(framework_dir)
+
+    own_tmp = None
+    if workspace is None:
+        own_tmp = tempfile.mkdtemp(prefix="lr-plugin-identity-")
+        workspace = own_tmp
+    try:
+        result = run_engine(
+            workspace, PLUGIN_IDENTITY_PROMPT, framework_dir=framework_dir,
+            _skip_identity_check=True,
+        )
+        if result.exit_code != 0:
+            raise PluginIdentityError(
+                _identity_fix_message(
+                    framework_dir,
+                    detail=(
+                        f"identity probe engine exit={result.exit_code}; "
+                        f"stderr_tail={(result.stderr or '')[-400:]!r}; "
+                        f"text_tail={(result.text or '')[-400:]!r}"
+                    ),
+                )
+            )
+        if "PLUGIN-IDENTITY-FAILED" in (result.text or ""):
+            raise PluginIdentityError(
+                _identity_fix_message(
+                    framework_dir,
+                    detail=f"engine could not resolve plugin root:\n{result.text}",
+                )
+            )
+        root, version = parse_plugin_identity(result.text or "")
+        assert_plugin_identity_match(version, root, framework_dir)
+        _IDENTITY_CHECKED_FOR.add(key)
+        return {
+            "skipped": False,
+            "framework_dir": framework_dir,
+            "reported_root": root,
+            "reported_version": version,
+            "cost_usd": result.cost_usd,
+        }
+    finally:
+        if own_tmp:
+            shutil.rmtree(own_tmp, ignore_errors=True)
 
 
 def memory_file_name():
@@ -732,13 +982,21 @@ def _debug_dump(result):
         )
 
 
-def run_engine(workspace, prompt, framework_dir=None):
+def run_engine(workspace, prompt, framework_dir=None, _skip_identity_check=False):
     """Run the engine headless in `workspace` and return a RunResult.
 
     framework_dir overrides the plugin under test for one run — used by the
     Script Fallback Contract scenario, which needs a deliberately broken copy.
+
+    On the first call per process (unless LR_SKIP_PLUGIN_IDENTITY=1), verifies
+    the engine's loaded/installed plugin matches LR_FRAMEWORK_DIR — see
+    verify_plugin_identity. Per-run framework_dir overrides are not re-checked
+    (they are absolute-path copies of the same tree). _skip_identity_check is
+    for the probe's own call.
     """
     framework_dir = framework_dir or FRAMEWORK_DIR
+    if not _skip_identity_check:
+        verify_plugin_identity(workspace=workspace, framework_dir=FRAMEWORK_DIR)
     env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
     if ENGINE == "claude":
         cmd = [
