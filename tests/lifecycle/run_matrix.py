@@ -12,6 +12,10 @@ adds the missing release-gate mechanics:
 Default concurrency is conservative: engines run in parallel, modules for one
 engine run sequentially. Raise --module-jobs only when the provider quota can
 handle the burst.
+
+Before any module runs, each engine is gated by harness.verify_plugin_identity
+(Codex also gets a deterministic marketplace/cache preflight) so a wrong
+installed plugin cannot produce a false-green suite.
 """
 
 import argparse
@@ -141,11 +145,68 @@ def run_module(engine, module, suite, test_filter, base_env, run_dir):
     return result
 
 
+def verify_engine_plugin_identity(engine, base_env, run_dir):
+    """Fail this engine's whole shard immediately if the wrong plugin would load.
+
+    Imports harness under the target LR_ENGINE so Codex marketplace checks and the
+    shared VERSION assertion run before any scenario spends API money.
+    """
+    env = {**base_env, "LR_ENGINE": engine}
+    if "LR_TEST_MODEL" not in env:
+        env["LR_TEST_MODEL"] = MODEL_DEFAULTS.get(engine, "haiku")
+    # Keep identity failures visible even when the suite would otherwise skip.
+    env["LR_LIFECYCLE"] = env.get("LR_LIFECYCLE", "1")
+    probe = (
+        "import os, sys\n"
+        "sys.path.insert(0, os.path.join(%r, 'tests', 'lifecycle'))\n"
+        "import harness\n"
+        "info = harness.verify_plugin_identity(force=True)\n"
+        "print('PLUGIN-IDENTITY-OK', info.get('reported_version'), info.get('reported_root'))\n"
+    ) % REPO_ROOT
+    print("  identity %-7s ..." % engine, flush=True)
+    start = time.monotonic()
+    proc = subprocess.run(
+        [sys.executable, "-c", probe],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    duration_s = round(time.monotonic() - start, 3)
+    stem = "%s-plugin-identity" % safe_name(engine)
+    write_text(os.path.join(run_dir, "logs", stem + ".stdout.txt"), proc.stdout)
+    write_text(os.path.join(run_dir, "logs", stem + ".stderr.txt"), proc.stderr)
+    if proc.returncode != 0:
+        detail = (proc.stderr or proc.stdout or "").strip()[-800:]
+        print("  FAILED identity %-7s (%.1fs)" % (engine, duration_s), flush=True)
+        print(detail, flush=True)
+        return False, detail
+    print("  ok     identity %-7s (%.1fs)" % (engine, duration_s), flush=True)
+    return True, (proc.stdout or "").strip()
+
+
 def run_configs(configs, suite, test_filter, engine_jobs, module_jobs, base_env, run_dir):
     groups = group_by_engine(configs)
     results = {}
+    identity = {}
+
+    for engine in groups:
+        ok, detail = verify_engine_plugin_identity(engine, base_env, run_dir)
+        identity[engine] = {"ok": ok, "detail": detail}
+        if not ok:
+            # Do not run this engine's modules — results would be uninterpretable.
+            for e, m in groups[engine]:
+                r = ModuleResult(e, m)
+                r.model = base_env.get("LR_TEST_MODEL") or MODEL_DEFAULTS.get(e, "haiku")
+                r.status = "failed"
+                r.exit_code = 2
+                r.duration_s = 0.0
+                r.stderr_tail = detail
+                results[(e, m)] = r
 
     def run_engine_group(engine, engine_configs):
+        if not identity.get(engine, {}).get("ok", True):
+            return
         workers = module_jobs if module_jobs > 0 else len(engine_configs)
         with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
             futures = {
@@ -164,7 +225,7 @@ def run_configs(configs, suite, test_filter, engine_jobs, module_jobs, base_env,
         for fut in futures:
             fut.result()
 
-    return [results[c] for c in configs]
+    return [results[c] for c in configs], identity
 
 
 def summarize(results):
@@ -254,7 +315,9 @@ def main(argv=None):
 
     base_env = dict(os.environ)
     start = time.monotonic()
-    results = run_configs(configs, args.suite, args.test_filter, engine_jobs, module_jobs, base_env, run_dir)
+    results, identity = run_configs(
+        configs, args.suite, args.test_filter, engine_jobs, module_jobs, base_env, run_dir,
+    )
     duration_s = round(time.monotonic() - start, 3)
     all_ok = summarize(results)
 
@@ -267,6 +330,7 @@ def main(argv=None):
             "LR_FRAMEWORK_DIR",
             os.path.join(HERE, "..", "..", "..", "lore-framework"),
         )),
+        "plugin_identity": identity,
         "engines": engines,
         "modules": modules,
         "engine_jobs": engine_jobs,

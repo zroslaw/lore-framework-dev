@@ -93,17 +93,18 @@ but nothing schedules them — the next ship would silently inherit an unverifie
 the union of v27+v28 changes. Covered by the v28 standard lifecycle matrix plus targeted
 reruns recorded in `workdir/v28-e2e-gate-2026-07-22.md`; delete on the next refresh.
 
-### A7. Lifecycle harness doesn't verify which plugin actually loaded — OPEN
+### A7. Lifecycle harness doesn't verify which plugin actually loaded — ✅ done (this branch)
 Confirmed live 2026-07-27 running the suite against the parked v31 branch: `harness.py`'s
 `run_engine()` passes `--plugin-dir <framework_dir>`, but on Codex and Cursor an
 installed/cached plugin silently won over that flag — both engines ran the full suite
 against an installed v30 plugin while reporting results as if v31 had been tested. Claude
 Code was unaffected only because nothing was installed for it globally on that machine,
 which is incidental, not structural. A green or red result under this condition is
-uninterpretable either way. **Do:** before trusting any engine's lifecycle result, probe
-the loaded plugin's actual `VERSION` and assert it equals `framework_version()` of
-`LR_FRAMEWORK_DIR`; fail loudly and immediately on mismatch rather than letting all modules
-run to completion against the wrong tree. See `lifecycle-harness-plugin-identity-unverified.md`.
+uninterpretable either way. **Done:** `verify_plugin_identity` probes loaded VERSION (+
+FRAMEWORK-ROOT) and asserts against `LR_FRAMEWORK_DIR`; Codex also gets a deterministic
+marketplace-source/cache preflight; `run_matrix.py` fails an engine's shard before any
+module runs. Opt out only via `LR_SKIP_PLUGIN_IDENTITY=1` (debug). See
+`lifecycle-harness-plugin-identity-unverified.md`, `tests/test_lifecycle_plugin_identity.py`.
 
 ### A6. `docs/engines/claude.md` ↔ `CLAUDE.md` case-collision on macOS — OPEN (low)
 Observed live 2026-07-18: on case-insensitive APFS, Claude Code auto-injects

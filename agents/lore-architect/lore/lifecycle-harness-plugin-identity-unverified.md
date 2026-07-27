@@ -34,14 +34,22 @@ entirely* for the one requested. Whether this counts as the second occurrence th
 bar — the *shape* (environment quietly invalidates a gate result without erroring) matches; the
 *mechanism* (artifact substitution vs. capability block) doesn't.
 
-## Fix needed (harness, not yet applied)
+## Fix (harness) — applied
 
-Before trusting any engine's lifecycle result, the harness should probe the loaded plugin's actual
-`VERSION` (a cheap boot-time check, or a dedicated preflight scenario) and assert it equals
-`framework_version()` of the `LR_FRAMEWORK_DIR` under test. Fail loudly and immediately on a mismatch,
-rather than letting all 7 modules run to completion against the wrong tree. Filed as a harness fix on
-`workdir/what-to-improve.md` and belongs in `framework-improvements-backlog.md` under whatever section
-covers the lifecycle harness.
+`tests/lifecycle/harness.py` now gates on plugin identity before trusting results:
+
+1. **`verify_plugin_identity`** — once per process, asks the engine to report
+   `FRAMEWORK-ROOT` / `PLUGIN-VERSION` for the plugin that actually supplies lr skills, and
+   asserts both against `LR_FRAMEWORK_DIR` (VERSION required; root when reported).
+2. **Codex deterministic preflight** — because Codex has no `--plugin-dir`, also checks that
+   an enabled `lr@lore-framework` marketplace `source` realpath-equals `LR_FRAMEWORK_DIR` and
+   that the plugin cache has a matching VERSION, before any scenario runs.
+3. **`run_matrix.py`** — runs the check once per engine and **skips that engine's modules** on
+   failure (exit 2), so a wrong install cannot produce a false green across 7 modules.
+4. **`run_engine`** — lazy same check on direct module invocation (`python3 tests/lifecycle/test_*.py`).
+
+Opt-out: `LR_SKIP_PLUGIN_IDENTITY=1` (debug only). Unit coverage:
+`tests/test_lifecycle_plugin_identity.py`.
 
 ## Concrete instance this bit
 

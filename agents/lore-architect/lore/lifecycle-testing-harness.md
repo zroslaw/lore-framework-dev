@@ -158,14 +158,15 @@ reachable from the repo root, not only from deep test directories: root `README.
 
 ## What's still open
 
-- **Verify plugin identity before trusting a result (2026-07-27)** — `run_engine()` passes
+- **Verify plugin identity before trusting a result (2026-07-27; fixed)** — `run_engine()` passes
   `--plugin-dir <framework_dir>`, but on Codex and Cursor an installed/cached plugin can silently win
   over that flag, so the suite runs to completion against the wrong tree with no loud failure. Found
   running the suite against the parked v31 branch: Codex and Cursor both resolved an installed v30
   plugin instead of the v31 worktree, invalidating both engines' results while Claude Code (nothing
-  installed globally on that machine) was unaffected only incidentally. Fix: probe the loaded plugin's
-  actual `VERSION` and assert it equals `framework_version()` of `LR_FRAMEWORK_DIR`, failing loudly on
-  mismatch. See `lifecycle-harness-plugin-identity-unverified.md`.
+  installed globally on that machine) was unaffected only incidentally. **Fix applied:**
+  `verify_plugin_identity` probes loaded `VERSION`/`FRAMEWORK-ROOT`; Codex also gets a deterministic
+  marketplace-source/cache preflight; `run_matrix` fails the engine shard before modules run. See
+  `lifecycle-harness-plugin-identity-unverified.md`.
 - **Parallelize the suite** — scenarios are fixture-isolated; today they run serially via
   `unittest discover` (~15–45 min/engine). Future: `LR_LIFECYCLE_JOBS`, parallel by test file, or
   parallel by engine in separate terminals; cap concurrency for API limits. See
