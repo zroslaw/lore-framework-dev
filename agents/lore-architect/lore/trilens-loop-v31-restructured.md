@@ -2,9 +2,11 @@
 
 The one-paragraph compression recorded in `trilens-loop-deliberately-minimal-2026-07-25.md` is **no
 longer what the doc looks like**. On explicit user instruction across several turns (2026-07-26/27),
-it was rewritten into a ~75-line structured doc. Still on `wip/lr-core-v31`, committed there as
-`lore-framework` `c3d418d`; branch **not** merged to main, **not** pushed. Main still carries the
-v30 325-line doc described in `trilens-loop-feature.md`.
+it was rewritten into a ~75-line structured doc. Still on `lore-framework` `wip/lr-core-v31`,
+committed there as `lore-framework` `c3d418d`; **plugin branch not merged to main, not pushed.**
+`lore-framework-dev` main already carries related lore (including this topic) via the 2026-07-27
+merge — see `v31-lr-core-parked-2026-07-25.md`. Main's plugin still carries the v30 325-line doc
+described in `trilens-loop-feature.md`.
 
 This was not a "helpful restore" of the old version — it is a new shape the user asked for step by
 step. The don't-re-expand-unasked rule held throughout: every expansion here was user-directed.

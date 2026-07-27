@@ -35,6 +35,7 @@ Distinguish adjacent concepts before asserting (clean-room-vs-tests ≠ context-
 
 - **Verify state directly before mutating it.** `ls`, `cat`, `git` the thing you think is broken before any edit/delete/repoint. An inference is a hypothesis, not a fact.
 - **Attribute parallel tool-call results carefully.** When one of N parallel reads errors (or returns empty), confirm *which* path failed before reasoning from it. Empty-result-from-wrong-path is a classic false "missing file" (same trap as `tooling-cwd-safety.md`'s empty-Glob).
+- **Don't parallelize a conflict-resolve edit with `git add`/`commit`.** The add can stage the pre-edit file and commit conflict markers while the working tree looks clean. Serial only; verify with `git show HEAD:path`. See `parallel-edit-git-add-race-conflict-resolve.md`.
 - **Diagnosis is cheap, action is not.** When about to fix a "bug" in code you did not author this session, re-verify first. Asymmetric cost: a wrong claim costs a sentence; a wrong fix costs a regression plus the debugging to find it.
 - **Confirm the *right* cause before the invasive fix** (see section above) — verification is about *which* bug, not only *whether*.
 

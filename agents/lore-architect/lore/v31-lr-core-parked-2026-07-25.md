@@ -8,17 +8,20 @@ pushed to completion, not discarded. Follow-on sessions resumed it three times: 
 literate-accelerator addendum, a review-and-fix pass, and the `trilens-loop.md` restructure (all
 below).
 
-**Current state as of 2026-07-27 (end of session): everything is committed on `wip/lr-core-v31` in
-both repos, with clean working trees. The branch is NOT merged to main and NOT pushed.** This changed
-from earlier sessions, where the work sat uncommitted in the worktrees — the "nothing is committed"
-framing in the sections below describes those sessions' end states, not today's. **The lifecycle
-suite has now run once against this branch** — see § 2026-07-27: first real lifecycle-suite run,
-below — with a partial (Claude-only) valid result.
+**Current state as of 2026-07-27 (later session): asymmetric merge.**
+`lore-framework-dev` `wip/lr-core-v31` was **merged to `main` and pushed** (merge `f73f57d`,
+conflict-marker cleanup `0112890`, `.DS_Store` gitignore `592d04a`). One content conflict resolved
+in `trilens-loop-feature.md` (kept main's Codex **gpt-5.4** wording); accidental WIP file `p`
+dropped. **`lore-framework` plugin is still parked** on `wip/lr-core-v31` at `cd8ece1` — not
+merged, not pushed, not a v31 ship. The historical sections below still describe the earlier
+"both branches committed, neither merged" end state; treat this paragraph as authoritative for
+*where the work lives now*. Lifecycle: Claude/haiku green only; Codex/Cursor still need
+plugin-identity re-run — see § 2026-07-27: first real lifecycle-suite run.
 
-| Repo | Branch head | Contents |
+| Repo | Where it lives now | Notes |
 |---|---|---|
-| `lore-framework` | `cd8ece1` | trilens rounds 1–3 fixes (nested-repo `git -C` escape in `version-check.md`'s prose gate, etc.) + the `macos-var-symlink-realpath-ambiguity.md` fix, on top of `c3d418d` (trilens-loop restructure, Cursor subagent notes, on top of `63d2d86` WIP) |
-| `lore-framework-dev` | `c63da4a` | same trilens rounds' fixes, on top of `8fc46f0` (regression tests + `literate-accelerator-pattern.md` + a lore-context addition, on top of `cd71c76` WIP) |
+| `lore-framework` | `wip/lr-core-v31` @ `cd8ece1` (worktree) | Still the ship gate. Plugin + lifecycle re-runs stay here. |
+| `lore-framework-dev` | **`main`** (includes former WIP) | Agent-repo side landed; worktree branch tip still `c63da4a` historically. |
 
 ## 2026-07-26 addendum: literate-accelerator redesign
 
@@ -169,32 +172,32 @@ behavior. Verified false via `git merge-tree --write-tree`: zero conflicts, both
 in the resulting tree. Overridden, disclosed, and generalized as its own topic — see
 `diverged-branch-diff-misread-as-merge-outcome.md`.
 
-**Outstanding for v31 as of this session's end** (supersedes the "Resume steps" list below where the
-two overlap — that list's step 1 is now partially done, not fully open):
+**Outstanding for v31 as of the lore-framework-dev merge session** (supersedes older resume lists):
 
 1. Repoint Codex's (`~/.codex/config.toml` marketplace source) and Cursor's (cached plugin) sources at
-   the `wip/lr-core-v31` worktree, then actually re-run those two engines' lifecycle suites against the
-   corrected target — undecided, deferred to the user.
-2. Reconcile the Codex reviewer-tier model name in `release-notes/30.md` / `versioning-release-types.md`
-   — **done this session**: v30's shipped notes are left as-shipped (no retro-edit), v31 carries the
-   correction of record.
-3. Version-ship discipline once all three engines are actually green: four manifests to `1.31.0`, the
-   `versioning-release-types.md` v31 entry, the cache-clear footer (this release touches `scripts/` and
-   skill-referenced docs — cache-affecting), merge `wip/lr-core-v31` to `main` in both repos, push.
-4. Fold `literate-accelerator-pattern.md` and `trilens-loop-v31-restructured.md` into main's lore on
-   merge, per this topic's own "Where it lives" / "See Also" pointers.
+   the `lore-framework` `wip/lr-core-v31` worktree, then re-run those two engines' lifecycle suites —
+   still the real precondition to a valid three-engine green.
+2. Reconcile the Codex reviewer-tier model name — **done**: v31 notes carry **gpt-5.4**; v30 shipped
+   notes left as-is.
+3. Version-ship discipline once all three engines are green: four manifests to `1.31.0`, the
+   `versioning-release-types.md` v31 entry, the cache-clear footer (cache-affecting), then merge
+   **`lore-framework`** `wip/lr-core-v31` → `main` and push. (`lore-framework-dev` already on main.)
+4. Fold `trilens-loop-v31-restructured.md` into `trilens-loop-feature.md` when the plugin doc ships;
+   `literate-accelerator-pattern.md` is already on `lore-framework-dev` main via the merge.
 
-Branch state at this session's end: `wip/lr-core-v31` at `cd8ece1` (lore-framework) / `c63da4a`
-(lore-framework-dev), both clean, still not merged, still not pushed.
+Plugin branch tip still `cd8ece1` on `wip/lr-core-v31`, clean, not merged/pushed.
 
 ## Where it lives
 
-Branch `wip/lr-core-v31` in both `lore-framework` and `lore-framework-dev`, each checked out in its own
-worktree at `<workspace>/.worktrees/<repo>/lr-core-v31/` (per `worktrees-convention.md`). Both
-top-level `main` checkouts are clean — nothing of this work is visible from a normal boot on main.
-`docs/trilens-loop.md` on main is still the full 325-line version described in `trilens-loop-feature.md`
-— see `trilens-loop-v31-restructured.md` for the parked branch's current version of that doc, and
-`trilens-loop-deliberately-minimal-2026-07-25.md` for the standing don't-auto-restore rule.
+Branch `wip/lr-core-v31` in **`lore-framework`** (still the only unmerged side), checked out at
+`<workspace>/.worktrees/lore-framework/lr-core-v31/`. **`lore-framework-dev` main now includes the
+former WIP** (merged 2026-07-27); its worktree may still exist at
+`.worktrees/lore-framework-dev/lr-core-v31/` but is no longer the source of truth for agent-repo
+content. Top-level `lore-framework` `main` remains clean at v30 — nothing of the plugin work is
+visible from a normal boot on main. `docs/trilens-loop.md` on main is still the full 325-line
+version described in `trilens-loop-feature.md` — see `trilens-loop-v31-restructured.md` for the
+parked plugin branch's version of that doc, and `trilens-loop-deliberately-minimal-2026-07-25.md`
+for the standing don't-auto-restore rule.
 
 ## Resuming
 
@@ -214,13 +217,13 @@ of 2026-07-27:
    `cd8ece1`/`c63da4a`, not the earlier `c3d418d`/`8fc46f0`.
 2. ~~Reconcile the Codex reviewer-tier model name before shipping~~ — **done 2026-07-27**: v31's notes
    carry the correction (**gpt-5.4**, not gpt-4.5); v30's shipped notes were left as-is, not retro-edited.
-3. Repoint Codex's and Cursor's plugin sources at the `wip/lr-core-v31` worktree and re-run those two
-   engines' lifecycle suites — the actual remaining precondition to a valid three-engine green.
-4. Ship: version-ship discipline in `role.md` (manifests, `versioning-release-types.md` backfill,
-   cache-clear footer), then merge `wip/lr-core-v31` to main in both repos and push.
-5. On merge, fold `literate-accelerator-pattern.md` and `trilens-loop-v31-restructured.md` into
-   main's lore properly — the former arrives with the branch, the latter should collapse into
-   `trilens-loop-feature.md` once the doc it describes is the shipped one.
+3. Repoint Codex's and Cursor's plugin sources at the **`lore-framework`** `wip/lr-core-v31`
+   worktree and re-run those two engines' lifecycle suites — still the remaining three-engine gate.
+4. Ship the **plugin**: version-ship discipline in `role.md` (manifests, `versioning-release-types.md`
+   backfill, cache-clear footer), then merge `lore-framework` `wip/lr-core-v31` → main and push.
+   (`lore-framework-dev` already merged.)
+5. When the plugin ships, collapse `trilens-loop-v31-restructured.md` into `trilens-loop-feature.md`.
+   `literate-accelerator-pattern.md` is already on `lore-framework-dev` main.
 
 Before starting *any* fresh work on `lr-core`, the Script Fallback Contract, or `trilens-loop.md`, check
 for this branch/worktree pair first — a second attempt at the same design without checking would

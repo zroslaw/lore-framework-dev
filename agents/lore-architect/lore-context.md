@@ -214,30 +214,16 @@ surfaces are all live: **Lore Beings** (Being Keeper substrate + `/lr:being` com
 **Markdown session archives** under `agents/<agent>/archive/YYYY/MM/`, and **`/lr:trilens-loop`**
 (iterated three-lens review). Three engines are Tier-1 supported — Claude Code, Codex, Cursor.
 
-**v31 `lr-core` is built, reviewed, but PARKED, not shipped.** Deterministic substrate script +
-boot/attach/consult/pull-lore/process-merge/lore-search doc rewiring + the Script Fallback Contract
-(whose Accelerator category was redesigned as **literate** — the script's own comments are the
-fallback spec, ~9 docs thinned to pointers), plus a reworked `docs/trilens-loop.md`. It lives on
-branch `wip/lr-core-v31` in both repos (worktrees at
-`<workspace>/.worktrees/{lore-framework,lore-framework-dev}/lr-core-v31/`), **committed there, working
-trees clean, not merged to main and not pushed** — parked per explicit user instruction after a rough
-2026-07-25 session. Three full-surface trilens rounds have now run over the branch (25 findings, 21
-applied, 3 declined, 1 accepted, zero sustained BLOCKERs; round 3 hit the 3-round ceiling with 2 HIGHs
-left ungated and disclosed as such), fixing real bugs along the way — a nested-repo `git -C` escape
-both in the script (`git-dash-c-needs-toplevel-guard.md`) and, found separately this round, in
-`version-check.md`'s parallel prose gate; signal-death/sentinel collisions; encoding/BOM bugs; a
-version-comparison bug; boot-procedure and release-notes gaps — plus two mutation-verified regression
-tests (`verify-regression-tests-via-mutation.md`), tests 38→51 green. **The lifecycle suite has now
-run once (2026-07-27), with a partial result: Claude Code/haiku is green (6/7 modules; the 7th's
-flakiness root-caused as a macOS `pwd`-vs-`realpath` ambiguity, `macos-var-symlink-realpath-ambiguity.md`,
-and fixed) and is the only trustworthy data point — Codex and Cursor both silently resolved an
-*installed* v30 plugin instead of the `--plugin-dir` worktree under test, invalidating both engines'
-results (`lifecycle-harness-plugin-identity-unverified.md`).** Repointing those two engines' sources at
-the worktree and re-running them is the actual remaining precondition to a valid three-engine green,
-still deferred to the user. `main` in both repos is unaffected. Check `v31-lr-core-parked-2026-07-25.md`
-before starting related work — its "Resuming" section is current; the in-worktree
-`workdir/GOAL-2026-07-25.md` is stale on three points, don't follow it as-is. See also
-`trilens-loop-v31-restructured.md`.
+**v31 `lr-core` is built and reviewed; agent-repo side is on `lore-framework-dev` `main`, plugin
+still PARKED.** Deterministic substrate + literate Script Fallback Contract + reworked
+`docs/trilens-loop.md` live on `lore-framework` branch `wip/lr-core-v31` @ `cd8ece1` (worktree
+`.worktrees/lore-framework/lr-core-v31/`) — **not merged, not a ship**. `lore-framework-dev`
+merged that WIP to `main` 2026-07-27 (`f73f57d`+). Ship gate remains: repoint Codex/Cursor plugin
+sources at the framework worktree, re-run lifecycle (Claude/haiku already green;
+`lifecycle-harness-plugin-identity-unverified.md`), then version-ship the plugin. Check
+`v31-lr-core-parked-2026-07-25.md` before related work. See also
+`trilens-loop-v31-restructured.md`, `literate-accelerator-pattern.md`,
+`parallel-edit-git-add-race-conflict-resolve.md`.
 
 Both pre-ship gates are in working order and both are routinely run: the review loop via
 `/lr:trilens-loop`, and the real-engine lifecycle suite via `tests/lifecycle/` (plus the separate
