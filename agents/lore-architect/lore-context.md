@@ -32,12 +32,13 @@ Core mechanics: directory-driven, plain markdown (frontmatter only on descriptor
 
 **Subagent as optimization vs subagent as semantics** — before letting any engine degrade a
 subagent-spawning procedure to serial host-side execution, classify what the subagent is *for*. If it
-buys parallelism and context isolation (recall, consult, attach, merge, conflict resolution),
-serialization is lossless. If the subagent's *independence from the caller* is the deliverable
-(`/lr:trilens-loop`), serialization destroys the feature — the procedure must stop and report. Profile
-degradation clauses therefore need carve-outs, not blanket rules, and "the conservative profile passed
-the whole suite" only ever meant it was adequate for the procedures that existed then. See
-`subagent-as-optimization-vs-subagent-as-semantics.md`.
+buys parallelism and context isolation (recall, consult, attach, conflict resolution — merge too on
+Cursor since 2026-07-28 via `Task`), serialization is lossless. If the subagent's *independence from
+the caller* is the deliverable (`/lr:trilens-loop`), serialization destroys the feature — the procedure
+must stop and report. Profile degradation clauses need carve-outs, not blanket rules. On Cursor, `Task`
+free-text briefs are validated and merge + trilens use them; recall/consult/attach/conflict resolution
+stay serial until upgraded. See `subagent-as-optimization-vs-subagent-as-semantics.md`,
+`cursor-merge-via-task.md`, `cursor-task-free-text-brief-validated.md`.
 
 See `system-design-principles.md` (the full list and the overreach diagnostics), plus the framing topics `team-shared-knowledge-principle.md`, `framework-as-engine-not-kb.md`, `agents-are-executors-first.md`, `knowledge-vs-skills-distinction.md`, `framework-scope-vs-agent-scope.md`.
 
@@ -65,7 +66,9 @@ Engine-specific operational knowledge now has one hub topic per engine: `claude-
 for install/update model, invocation surface, subagent mechanism, memory file, MCP/plugin loading,
 sandbox constraints, and lifecycle-harness caveats; keep atomic findings in the linked detailed
 topics rather than rediscovering them from old session notes. Cursor live usage retrieval
-(plan quota + CLI session context) → `cursor-usage-auto-retrieval.md`.
+(plan quota + CLI session context) → `cursor-usage-auto-retrieval.md`. On Cursor, merge and trilens
+run via native `Task` with validated free-text briefs; other fan-outs remain serial host-side until
+upgraded (`cursor-merge-via-task.md`, `cursor-task-free-text-brief-validated.md`).
 
 At least one Claude Code host flavor ("local-agent-mode-sessions") snapshots the **entire plugin
 bundle per session** rather than referencing the live checkout — skill dispatch resolves through
@@ -202,7 +205,8 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
   the port was **packaging, not redesign** — the whole surface is **5 adapter bindings** via the
   `docs/engines/` convention (framework-root, invocation-syntax, subagent-spawn, memory-file,
   runtime-bounding) plus Boot Step-0 engine selection. Both engines have native in-session subagents
-  (Codex `spawn_agent`/`wait_agent`; Cursor `Task`), so the feared Tier-B nucleus is proven, and one
+  (Codex `spawn_agent`/`wait_agent`; Cursor `Task` — free-text briefs validated 2026-07-28, merge on
+  `Task` since then), so the feared Tier-B nucleus is proven, and one
   repo carries both skill namespaces (canonical `skills/<skill>/` for Claude, `.cursor-skills/lr-<skill>/`
   wrappers for Cursor, kept in sync by `scripts/sync-cursor-skills` and `/lr:check` #21).
 

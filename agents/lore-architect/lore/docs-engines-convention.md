@@ -77,21 +77,23 @@ deferred (carry `${CLAUDE_PLUGIN_ROOT}`, out of core scope): `.mcp.json` / lr-wa
 Both corrections came out of shipping `/lr:trilens-loop` (`trilens-loop-feature.md`), and both are
 about the same binding.
 
-**Cursor — a carve-out, not a blanket rule.** The v20 binding's conservative "execute host-side,
+**Cursor — carve-outs, not a blanket rule.** The v20 binding's conservative "execute host-side,
 serially" clause was epistemic caution rather than a discovered limitation, and it had gone stale:
 Cursor shipped subagents in **2.4** (2026-01-22; editor, CLI and Cloud Agents), dispatched via a `Task`
-tool, with async subagents and the nesting rule following in 2.5. The corrected binding keeps serial
-host-side execution as the *validated default* for the procedures that already pass that way (recall,
-consult, attach, merge, conflict resolution) and carves out one exception: procedures where **subagent
-independence is the semantics rather than an optimization** use `Task`. `trilens-loop.md` is the only
-such procedure today and is named explicitly; extension to the serial-default procedures is forbidden
-without their own validation run. See `subagent-as-optimization-vs-subagent-as-semantics.md` — that
-distinction is the whole reason the carve-out exists.
+tool, with async subagents and the nesting rule following in 2.5. The corrected binding uses `Task` for
+**merge** and for procedures where **subagent independence is the semantics** (`trilens-loop.md`), and
+keeps serial host-side execution as the validated default for recall, consult, attach version-reconcile,
+and conflict resolution until those get their own deliberate upgrade. Merge moved to `Task` on
+2026-07-28 once free-text brief shape was validated in-session (`cursor-task-free-text-brief-validated.md`,
+`cursor-merge-via-task.md`). See `subagent-as-optimization-vs-subagent-as-semantics.md` — merge is
+optimization-class (serialization was lossless but slower); trilens is semantics-class (serialization
+destroys the feature).
 
-A new **§ Native subagents** section separates *what Cursor documents* from *what this framework has
-actually validated*, and flags the load-bearing unknown: whether `Task` accepts a free-text brief or
-only dispatches pre-defined agent files by name. That separation is the convention-level lesson — a
-profile may host an unvalidated documented capability as long as the section says which is which.
+**§ Native subagents** separates *what Cursor documents* from *what this framework has validated*.
+Free-text briefs are validated (2026-07-28); throwaway `.cursor/agents/` definitions are obsolete for
+merge and trilens briefs. That separation remains the convention-level lesson — a profile may host a
+documented capability before every procedure using it is end-to-end proven; say which is which, and
+trust tool-call evidence over model self-report when upgrading.
 
 **Claude — the two traps.** `docs/engines/claude.md`'s `subagent-spawn` binding now names all three
 subagent types (`general-purpose`, `Explore`, `fork`) and their two traps: `fork` **inherits the

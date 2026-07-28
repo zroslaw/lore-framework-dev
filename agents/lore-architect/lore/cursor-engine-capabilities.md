@@ -17,19 +17,16 @@ validation and probe notes in the linked topics below.
   validated 2026-07-10 (`cursor-mid-session-fallback-validated.md`).
 - **Invocation surface** — skill wrappers under `.cursor-skills/lr-<skill>/` → `/lr-<skill>`;
   per-agent shortcuts `/lr-<agent>-agent` under `.cursor/skills/` after registration.
-- **Subagent model** — serial host-side execution is the **validated default**, with one carve-out
-  since v30. Cursor does have native subagents (shipped in **2.4**, 2026-01-22 — editor, CLI and Cloud
-  Agents — dispatched via a `Task` tool; async subagents and the nesting rule followed in 2.5), so the
-  v20 profile's blanket "no native mechanism relied on" was epistemic caution that had gone stale. The
-  corrected binding keeps serial execution for recall / consult / attach / merge / conflict resolution
-  (all validated that way, all lossless under serialization) and uses `Task` only for procedures where
-  **subagent independence is the semantics, not an optimization** — `trilens-loop.md` is the sole
-  current exception, and extension to the serial-default procedures needs its own validation run. See
+- **Subagent model** — Cursor has native subagents (shipped in **2.4**, 2026-01-22 — editor, CLI and
+  Cloud Agents — dispatched via a `Task` tool; async subagents and the nesting rule followed in 2.5).
+  **`Task` accepts free-text briefs** (`prompt` + `subagent_type`; validated 2026-07-28 —
+  `cursor-task-free-text-brief-validated.md`). **Merge** and **`/lr:trilens-loop`** run through
+  parallel `Task` fan-out (one write-capable `Task` per active agent for merge;
+  `cursor-merge-via-task.md`). Recall / lore-search, consult, attach version-reconcile, and conflict
+  resolution remain **serial host-side** until separately upgraded. If `Task` is missing on an old CLI
+  build, stop and report — do not silently host-side merge. See
   `subagent-as-optimization-vs-subagent-as-semantics.md`, `docs-engines-convention.md` § v30 profile
-  corrections. **Load-bearing unknown:** whether `Task` accepts a free-text brief or only dispatches
-  pre-defined agent files by name — the profile's § Native subagents section separates what Cursor
-  documents from what we have validated, and procedures using `Task` handle the name-only case by
-  writing throwaway `readonly` definitions under `.cursor/agents/` and deleting them afterwards.
+  corrections, `merge-in-booted-subagents.md`.
 - **Memory file** — `AGENTS.md`.
 - **Doctor** — `doctor-cursor-session-without-plugin` for missing skills entirely (v25).
 - **Three-manifest discipline** — `.cursor-plugin/plugin.json` bumped with Claude manifests;
@@ -58,7 +55,10 @@ This hub is the starting map for install, refresh, fallback, invocation, and con
 - `docs-engines-convention.md`
 - `multi-engine-portability-direction.md`
 - `engine-session-log-formats.md`
-- `subagent-as-optimization-vs-subagent-as-semantics.md` — the principle behind the v30 `Task` carve-out
-- `trilens-loop-feature.md` — the only semantics-class procedure today, and why the carve-out exists
+- `subagent-as-optimization-vs-subagent-as-semantics.md` — optimization vs semantics classification
+- `cursor-task-free-text-brief-validated.md` — free-text `Task` brief shape confirmed
+- `cursor-merge-via-task.md` — merge upgraded from serial host-side to `Task`
+- `merge-in-booted-subagents.md` — engine-neutral merge execution model
+- `trilens-loop-feature.md` — semantics-class procedure; also uses `Task` on Cursor
 - `feedback-composer-25-subagent-reviews.md` — composer-2.5 as a reviewer tier
 - `cursor-boot-context-cost-measurement.md` — ~20K version-match boot on 256K Cursor window

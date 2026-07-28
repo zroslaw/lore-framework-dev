@@ -91,9 +91,10 @@ first-class part of the feature. Rejected: `/lr:review` (collides conceptually w
   clean instead of following the retry-then-report rule. 1 failure in 2 repeat runs with an unchanged
   doc, so it reads as weak-model variance rather than a procedure defect. The rule is correct but not
   binding enough for that tier.
-- **Open seam:** whether Cursor's `Task` tool accepts a free-text brief or only dispatches
-  pre-defined agent files by name. Unmeasured. The doc handles the name-only case by writing throwaway
-  `readonly` definitions under `.cursor/agents/` and deleting them afterwards.
+- **Closed seam (2026-07-28):** Cursor `Task` accepts free-text briefs (`prompt` + `subagent_type`).
+  Validated in-session; throwaway `.cursor/agents/` definitions are obsolete for trilens/merge briefs.
+  See `cursor-task-free-text-brief-validated.md`. Brief shape ≠ end-to-end proof of every fan-out
+  procedure — upgrade claims still need tool-call logs, not a green scenario alone.
 
 ## See Also
 

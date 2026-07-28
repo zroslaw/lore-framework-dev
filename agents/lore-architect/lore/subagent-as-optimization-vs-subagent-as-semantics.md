@@ -29,10 +29,11 @@ correct in one case and invalid in the other.
    review round returned it as a `BLOCKER` citing this rule. See
    `check-own-lore-before-dismissing-a-finding.md`.
 2. **A profile's degradation clause needs a carve-out, not a blanket rule.** v30 added exactly that to
-   `docs/engines/cursor.md`: it keeps serial host-side execution as the validated default for the
-   procedures that already pass that way, and carves out semantics-class procedures (naming
-   `trilens-loop.md` as the sole current exception, and explicitly forbidding extension to the
-   serial-default procedures without their own validation run).
+   `docs/engines/cursor.md`: semantics-class procedures (`trilens-loop.md`) must use native `Task`; the
+   remaining optimization-class fan-outs default serial host-side until deliberately upgraded. **Merge**
+   upgraded to `Task` on 2026-07-28 (`cursor-merge-via-task.md`) — still optimization-class, but no
+   longer serial on Cursor. Recall, consult, attach version-reconcile, and conflict resolution remain
+   serial until their own upgrade. Do not extend `Task` to those without evidence.
 3. **Independence has a second level: the brief.** A cold-context subagent handed the caller's
    rationale is only nominally independent — see `parallel-reviewer-fanout-pattern.md` § Brief the
    goal, not the rationale.
@@ -55,6 +56,8 @@ This is a **third axis** on the engine-degradation question, orthogonal to the t
 
 - `trilens-loop-feature.md` — the first semantics-class procedure and the reason this axis got named.
 - `cursor-engine-capabilities.md` — the profile whose degradation clause needed the carve-out.
+- `cursor-merge-via-task.md` — optimization-class merge upgraded to `Task` on Cursor (2026-07-28).
+- `cursor-task-free-text-brief-validated.md` — the probe that closed the brief-shape unknown.
 - `docs-engines-convention.md` — the five bindings; `subagent-spawn` is the one this constrains.
 - `multi-engine-portability-direction.md` — the direction this refines: parity is per-procedure-class,
   not per-engine.

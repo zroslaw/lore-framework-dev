@@ -4,7 +4,7 @@ Merge always runs in subagents as of v8 — uniform for single-agent and multi-a
 
 ## Execution model
 
-Each subagent is of type **`general-purpose`** — merge needs `Write`/`Edit`/`Bash`, which `Explore` can't do. The host dispatches one subagent per active agent (host + attached guests) in parallel via a single multi-call message.
+Each subagent is of type **`general-purpose`** — merge needs `Write`/`Edit`/`Bash`, which `Explore` can't do. The host dispatches one subagent per active agent (host + attached guests) in parallel via a single multi-call message. On **Cursor**, the binding is **`Task`** with `generalPurpose` (or equivalent) instead of Claude's `Agent` tool — same brief shape, same boot-then-merge procedure (`cursor-merge-via-task.md`).
 
 Host briefs each subagent to:
 
@@ -47,5 +47,6 @@ Reflect stays inline even in v8 — see `reflect-merge-execution-asymmetry.md`. 
 - `reflect-merge-execution-asymmetry.md` — the design rule for inline-vs-subagent
 - `finalization-process.md` — overall four-phase flow
 - `consult-pattern.md` — the other place a subagent boots as its target
+- `cursor-merge-via-task.md` — Cursor engine binding for merge via `Task`
 - `sonnet-subagent-review-pattern.md` — same role-as-lens mechanism applied to pre-publication review of high-stakes lore changes
 - `skill-doc-pattern.md` — why merge orchestration lives in `docs/finalize.md`
