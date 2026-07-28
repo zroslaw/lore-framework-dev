@@ -732,6 +732,33 @@ def check_installed_plugin_sources(framework_dir):
         check_cursor_plugin_sources(framework_dir)
 
 
+IDENTITY_VERIFIED_ENV = "LR_PLUGIN_IDENTITY_VERIFIED"
+
+
+def identity_token(framework_dir):
+    """Opaque token proving *which* tree an identity probe cleared, for which engine.
+
+    run_matrix probes once per engine, then every module subprocess re-probed on
+    its first run_engine because the cache is in-process — a full engine
+    round-trip per module, which is what timed out Cursor's takeover module at
+    420s. The token lets a child inherit the parent's verdict.
+
+    It carries engine + realpath + VERSION so it cannot be inherited across a
+    differently-configured run: a stale token from another engine, another
+    worktree, or a since-changed VERSION simply fails to match and the child
+    probes for itself.
+    """
+    return "%s|%s|%s" % (
+        ENGINE, os.path.realpath(framework_dir), read_framework_version(framework_dir),
+    )
+
+
+def identity_preverified(framework_dir):
+    """Did our parent process already clear this exact engine+tree+version?"""
+    token = os.environ.get(IDENTITY_VERIFIED_ENV)
+    return bool(token) and token == identity_token(framework_dir)
+
+
 def verify_plugin_identity(workspace=None, framework_dir=None, *, force=False):
     """Probe (and for Codex/Cursor, pre-check) that the loaded plugin matches framework_dir.
 
@@ -745,7 +772,16 @@ def verify_plugin_identity(workspace=None, framework_dir=None, *, force=False):
     if not force and os.environ.get("LR_SKIP_PLUGIN_IDENTITY") == "1":
         return {"skipped": True, "framework_dir": framework_dir}
 
+    # Always deterministic-check, even when inheriting a parent's verdict below:
+    # it costs no engine call, and it is the only thing that catches a competing
+    # plugin tree that appeared *after* the parent probed — exactly the
+    # 2026-07-27 Cursor rehydration, which landed 23s after the mitigation and
+    # 1m46s before the suite started.
     check_installed_plugin_sources(framework_dir)
+
+    if not force and identity_preverified(framework_dir):
+        _IDENTITY_CHECKED_FOR.add(key)
+        return {"skipped": False, "inherited": True, "framework_dir": framework_dir}
 
     own_tmp = None
     if workspace is None:

@@ -299,6 +299,65 @@ class CodexAgentMessages(unittest.TestCase):
         self.assertEqual(r.transcript, "said\nfinal")
 
 
+class IdentityTokenInheritance(unittest.TestCase):
+    """Module subprocesses inherit run_matrix's verdict instead of re-probing.
+
+    Each module re-paying a full engine round-trip is what timed out Cursor's
+    takeover module at 420s. The token must be narrow enough that it cannot be
+    inherited across a differently-configured run.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix="lr-token-")
+        self.addCleanup(lambda: __import__("shutil").rmtree(self.tmp, ignore_errors=True))
+        with open(os.path.join(self.tmp, "VERSION"), "w", encoding="utf-8") as f:
+            f.write("31\n")
+        self._saved = os.environ.get(harness.IDENTITY_VERIFIED_ENV)
+        self.addCleanup(self._restore)
+
+    def _restore(self):
+        if self._saved is None:
+            os.environ.pop(harness.IDENTITY_VERIFIED_ENV, None)
+        else:
+            os.environ[harness.IDENTITY_VERIFIED_ENV] = self._saved
+
+    def test_matching_token_is_preverified(self):
+        os.environ[harness.IDENTITY_VERIFIED_ENV] = harness.identity_token(self.tmp)
+        self.assertTrue(harness.identity_preverified(self.tmp))
+
+    def test_absent_token_is_not_preverified(self):
+        os.environ.pop(harness.IDENTITY_VERIFIED_ENV, None)
+        self.assertFalse(harness.identity_preverified(self.tmp))
+
+    def test_token_from_another_tree_is_rejected(self):
+        other = tempfile.mkdtemp(prefix="lr-token-other-")
+        self.addCleanup(lambda: __import__("shutil").rmtree(other, ignore_errors=True))
+        with open(os.path.join(other, "VERSION"), "w", encoding="utf-8") as f:
+            f.write("31\n")
+        os.environ[harness.IDENTITY_VERIFIED_ENV] = harness.identity_token(other)
+        self.assertFalse(harness.identity_preverified(self.tmp))
+
+    def test_token_goes_stale_when_version_changes(self):
+        """A rebuilt worktree at the same path must not inherit the old verdict."""
+        os.environ[harness.IDENTITY_VERIFIED_ENV] = harness.identity_token(self.tmp)
+        with open(os.path.join(self.tmp, "VERSION"), "w", encoding="utf-8") as f:
+            f.write("32\n")
+        self.assertFalse(harness.identity_preverified(self.tmp))
+
+    def test_token_names_the_engine(self):
+        """A cursor-cleared token must not silently clear a codex module."""
+        self.assertTrue(harness.identity_token(self.tmp).startswith(harness.ENGINE + "|"))
+
+    def test_run_matrix_env_name_matches_harness(self):
+        """The two spellings are separate constants; drift would silently disable this."""
+        path = os.path.join(LIFECYCLE, "run_matrix.py")
+        with open(path, encoding="utf-8") as f:
+            source = f.read()
+        self.assertIn(
+            f'IDENTITY_VERIFIED_ENV = "{harness.IDENTITY_VERIFIED_ENV}"', source,
+        )
+
+
 class CodexPromptPassthrough(unittest.TestCase):
     def test_identity_probe_does_not_inject_framework_dir(self):
         rewritten = harness.codex_prompt(harness.PLUGIN_IDENTITY_PROMPT)

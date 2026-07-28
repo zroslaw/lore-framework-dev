@@ -44,6 +44,11 @@ STANDARD_MODULES = [
 KEEPER_MODULES = ["test_lrb_lifecycle.py"]
 ENGINE_DEFAULTS = ["claude", "codex", "cursor"]
 MODEL_DEFAULTS = {"claude": "haiku", "codex": "gpt-5.4-mini", "cursor": "composer-2.5"}
+# Mirrors harness.IDENTITY_VERIFIED_ENV. Spelled out rather than imported: this
+# module drives several engines in one process, and importing harness would bind
+# harness.ENGINE to whatever LR_ENGINE happened to be set at import time.
+# tests/test_lifecycle_plugin_identity.py pins the two spellings together.
+IDENTITY_VERIFIED_ENV = "LR_PLUGIN_IDENTITY_VERIFIED"
 
 
 def parse_csv(value, allowed=None):
@@ -162,6 +167,10 @@ def verify_engine_plugin_identity(engine, base_env, run_dir):
         "import harness\n"
         "info = harness.verify_plugin_identity(force=True)\n"
         "print('PLUGIN-IDENTITY-OK', info.get('reported_version'), info.get('reported_root'))\n"
+        # Emitted so module subprocesses can inherit this verdict instead of each
+        # paying its own engine round-trip. They still run the deterministic
+        # filesystem check, so a tree that appears mid-suite is still caught.
+        "print('PLUGIN-IDENTITY-TOKEN', harness.identity_token(harness.FRAMEWORK_DIR))\n"
     ) % REPO_ROOT
     print("  identity %-7s ..." % engine, flush=True)
     start = time.monotonic()
@@ -180,9 +189,14 @@ def verify_engine_plugin_identity(engine, base_env, run_dir):
         detail = (proc.stderr or proc.stdout or "").strip()[-800:]
         print("  FAILED identity %-7s (%.1fs)" % (engine, duration_s), flush=True)
         print(detail, flush=True)
-        return False, detail
+        return False, detail, ""
     print("  ok     identity %-7s (%.1fs)" % (engine, duration_s), flush=True)
-    return True, (proc.stdout or "").strip()
+    detail = (proc.stdout or "").strip()
+    token = ""
+    for line in detail.splitlines():
+        if line.startswith("PLUGIN-IDENTITY-TOKEN "):
+            token = line.split(" ", 1)[1].strip()
+    return True, detail, token
 
 
 def run_configs(configs, suite, test_filter, engine_jobs, module_jobs, base_env, run_dir):
@@ -191,8 +205,8 @@ def run_configs(configs, suite, test_filter, engine_jobs, module_jobs, base_env,
     identity = {}
 
     for engine in groups:
-        ok, detail = verify_engine_plugin_identity(engine, base_env, run_dir)
-        identity[engine] = {"ok": ok, "detail": detail}
+        ok, detail, token = verify_engine_plugin_identity(engine, base_env, run_dir)
+        identity[engine] = {"ok": ok, "detail": detail, "token": token}
         if not ok:
             # Do not run this engine's modules — results would be uninterpretable.
             for e, m in groups[engine]:
@@ -207,10 +221,18 @@ def run_configs(configs, suite, test_filter, engine_jobs, module_jobs, base_env,
     def run_engine_group(engine, engine_configs):
         if not identity.get(engine, {}).get("ok", True):
             return
+        # Per-engine env, not a mutation of the shared base_env: engine groups run
+        # concurrently, and one engine's identity token must never leak into
+        # another's modules — where it would fail to match anyway, but only after
+        # the child had already skipped nothing and probed for itself.
+        engine_env = dict(base_env)
+        token = identity.get(engine, {}).get("token")
+        if token:
+            engine_env[IDENTITY_VERIFIED_ENV] = token
         workers = module_jobs if module_jobs > 0 else len(engine_configs)
         with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
             futures = {
-                pool.submit(run_module, e, m, suite, test_filter, base_env, run_dir): (e, m)
+                pool.submit(run_module, e, m, suite, test_filter, engine_env, run_dir): (e, m)
                 for e, m in engine_configs
             }
             for fut in as_completed(futures):
