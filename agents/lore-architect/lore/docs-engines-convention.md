@@ -126,6 +126,12 @@ Two corollaries for procedure docs:
 This composes with § Cross-profile guardrail audits below: having written a trap into one binding, check
 the sibling bindings for the same class of trap.
 
+**Generalized past engine profiles:** the binding is one kind of point-of-use site; so are the script
+that performs the operation, the exact command spelled out in a doc, and a regression test. The same
+failure recurred on 2026-07-28 with non-engine traps (GNU `timeout` on macOS, `git -C` off a repo
+toplevel) — both recorded in lore I wrote myself, both hit anyway. See
+`point-of-use-guardrails-beat-recorded-lore.md`.
+
 ## Cross-profile guardrail audits
 
 When one engine profile documents a named guardrail against a class of error, check every sibling profile for the same latent bug rather than assuming the guardrail was only ever needed once. Since all three profiles share the same five bindings by design, a fix in one binding's handling on one profile is a strong signal to audit the same binding on the others. Concrete instance: `docs/engines/cursor.md` had long guarded against guessing `docs/<skill>.md` from a skill name (skill-name and doc-filename diverge, e.g. `boot` → `agent-boot.md`), but `docs/engines/codex.md`'s invocation-syntax binding had the identical latent bug, undetected until an AI-installer review pass traced it against real files on disk. See `skill-doc-filename-divergence-bug-class.md`.

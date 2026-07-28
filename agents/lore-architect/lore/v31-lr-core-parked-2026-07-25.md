@@ -8,17 +8,29 @@ pushed to completion, not discarded. Follow-on sessions resumed it three times: 
 literate-accelerator addendum, a review-and-fix pass, and the `trilens-loop.md` restructure (all
 below).
 
-**Current state as of 2026-07-27 evening session:** A7 plugin-identity gate is on
-`lore-framework-dev` `main`. Codex marketplace + Cursor (cloud plugin disabled) were
-repointed at the v31 worktree; a **valid** lifecycle re-run produced Codex **6/7** and
-Cursor **4/7** — see `v31-lifecycle-rerun-partial-green-2026-07-27.md`. Plugin remains
-parked on `wip/lr-core-v31` @ `cd8ece1`. Ship gate: triage remaining boot/Script-Fallback /
-Cursor-sees-30 failures, then version-ship.
+**Current state as of the 2026-07-28 session:** A7 plugin-identity gate is on
+`lore-framework-dev` `main`, and its two structural holes are now closed. The 2026-07-27
+lifecycle re-run was **re-triaged on 2026-07-28 and its original failure list was mostly
+wrong** — Codex's shard is valid (one genuine defect, one undetermined), Cursor's shard is
+**uninterpretable, not 4/7**, because the cloud plugin rehydrated over the move-aside and
+Cursor's A7 arm was a model self-report that could not see it. See
+`v31-lifecycle-rerun-partial-green-2026-07-27.md` for the corrected triage.
 
 | Repo | Where it lives now | Notes |
 |---|---|---|
-| `lore-framework` | `wip/lr-core-v31` @ `cd8ece1` (worktree) | Still the ship gate. |
-| `lore-framework-dev` | **`main`** (includes former WIP + A7) | Harness identity gate live. |
+| `lore-framework` | `wip/lr-core-v31` @ `b824da5` (worktree) | Still the ship gate. |
+| `lore-framework-dev` | **`main`** @ `848d3fc` (includes former WIP + A7) | Harness identity gate live, both holes closed. |
+
+**Ungated commit ledger (2026-07-28).** Four commits carry this session's work and **none has
+been seen by any gate** — no trilens round, no lifecycle run:
+
+- `lore-framework-dev` `main`: `03067c1`, `467b009`, `848d3fc` (A7 hole fixes, transcript
+  capture, identity-verdict inheritance).
+- `lore-framework` `wip/lr-core-v31`: `b824da5` — and this one **changes a boot-path procedure
+  doc**, the highest-risk class.
+
+Per `post-convergence-edits-need-their-own-gate.md` these must be gated before ship; do not
+report v31 as reviewed-and-green on the strength of the earlier rounds.
 
 ## 2026-07-26 addendum: literate-accelerator redesign
 
@@ -169,20 +181,31 @@ behavior. Verified false via `git merge-tree --write-tree`: zero conflicts, both
 in the resulting tree. Overridden, disclosed, and generalized as its own topic — see
 `diverged-branch-diff-misread-as-merge-outcome.md`.
 
-**Outstanding for v31 as of the post-A7 lifecycle re-run** (supersedes older resume lists):
+**Outstanding for v31 as of the 2026-07-28 re-triage** (supersedes all older resume lists, and
+in particular the six-item failure list this section used to carry):
 
-1. Triage/fix the partial-green failures in `v31-lifecycle-rerun-partial-green-2026-07-27.md`
-   (Codex R>F wording + Script Fallback notify; Cursor stamp/update-dry-run seeing 30; takeover
-   identity-probe timeout).
-2. Version-ship discipline once the gate is acceptably green: four manifests to `1.31.0`, the
+1. **Re-run Codex `test_07` and `test_08`.** `test_07`'s real defect is fixed on `b824da5`
+   (`script-emits-data-doc-owns-the-words.md`); `test_08` was never decidable on Codex until
+   `RunResult.transcript` landed (`transcript-vs-final-message-assertions.md`).
+2. **Re-run the entire Cursor shard** with `check_cursor_plugin_sources()` in force. Its
+   2026-07-27 numbers carry no information — the suite ran against a v30 plugin.
+3. **Gate this session's four ungated commits** (see the ledger above): a trilens round covering
+   `b824da5`'s boot-path doc change, plus a lifecycle run that actually sees them.
+4. Version-ship discipline once the gate is genuinely green: four manifests to `1.31.0`, the
    `versioning-release-types.md` v31 entry, the cache-clear footer (cache-affecting), then merge
    **`lore-framework`** `wip/lr-core-v31` → `main` and push. (`lore-framework-dev` already on main,
    including A7.)
-3. Fold `trilens-loop-v31-restructured.md` into `trilens-loop-feature.md` when the plugin doc ships.
-4. Restore Cursor cloud-plugin backup (`~/.cursor/plugins-backup-v31-*`) after parked-branch testing
-   if normal IDE installs should return — see `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
+5. Fold `trilens-loop-v31-restructured.md` into `trilens-loop-feature.md` when the plugin doc ships.
+6. Restore the Cursor cloud-plugin backup (`~/.cursor/plugins-backup-v31-*`) after parked-branch
+   testing if normal IDE installs should return — and note that the move-aside must be **re-checked
+   after the fact**, not trusted (`cursor-cloud-plugin-rehydrates-over-plugin-dir.md`).
 
-Plugin branch tip still `cd8ece1` on `wip/lr-core-v31`, clean, not merged/pushed.
+Plugin branch tip is now `b824da5` on `wip/lr-core-v31`, clean, not merged/pushed.
+
+**Not a v31 item:** the `agent-boot.md` size regression measured 2026-07-28
+(`agent-boot-doc-grew-when-scripted.md`) is deliberately deferred to v32 — reopening the
+most-read procedure doc now moves the ship further out. Queued as A8 on
+`workdir/what-to-improve.md`.
 
 ## Where it lives
 
@@ -198,18 +221,19 @@ for the standing don't-auto-restore rule.
 
 ## Resuming
 
-Don't reconstruct the plan from scratch. **A7, Codex/Cursor repoint, and a valid lifecycle
-re-run are done** — see `v31-lifecycle-rerun-partial-green-2026-07-27.md` for the failure list
-that is now the ship gate. Older resume bullets about "never ran lifecycle" / "repoint sources"
-are stale.
+Don't reconstruct the plan from scratch. **A7 (both holes now closed), the Codex repoint, and a
+Codex lifecycle shard are done.** Older resume bullets about "never ran lifecycle" / "repoint
+sources" are stale — and so is any six-item failure list: read
+`v31-lifecycle-rerun-partial-green-2026-07-27.md`'s **corrected** triage, not a remembered
+version of it.
 
-Next:
-1. Triage/fix the partial-green failures (Script Fallback notify, Codex R>F wording, Cursor
-   seeing framework 30 in update/boot scenarios, takeover identity-probe timeout).
-2. Ship the plugin when the gate is acceptably green (manifests, version-history, cache-clear,
+Next, in order:
+1. Re-run Codex `test_07` / `test_08` and the full Cursor shard (see Outstanding above).
+2. Gate the four ungated commits from 2026-07-28.
+3. Ship the plugin when the gate is genuinely green (manifests, version-history, cache-clear,
    merge `wip/lr-core-v31` → main).
-3. Collapse `trilens-loop-v31-restructured.md` into `trilens-loop-feature.md` on ship; restore
-   Cursor cloud-plugin backup if normal installs should return.
+4. Collapse `trilens-loop-v31-restructured.md` into `trilens-loop-feature.md` on ship; restore
+   the Cursor cloud-plugin backup if normal installs should return.
 
 Before starting *any* fresh work on `lr-core`, the Script Fallback Contract, or `trilens-loop.md`, check
 for this branch/worktree pair first — a second attempt at the same design without checking would
@@ -244,9 +268,15 @@ held rather than pushed through or discarded.
   (nested-repo `git -C` escape).
 - `verify-regression-tests-via-mutation.md` — how the two round-2 regression tests added in round 1
   were verified to actually pin their bugs.
-- `literate-accelerator-pattern.md` — **not yet in this repo's lore**; lives only in the worktree's
-  `lore/` until v31 ships (see 2026-07-26 addendum above). Look for it there, not here, if you need
-  the pattern before then.
+- `literate-accelerator-pattern.md` — the pattern this work introduced. It **is** in this repo's
+  lore now (landed on `main` via `8fc46f0`); the 2026-07-26 addendum's "worktree only" note is
+  historical.
+- `script-emits-data-doc-owns-the-words.md` — the accelerator constraint v31's own lifecycle run
+  taught: the script emits data, the doc owns user-facing words.
+- `a-gate-cannot-be-a-model-self-report.md`, `transcript-vs-final-message-assertions.md` — the two
+  harness defects that made the 2026-07-27 failure list untrustworthy.
+- `agent-boot-doc-grew-when-scripted.md` — the v32-deferred size regression in the doc this
+  release scripted.
 - `lifecycle-harness-plugin-identity-unverified.md` — the 2026-07-27 finding that Codex/Cursor silently
   resolved an installed v30 plugin instead of the worktree under test, invalidating both engines'
   results from this session's lifecycle run.

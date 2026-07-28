@@ -93,7 +93,22 @@ but nothing schedules them — the next ship would silently inherit an unverifie
 the union of v27+v28 changes. Covered by the v28 standard lifecycle matrix plus targeted
 reruns recorded in `workdir/v28-e2e-gate-2026-07-22.md`; delete on the next refresh.
 
-### A7. Lifecycle harness doesn't verify which plugin actually loaded — ✅ done (this branch)
+### A8. `agent-boot.md` doubled in the release that scripted it — OPEN, **v32 tier (explicitly not v31)**
+Measured 2026-07-28: the boot procedure went 51 → 108 lines on the v31 branch, in the release
+whose purpose was to move it into `scripts/lr-core`. `auto-pull.md` went the other way
+(100 → 80), so the literate-accelerator thesis holds there and fails here. Every boot on every
+engine pays ~3K tokens for the most-read doc in the framework. Three causes, only one
+legitimate: (a) ~a quarter of the file is the standing operating manual, not boot — splitting
+it out is pure filing, zero behavior change; (b) Step 2 hand-writes prose routing for JSON
+fields the script already computed, where `read_next` already solves the same problem in two
+lines for `role.md`/`lore-context.md`; (c) the remainder is load-bearing scar tissue pinned by
+lifecycle scenarios — do not trim it blind. **Do:** (a) then (b), each behind the normal
+gates. **Deliberately deferred past v31** — reopening the most-read procedure doc while v31 is
+four commits from shipping moves the ship further out. Evidence + word-level breakdown:
+`agent-boot-doc-grew-when-scripted.md`. Backlog ref: § Framework Upkeep — "no subtraction
+force".
+
+### A7. Lifecycle harness doesn't verify which plugin actually loaded — ✅ done (holes closed 2026-07-28, ungated)
 Confirmed live 2026-07-27 running the suite against the parked v31 branch: `harness.py`'s
 `run_engine()` passes `--plugin-dir <framework_dir>`, but on Codex and Cursor an
 installed/cached plugin silently won over that flag — both engines ran the full suite
@@ -103,8 +118,17 @@ which is incidental, not structural. A green or red result under this condition 
 uninterpretable either way. **Done:** `verify_plugin_identity` probes loaded VERSION (+
 FRAMEWORK-ROOT) and asserts against `LR_FRAMEWORK_DIR`; Codex also gets a deterministic
 marketplace-source/cache preflight; `run_matrix.py` fails an engine's shard before any
-module runs. Opt out only via `LR_SKIP_PLUGIN_IDENTITY=1` (debug). See
-`lifecycle-harness-plugin-identity-unverified.md`, `tests/test_lifecycle_plugin_identity.py`.
+module runs. Opt out only via `LR_SKIP_PLUGIN_IDENTITY=1` (debug).
+**Follow-up, 2026-07-28:** the first fix shipped with two structural holes (per-run
+`framework_dir` overrides unchecked — and `test_08` is the only scenario handed a different
+tree, so the one test needing verification was the one skipping it; and the verdict cached
+per process, proving identity at probe time only). Worse, the **Cursor arm was a model
+self-report**, which passed while the suite ran on v30. All three closed
+(`check_cursor_plugin_sources()` walks `local/`+`marketplaces/`+`cache/` off the filesystem;
+override verification; `engine|realpath|VERSION` verdict inheritance, which also removed
+`test_takeover`'s 420s timeout). **These fixes are ungated** — no lifecycle run has seen
+them. See `lifecycle-harness-plugin-identity-unverified.md`,
+`a-gate-cannot-be-a-model-self-report.md`, `tests/test_lifecycle_plugin_identity.py`.
 
 ### A6. `docs/engines/claude.md` ↔ `CLAUDE.md` case-collision on macOS — OPEN (low)
 Observed live 2026-07-18: on case-insensitive APFS, Claude Code auto-injects
@@ -211,6 +235,9 @@ surface.
 4. **Own design sessions:** B5 (trust model), C3 (MCP server), C4 (autonomous
    maintenance).
 5. **Continuous:** B6 (marketplace) whenever ready; B3/B4 data-gathering alongside.
+
+**v32 tier (added 2026-07-28):** A8 (`agent-boot.md` subtraction pass) — first item of the
+release *after* v31 ships, not folded into it.
 
 ## Provenance
 

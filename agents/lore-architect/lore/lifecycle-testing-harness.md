@@ -115,6 +115,18 @@ Out of scope for this harness (covered elsewhere or not headless-scriptable):
 
 Assertions are structural, matching the design premise: git HEAD before/after, file existence, canary tokens planted in fixture files (to prove a file was actually read, not paraphrased around), `grep`-based fact checks after reflect/merge. No LLM-as-judge needed for any of the 19 — the catalog's premise (procedure outputs are files + git state, verifiable by script) held up in practice.
 
+**Classify every text assertion as mid-run or end-state.** `RunResult.text` is the *final message*
+only on Codex (`--output-last-message`); `RunResult.transcript` (Codex `--json` stream,
+`agent_message` items only; defaults to `text` on Claude/Cursor) carries what was said *during* the
+run. Asserting a mid-boot notice against `text` makes compliant and violating runs
+indistinguishable — that is what left Codex `test_08` undetermined rather than failing. See
+`transcript-vs-final-message-assertions.md`.
+
+**A failure list is a hypothesis until someone reads the transcripts.** Re-triaging the 2026-07-27
+v31 re-run from stored logs overturned four of six failures at zero engine cost — the
+confident-sounding assertion messages were the wrong ones. See
+`v31-lifecycle-rerun-partial-green-2026-07-27.md`.
+
 ## Cost and gating
 
 Gated behind `LR_LIFECYCLE=1` (real API cost; the default tier is the cheapest practical
@@ -165,8 +177,13 @@ reachable from the repo root, not only from deep test directories: root `README.
   plugin instead of the v31 worktree, invalidating both engines' results while Claude Code (nothing
   installed globally on that machine) was unaffected only incidentally. **Fix applied:**
   `verify_plugin_identity` probes loaded `VERSION`/`FRAMEWORK-ROOT`; Codex also gets a deterministic
-  marketplace-source/cache preflight; `run_matrix` fails the engine shard before modules run. See
-  `lifecycle-harness-plugin-identity-unverified.md`.
+  marketplace-source/cache preflight; `run_matrix` fails the engine shard before modules run.
+  **That first fix had two holes** — per-run `framework_dir` overrides were unchecked, and the
+  verdict was cached per process — plus a Cursor arm implemented as a model self-report. All three
+  closed 2026-07-28 (`check_cursor_plugin_sources()`, override verification,
+  `engine|realpath|VERSION` verdict inheritance), and the fixes are themselves not yet gated by a
+  run. See `lifecycle-harness-plugin-identity-unverified.md`,
+  `a-gate-cannot-be-a-model-self-report.md`.
 - **Parallelize the suite** — scenarios are fixture-isolated; today they run serially via
   `unittest discover` (~15–45 min/engine). Future: `LR_LIFECYCLE_JOBS`, parallel by test file, or
   parallel by engine in separate terminals; cap concurrency for API limits. See
@@ -215,6 +232,10 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `post-convergence-edits-need-their-own-gate.md` — a green run certifies only the artifact state it ran against.
 - `macos-documents-permission-loss-mid-session.md` — the environment ailment that renders a run's verdict uninterpretable.
 - `lifecycle-harness-plugin-identity-unverified.md` — the harness never verifies which plugin actually loaded on Codex/Cursor, so an installed plugin can silently substitute a different artifact for the one under test.
+- `a-gate-cannot-be-a-model-self-report.md` — why a gate implemented as an engine-side prompt is
+  not a gate; the rule the A7 Cursor arm broke.
+- `transcript-vs-final-message-assertions.md` — mid-run vs end-state assertion surfaces, and the
+  Codex transcript capture.
 - `codex-cli-plugin-loading-findings.md`, `cursor-agent-cli-probe-findings.md` — first empirical
   per-engine probes.
 - `codex-port-validated-end-to-end.md`, `codex-testing-methodology.md` — the manual end-to-end Codex validation and its rollout-log ground-truthing (what the automated codex driver must replicate).

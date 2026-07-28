@@ -49,7 +49,12 @@ prefixed wrappers (`cursor-dual-skill-tree-one-repo.md`). **Skills are thin poin
 An **accelerator** script (Script Fallback Contract) can go one step further and become
 **literate**: the procedure lives in the script's own instructional comments rather than in a
 companion doc, so there's one artifact instead of two that can drift apart. First applied to
-`scripts/lr-core` in v31. See `literate-accelerator-pattern.md`.
+`scripts/lr-core` in v31. Hard constraint at that seam: **the script emits data, the doc owns
+user-facing words** — a script string that reads like a finished message gets printed as one, and
+printing it *looks* like handling the situation, so the executor never reaches the doc that owns
+the remedy. And scripting a procedure does not automatically shrink its doc: `auto-pull.md` shrank,
+`agent-boot.md` doubled. See `literate-accelerator-pattern.md`,
+`script-emits-data-doc-owns-the-words.md`, `agent-boot-doc-grew-when-scripted.md`.
 
 The plugin can also **bundle an MCP server** (declared in a root `.mcp.json`, auto-launched by Claude Code with its tools merged into the agent): **`lr-wait`** (v18) is the first — and the framework's first `python3` dependency (stdlib-only, no pip; the sole sanctioned exception to bash-on-BSD, for protocol-speaking server components). Practical limit to remember before promising a long wait: on Claude Code a single MCP call dies at the engine's ~30-minute idle timeout, and the abort leaves `lr-wait`'s single-request lock stuck `busy` for the rest of the session — chunk waits at ≤29 min, or use a backgrounded shell timer. See `plugin-mcp-server-convention.md`, `wait-primitive-feature.md`.
 
@@ -68,11 +73,17 @@ agent lore. Lore is for judgement and history; the profile is the point-of-use c
 by hitting a trap that had been recorded in my own lore since v18. See `docs-engines-convention.md`
 § Engine traps belong in the binding, and audit sibling profiles whenever one binding gains a guardrail.
 
-**Codex/Cursor plugin identity is gated (A7).** The lifecycle harness asserts loaded plugin VERSION
-against `LR_FRAMEWORK_DIR` before trusting results; Codex also gets a marketplace-source/cache
-preflight. Cursor still needs the cloud marketplace install disabled/moved aside when testing a
-non-main checkout — it rehydrates from GitHub over `--plugin-dir` otherwise. See
-`lifecycle-harness-plugin-identity-unverified.md`, `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
+**Codex/Cursor plugin identity is gated (A7), and the gate is filesystem-deterministic on both
+engines.** The lifecycle harness asserts loaded plugin VERSION against `LR_FRAMEWORK_DIR` before
+trusting results, including per-run `framework_dir` overrides, with the verdict inherited by child
+subprocesses via an `engine|realpath|VERSION` token rather than cached per process. Codex reads
+`~/.codex/config.toml` + plugin cache; Cursor walks `~/.cursor/plugins/{local,marketplaces,cache}`.
+The Cursor arm was originally an engine-side prompt and passed while the suite ran on v30 — a gate
+implemented in the medium it gates is not a gate. Cursor's cloud marketplace install also
+**rehydrates within ~25 seconds** of being moved aside, so a manual prep step cannot be trusted;
+re-check at suite start, which is what the harness check is for. See
+`lifecycle-harness-plugin-identity-unverified.md`, `a-gate-cannot-be-a-model-self-report.md`,
+`cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
 
 ## Marketplace & Distribution
 
@@ -148,7 +159,10 @@ appending the current entry. See `versioning-release-types.md`, `plugin-manifest
 How I work, especially at version ships and high-stakes lore edits:
 - **On VERSION bumps:** backfill `versioning-release-types.md` history, add the cache-clear footer if cache-affecting, bump all four version-bearing plugin manifests to `1.<VERSION>.0`, promote any newly-named principle to its own topic. (Full curation disciplines live in `role.md`.)
 - **Pre-ship review:** multi-lens review iterated until a round finds nothing worth fixing (convergence is the ship signal) — **run it via `/lr:trilens-loop`** rather than hand-assembling the fan-out; the skill enforces cold-context reviewer independence, the APPLIED/DECLINED ledger, the "a silent round is not a clean round" guard, and rail-removal disclosure, while lens *choice* and triage judgement stay mine. Brief reviewers with the **goal, not the rationale** — rationale pre-empts the criticism you're paying for. Two triage facts from measuring a live round: **~94% of a loop's tokens stay inside the subagents** (a reviewer's budget is its own reasoning, not the material handed to it — so withholding the diff is cost-neutral, and the exchange contract must be justified on independence and host-context preservation, never on token savings), and **convergent findings from two independent lenses are strong evidence, not redundancy** — reword rather than defend. Sonnet boot-as-self review remains the separate single-lens, role-as-perspective tool for high-stakes single edits. See `trilens-loop-feature.md`, `parallel-reviewer-fanout-pattern.md`, `sonnet-subagent-review-pattern.md`. **Second, empirical leg (v18+):** for procedure docs covered by the lifecycle testing harness, also run the relevant scenarios against real engine execution before shipping — review catches reasoning issues, the harness catches model-execution-fidelity issues invisible to a strong-model reviewer — and the fidelity axis is **engine, not just model tier** (run scenarios on every engine, using the cheapest practical default tier unless explicitly overriding: Claude Code -> haiku, Codex -> gpt-5.4-mini, Cursor -> composer-2.5; the same model tier can behave differently by engine, and mid-procedure step insertions are the highest-risk for a silent skip). See `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`, `haiku-ambiguity-detector.md`.
-- **A gate result belongs to an artifact state** — a converged review loop and a green lifecycle run each certify only the tree they actually ran against. An edit landed after the gates pass is ungated: re-run the affected gate, or revert and file a follow-up. Never report "converged and green" for a tree neither gate saw, and record *which* state a result belongs to. Also: an environment failure mid-run (e.g. macOS TCC revocation) makes results **uninterpretable**, not red — fix and re-run rather than debugging the code under test. See `post-convergence-edits-need-their-own-gate.md`, `macos-documents-permission-loss-mid-session.md`.
+- **A gate result belongs to an artifact state** — a converged review loop and a green lifecycle run each certify only the tree they actually ran against. An edit landed after the gates pass is ungated: re-run the affected gate, or revert and file a follow-up. Never report "converged and green" for a tree neither gate saw, and record *which* state a result belongs to. Also: an environment failure mid-run (e.g. macOS TCC revocation) or the engine resolving a *different* plugin tree makes results **uninterpretable**, not red — fix and re-run rather than debugging the code under test. See `post-convergence-edits-need-their-own-gate.md`, `macos-documents-permission-loss-mid-session.md`.
+- **A gate cannot be a model self-report** — a gate must not be implemented in the medium it gates. Ask what evidence it rests on and whether the thing under test could have produced that evidence; if yes, it is a self-report wearing a gate's name. "Both engines have coverage" is not evidence parity. See `a-gate-cannot-be-a-model-self-report.md`.
+- **A failure list is a hypothesis until someone reads the transcripts** — an assertion message names what was observed, never why. Re-triage from stored logs before planning fixes; stored artifacts plus `stat` routinely beat fresh engine probes on cost and certainty. Classify each text assertion as mid-run (needs the transcript) or end-state (final message suffices) — mixing them changes what a test means per engine. See `v31-lifecycle-rerun-partial-green-2026-07-27.md`, `transcript-vs-final-message-assertions.md`.
+- **Decide where the guardrail lives before writing the topic** — lore is retrieved when a task cues it, and a one-off command cues nothing; a trap recorded only as knowledge protects nobody, including its author. Name the point-of-use site (script check, exact command in the doc, test) as part of the fix, and prefer a deterministic harness check over a human prep step. See `point-of-use-guardrails-beat-recorded-lore.md`, `docs-engines-convention.md` § Engine traps belong in the binding.
 - **Verify before asserting** — check filesystem/state directly before "fixing" a suspected bug; verify *which* bug, not just whether. **Pointed inward:** before declaring a known finding moot — especially a ship-blocking one — read the lore rule it rests on rather than reconstructing it; reconstruction keeps a rule's motivating case and drops its actual obligation, and those diverge precisely when dismissal feels justified (`check-own-lore-before-dismissing-a-finding.md`). Same reflex, two more sites: fetch volatile external facts (prices, model IDs, rate limits) live with a dated citation rather than trusting memory — "couldn't verify" licenses marking a value unavailable, not guessing; and after any scoped/read-only subagent or fork returns, verify its actual filesystem footprint (`git status`, `git worktree list`) rather than trusting its summary — a capable fork acts on the largest goal it can see in inherited context unless scoped *against* it explicitly. See `verify-before-acting-on-suspected-bugs.md`, `fetch-volatile-facts-live-not-memory.md`, `fork-scope-creep-under-standing-goal.md`.
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source (pointer, don't restate — and its design-time cousin: reuse an existing correlation/identity signal before inventing new plumbing); don't defer completable bounded sweeps; graduated verification (confidence, not boolean). See `naming-foundational-principles.md`, `single-canonical-source-discipline.md`, `reuse-existing-correlation-signal.md`, `feedback-don-t-defer-completable-scope.md`, `graduated-verification-confidence.md`.
 - **User-feedback working style:** ranked-shortlist over exhaustive enumeration; confirm before writing durable lore mid-session; in design dialogues, write the draft only when the user triggers it (decisions are safe in conversation — don't repeatedly move to persist); populate dry-run counters with would-be outcomes; "enforce X" ≠ add a required schema field; for broad/emotionally-loaded open-ended asks, decompose into hidden axes and sequence a build order by dependency (cheapest/highest-leverage first, flashiest/most-structural last) rather than proposing a menu or jumping to implementation; on a second round of pushback on the same axis (length, tone, scope), act on the next ask instead of re-justifying — a second "no" is not a request for more reasoning; a **short measurement question gets a short factual answer**, with the interesting generalisation offered rather than delivered, and **several style skills invoked at once is a stop signal**, not a preference tweak (hold the style for the rest of the session). See `feedback-too-many-words.md`, `feedback-confirm-before-writing-lore.md`, `feedback-draft-only-when-user-triggers.md`, `feedback-schemas-as-enforcement-overreach.md`, `feedback-layered-decomposition-for-open-ended-asks.md`, `feedback-mvp-minimalism.md`, `feedback-comply-promptly-after-repeated-pushback.md`.
@@ -217,12 +231,19 @@ surfaces are all live: **Lore Beings** (Being Keeper substrate + `/lr:being` com
 
 **v31 `lr-core` is built and reviewed; agent-repo side is on `lore-framework-dev` `main`, plugin
 still PARKED.** Deterministic substrate + literate Script Fallback Contract + reworked
-`docs/trilens-loop.md` live on `lore-framework` branch `wip/lr-core-v31` @ `cd8ece1` (worktree
-`.worktrees/lore-framework/lr-core-v31/`) — **not merged, not a ship**. A7 plugin-identity gate
-is on `lore-framework-dev` main; valid Codex/Cursor re-run after repoint: Codex **6/7**, Cursor
-**4/7** (`v31-lifecycle-rerun-partial-green-2026-07-27.md`). Ship gate: triage remaining failures,
-then version-ship the plugin. Check `v31-lr-core-parked-2026-07-25.md` before related work. See
-also `lifecycle-harness-plugin-identity-unverified.md`,
+`docs/trilens-loop.md` live on `lore-framework` branch `wip/lr-core-v31` @ `b824da5` (worktree
+`.worktrees/lore-framework/lr-core-v31/`) — **not merged, not a ship**.
+
+Lifecycle standing: **one confirmed v31 defect** (Codex `test_07`, fixed on `b824da5` —
+`script-emits-data-doc-owns-the-words.md`), **one undetermined** (Codex `test_08`, undecidable
+until transcript capture landed), and **the whole Cursor shard uninterpretable** — it ran against
+a v30 plugin. Ship gate: re-run those Codex scenarios and the full Cursor shard, gate the four
+commits no gate has seen (`lore-framework-dev` `03067c1`/`467b009`/`848d3fc`, `lore-framework`
+`b824da5` — the last changes a boot-path doc), then version-ship. Check
+`v31-lr-core-parked-2026-07-25.md` before related work, and read
+`v31-lifecycle-rerun-partial-green-2026-07-27.md`'s corrected triage rather than any remembered
+failure list. See also `lifecycle-harness-plugin-identity-unverified.md`,
+`a-gate-cannot-be-a-model-self-report.md`, `transcript-vs-final-message-assertions.md`,
 `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`, `trilens-loop-v31-restructured.md`,
 `literate-accelerator-pattern.md`.
 
@@ -236,7 +257,7 @@ See `trilens-loop-feature.md`, `lifecycle-testing-harness.md`, `lore-beings-desi
 
 `framework-improvements-backlog.md` is the canonical list of deferred items; its § Ship Closures
 archives per-ship gate dispositions. Quality benchmark tier/probe expansion is in the dev repo with
-regular/deep matrix defaults and local override support. ~175 lore topics. The
+regular/deep matrix defaults and local override support. ~195 lore topics. The
 backlog is organized into top-level `##` categories (Major Directions, Session Lifecycle &
 Durability, Knowledge Quality & Curation, Multi-Agent Collaboration, Workspace & Environment,
 Framework Upkeep/Distribution/Docs, Ship Closures archive), each holding `###` topical sections —
@@ -249,5 +270,7 @@ action view over the backlog that must always exist, not a one-off review delive
 refresh it at each architecture review. Last refresh 2026-07-18: A-tier verified inconsistencies
 (script-backed `/lr:check` core + reference-rot cleanup first), B-tier backlog promotions (merge
 verification, staleness surfacing, trust model), C-tier feature directions (ambient recall,
-`/lr:note`, lore MCP server). See `standing-improvement-list-practice.md` for the refresh
-protocol, backlog relationship, and tiering convention.
+`/lr:note`, lore MCP server). A **v32 tier** now sits alongside these: A8, the `agent-boot.md`
+subtraction pass, held out of v31 deliberately (`agent-boot-doc-grew-when-scripted.md`). See
+`standing-improvement-list-practice.md` for the refresh protocol, backlog relationship, and
+tiering convention.

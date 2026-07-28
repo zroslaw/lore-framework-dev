@@ -92,6 +92,16 @@ mechanizing it later. The distinction from **Implementation** scripts
 (`scripts/workspace-pull`, `scripts/lrb.py`, etc. — the script *is* the spec, nothing to fall back
 to) is unchanged; this pattern only applies to the Accelerator half of the split.
 
+**One hard constraint learned from v31's own lifecycle run:** the script emits *data*; the doc owns
+*user-facing words*. A literate accelerator that also emits finished-sounding messages gives the
+executor a cheaper path than the doc it was meant to accelerate — see
+`script-emits-data-doc-owns-the-words.md`.
+
+**One counter-measurement worth carrying:** the literate rewrite shrank `auto-pull.md` (100 → 80
+lines) but *doubled* `agent-boot.md`'s procedure (51 → 108 lines). Scripting a procedure does not
+automatically shrink its doc; check the measurement rather than assuming the thesis held. See
+`agent-boot-doc-grew-when-scripted.md`.
+
 See `subagent-as-optimization-vs-subagent-as-semantics.md` for a related but distinct classification
 question (what a *subagent* is for, not what a *script's* fallback is) and
 `single-canonical-source-discipline.md` for the general principle this is one instance of.

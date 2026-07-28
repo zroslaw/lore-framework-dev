@@ -29,8 +29,14 @@ stream of a headless `exec` run.
 Landed in Lore Beings' `docs/beings.md` § Engine kinds and `scripts/lrb.py`'s codex-kind spawn/
 finish logic (v28).
 
+Re-confirmed live on `gpt-5.4-mini` 2026-07-27 while adding transcript capture to the lifecycle
+harness: only `item.completed` items of `type: "agent_message"` carry what the agent *said* —
+counting tool-call or reasoning items instead produces false greens. See
+`transcript-vs-final-message-assertions.md`.
+
 ## See Also
 
+- `transcript-vs-final-message-assertions.md` — the harness rule built on this stream contract
 - `engine-kinds-design-decision.md` — the design decision this contract feeds
 - `engine-session-log-formats.md` — the separate rollout-JSONL artifact (on-disk, not stdout)
 - `codex-engine-capabilities.md` — the durable Codex hub topic

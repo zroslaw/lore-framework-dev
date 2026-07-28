@@ -57,22 +57,63 @@ bar — the *shape* (environment quietly invalidates a gate result without error
 Opt-out: `LR_SKIP_PLUGIN_IDENTITY=1` (debug only). Unit coverage:
 `tests/test_lifecycle_plugin_identity.py`.
 
+## A7 shipped with two holes — both closed 2026-07-28
+
+A7 passed on Cursor on 2026-07-27 and the suite still ran against v30. Reading the stored logs
+found **two structural holes in `harness.py`**, plus a third defect in the evidence class of the
+Cursor arm:
+
+1. **Per-run `framework_dir` overrides were never checked.** The docstring assumed overrides were
+   "absolute-path copies of the same tree." `test_08` is the only scenario handed a *different*
+   tree — so the one test that needed verification was precisely the one skipping it.
+2. **The check was cached per process** (`_IDENTITY_CHECKED_FOR`). That proves identity at probe
+   time only, not that it still held for later runs in the same process.
+3. **The Cursor arm was a model self-report, not a check.** It asked the engine which plugin root
+   supplied its `lr` skills — unanswerable from inside a model. It reported
+   `PLUGIN-IDENTITY-OK 31 <worktree>` truthfully (it read `--plugin-dir`'s tree) while a different
+   tree served the skills. Codex was never exposed to this because
+   `check_codex_plugin_sources()` was filesystem-deterministic from the start; the asymmetry was
+   invisible because both engines "had A7 coverage." See `a-gate-cannot-be-a-model-self-report.md`.
+
+**Fixes applied** (`lore-framework-dev` main, `03067c1` / `848d3fc`):
+
+- Per-run `framework_dir` overrides are now verified, not assumed.
+- The per-process cache is replaced by a verdict inherited through an `engine|realpath|VERSION`
+  token, while each child subprocess still runs the deterministic filesystem check itself. This
+  also removed the `test_takeover` 420s timeout, which was `run_matrix` probing once per engine and
+  then every module subprocess re-probing.
+- **`check_cursor_plugin_sources()`** — walks `~/.cursor/plugins/{local,marketplaces,cache}` and
+  rejects any tree whose `VERSION` differs from `LR_FRAMEWORK_DIR`. Filesystem only, no engine
+  call. Against the real machine state it named both stale v30 trees immediately.
+
+**These fixes are themselves ungated** — no lifecycle run has exercised them. See
+`v31-lr-core-parked-2026-07-25.md` § ungated commit ledger.
+
 **Cursor operational companion:** disabling/repointing alone is incomplete — Cursor's cloud
-marketplace install rehydrates the cache from GitHub over `--plugin-dir`. See
-`cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
+marketplace install rehydrates the cache from GitHub over `--plugin-dir`, and does so within ~25
+seconds of a move-aside. See `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
 
 ## Concrete instance this bit
 
 The 2026-07-27 *first* lifecycle run against the parked v31 branch (`v31-lr-core-parked-2026-07-25.md`):
 Claude/haiku produced the only trustworthy result (6/7 green, one flaky scenario root-caused and fixed
 — see `macos-var-symlink-realpath-ambiguity.md`); Codex and Cursor's results from that same run were
-**invalid, not red**. After A7 + engine repoint, a second run produced valid (partially green) results —
-see that parking topic's later addendum / `v31-lifecycle-rerun-partial-green-2026-07-27.md`.
+**invalid, not red**.
+
+The second run, after A7 + engine repoint, was only *partly* rescued: Codex's shard became valid,
+but **Cursor's shard was still uninterpretable** — holes 1–3 above let it run on v30 again. That was
+found only on 2026-07-28 by reading the stored logs. See
+`v31-lifecycle-rerun-partial-green-2026-07-27.md` for the corrected triage; do not trust the
+original six-item failure list from that run.
 
 ## See Also
 
 - `lifecycle-testing-harness.md` — the harness this gap lives in.
+- `a-gate-cannot-be-a-model-self-report.md` — the principle the Cursor arm violated; the general
+  rule this instance produced.
 - `cursor-cloud-plugin-rehydrates-over-plugin-dir.md` — Cursor-specific rehydration over `--plugin-dir`.
+- `transcript-vs-final-message-assertions.md` — the sibling harness-evidence defect found in the
+  same 2026-07-28 log review.
 - `v31-lr-core-parked-2026-07-25.md` — the concrete run this invalidated, plus the valid re-run.
 - `lore-beings-mvp-takeover-review.md` — the sibling sandboxed-review blind spot (blocked capability,
   not artifact substitution).

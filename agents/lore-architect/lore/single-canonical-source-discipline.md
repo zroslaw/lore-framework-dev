@@ -69,3 +69,5 @@ In framework code/docs, default to pointer-only. The bootstrap-recap exception i
 - `framework-defined-role-pattern.md` — adjacent: same "central body, thin per-instance role.md" shape applied to roles.
 - `spawn-teammate-feature.md` — v15 teammate-conventions integration is one worked instance.
 - `consistency-sweep-read-not-just-grep.md` — detecting restatement drift after the fact: grep finds tokens, only reading the prose finds the false restatement.
+- `script-emits-data-doc-owns-the-words.md` — this discipline at the script/doc seam: a script must
+  not emit a user-facing message the doc owns, or the executor prints it instead of routing.
