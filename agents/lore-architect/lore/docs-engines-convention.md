@@ -12,11 +12,16 @@ concrete realization of the "`docs/engines/` adapter" lever named in
   `docs/engines/codex.md`, and `docs/engines/cursor.md`. Every profile fills the **same five
   bindings** — framework-root, invocation-syntax, subagent-spawn, memory-file, runtime-bounding —
   plus capability gates. Only the values differ.
-- **Boot Step-0** (new, top of `agent-boot.md`): (1) resolve `<framework-root>` by self-location
-  (the dir containing `VERSION`); (2) infer the engine — strongest signal first: non-empty
-  `${CLAUDE_PLUGIN_ROOT}` → claude; else `~/.codex/` present or root under it → codex; else
-  default claude — then read `docs/engines/<engine>.md` and keep its values as standing session
-  context. **Profile wins on conflict** with any later step.
+- **Boot Step-0** (top of `agent-boot.md`): resolve `<framework-root>` by self-location (the dir
+  containing `VERSION`). Engine *selection* used to live here too, as a prose ladder the model
+  walked itself; since v33 it is done deterministically by `lr-core`'s `detect_engine`, reported as
+  `data.engine`, and consumed at Step 2 — the model reads the named profile rather than choosing
+  it. Boot Step 0 now explicitly forbids inferring the engine from what the model believes it is.
+  See `engine-profile-must-be-observed-not-believed.md` for why, and
+  `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md` for the Codex blind spot
+  that deleting the old `~/.codex/` rung exposed. **Profile still wins on conflict** with any later
+  step; once selected, read `docs/engines/<engine>.md` and keep its values as standing session
+  context.
 - **Shared procedure docs stay engine-agnostic.** They describe the Claude mechanism; each spawn
   site (merge/recall/lore-search/consult) carries a one-line "Engine note" pointing at the
   profile's subagent-spawn override. Low churn, and the override wins at execution time.
@@ -140,6 +145,12 @@ When one engine profile documents a named guardrail against a class of error, ch
 
 ## See Also
 
+- `engine-profile-must-be-observed-not-believed.md` — how the profile is now selected (deterministic
+  `detect_engine`, not model self-knowledge), and the `--engine` remedy for a misdetection.
+- `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md` — the Codex § Detection
+  blind spot clause in `docs/engines/codex.md` and why it exists.
+- `template-whitespace-is-contract-under-byte-exact-idempotency.md` — the registered-shortcut
+  bootstrap block each profile carries must be a single unwrapped line.
 - `multi-engine-portability-direction.md` — the anchor; § Architectural levers names the five bindings.
 - `codex-port-validated-end-to-end.md` — this convention exercised end-to-end on real Codex.
 - `cursor-port-validated-end-to-end.md` — the validated local Cursor build on the same convention.

@@ -41,6 +41,9 @@ until you check what *class* of evidence each one rests on.
 
 ## See Also
 
+- `engine-profile-must-be-observed-not-believed.md` — the sibling one layer down: a gate must not be
+  implemented in the medium it gates; a *binding* must not be selected by the thing it binds. Same
+  diagnostic question, applied to engine-profile selection at boot.
 - `lifecycle-harness-plugin-identity-unverified.md` — the gate this rule was learned on.
 - `cursor-cloud-plugin-rehydrates-over-plugin-dir.md` — the environment behavior that made the
   false pass possible.

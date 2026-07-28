@@ -58,8 +58,10 @@ engine kind was added (`engine-kinds-design-decision.md`, `codex-exec-real-invoc
 Both worktrees were then merged into their repos' main branches (`lore-framework` ff-only,
 `lore-framework-dev` via a `--no-ff` merge since main had diverged with a v27 finalize commit), and
 the result shipped as **v28** (commit `44bc57d`, BETA, release-committed but not yet pushed — see
-`versioning-release-types.md` and `lore-beings-design.md`). It is still not a persistent
-`--launchd` daemon install on any real machine.
+`versioning-release-types.md` and `lore-beings-design.md`). As of that v28 point it was not yet a persistent
+`--launchd` daemon install on any real machine. **That has since changed** — the launchd Keeper is
+live on this machine as of 2026-07-28; `lore-beings-design.md` § launchd install status is
+authoritative for current state.
 
 ## Operational lesson
 

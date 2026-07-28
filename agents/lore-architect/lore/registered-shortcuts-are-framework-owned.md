@@ -18,8 +18,20 @@ Migration, release, and doctor guidance for shortcut repair must name the engine
 and Cursor entry points and cache-refresh commands explicitly. A generic `/lr:` instruction is not a
 portable remedy: shortcut invocation and plugin refresh are engine bindings, not shared syntax.
 
+## Byte-exact classification makes the template's whitespace load-bearing
+
+Because a shortcut counts as `current` only on a byte-for-byte match against a freshly generated
+artifact, every formatting choice in the authored template — including line wrapping inside a fenced
+block in an engine profile — is part of the contract. A wrapped bootstrap is never `current`, so
+each upgrade rewrites an already-correct file, and Claude Code renders the shortcut's description
+from its first line, so the command list shows a fragment. Enforced by `/lr:check` #18 and
+`test_bootstrap_body_is_a_single_line`. See
+`template-whitespace-is-contract-under-byte-exact-idempotency.md`.
+
 ## See Also
 
+- `template-whitespace-is-contract-under-byte-exact-idempotency.md` — the general rule behind the
+  single-line bootstrap requirement.
 - `fix-the-pointer-not-the-shipped-migration.md` — preserve historical migration records; correct or
   add the live migration path that repairs current artifacts.
 - `docs-engines-convention.md` — engine bindings are the point-of-use source for portable execution.

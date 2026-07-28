@@ -44,8 +44,22 @@ because a prep step is exactly a recalled instruction at a moment that does not 
 `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`, where a correctly-executed manual mitigation
 still lost.
 
+Two later applications of the same reflex, both from 2026-07-28:
+
+- The single-line registered-shortcut bootstrap was fixed in the doc **and** given a `/lr:check` #18
+  clause plus `test_bootstrap_body_is_a_single_line`, because the check is what a user actually runs
+  against their own workspace (`template-whitespace-is-contract-under-byte-exact-idempotency.md`).
+- Engine-profile selection moved out of boot prose entirely and into `lr-core`'s `detect_engine`:
+  when a procedure step's input is a fact about the running environment, the step belongs in the
+  deterministic accelerator, not in instructions to a model
+  (`engine-profile-must-be-observed-not-believed.md`).
+
 ## See Also
 
+- `template-whitespace-is-contract-under-byte-exact-idempotency.md` — doc rule plus check plus test,
+  because the doc rule alone was demonstrably not enough.
+- `engine-profile-must-be-observed-not-believed.md` — the strongest form: move the step into the
+  script rather than guarding the prose.
 - `docs-engines-convention.md` § Engine traps belong in the binding — the narrower original form.
 - `portable-shell-in-framework-docs.md`, `git-dash-c-needs-toplevel-guard.md`,
   `tooling-cwd-safety.md` — the three topics that failed to fire.

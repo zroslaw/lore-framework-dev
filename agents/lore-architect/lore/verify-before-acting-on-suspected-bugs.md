@@ -70,8 +70,20 @@ trilens reviewer misread exactly this as a `BLOCKER` (a merge would "silently di
 own topic because the trap (diff-rendering-as-ground-truth) is distinct and nameable. See
 `diverged-branch-diff-misread-as-merge-outcome.md`.
 
+## The same reflex applied to a *failing* test, not a suspected bug (2026-07-28)
+
+One more face: a red test is a hypothesis about which side is wrong, not a verdict on the code. It
+can be failing because the world changed, because the code broke, or because it is correctly
+reporting an unwelcome truth about the *environment* — and the third kind is where a reflex "fix"
+deletes a real guarantee. A sandboxed-install escape check went red because a real launchd Keeper
+exists on this machine; making it green would have removed the safety assertion, not repaired it.
+See `a-red-test-may-be-asserting-a-true-fact.md`.
+
 ## See Also
 
+- `a-red-test-may-be-asserting-a-true-fact.md` — this rule applied to test failures: establish which
+  side is wrong before turning anything green, and give danger-guarding assertions the strongest
+  presumption of correctness.
 - `check-own-lore-before-dismissing-a-finding.md` — this rule turned inward, onto my own operational lore; the dismissal case rather than the fix case.
 - `diverged-branch-diff-misread-as-merge-outcome.md` — this rule applied to misreading a diverged
   branch's two-way diff as a merge preview, rather than to a suspected code bug.

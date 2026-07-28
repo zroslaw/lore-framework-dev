@@ -29,8 +29,19 @@ This is a corollary of `finalization-process.md`'s existing single-repo-conflict
 after the fact; this rule is about *avoiding* the conflict in the first place when the concurrency
 is foreseeable (multiple engines, same agent, same session-scale task).
 
+## The wide-staging variant (2026-07-28)
+
+Write-ownership is necessary but not sufficient. A concurrent session can sweep your uncommitted
+work into *its* commit without ever touching your content, purely through a directory-wide
+`git add`. Same shared-workspace hazard, different mechanism — no conflict, no loss, but ungated
+work ships under someone else's commit message. See
+`concurrent-session-committed-my-uncommitted-work.md`.
+
 ## See Also
 
+- `concurrent-session-committed-my-uncommitted-work.md` — the staging-scope variant of this hazard;
+  read alongside, since designating a single writer does not protect files the writer never meant to
+  stage.
 - `cross-engine-team-substrate-validated.md` — the shared-folder coordination substrate this
   collaboration used; the write-ownership rule is the missing piece that makes it safe for tasks
   that end in a real commit.
