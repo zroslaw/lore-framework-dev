@@ -45,8 +45,8 @@
 **Cursor dual skill tree (21, added v21):**
 21. Cursor-tree parity — verifies the `.cursor-skills/lr-<skill>/` wrapper tree stays 1:1 with the canonical `skills/<skill>/` tree (the dual-skill-tree pattern in `cursor-dual-skill-tree-one-repo.md`). Checks: a wrapper exists for every canonical skill and vice versa (orphan detection), each wrapper's frontmatter `name` is `lr-<skill>`, self-location references `.cursor-skills/lr-<skill>/SKILL.md`, invocation-syntax matches, and no content drift between wrapper and canonical intent. Enforces that `scripts/sync-cursor-skills` was re-run after any skill add/rename. Added in v21, path root moved in v23 to keep wrappers out of Codex's plugin crawl. See `cursor-dual-skill-tree-one-repo.md`.
 
-**Workspace layer (22–23, added v25):**
-22. Workspace child repos gitignored — verifies declared child repos under a git-backed workspace are covered by the workspace `.gitignore`, preventing parent-repo accidental staging.
+**Workspace layer (22–23, added v25; #22 expanded for standard workspace-owned lines):**
+22. Workspace gitignore coverage — verifies the standard workspace-owned lines (`/.worktrees/`, `/.lr-beings/`, `/.tmp/`) and declared child repos under a git-backed workspace are covered by the workspace `.gitignore`. See `workspace-owned-default-ignore-lines.md`.
 23. Legacy init markers — flags old `lr:init` managed-section markers in engine memory files so users refresh through `/lr:workspace-init`.
 
 **History:** originally 17 checks. Migration 2 dropped the agent-level version check (old check 6) because `role.md` no longer carries a `version` field — subsequent checks renumbered down by one, leaving 16. Migration 5 added checks 17 and 18 for drift detection. v14 added check 19 (plugin manifest version) — the first non-migration check addition (release-notes-only ship). v15 added check 20 (migration write-paths declaration) — also release-notes-only. v21 added check 21 (cursor-tree parity) — release-notes-only. v25 extended check 19 to four manifests and added checks 22–23 for the workspace layer.

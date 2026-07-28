@@ -17,7 +17,7 @@ Three discrete layers — identify which one owns a change before touching files
 2. **Domain** — the conceptual scope of one agent repo, marked by `lore-repo.md` (frontmatter: `description`, `version`, optional `repos:`). Holds `agents/<name>/` with `role.md`, `lore-context.md`, `lore/`, `workdir/`, `sessions/`.
 3. **Workspace** — the filesystem Claude runs from; holds one or more agent repos + their declared siblings. Discovery scans workspace-root dirs for `lore-repo.md`; nested repos are invisible to most skills.
 
-See `architecture-overview.md`, `workspace-vs-domain-vocabulary.md`, `agent-discovery-nesting-constraint.md`, `plugin-vs-agent-repo-separation.md`.
+See `architecture-overview.md`, `workspace-vs-domain-vocabulary.md`, `agent-discovery-nesting-constraint.md`, `plugin-vs-agent-repo-separation.md`, `workspace-owned-default-ignore-lines.md`.
 
 ## Design Principles
 
@@ -231,46 +231,32 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
   `quality-benchmark-feature.md`, `positioning-triad-differentiation.md`, `port-landing-next-steps.md`.
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** review item — active follow-ups from the 2026-06-13 architecture review; see `framework-improvements-backlog.md`. That review's settled dispositions (incl. DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in `architecture-review-dispositions.md`. A newer 2026-07-02 review added two further backlog items (post-merge diff verification, recall-time staleness surfacing) — see `framework-improvements-backlog.md` § Merge Quality, § Search / Scaling.
 - Parked: workdir-as-reference-library; vector-DB search (until >100 topics/agent); the session-as-durable-artifact cluster (boot auto-push, boot-context cache, suspend/resume, JSONL archive). All in `framework-improvements-backlog.md`.
-- **v25 workspace layer (pull + init)** — implemented locally in `lore-framework` commit `0311ab6`.
-  Hard renames: workspace-sync→workspace-pull, init→workspace-init. Two-level repo declarations
-  (`lore-workspace.md` + domain `repos:`), optional workspace-as-git-repo envelope, cursor wrapper
-  regeneration, checks #22–23. Full lifecycle remains the pre-push gate. See
-  `v25-workspace-pull-init-design.md`, `workspace-meta-repo-pattern.md`.
+- **v25 workspace layer (pull + init)** — shipped; standard workspace-owned ignore lines now include
+  `/.worktrees/`, `/.lr-beings/`, and `/.tmp/` (init seeds, pull phase 3 re-asserts, check #22 warns).
+  Disposable scaffolds go under `.tmp/<name>/`. See `v25-workspace-pull-init-design.md`,
+  `workspace-owned-default-ignore-lines.md`, `workspace-meta-repo-pattern.md`.
 
 ## Current State
 
-Workspace holds three canonical repos: **`lore-framework/`** (plugin), **`lore-framework-dev/`**
-(this repo — lore-architect lore, tests, drafts), and **`lore-agents/`** (personal agents).
+Workspace holds **`lore-framework/`**, **`lore-framework-dev/`**, **`lore-agents/`**, and
+**`lore-chronicler/`** (Being; on disk). Meta-repo `AGENTS.md` lists them after a
+`/lr:workspace-init --refresh`.
 
-`lore-framework/` is **clean and pushed at v31** on `main`. The newest shipped capability surface is
-the deterministic `lr-core` substrate and Script Fallback Contract; the release also includes the
-reworked `/lr:trilens-loop`, Lore Beings, Markdown session archives, and multi-engine lifecycle
-identity protections. Three engines are Tier-1 supported — Claude Code, Codex, Cursor.
+Local `main` is at **framework v33** (matches `lore-framework-dev` stamp) and is **ahead of
+origin** — includes v32 shortcut-bootstrap work, v33 shortcut refresh migration, and the merged
+workspace-owned-ignore / `.tmp` fixture changes. Unrelated uncommitted WIP may still sit on those
+`main` checkouts; do not sweep it into lore finalize commits (`git add agents/` only). Auto-pull
+can fail while local main is ahead/diverged — continue degraded and push deliberately.
 
-**v31 was shipped on explicit user direction with a recorded gate waiver, not as release-green.**
-The remaining Codex `test_07`/`test_08` reruns, full Cursor lifecycle shard, and final trilens gate
-were intentionally skipped; prior evidence does not cover them. Preserve unrelated dirty-tree
-changes during any release work, and record any such waiver with the skipped gates in
-`versioning-release-types.md`. See `v31-lr-core-parked-2026-07-25.md`,
-`lifecycle-testing-harness.md` § Release Gate Evidence States, and
-`lifecycle-harness-plugin-identity-unverified.md`.
+**Preserve unrelated dirty-tree changes** during release or fold-into-main work; stash around
+feature merges when needed (`fold-feature-into-local-main-via-stash.md`).
 
-Both pre-ship gates are in working order and both are routinely run: the review loop via
-`/lr:trilens-loop`, and the real-engine lifecycle suite via `tests/lifecycle/` (plus the separate
-higher-blast-radius `LR_LIFECYCLE_KEEPER=1` Keeper track and the `LR_QUALITY=1` benchmark track).
-See `trilens-loop-feature.md`, `lifecycle-testing-harness.md`, `lore-beings-design.md`,
-`session-summaries-feature.md`.
+Both pre-ship gates remain in working order: `/lr:trilens-loop`, and `tests/lifecycle/` (plus
+Keeper / quality tracks). For small doc ships, a feedback-only trilens round then selective apply
+is a valid path (`trilens-feedback-only-selective-apply.md`).
 
-**v32 — version-agnostic registered boot shortcuts** — locally committed on branch
-`codex/shortcut-bootstrap` in both repos (`lore-framework` `4f35a0f`, `lore-framework-dev`
-`84395f8`), **not yet merged to `main` or pushed**. Generated per-agent shortcuts no longer bake an
-absolute, version-pinned path to `agent-boot.md`; they self-locate framework authority off the
-session's actively installed boot skill instead, fixing a defect where a shortcut pinned to a dead
-plugin-cache path after an upgrade. Designed via the three-engine (Claude/Codex/Cursor) shared-folder
-review recorded at `agents/lore-architect/workdir/v31-feedback/`. Shipped locally under an explicit
-user waiver — the real per-engine upgrade-lifecycle regression is filed as a required follow-up, not
-proven. See `versioning-release-types.md`'s v32 entry, `cross-engine-team-substrate-validated.md`,
-`fix-the-pointer-not-the-shipped-migration.md`.
+See `versioning-release-types.md`, `trilens-loop-feature.md`, `lifecycle-testing-harness.md`,
+`workspace-owned-default-ignore-lines.md`.
 
 ## Running Backlog & Standing Improvement List
 

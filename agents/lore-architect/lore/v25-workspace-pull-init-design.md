@@ -29,15 +29,17 @@ semantics.
    not fatal.
 1. `lore-workspace.md` → clone missing.
 2. All `*/lore-repo.md` → clone missing domain deps.
-3. Gitignore: all **declared present** children (not only newly cloned); `url_to_dir` rejects
-   gitignore metacharacters.
+3. Gitignore: standard workspace-owned lines (`/.worktrees/`, `/.lr-beings/`, `/.tmp/`) plus all
+   **declared present** children (not only newly cloned); `url_to_dir` rejects gitignore
+   metacharacters. See `workspace-owned-default-ignore-lines.md`.
 4. Pull all top-level git repos (undeclared repos still pulled — v11 parity).
 
 ## workspace-init
 
 Setup: interview → **confirmation gate** → write descriptor → idempotent `.gitignore` seed
-(`/.worktrees/` append-only) → default README → **workspace-pull** → memory file v2 (after pull).
-Refresh: managed section only. `--reconfigure`: re-interview; gitignore never truncated.
+(`/.worktrees/`, `/.lr-beings/`, `/.tmp/` append-only) → default README → **workspace-pull** →
+memory file v2 (after pull). Refresh: managed section only (does **not** repair `.gitignore`).
+`--reconfigure`: re-interview; gitignore never truncated.
 register-repo wizard **deferred v26** (hint in summary).
 
 Optional workspace git repo — team shares recipe; children gitignored.
