@@ -224,28 +224,18 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
 Workspace holds three canonical repos: **`lore-framework/`** (plugin), **`lore-framework-dev/`**
 (this repo — lore-architect lore, tests, drafts), and **`lore-agents/`** (personal agents).
 
-`lore-framework/` is **clean and pushed at v30** on `main`. The three newest *shipped* capability
-surfaces are all live: **Lore Beings** (Being Keeper substrate + `/lr:being` command surface, BETA),
-**Markdown session archives** under `agents/<agent>/archive/YYYY/MM/`, and **`/lr:trilens-loop`**
-(iterated three-lens review). Three engines are Tier-1 supported — Claude Code, Codex, Cursor.
+`lore-framework/` is **clean and pushed at v31** on `main`. The newest shipped capability surface is
+the deterministic `lr-core` substrate and Script Fallback Contract; the release also includes the
+reworked `/lr:trilens-loop`, Lore Beings, Markdown session archives, and multi-engine lifecycle
+identity protections. Three engines are Tier-1 supported — Claude Code, Codex, Cursor.
 
-**v31 `lr-core` is built and reviewed; agent-repo side is on `lore-framework-dev` `main`, plugin
-still PARKED.** Deterministic substrate + literate Script Fallback Contract + reworked
-`docs/trilens-loop.md` live on `lore-framework` branch `wip/lr-core-v31` @ `b824da5` (worktree
-`.worktrees/lore-framework/lr-core-v31/`) — **not merged, not a ship**.
-
-Lifecycle standing: **one confirmed v31 defect** (Codex `test_07`, fixed on `b824da5` —
-`script-emits-data-doc-owns-the-words.md`), **one undetermined** (Codex `test_08`, undecidable
-until transcript capture landed), and **the whole Cursor shard uninterpretable** — it ran against
-a v30 plugin. Ship gate: re-run those Codex scenarios and the full Cursor shard, gate the four
-commits no gate has seen (`lore-framework-dev` `03067c1`/`467b009`/`848d3fc`, `lore-framework`
-`b824da5` — the last changes a boot-path doc), then version-ship. Check
-`v31-lr-core-parked-2026-07-25.md` before related work, and read
-`v31-lifecycle-rerun-partial-green-2026-07-27.md`'s corrected triage rather than any remembered
-failure list. See also `lifecycle-harness-plugin-identity-unverified.md`,
-`a-gate-cannot-be-a-model-self-report.md`, `transcript-vs-final-message-assertions.md`,
-`cursor-cloud-plugin-rehydrates-over-plugin-dir.md`, `trilens-loop-v31-restructured.md`,
-`literate-accelerator-pattern.md`.
+**v31 was shipped on explicit user direction with a recorded gate waiver, not as release-green.**
+The remaining Codex `test_07`/`test_08` reruns, full Cursor lifecycle shard, and final trilens gate
+were intentionally skipped; prior evidence does not cover them. Preserve unrelated dirty-tree
+changes during any release work, and record any such waiver with the skipped gates in
+`versioning-release-types.md`. See `v31-lr-core-parked-2026-07-25.md`,
+`lifecycle-testing-harness.md` § Release Gate Evidence States, and
+`lifecycle-harness-plugin-identity-unverified.md`.
 
 Both pre-ship gates are in working order and both are routinely run: the review loop via
 `/lr:trilens-loop`, and the real-engine lifecycle suite via `tests/lifecycle/` (plus the separate

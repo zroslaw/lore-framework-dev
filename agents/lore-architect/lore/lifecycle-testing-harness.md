@@ -147,6 +147,12 @@ user explicitly accepts targeted evidence plus documented provider-limit failure
 gate. Do not describe a provider-limited checkpoint as ready to push/tag without that explicit
 acceptance.
 
+An explicit direction to ship **without** the normal test or review gates is a different,
+exceptional disposition: carry out the requested release machinery, but record the waiver and the
+specific skipped gates in that release's entry in `versioning-release-types.md`. Do not call that
+release release-green or let earlier gate evidence silently cover it. Preserve unrelated dirty-tree
+changes while merging and pushing. v31 is the first recorded instance.
+
 ## Claude account-limit signature
 
 Claude Code account-limit exhaustion can masquerade as broad lifecycle breakage. The signature is:

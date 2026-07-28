@@ -1,4 +1,4 @@
-# v31 `lr-core` — Parked, Not Shipped (2026-07-25; addendum, review, and restructure through 2026-07-27)
+# v31 `lr-core` — Parked, Then Shipped Under Waiver (2026-07-25–28)
 
 The v31 `lr-core` work — a deterministic substrate script plus boot/attach/consult/pull-lore/
 process-merge/lore-search doc rewiring, plus the Script Fallback Contract — is fully implemented and
@@ -7,6 +7,15 @@ user parked it explicitly, mid-session on 2026-07-25, after a rough and frustrat
 pushed to completion, not discarded. Follow-on sessions resumed it three times: the
 literate-accelerator addendum, a review-and-fix pass, and the `trilens-loop.md` restructure (all
 below).
+
+## Outcome (2026-07-28)
+
+The user explicitly directed v31 to ship without the remaining lifecycle reruns or final review
+gate. The release machinery was completed and pushed while preserving unrelated dirty working-tree
+changes. This is a **recorded gate waiver, not release-green**: Codex `test_07`/`test_08`, the full
+Cursor lifecycle shard, and the final trilens gate were intentionally skipped. The canonical release
+record is `versioning-release-types.md`'s v31 entry; the pre-ship state below remains historical
+context, not a resume plan.
 
 **Current state as of the 2026-07-28 session:** A7 plugin-identity gate is on
 `lore-framework-dev` `main`, and its two structural holes are now closed. The 2026-07-27
