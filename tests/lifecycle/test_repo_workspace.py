@@ -155,10 +155,15 @@ class RepoWorkspaceScenarios(unittest.TestCase):
         self.assertIn("boot as agent", content)
         self.assertIn("from", content)
         self.assertIn(os.path.join(fx.repo, "agents", AGENT_NAME), content)
+        self.assertNotIn("plugins/cache/", content)
+        self.assertNotIn("/docs/agent-boot.md", content)
         if harness.ENGINE == "cursor":
+            self.assertIn("installed `/lr-boot` skill", content)
             self.assertIn("name: lr-test-agent-agent", content)
             self.assertIn("disable-model-invocation: true", content)
             self.assertIn(f'"{harness.REPO_NAME}/**"', content)
+        elif harness.ENGINE == "claude":
+            self.assertIn("installed `/lr:boot` skill", content)
 
     def test_23_register_repo(self):
         """register-repo creates shortcuts for every agent in the repo."""
