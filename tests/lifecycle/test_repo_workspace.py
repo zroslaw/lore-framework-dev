@@ -128,15 +128,19 @@ class RepoWorkspaceScenarios(unittest.TestCase):
 
     def test_21_update_dry_run_does_not_write(self):
         """update --dry-run reports the pending upgrade but leaves lore-repo.md untouched."""
-        fx = build_fixture(self.tmp, version="17")
+        # This scenario verifies dry-run non-mutation, not every historical
+        # migration. Keep exactly one pending version so an engine spends its
+        # budget exercising the contract under test instead of narrating the
+        # entire release history.
+        fx = build_fixture(self.tmp, version="32")
         r = run_engine(fx.workspace, UPDATE_DRYRUN_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
         self.assertEqual(
-            read_repo_version(fx), "17",
+            read_repo_version(fx), "32",
             "dry-run must not modify lore-repo.md",
         )
-        self.assertIn("17", r.text)
+        self.assertIn("32", r.text)
         self.assertIn(harness.framework_version(), r.text)
 
     def _shortcut_paths(self, workspace, agent_name):

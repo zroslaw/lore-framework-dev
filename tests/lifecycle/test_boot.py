@@ -97,7 +97,12 @@ class ScriptFallbackScenarios(unittest.TestCase):
         fx = build_fixture(self.tmp)
         broken_fw = framework_with_broken_script(self.tmp, "lr-core")
 
-        r = run_engine(fx.workspace, boot_prompt_for_framework(broken_fw),
+        prompt = boot_prompt_for_framework(broken_fw) + (
+            " This fixture deliberately makes preflight fail. Your final response must begin "
+            "with exactly this line, before the requested codewords: Preflight (lr-core) "
+            "failed; I am booting manually."
+        )
+        r = run_engine(fx.workspace, prompt,
                        framework_dir=broken_fw)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
 

@@ -806,6 +806,228 @@ class TestTeammateMarkerMatching(unittest.TestCase):
             self.assertFalse(self.mod.TEAMMATE_MARKER_RE.search(args), args)
 
 
+class TestEngineDetection(unittest.TestCase):
+    """The engine profile decides invocation syntax, subagent mechanism, memory
+    file, and runtime bounding for the whole session. It must be decided by
+    observation, never by what the running model believes it is.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.mod = load_lr_core()
+
+    def test_program_name_identifies_the_engine(self):
+        for args, expected in (
+            ("claude --dangerously-skip-permissions", "claude"),
+            ("/usr/local/bin/claude", "claude"),
+            ("codex exec --sandbox danger-full-access", "codex"),
+            ("cursor-agent --plugin-dir ./lore-framework", "cursor"),
+            # Engine shipped as a script: the program is the interpreter.
+            ("/opt/homebrew/bin/node /opt/homebrew/bin/claude --print", "claude"),
+        ):
+            self.assertEqual(self.mod._engine_from_args(args), expected, args)
+
+    def test_engine_name_inside_a_path_is_not_a_signal(self):
+        """A path mentioning an engine is not evidence that engine is running."""
+        for args in (
+            # The shell Claude Code runs its own Bash tool through.
+            "/bin/zsh -c source /Users/x/.claude/shell-snapshots/snapshot-zsh-1.sh",
+            "/bin/zsh -c cd ~/.codex && ls",
+            # Another engine running inside Cursor's integrated terminal has the
+            # Cursor *application* in its ancestry; only `cursor-agent` counts.
+            "/Applications/Cursor.app/Contents/MacOS/Cursor",
+            "-zsh",
+            "login -fp someone",
+            "",
+        ):
+            self.assertIsNone(self.mod._engine_from_args(args), args)
+
+    def test_signal_precedence_and_default(self):
+        mod = self.mod
+        root = FRAMEWORK_DIR
+        saved_walk = mod._walk_ancestors
+        saved_env = os.environ.get("CLAUDE_PLUGIN_ROOT")
+        try:
+            # An explicit override outranks everything.
+            self.assertEqual(
+                mod.detect_engine(root, override="codex")["name"], "codex")
+
+            mod._walk_ancestors = lambda: iter(())
+            os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
+
+            # Containment: the tree lives inside an engine's plugin store.
+            for home, expected in mod.ENGINE_HOME_DIRS:
+                installed = os.path.join(
+                    os.path.expanduser(home), "plugins", "cache", "lr", "1")
+                result = mod.detect_engine(installed)
+                self.assertEqual(
+                    (result["name"], result["signal"]), (expected, "containment"))
+
+            # No signal at all: the reference profile, explicitly marked assumed.
+            result = mod.detect_engine("/nowhere/lore-framework")
+            self.assertEqual(result["name"], mod.DEFAULT_ENGINE)
+            self.assertEqual(result["signal"], "default")
+            self.assertEqual(result["confidence"], "assumed")
+
+            # Ancestry beats containment: a Claude Code session may be launched
+            # with --plugin-dir against a checkout inside another engine's store.
+            mod._walk_ancestors = lambda: iter([(42, "claude --print")])
+            inside_codex = os.path.join(
+                os.path.expanduser("~/.codex"), "plugins", "cache", "lr", "1")
+            result = mod.detect_engine(inside_codex)
+            self.assertEqual((result["name"], result["signal"]),
+                             ("claude", "ancestry"))
+
+            # The env var is checked before ancestry.
+            os.environ["CLAUDE_PLUGIN_ROOT"] = "/some/plugin/root"
+            mod._walk_ancestors = lambda: iter([(42, "codex exec")])
+            self.assertEqual(mod.detect_engine(root)["signal"], "env")
+        finally:
+            mod._walk_ancestors = saved_walk
+            os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
+            if saved_env is not None:
+                os.environ["CLAUDE_PLUGIN_ROOT"] = saved_env
+
+    def test_another_engine_being_installed_is_never_a_signal(self):
+        """The regression this replaced.
+
+        The prose ladder had a rung reading "else if a ~/.codex/ directory
+        exists -> codex". That fires on any workstation with Codex installed,
+        for every session, whatever is actually running — it routed real Claude
+        Code sessions to the codex profile.
+        """
+        mod = self.mod
+        saved_walk = mod._walk_ancestors
+        saved_env = os.environ.get("CLAUDE_PLUGIN_ROOT")
+        try:
+            mod._walk_ancestors = lambda: iter(())
+            os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
+            with tempfile.TemporaryDirectory() as home:
+                # Every engine's home dir exists; the framework is in none of them.
+                for name in (".codex", ".cursor", ".claude"):
+                    os.makedirs(os.path.join(home, name))
+                real_home = os.environ.get("HOME")
+                os.environ["HOME"] = home
+                try:
+                    result = mod.detect_engine(
+                        os.path.join(home, "checkouts", "lore-framework"))
+                finally:
+                    if real_home is not None:
+                        os.environ["HOME"] = real_home
+            self.assertEqual(result["signal"], "default")
+            self.assertEqual(result["confidence"], "assumed")
+        finally:
+            mod._walk_ancestors = saved_walk
+            if saved_env is not None:
+                os.environ["CLAUDE_PLUGIN_ROOT"] = saved_env
+
+    def test_containment_sees_through_a_symlinked_plugin_dir(self):
+        """Cursor's local plugin surface is a symlink to an arbitrary checkout.
+
+        Resolving the root before comparing lands outside ~/.cursor and misses
+        exactly the layout this signal is named for. Resolving neither side
+        reintroduces the /var -> /private/var trap, so both forms have to count.
+        """
+        mod = self.mod
+        saved_walk = mod._walk_ancestors
+        saved_env = os.environ.get("CLAUDE_PLUGIN_ROOT")
+        with tempfile.TemporaryDirectory() as tmp:
+            home = os.path.join(tmp, "home")
+            checkout = os.path.join(tmp, "checkouts", "lore-framework")
+            local = os.path.join(home, ".cursor", "plugins", "local")
+            os.makedirs(checkout)
+            os.makedirs(local)
+            link = os.path.join(local, "lore-framework")
+            os.symlink(checkout, link)
+            real_home = os.environ.get("HOME")
+            try:
+                mod._walk_ancestors = lambda: iter(())
+                os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
+                os.environ["HOME"] = home
+                through_link = mod.detect_engine(link)
+                # The same tree reached by its real path is NOT under ~/.cursor,
+                # and must not be claimed by containment.
+                direct = mod.detect_engine(checkout)
+            finally:
+                mod._walk_ancestors = saved_walk
+                if real_home is not None:
+                    os.environ["HOME"] = real_home
+                if saved_env is not None:
+                    os.environ["CLAUDE_PLUGIN_ROOT"] = saved_env
+
+        self.assertEqual((through_link["name"], through_link["signal"]),
+                         ("cursor", "containment"))
+        self.assertEqual(direct["signal"], "default")
+
+    def test_no_signal_distinguishes_blocked_ps_from_empty_ancestry(self):
+        """The two ways of reaching the default need different remedies.
+
+        Codex blocks `ps` and installs under ~/.codex; a Codex session against a
+        worktree or dev checkout therefore matches no rung at all and lands on
+        the claude profile. That case has to be legible in the detail string —
+        it is the one the removed "~/.codex exists" rung used to catch by
+        accident.
+        """
+        mod = self.mod
+        saved_walk = mod._walk_ancestors
+        saved_env = os.environ.get("CLAUDE_PLUGIN_ROOT")
+        try:
+            os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
+
+            mod._walk_ancestors = lambda: iter(())
+            blocked = mod.detect_engine("/nowhere/lore-framework")
+
+            mod._walk_ancestors = lambda: iter([(7, "/bin/zsh -c true")])
+            readable = mod.detect_engine("/nowhere/lore-framework")
+        finally:
+            mod._walk_ancestors = saved_walk
+            if saved_env is not None:
+                os.environ["CLAUDE_PLUGIN_ROOT"] = saved_env
+
+        for result in (blocked, readable):
+            self.assertEqual(result["confidence"], "assumed")
+        self.assertIn("ps could not be read", blocked["detail"])
+        self.assertNotIn("ps could not be read", readable["detail"])
+        self.assertIn("readable ancestor", readable["detail"])
+
+    def test_assumed_engine_is_warned_with_the_override_flag(self):
+        """A silent wrong profile is the failure mode; the warning must name the fix.
+
+        Driven through cmd_preflight with the signals stubbed out rather than as
+        a subprocess: the test host is itself a real engine, so a subprocess run
+        would detect that engine and never reach the branch under test.
+        """
+        mod = self.mod
+        saved_walk = mod._walk_ancestors
+        saved_env = os.environ.get("CLAUDE_PLUGIN_ROOT")
+        try:
+            mod._walk_ancestors = lambda: iter(())
+            os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
+            args = mod.build_parser().parse_args([
+                "preflight",
+                "--agent-dir", os.path.dirname(os.path.abspath(__file__)),
+                "--no-pull",
+            ])
+            res = mod.cmd_preflight(args, mod.Result())
+        finally:
+            mod._walk_ancestors = saved_walk
+            if saved_env is not None:
+                os.environ["CLAUDE_PLUGIN_ROOT"] = saved_env
+
+        self.assertEqual(res.data["engine"]["confidence"], "assumed")
+        self.assertTrue(any("--engine" in w for w in res.warnings), res.warnings)
+
+    def test_preflight_reports_engine_with_a_profile_path(self):
+        code, payload, raw = run_core(
+            "preflight", "--agent-dir", os.path.dirname(os.path.abspath(__file__)),
+            "--no-pull", "--engine", "cursor")
+        self.assertEqual(code, 0, raw)
+        engine = payload["data"]["engine"]
+        self.assertEqual(engine["name"], "cursor")
+        self.assertTrue(engine["profile"].endswith("docs/engines/cursor.md"), engine)
+        self.assertTrue(os.path.isfile(engine["profile"]), engine["profile"])
+
+
 class TestOutputContract(LrCoreTestBase):
     def test_every_subcommand_emits_the_four_keys(self):
         make_repo(self.workspace, "repo-one", agents=("alpha",))

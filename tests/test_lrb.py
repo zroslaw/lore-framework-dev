@@ -1444,12 +1444,20 @@ class TestCliSubprocess(LrbTestCase):
                                env=env, timeout=30)
 
     def test_install_is_sandboxed_and_idempotent(self):
+        real_launchagents = os.path.expanduser("~/Library/LaunchAgents/com.lore-beings.keeper.plist")
+        real_before = None
+        if os.path.exists(real_launchagents):
+            with open(real_launchagents, "rb") as fh:
+                real_before = fh.read()
         r = self.run_lrb("install")
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertTrue(os.path.exists(os.path.join(self.home, "lrb.py")))
         self.assertTrue(os.path.exists(os.path.join(self.launchagents, "com.lore-beings.keeper.plist")))
-        real_launchagents = os.path.expanduser("~/Library/LaunchAgents/com.lore-beings.keeper.plist")
-        self.assertFalse(os.path.exists(real_launchagents))
+        if real_before is None:
+            self.assertFalse(os.path.exists(real_launchagents))
+        else:
+            with open(real_launchagents, "rb") as fh:
+                self.assertEqual(fh.read(), real_before)
 
     def test_workspaces_and_engines_roundtrip(self):
         self.run_lrb("install")

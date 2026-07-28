@@ -23,6 +23,12 @@ FRAMEWORK_DIR = os.environ.get(
     os.path.abspath(os.path.join(HERE, "..", "..", "lore-framework")),
 )
 SCRIPT = os.path.join(FRAMEWORK_DIR, "scripts", "session-takeover")
+
+# `stats` always carries the live framework VERSION (the archive frontmatter,
+# by contrast, keeps whatever the caller supplied). Read it instead of pinning a
+# literal: the stats assertion was pinned to "29" and went red from v30 onward.
+with open(os.path.join(FRAMEWORK_DIR, "VERSION")) as _fh:
+    FRAMEWORK_VERSION = _fh.read().strip()
 sys.path.insert(0, os.path.join(HERE, "fixtures"))
 from archive_fixture import (  # noqa: E402
     claude_projects_session,
@@ -321,6 +327,8 @@ class CliArchiveVerbTests(unittest.TestCase):
         with open(out) as fh:
             archive_md = fh.read()
         self.assertIn('uuid: "LORE-CLI-1"', archive_md)
+        # Caller-supplied via --frontmatter-json: asserts setdefault() preserves it
+        # rather than stamping the live VERSION over it.
         self.assertIn('framework_version: "29"', archive_md)
         self.assertIn("# Full Session Log", archive_md)
         self.assertIn("Tool Call", archive_md)
@@ -333,7 +341,7 @@ class CliArchiveVerbTests(unittest.TestCase):
         # stats carries the archive locator for frontmatter assembly
         self.assertEqual(s["archive"]["path"], out)
         self.assertEqual(s["archive"]["schema_version"], 1)
-        self.assertEqual(s["framework_version"], "29")
+        self.assertEqual(s["framework_version"], FRAMEWORK_VERSION)
 
     def test_stats_verb_writes_usage_without_archive_file(self):
         log = os.path.join(self.tmp, "rollout.jsonl")

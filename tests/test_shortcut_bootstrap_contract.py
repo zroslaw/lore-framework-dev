@@ -46,6 +46,38 @@ class ShortcutBootstrapContractTests(unittest.TestCase):
             self.assertIn(skill_name, content, path)
             self.assertIn("boot as agent `<agent-name>` from `<agent-dir>`", content, path)
 
+    def test_bootstrap_body_is_a_single_line(self):
+        """A generated shortcut is one line, so the template must be one line.
+
+        `migrations/33.md` reports an existing shortcut as `current` only on a
+        byte-for-byte match against a freshly generated artifact, and Claude Code
+        renders a command's description from the file's first line. A profile
+        whose fenced bootstrap is wrapped for readability gets copied verbatim,
+        and both of those break quietly.
+        """
+        for path in ("docs/engines/claude.md", "docs/engines/cursor.md",
+                     "docs/engines/codex.md"):
+            content = read(path)
+            marker = "## Registered shortcut bootstrap"
+            section = content.split(marker, 1)[1]
+            fence_start = section.index("```markdown") + len("```markdown\n")
+            body = section[fence_start:section.index("```", fence_start)]
+            self.assertEqual(
+                len(body.strip().splitlines()), 1,
+                f"{path}: bootstrap body must be a single unwrapped line")
+
+    def test_check_flags_a_wrapped_bootstrap(self):
+        """A shortcut can be correct in content and wrong in shape.
+
+        `/lr:check` is what a user runs against their own workspace, so the
+        single-line rule has to be enforceable there and not only in the
+        generator's own docs.
+        """
+        check = read("docs/check.md")
+        section = check.split("## 18. Legacy registered shortcut formats", 1)[1]
+        section = section.split("\n## ", 1)[0]
+        self.assertIn("more than one line", section)
+
     def test_doctor_and_check_reject_stale_cache_pins(self):
         doctor = read("docs/doctor.md")
         ailment = read("docs/doctor-stale-shortcut-bootstrap.md")

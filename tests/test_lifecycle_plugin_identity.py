@@ -28,6 +28,14 @@ class ParsePluginIdentity(unittest.TestCase):
         self.assertIsNone(root)
         self.assertIsNone(version)
 
+    def test_keeps_version_when_cursor_appends_completion_prose(self):
+        root, version = harness.parse_plugin_identity(
+            "FRAMEWORK-ROOT: /tmp/fw\n"
+            "PLUGIN-VERSION: 33The identity probe resolved successfully.\n"
+        )
+        self.assertEqual(root, "/tmp/fw")
+        self.assertEqual(version, "33")
+
     def test_empty_text(self):
         self.assertEqual(harness.parse_plugin_identity(""), (None, None))
         self.assertEqual(harness.parse_plugin_identity(None), (None, None))

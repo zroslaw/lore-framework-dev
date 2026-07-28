@@ -26,6 +26,7 @@ to avoid API rate limits. See lore `lifecycle-harness-parallelization.md`.
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -509,7 +510,13 @@ def parse_plugin_identity(text):
         if line.startswith("FRAMEWORK-ROOT:"):
             root = line.split(":", 1)[1].strip().strip('"').strip("'") or None
         elif line.startswith("PLUGIN-VERSION:"):
-            version = line.split(":", 1)[1].strip().strip('"').strip("'") or None
+            candidate = line.split(":", 1)[1].strip().strip('"').strip("'")
+            # Cursor may append a completion sentence directly to its required
+            # version line (for example, ``33The identity probe ...``). Keep
+            # the version token while the later identity assertion still
+            # verifies it against the framework under test.
+            match = re.match(r"(?:1\.\d+(?:\.\d+)?|\d+)", candidate)
+            version = match.group(0) if match else None
     return root, version
 
 
@@ -1192,15 +1199,21 @@ def run_engine(workspace, prompt, framework_dir=None, _skip_identity_check=False
     verify_plugin_identity. _skip_identity_check is for the probe's own call.
 
     A per-run framework_dir override still gets the deterministic installed-source
-    check (cheap, no engine call), because an override is precisely the case the
-    once-per-process model probe cannot cover: the probe ran against a different
-    tree, so a competing install would silently serve the override's scenario. It
-    does not get its own model probe — that would cost a round-trip per run.
+    check for engines which load a supplied plugin directory (Claude and Cursor).
+    Codex has no per-invocation plugin-directory option: override scenarios there
+    name the copied documentation explicitly, while the baseline marketplace
+    identity remains verified above. Requiring its marketplace source to equal a
+    temporary copy would make the Script Fallback fixture impossible to run.
+    Overrides do not get their own model probe — that would cost a round-trip per
+    run.
     """
     framework_dir = framework_dir or FRAMEWORK_DIR
     if not _skip_identity_check:
         verify_plugin_identity(workspace=workspace, framework_dir=FRAMEWORK_DIR)
-        if os.path.realpath(framework_dir) != os.path.realpath(FRAMEWORK_DIR):
+        if (
+            ENGINE != "codex"
+            and os.path.realpath(framework_dir) != os.path.realpath(FRAMEWORK_DIR)
+        ):
             check_installed_plugin_sources(framework_dir)
     env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
     if ENGINE == "claude":
