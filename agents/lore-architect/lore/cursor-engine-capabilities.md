@@ -38,6 +38,8 @@ validation and probe notes in the linked topics below.
   (`sub::jwt` cookie); session context % via CLI statusline only (interactive, not headless `-p`);
   IDE context ring is manual. See `cursor-usage-auto-retrieval.md`; draft probe in
   `workdir/cursor-cli-usage/`.
+- **Boot context cost** — version-match boot ≈ **~20K tokens** (~8–9% of 256K); measure with
+  `scripts/token-count` (`o200k_base`). See `cursor-boot-context-cost-measurement.md`.
 
 ## Why this hub exists
 
@@ -59,3 +61,4 @@ This hub is the starting map for install, refresh, fallback, invocation, and con
 - `subagent-as-optimization-vs-subagent-as-semantics.md` — the principle behind the v30 `Task` carve-out
 - `trilens-loop-feature.md` — the only semantics-class procedure today, and why the carve-out exists
 - `feedback-composer-25-subagent-reviews.md` — composer-2.5 as a reviewer tier
+- `cursor-boot-context-cost-measurement.md` — ~20K version-match boot on 256K Cursor window

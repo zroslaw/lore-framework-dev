@@ -49,6 +49,8 @@ from shipping moves the ship further out. Filed on `workdir/what-to-improve.md` 
 
 ## See Also
 
+- `cursor-boot-context-cost-measurement.md` — full-stack Cursor measurement (~20K version-match
+  boot; confirms the ~3K `agent-boot.md` slice and shows `lore-context.md` as the largest file).
 - `standing-improvement-list-practice.md` — where this is queued and how the tiering works.
 - `literate-accelerator-pattern.md` — the v31 thesis this measurement partly contradicts.
 - `lore-context-shape-discipline.md` — the sibling shape-over-size discipline for lore, same

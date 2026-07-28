@@ -115,6 +115,8 @@ materially in just 18 days as of the 2026-07-20 re-survey.
 
 Boot (`agent-boot.md`, single source of truth): discover agent → auto-pull repo → version check → read `role.md` + `lore-context.md` → detect teammate spawn → confirm. **Boot loads only those two files; topics are read on demand.** Repos auto-pull at every session-context boundary (boot, attach, pre-merge) to match the team's latest pushed state; `/lr:pull-lore` is the manual refresh. See `freshness-contracts-at-session-boundaries.md`, `auto-pull-mechanism.md`.
 
+**Cursor boot cost (measured 2026-07-28):** a version-match boot is ~20K tokens (~8–9% of a 256K window); `lore-context.md` is the largest file (~9K), `version-check.md` adds ~3.9K only on skew. Remeasure with `lore-framework/scripts/token-count` (`o200k_base`). See `cursor-boot-context-cost-measurement.md`, `agent-boot-doc-grew-when-scripted.md`.
+
 `version-check.md`'s nested-repo guard has a macOS-specific trap: "resolve both to real paths" is not
 self-executing prose — a weak model filled the gap with bare `pwd`, which disagrees with git's
 `--show-toplevel` under macOS's `/var`→`/private/var` symlink, producing a false "not its own git root"
