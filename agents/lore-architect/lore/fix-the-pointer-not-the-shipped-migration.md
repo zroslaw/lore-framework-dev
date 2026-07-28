@@ -43,3 +43,5 @@ wrong, because it's the only one of the two that's still making a claim about th
   (two engines, separate reads, same finding).
 - `consistency-checks.md` — where a future `/lr:check` rule could assert migration-vs-pointer
   consistency mechanically, if this class of bug recurs.
+- `registered-shortcuts-are-framework-owned.md` — the ownership boundary for regenerating an
+  already-recognized generated shortcut without touching optional registrations or collisions.
