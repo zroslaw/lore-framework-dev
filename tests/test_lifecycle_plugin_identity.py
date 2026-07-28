@@ -247,6 +247,58 @@ class CursorPluginSources(unittest.TestCase):
         harness.check_cursor_plugin_sources(self.fw, plugins_root=self.plugins)
 
 
+class CodexAgentMessages(unittest.TestCase):
+    """Transcript extraction from Codex's --json stream.
+
+    `text` comes from --output-last-message, so anything the agent said mid-run
+    is absent from it. test_08 asserts the Script Fallback notice, which is
+    emitted mid-boot — it needs the transcript or a compliant run reads as a
+    violation. Event shape verified live against gpt-5.4-mini.
+    """
+
+    STREAM = (
+        '{"type": "thread.started", "thread_id": "019fa606"}\n'
+        '{"type": "turn.started"}\n'
+        '{"type": "item.completed", "item": {"id": "item_0", '
+        '"type": "agent_message", "text": "lr-core preflight failed"}}\n'
+        '{"type": "item.completed", "item": {"id": "item_1", '
+        '"type": "agent_message", "text": "BOOT-CODEWORD: X"}}\n'
+        '{"type": "turn.completed", "usage": {"output_tokens": 43}}\n'
+    )
+
+    def test_extracts_agent_messages_in_order(self):
+        self.assertEqual(
+            harness.codex_agent_messages(self.STREAM),
+            ["lr-core preflight failed", "BOOT-CODEWORD: X"],
+        )
+
+    def test_ignores_non_agent_items(self):
+        """A token in a tool call or file path must not count as telling the user."""
+        stream = (
+            '{"type": "item.completed", "item": {"type": "command_execution", '
+            '"command": "python3 /fw/scripts/lr-core preflight"}}\n'
+            '{"type": "item.completed", "item": {"type": "reasoning", '
+            '"text": "I should mention lr-core"}}\n'
+        )
+        self.assertEqual(harness.codex_agent_messages(stream), [])
+
+    def test_tolerates_noise_and_empty(self):
+        self.assertEqual(harness.codex_agent_messages(""), [])
+        self.assertEqual(harness.codex_agent_messages(None), [])
+        self.assertEqual(harness.codex_agent_messages("not json\n\n"), [])
+        self.assertEqual(harness.codex_agent_messages('{"type": "turn.started"}'), [])
+
+    def test_run_result_transcript_defaults_to_text(self):
+        """Claude and Cursor expose no event stream; transcript must not be empty."""
+        r = harness.RunResult(0, "final only", None, None, "")
+        self.assertEqual(r.transcript, "final only")
+
+    def test_run_result_keeps_explicit_transcript(self):
+        r = harness.RunResult(0, "final", None, None, "", transcript="said\nfinal")
+        self.assertEqual(r.text, "final")
+        self.assertEqual(r.transcript, "said\nfinal")
+
+
 class CodexPromptPassthrough(unittest.TestCase):
     def test_identity_probe_does_not_inject_framework_dir(self):
         rewritten = harness.codex_prompt(harness.PLUGIN_IDENTITY_PROMPT)

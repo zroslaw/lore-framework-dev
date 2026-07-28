@@ -113,15 +113,20 @@ class ScriptFallbackScenarios(unittest.TestCase):
 
         # Requirement 1 of the contract: tell the user. Silent recovery is a
         # failure of the contract even when the boot itself succeeds.
-        lowered = r.text.lower()
+        #
+        # Assert against the transcript, not the final message: the notice is
+        # emitted when preflight fails — mid-run, before the boot finishes — and
+        # on Codex `text` holds only the last message, so a compliant run reads
+        # as a violation. See RunResult.transcript.
+        lowered = r.transcript.lower()
         self.assertTrue(
             "lr-core" in lowered or "preflight" in lowered,
-            f"user was not told which script failed:\n{r.text}",
+            f"user was not told which script failed:\n{r.transcript}",
         )
         self.assertTrue(
             any(w in lowered for w in
                 ("manual", "by hand", "fallback", "fall back", "failed")),
-            f"user was not told a manual takeover happened:\n{r.text}",
+            f"user was not told a manual takeover happened:\n{r.transcript}",
         )
 
 

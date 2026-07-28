@@ -1068,13 +1068,51 @@ def grep_agent_dir(fx, needle):
     return False
 
 
+def codex_agent_messages(stdout):
+    """Extract everything Codex actually said to the user from its --json stream.
+
+    Event shape (verified live against gpt-5.4-mini):
+        {"type": "item.completed",
+         "item": {"id": ..., "type": "agent_message", "text": "..."}}
+
+    Only `agent_message` items count. Tool calls and reasoning are deliberately
+    excluded: an assertion about what the *user was told* must not pass because
+    a token appeared in a tool argument or a file path.
+    """
+    messages = []
+    for line in (stdout or "").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            event = json.loads(line)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        item = event.get("item") if isinstance(event, dict) else None
+        if isinstance(item, dict) and item.get("type") == "agent_message":
+            text = item.get("text")
+            if text:
+                messages.append(text)
+    return messages
+
+
 class RunResult:
-    def __init__(self, exit_code, text, cost_usd, duration_ms, stderr):
+    def __init__(self, exit_code, text, cost_usd, duration_ms, stderr,
+                 transcript=None):
         self.exit_code = exit_code
         self.text = text
         self.cost_usd = cost_usd
         self.duration_ms = duration_ms
         self.stderr = stderr
+        # Everything the agent said across the run, where the engine exposes it.
+        # `text` is the FINAL message only — on Codex that comes from
+        # --output-last-message, so anything said mid-run (a Script Fallback
+        # notice, a version warning) is absent from it entirely. Assertions of
+        # the form "the user was told X" belong here; assertions about the end
+        # state (canaries, DONE markers) belong on `text`.
+        # Claude and Cursor are driven with --output-format json, which returns
+        # one result string and no event stream, so transcript == text there.
+        self.transcript = transcript if transcript is not None else text
 
     def summary(self):
         cost = f"${self.cost_usd:.4f}" if self.cost_usd is not None else "cost=?"
@@ -1095,10 +1133,12 @@ def _debug_dump(result):
     _DEBUG_SEQ[0] += 1
     path = os.path.join(dbg, f"{ENGINE}-{MODEL}-{_DEBUG_SEQ[0]:02d}.txt")
     with open(path, "w", encoding="utf-8", errors="ignore") as fh:
-        fh.write(
-            f"exit={result.exit_code}\n\n=== FINAL MESSAGE ===\n{result.text}\n\n"
-            f"=== STDERR (tail) ===\n{(result.stderr or '')[-2000:]}\n"
-        )
+        fh.write(f"exit={result.exit_code}\n\n=== FINAL MESSAGE ===\n{result.text}\n\n")
+        # Only when it carries more than the final message — otherwise it is a
+        # verbatim duplicate and just makes the dump harder to read.
+        if result.transcript and result.transcript != result.text:
+            fh.write(f"=== TRANSCRIPT ===\n{result.transcript}\n\n")
+        fh.write(f"=== STDERR (tail) ===\n{(result.stderr or '')[-2000:]}\n")
 
 
 def run_engine(workspace, prompt, framework_dir=None, _skip_identity_check=False):
@@ -1172,12 +1212,14 @@ def run_engine(workspace, prompt, framework_dir=None, _skip_identity_check=False
             if os.path.exists(output_last_message):
                 with open(output_last_message, encoding="utf-8", errors="ignore") as fh:
                     text = fh.read() or proc.stdout
+            transcript = "\n".join(codex_agent_messages(proc.stdout)) or text
         finally:
             try:
                 os.unlink(output_last_message)
             except FileNotFoundError:
                 pass
-        rr = RunResult(proc.returncode, text or "", None, None, proc.stderr)
+        rr = RunResult(proc.returncode, text or "", None, None, proc.stderr,
+                       transcript=transcript)
         _debug_dump(rr)
         return rr
     else:

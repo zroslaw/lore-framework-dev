@@ -233,6 +233,45 @@ class TestPreflight(LrCoreTestBase):
             self.assertEqual(rc, 0)
             self.assertEqual(out["data"]["version"]["verdict"], verdict, agent)
 
+    def test_skew_is_reported_through_data_only_never_as_a_warning(self):
+        """version-check.md owns the user-facing skew message; preflight owns the data.
+
+        The Codex repo-ahead lifecycle scenario printed the script's
+        `version skew: repo=32 framework=31 (repo-ahead)` line verbatim and
+        stopped, never reaching version-check.md's engine-specific plugin-refresh
+        remedy — agent-boot.md tells the caller to surface warnings one line each,
+        so a warning that reads like a finished message gets treated as one.
+        A skew must leave `warnings` empty; the verdict alone routes the caller.
+        """
+        for version, verdict in (("99", "repo-ahead"), ("27", "repo-behind"),
+                                 ("v2", "differs")):
+            repo = make_repo(self.workspace, f"skew-{verdict}-{version}",
+                             version=version, agents=(f"agent-{version}",))
+            self.assertTrue(os.path.isdir(repo))
+            rc, out, _ = self.core("preflight", "--agent", f"agent-{version}",
+                                   "--workspace", self.workspace, "--no-pull")
+            self.assertEqual(out["data"]["version"]["verdict"], verdict, version)
+            self.assertEqual(
+                [w for w in out["warnings"] if "skew" in w.lower()], [],
+                f"{verdict} must not emit a skew warning: {out['warnings']}",
+            )
+
+    def test_unknown_version_still_warns(self):
+        """The counterpart: `unknown` is not a skew and keeps its warning.
+
+        Silence there would read as "versions agree" — a different and unearned
+        claim — and that message deliberately does not point at version-check.md.
+        """
+        repo = make_repo(self.workspace, "no-stamp", agents=("beta",))
+        write(os.path.join(repo, "lore-repo.md"), "no frontmatter here\n")
+        rc, out, _ = self.core("preflight", "--agent", "beta",
+                               "--workspace", self.workspace, "--no-pull")
+        self.assertEqual(out["data"]["version"]["verdict"], "unknown")
+        self.assertTrue(
+            [w for w in out["warnings"] if "version stamp" in w],
+            f"unknown must still warn: {out['warnings']}",
+        )
+
     def test_int_equal_versions_spelled_differently_are_a_match(self):
         """`031` and `31` are the same version.
 
