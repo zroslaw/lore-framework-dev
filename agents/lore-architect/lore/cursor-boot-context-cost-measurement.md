@@ -1,6 +1,8 @@
-# Cursor Boot Context Cost (measured 2026-07-28)
+# Boot Context Cost Measurement (measured 2026-07-28)
 
-Empirical boot-cost measurement on Cursor (256K window) for `lore-architect`, using Cursor's Context Usage UI plus `lore-framework/scripts/token-count` (`tiktoken` / `o200k_base`).
+Measure the files a boot procedure loads separately from tool output and hidden engine context. `lore-framework/scripts/token-count` uses `tiktoken` / `o200k_base`: it is exact for that encoding and a stable cross-engine proxy, though not a billing-accurate count for every model. Do not use `characters / 4` for decisions; Markdown, paths, and code made it materially disagree with the tokenizer in a live boot measurement.
+
+The Cursor measurement below also used Cursor's Context Usage UI for its conversation delta.
 
 ## What boot costs
 
@@ -11,7 +13,7 @@ Empirical boot-cost measurement on Cursor (256K window) for `lore-architect`, us
 | Files without `version-check.md` (normal match) | 19,091 | ~7.5% |
 | Est. conversation Δ without version-check | ~22,600 | ~8.8% |
 
-**Rule of thumb:** a regular version-match boot is **~20K tokens** (~8–9% of a 256K Cursor window). Fixed session overhead (~22K tools/rules/skills) is separate and unchanged by boot.
+**Rule of thumb:** a regular version-match boot loads **about 18–20K file tokens** for this agent. Fixed engine/session overhead is separate and unchanged by the boot files.
 
 ## File breakdown (this boot)
 
@@ -28,6 +30,12 @@ Empirical boot-cost measurement on Cursor (256K window) for `lore-architect`, us
 `lore-context.md` is the largest single boot payload. `version-check.md` adds ~3.9K when skew routes there — match skips it.
 
 Conversation Δ exceeds the file sum by ~3.5K (tool wrappers, MCP schema for workspace root move, boot confirmation reply). Preflight JSON is only ~384 of that gap.
+
+## Codex file-only measurement
+
+The same `lore-architect` boot on Codex loaded about **21.8K** file-and-result tokens when version skew routed it through `version-check.md`; a version-match boot would have been about **17.9K**. Its main slices were `lore-context.md` (8.9K), `role.md` (3.2K), `agent-boot.md` (3.5K), the Codex engine profile (1.7K), and the conditional version-check document (3.9K). This is a repeatable file budget, not a claim about Codex's complete hidden startup context.
+
+The main reduction opportunity remains on-demand loading: the initial path needs preflight, result routing, role, and lore context; task-specific operating guidance can load when its situation occurs.
 
 ## How to remeasure
 
