@@ -161,3 +161,13 @@ The harness's first real use already found two genuine doc-fidelity bugs in `age
 - `plugin-mcp-server-convention.md` — the MCP registration convention that ports unchanged.
 - `framework-improvements-backlog.md` § Architecture-Review Follow-Ups — the simplification/subtraction theme this direction's fidelity report feeds.
 - `lr-dev-direction.md`, `autonomous-agents-vision.md` — sibling major directions (different axes: SDLC activity, process/substrate, and now engine portability).
+- `cross-engine-team-substrate-validated.md` — a shared-folder protocol for **separate sessions on
+  separate engines to coordinate on a real task**, validated end-to-end across all three ports
+  during the v32 design; distinct from this topic's per-engine profile-parity concern.
+- `same-agent-multiple-engines-single-writer.md`, `cross-engine-relay-not-attributable-authority.md`
+  — operational rules discovered running that substrate for real: same agent identity on multiple
+  engines needs one designated write-owner, and a relayed user decision from one session is not
+  authority for another session to act on.
+- `independent-engine-review-catches-structural-blind-spots.md` — a genuinely different engine
+  catches design flaws a single engine's self-review (even multi-lens) misses; worth the
+  coordination cost for high-stakes design decisions.

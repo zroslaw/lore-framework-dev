@@ -67,6 +67,11 @@ sandbox constraints, and lifecycle-harness caveats; keep atomic findings in the 
 topics rather than rediscovering them from old session notes. Cursor live usage retrieval
 (plan quota + CLI session context) → `cursor-usage-auto-retrieval.md`.
 
+At least one Claude Code host flavor ("local-agent-mode-sessions") snapshots the **entire plugin
+bundle per session** rather than referencing the live checkout — skill dispatch resolves through
+that frozen snapshot for the session's whole lifetime, so a mid-session version bump or git pull to
+the workspace checkout doesn't reach it. See `ephemeral-session-plugin-snapshot-topology.md`.
+
 **Where an engine fact belongs:** if it would change what an executor *types*, it goes in
 `docs/engines/<engine>.md`'s binding — the doc read at the moment of use — not only in these hubs or in
 agent lore. Lore is for judgement and history; the profile is the point-of-use contract. I learned this
@@ -135,9 +140,11 @@ User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone
 
 ## Versioning & Migration
 
-`lore-framework/VERSION` is the single source of truth; **the current shipped version is v30** — v31
-(`lr-core`) is fully built, reviewed, and parked, not shipped (see Current State above,
-`v31-lr-core-parked-2026-07-25.md`). Each
+`lore-framework/VERSION` is the single source of truth; **the current shipped-and-pushed version is
+v31** (`lr-core` substrate, shipped under a recorded gate waiver — see Current State below,
+`v31-lr-core-parked-2026-07-25.md`). **v32** (version-agnostic registered boot shortcuts) is locally
+committed in both `lore-framework` and `lore-framework-dev` but **not yet merged to `main` or
+pushed** — see Current State below and `versioning-release-types.md`'s v32 entry. Each
 agent repo stamps that version in its `lore-repo.md`, and four version-bearing plugin manifests mirror
 `1.<VERSION>.0` (`/lr:check` #19 enforces). A version is either **migration**, **release-notes-only**,
 or both, and independently **cache-affecting** or not — those two axes are orthogonal, and every ship
@@ -201,7 +208,18 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
   when validating an engine path; Codex's default sandbox blocks `.git` writes and network, so the
   supported finalization path needs `.git` writable through launch/config (a commit-blocked run is
   degraded fallback, not a merge failure); Codex per-agent shortcut register/unregister/list remains an
-  unvalidated implementation gap. The **"framework is prose executed by the model"** risk is
+  unvalidated implementation gap. **Separate sessions on separate engines coordinating on a real task**
+  (not `/lr:attach`, which is single-executor multi-agent) now has a validated substrate: a shared
+  append-only folder (worked example: `workdir/v31-feedback/`), reusable across message-vocabulary
+  changes — see `cross-engine-team-substrate-validated.md`. Two rules fell out of running it for real:
+  **check for same agent identity before any session writes** (two engines can be the same booted
+  agent against the same repo — designate one write-owner, `same-agent-multiple-engines-single-writer.md`)
+  and **don't relay a user decision from one session into the shared channel as settled authority for
+  another session** (`cross-engine-relay-not-attributable-authority.md`). A genuinely different engine
+  also catches design flaws same-engine self-review (even multi-lens) misses — a distinct axis from the
+  sandboxed-review/self-report family, worth the coordination cost on high-stakes design decisions,
+  not routine changes (`independent-engine-review-catches-structural-blind-spots.md`). The **"framework
+  is prose executed by the model"** risk is
   empirically retired for the exercised paths, and the substrate half has quantitative backing — the
   quality benchmark showed positive lore-utilization uplift on every engine+model config, with the
   nuance that **model–engine fit beats model tier**. Cross-engine support is a *supporting* fact in
@@ -242,6 +260,17 @@ Both pre-ship gates are in working order and both are routinely run: the review 
 higher-blast-radius `LR_LIFECYCLE_KEEPER=1` Keeper track and the `LR_QUALITY=1` benchmark track).
 See `trilens-loop-feature.md`, `lifecycle-testing-harness.md`, `lore-beings-design.md`,
 `session-summaries-feature.md`.
+
+**v32 — version-agnostic registered boot shortcuts** — locally committed on branch
+`codex/shortcut-bootstrap` in both repos (`lore-framework` `4f35a0f`, `lore-framework-dev`
+`84395f8`), **not yet merged to `main` or pushed**. Generated per-agent shortcuts no longer bake an
+absolute, version-pinned path to `agent-boot.md`; they self-locate framework authority off the
+session's actively installed boot skill instead, fixing a defect where a shortcut pinned to a dead
+plugin-cache path after an upgrade. Designed via the three-engine (Claude/Codex/Cursor) shared-folder
+review recorded at `agents/lore-architect/workdir/v31-feedback/`. Shipped locally under an explicit
+user waiver — the real per-engine upgrade-lifecycle regression is filed as a required follow-up, not
+proven. See `versioning-release-types.md`'s v32 entry, `cross-engine-team-substrate-validated.md`,
+`fix-the-pointer-not-the-shipped-migration.md`.
 
 ## Running Backlog & Standing Improvement List
 

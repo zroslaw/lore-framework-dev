@@ -42,6 +42,18 @@ Trade-off acknowledged: if the user interrupts mid-finalize (ctrl-C between phas
 
 When phase 4 push is rejected due to concurrent writes inside an agent subtree (e.g., two users finalized the same agent), `docs/resolve-conflicts.md` runs one `general-purpose` subagent per conflicted agent, each booted as its target, capped at 3 total attempts. Scope is agent subtree content only (lore, lore-context, role); conflicts outside agent subtrees hand back to the user. See `push-conflict-resolution.md`.
 
+## Multi-engine sessions: check for shared identity before writing
+
+This process assumes one executor finalizing one agent's repo. When multiple *separate engine
+sessions* are coordinating on the same task (not `/lr:attach` guests — genuinely different engine
+processes, e.g. Claude + Codex + Cursor each with their own session), confirm none of them are
+booted as the **same agent identity against the same repo** before any of them runs phase 2/4.
+If two sessions of the same agent both reflect→merge→commit independently, that's a real git
+conflict on shared prose, not a harmless collision. See
+`same-agent-multiple-engines-single-writer.md` for the discovered rule (designate a single
+write-owner explicitly) and `cross-engine-relay-not-attributable-authority.md` for the companion
+rule that a decision relayed from one session's user isn't authority for another session to act on.
+
 ## Related topics
 
 - `session-summaries-feature.md` — summary feature specifics, including v8 guest summaries
@@ -51,3 +63,7 @@ When phase 4 push is rejected due to concurrent writes inside an agent subtree (
 - `attach-pattern.md` — host/guest model and what changes on attach
 - `lore-search-pattern.md` — recall fan-out (the read-side counterpart to per-agent finalization)
 - `skill-doc-pattern.md` — `docs/finalize.md` as the orchestration home; the skill file is a thin pointer
+- `same-agent-multiple-engines-single-writer.md` — the write-ownership rule for multi-*engine-session*
+  coordination (distinct from multi-guest `/lr:attach`, which is single-executor already)
+- `cross-engine-relay-not-attributable-authority.md` — don't relay another session's user decision
+  as settled authority for this session's finalize

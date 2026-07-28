@@ -54,3 +54,6 @@ until you check what *class* of evidence each one rests on.
   result belongs to.
 - `point-of-use-guardrails-beat-recorded-lore.md` — why the fix belongs in the harness rather than
   in a human prep step.
+- `independent-engine-review-catches-structural-blind-spots.md` — an adjacent but distinct family:
+  a fully-functional review still misses things a *different engine* catches, with no environmental
+  defect or silent substitution involved.

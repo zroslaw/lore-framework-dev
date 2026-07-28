@@ -46,6 +46,12 @@ are written in Claude terms first, and other engines override only the binding p
   look like broad scenario failure: quick exit code 1, zero cost, and a final "session limit" message
   after earlier normal scenarios. Treat that as quota exhaustion and inspect `LR_DEBUG_DIR` before
   debugging framework behavior. See `lifecycle-testing-harness.md`.
+- **Ephemeral per-session plugin snapshot (one host flavor)** — at least one Claude Code host flavor
+  ("local-agent-mode-sessions") materializes a full, physically separate plugin-bundle snapshot per
+  session rather than referencing the marketplace cache or workspace checkout; skill dispatch
+  resolves through that snapshot for the session's whole lifetime, even when
+  `${CLAUDE_PLUGIN_ROOT}` is empty and the workspace checkout is git-pulled or version-bumped
+  mid-session. See `ephemeral-session-plugin-snapshot-topology.md`.
 
 ## Why this hub exists
 
@@ -68,3 +74,5 @@ details living in the linked topics below rather than scattered through multi-en
 - `subagent-as-optimization-vs-subagent-as-semantics.md` — when `fork` is not merely suboptimal but invalid
 - `wait-primitive-feature.md` — the MCP idle-timeout ceiling and the long-wait fallback
 - `macos-documents-permission-loss-mid-session.md` — the mid-session TCC ailment
+- `ephemeral-session-plugin-snapshot-topology.md` — the per-session plugin-snapshot divergence
+  hazard on the "local-agent-mode-sessions" host flavor

@@ -273,6 +273,38 @@ Cross-engine plugin-marketplace readiness. Anchor topics: `engine-marketplace-re
 
 ## Ship Closures (archive)
 
+### v32 SHIP CLOSURE (2026-07-28, local — not pushed)
+
+**Version-agnostic registered boot shortcuts.** Fixes generated per-agent shortcuts
+(`/lr-<agent>-agent`, `$lr-<agent>-agent`) baking an absolute, version-pinned path to
+`agent-boot.md`, which silently breaks after a framework upgrade on any engine using a versioned
+plugin-cache install (first observed on Codex: a shortcut pinned to a dead `1.27.0` path after
+upgrading to `1.31.0`). Shortcuts now pin only agent name + absolute agent directory; framework
+authority comes from self-locating off the session's actively installed boot skill, documented
+per-engine in `docs/engines/<engine>.md` § Registered shortcut bootstrap.
+
+Local commits: `lore-framework` `4f35a0f`, `lore-framework-dev` `84395f8`, both on
+`codex/shortcut-bootstrap` (not yet merged to `main` as of this entry — see
+`workdir/v31-feedback/` round 5 for the merge-to-main follow-up). `VERSION` 32, all four manifests
+`1.32.0`, `release-notes/32.md` written.
+
+**Shipped under an explicit, independently-attributed user waiver in all three engine sessions
+(Claude, Codex, Cursor each confirmed directly, not by cross-engine relay — see
+`workdir/v31-feedback/STATUS.md`), not release-green:** the real per-engine upgrade-lifecycle
+regression (register → upgrade installed plugin without rewriting the shortcut → invoke → prove
+the new active `agent-boot.md` + stored agent directory are used) was **not implemented or run**.
+This is the single test that would directly prove the fixed defect is actually gone end-to-end.
+**Filed here as the required follow-up, not a deferred nice-to-have.**
+
+Full design + implementation + release-readiness record: three-round cross-engine review at
+`agents/lore-architect/workdir/v31-feedback/` (`CONCLUSION.md`, `STATUS.md`, 31 messages). First
+live exercise of ad hoc cross-engine (not cross-subagent) collaboration via a shared
+filesystem folder — see `workdir/draft-cross-engine-team-feature.md` for the resulting feature
+proposal to generalize the pattern.
+
+Push not authorized as of this entry — separate explicit step. See `versioning-release-types.md`
+§ v32.
+
 ### v25 SHIP CLOSURE (2026-07-12)
 
 **Ground truth before final push (verified 2026-07-12).** `lore-framework/main` carried three
