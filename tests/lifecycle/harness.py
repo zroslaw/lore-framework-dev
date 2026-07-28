@@ -140,13 +140,13 @@ FINALIZE_PROMPT = (
 )
 
 CREATE_REPO_PROMPT = (
-    "Invoke the lr:create-repo skill to scaffold a new lore agent repo named "
-    "'new-fixture-repo' in this workspace. If asked for a description, use "
-    "'Fixture repo created by lifecycle tests'. Do not ask for confirmation — "
-    "proceed directly using that description. Before printing DONE, verify that "
-    "'new-fixture-repo/lore-repo.md', 'new-fixture-repo/agents/', "
-    "'new-fixture-repo/.gitignore', 'new-fixture-repo/README.md', and "
-    "'new-fixture-repo/.git/' exist. Print DONE only after those paths exist."
+    "Invoke the lr:create-repo skill to scaffold a new lore agent repo at "
+    "'.tmp/new-fixture-repo' in this workspace (disposable path under .tmp/, not a top-level "
+    "child). If asked for a description, use 'Fixture repo created by lifecycle tests'. Do not "
+    "ask for confirmation — proceed directly using that description. Before printing DONE, "
+    "verify that '.tmp/new-fixture-repo/lore-repo.md', '.tmp/new-fixture-repo/agents/', "
+    "'.tmp/new-fixture-repo/.gitignore', '.tmp/new-fixture-repo/README.md', and "
+    "'.tmp/new-fixture-repo/.git/' exist. Print DONE only after those paths exist."
 )
 
 CREATE_AGENT_PROMPT = (
@@ -347,9 +347,9 @@ def codex_prompt(prompt):
     if prompt == CREATE_REPO_PROMPT:
         return (
             f"Read '{FRAMEWORK_DIR}/docs/create-repo.md' and follow it to scaffold a new lore "
-            "agent repo named 'new-fixture-repo' in this workspace. If a description is needed, "
-            "use 'Fixture repo created by lifecycle tests'. Do not ask for confirmation. Print "
-            "DONE when complete."
+            "agent repo at '.tmp/new-fixture-repo' in this workspace (disposable under .tmp/, "
+            "not a top-level child). If a description is needed, use 'Fixture repo created by "
+            "lifecycle tests'. Do not ask for confirmation. Print DONE when complete."
         )
     if prompt == CREATE_AGENT_PROMPT:
         return (
