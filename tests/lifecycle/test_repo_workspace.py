@@ -43,12 +43,19 @@ class RepoWorkspaceScenarios(unittest.TestCase):
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
 
-        new_repo = os.path.join(workspace, "new-fixture-repo")
+        new_repo = os.path.join(workspace, ".tmp", "new-fixture-repo")
         self.assertTrue(
             os.path.isfile(os.path.join(new_repo, "lore-repo.md")),
-            "lore-repo.md was not created",
+            "lore-repo.md was not created under .tmp/new-fixture-repo",
         )
-        self.assertTrue(os.path.isdir(os.path.join(new_repo, "agents")), "agents/ was not created")
+        self.assertTrue(
+            os.path.isdir(os.path.join(new_repo, "agents")),
+            "agents/ was not created under .tmp/new-fixture-repo",
+        )
+        self.assertFalse(
+            os.path.exists(os.path.join(workspace, "new-fixture-repo")),
+            "create-repo wrote a top-level new-fixture-repo; disposable fixtures belong under .tmp/",
+        )
         rev_parse = subprocess.run(
             ["git", "-C", new_repo, "rev-parse", "--is-inside-work-tree"],
             capture_output=True, text=True,
