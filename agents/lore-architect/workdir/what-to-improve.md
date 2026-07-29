@@ -181,6 +181,16 @@ auto-commit item describes. Full design drafted in `workdir/draft-auto-push-afte
 **Do:** consider shipping just the commit half (no push) as a smaller first step. Backlog
 ref: § Boot-Time Auto-Commit + Auto-Push.
 
+### B8. Cursor IDE boot assumes Claude — OPEN (live 2026-07-29)
+Booting in Cursor IDE chat (extension-host), not `cursor-agent` CLI, yields
+`confidence: assumed` → Claude reference profile. Ancestry sees `Cursor Helper` /
+`Cursor.app` only; those are deliberately non-signals so Claude-in-Cursor-terminal
+is not mislabeled. Workspace `<framework-root>` also misses `~/.cursor` containment.
+**Do:** decide among trusted IDE-only argv signal (with negative test), shortcuts
+passing `--engine cursor`, profile doc of the assumed path, and/or prefer
+plugin-cache framework-root on Cursor. Backlog ref: § Boot Step-0 Engine Detection
+Ordering (2026-07-29 bullet).
+
 ---
 
 ## C. New feature directions — what would make Lore Agents sexier

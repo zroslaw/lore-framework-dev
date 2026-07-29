@@ -52,6 +52,8 @@ the one least able to notice.
 ## See Also
 
 - `engine-profile-must-be-observed-not-believed.md` — the change this rule was learned during.
+- `cursor-ide-engine-detection-blind-spot.md` — the Cursor IDE sibling: deliberately-excluded
+  ancestry + workspace containment miss land IDE chat on the same `assumed` → Claude path.
 - `graduated-verification-confidence.md` — confidence as a reported value rather than a boolean;
   `assumed` vs `confident` is that principle at the detection layer.
 - `docs-engines-convention.md` — where the per-engine remedy lives at point of use.

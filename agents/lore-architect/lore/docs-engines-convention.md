@@ -17,11 +17,12 @@ concrete realization of the "`docs/engines/` adapter" lever named in
   walked itself; since v33 it is done deterministically by `lr-core`'s `detect_engine`, reported as
   `data.engine`, and consumed at Step 2 — the model reads the named profile rather than choosing
   it. Boot Step 0 now explicitly forbids inferring the engine from what the model believes it is.
-  See `engine-profile-must-be-observed-not-believed.md` for why, and
+  See `engine-profile-must-be-observed-not-believed.md` for why,
   `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md` for the Codex blind spot
-  that deleting the old `~/.codex/` rung exposed. **Profile still wins on conflict** with any later
-  step; once selected, read `docs/engines/<engine>.md` and keep its values as standing session
-  context.
+  that deleting the old `~/.codex/` rung exposed, and
+  `cursor-ide-engine-detection-blind-spot.md` for the Cursor IDE chat case that still assumes
+  Claude. **Profile still wins on conflict** with any later step; once selected, read
+  `docs/engines/<engine>.md` and keep its values as standing session context.
 - **Shared procedure docs stay engine-agnostic.** They describe the Claude mechanism; each spawn
   site (merge/recall/lore-search/consult) carries a one-line "Engine note" pointing at the
   profile's subagent-spawn override. Low churn, and the override wins at execution time.

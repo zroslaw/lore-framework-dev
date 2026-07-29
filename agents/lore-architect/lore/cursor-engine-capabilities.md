@@ -37,6 +37,11 @@ validation and probe notes in the linked topics below.
   `workdir/cursor-cli-usage/`.
 - **Boot context cost** — version-match boot ≈ **~20K tokens** (~8–9% of 256K); measure with
   `scripts/token-count` (`o200k_base`). See `cursor-boot-context-cost-measurement.md`.
+- **Detection blind spot (IDE chat)** — native Cursor IDE agent chat (extension-host) has no
+  `cursor-agent` in ancestry and a workspace `<framework-root>` misses `~/.cursor/` containment, so
+  `detect_engine` returns `confidence: "assumed"` → Claude profile. Bare `Cursor` / Helper are
+  deliberately non-signals (protects Claude-in-Cursor-terminal). Remedy today: `--engine cursor`.
+  Open fix options as backlog B8. See `cursor-ide-engine-detection-blind-spot.md`.
 
 ## Why this hub exists
 
@@ -62,3 +67,5 @@ This hub is the starting map for install, refresh, fallback, invocation, and con
 - `trilens-loop-feature.md` — semantics-class procedure; also uses `Task` on Cursor
 - `feedback-composer-25-subagent-reviews.md` — composer-2.5 as a reviewer tier
 - `cursor-boot-context-cost-measurement.md` — ~20K version-match boot on 256K Cursor window
+- `cursor-ide-engine-detection-blind-spot.md` — IDE chat assumes Claude; `--engine cursor` remedy
+- `engine-profile-must-be-observed-not-believed.md` — why detection is scripted, not believed

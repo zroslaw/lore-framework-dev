@@ -52,6 +52,21 @@ Cursor when it is really another engine running inside Cursor's integrated termi
 particular do not infer it from what you believe you are. The Manual Boot Procedure repeats it,
 because engine selection is the step a model is most likely to think it can skip.
 
+## What remains after the redesign
+
+Scripted detection is sound for the surfaces its signals can see. Two real configurations still
+land on `confidence: "assumed"` → Claude reference profile:
+
+- **Codex off a worktree / non-native install** — sandbox blocks `ps` and containment only matches
+  under `~/.codex/` (`removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`; remedy
+  documented in `docs/engines/codex.md` § Detection blind spot).
+- **Cursor IDE agent chat (extension-host)** — ancestry sees only deliberately-excluded `Cursor` /
+  Helper programs, and a workspace checkout as `<framework-root>` misses `~/.cursor/` containment
+  (`cursor-ide-engine-detection-blind-spot.md`; open as backlog B8).
+
+In both cases the boot remedy is the same: surface `assumed` and name `--engine <name>`. Do not
+invent a model-side guess to fill the gap — that would reintroduce the defect this topic records.
+
 ## Operational rule
 
 **When a procedure step's input is a fact about the running environment, the step belongs in the
@@ -63,6 +78,8 @@ deterministic accelerator, not in prose.** Prose asks a model to observe; a scri
   than binding selection).
 - `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md` — what deleting the bad
   `~/.codex/` rung cost, and the rule that fell out of it.
+- `cursor-ide-engine-detection-blind-spot.md` — Cursor IDE chat still assumes Claude; open fix
+  options in backlog B8.
 - `literate-accelerator-pattern.md` — why `detect_engine`'s own comments are the normative spec for
   the manual path.
 - `point-of-use-guardrails-beat-recorded-lore.md` — the same "put it where it executes" reflex.

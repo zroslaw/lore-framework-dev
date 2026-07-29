@@ -130,9 +130,14 @@ unsound "`~/.codex/` exists → codex" rung also removed the coverage it was pro
 Codex's two remaining signals fail *together* (sandbox blocks `ps`; containment only matches under
 `~/.codex/`), so a Codex session on a worktree or dev checkout silently lands on the claude profile —
 handled by making the no-signal branch legible and naming `--engine codex` as the remedy, in
-`docs/engines/codex.md` § Detection blind spot. See
+`docs/engines/codex.md` § Detection blind spot. **Cursor IDE agent chat has the same shape from a
+different miss:** ancestry sees only deliberately-excluded `Cursor` / Helper programs (so
+Claude-in-Cursor-terminal stays correctly unlabeled), and a workspace checkout as
+`<framework-root>` misses `~/.cursor/` containment — so IDE chat (not `cursor-agent` CLI) also
+lands on `assumed` → Claude until `--engine cursor`. Open as backlog B8. See
 `engine-profile-must-be-observed-not-believed.md`,
-`removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`.
+`removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`,
+`cursor-ide-engine-detection-blind-spot.md`.
 
 **Cursor boot cost (measured 2026-07-28):** a version-match boot is ~20K tokens (~8–9% of a 256K window); `lore-context.md` is the largest file (~9K), `version-check.md` adds ~3.9K only on skew. Remeasure with `lore-framework/scripts/token-count` (`o200k_base`). See `cursor-boot-context-cost-measurement.md`, `agent-boot-doc-grew-when-scripted.md`.
 
