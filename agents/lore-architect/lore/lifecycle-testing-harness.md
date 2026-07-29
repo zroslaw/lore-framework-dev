@@ -115,6 +115,12 @@ Out of scope for this harness (covered elsewhere or not headless-scriptable):
 
 Assertions are structural, matching the design premise: git HEAD before/after, file existence, canary tokens planted in fixture files (to prove a file was actually read, not paraphrased around), `grep`-based fact checks after reflect/merge. No LLM-as-judge needed for any of the 19 — the catalog's premise (procedure outputs are files + git state, verifiable by script) held up in practice.
 
+**Exercise the stated contract, not incidental release history.** A non-mutation dry-run scenario
+needs one pending migration, not the complete migration chain from an old fixture version; otherwise
+the model spends its action budget narrating history before it reaches the behavior under test. Keep
+end-to-end migration coverage where it belongs, while keeping a contract test focused enough to
+finish and make its assertion meaningful.
+
 **Classify every text assertion as mid-run or end-state.** `RunResult.text` is the *final message*
 only on Codex (`--output-last-message`); `RunResult.transcript` (Codex `--json` stream,
 `agent_message` items only; defaults to `text` on Claude/Cursor) carries what was said *during* the

@@ -41,6 +41,14 @@ guessing — see `fetch-volatile-facts-live-not-memory.md`):
 `turn.completed.usage` gives token counts but **no USD**, so Codex cost still is not directly
 available from the stream (consistent with `codex-exec-real-invocation-contract.md`).
 
+## Final-only fallback (v33)
+
+When an engine exposes only a final response, a test cannot prove an otherwise-required
+intermediate user notice from that capture surface. For a forced-fallback scenario, make the final
+response explicitly repeat the required notice before its completion markers. This does not weaken
+the product contract: it makes the already-required notification observable to the harness without
+pretending that a final-only capture contains a transcript.
+
 ## Operational rule
 
 When writing a lifecycle assertion, first classify it: *during* or *at the end*. Then check the

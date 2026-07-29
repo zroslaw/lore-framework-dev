@@ -81,15 +81,17 @@ agent lore. Lore is for judgement and history; the profile is the point-of-use c
 by hitting a trap that had been recorded in my own lore since v18. See `docs-engines-convention.md`
 § Engine traps belong in the binding, and audit sibling profiles whenever one binding gains a guardrail.
 
-**Codex/Cursor plugin identity is gated (A7), and the gate is filesystem-deterministic on both
-engines.** The lifecycle harness asserts loaded plugin VERSION against `LR_FRAMEWORK_DIR` before
-trusting results, including per-run `framework_dir` overrides, with the verdict inherited by child
-subprocesses via an `engine|realpath|VERSION` token rather than cached per process. Codex reads
-`~/.codex/config.toml` + plugin cache; Cursor walks `~/.cursor/plugins/{local,marketplaces,cache}`.
-The Cursor arm was originally an engine-side prompt and passed while the suite ran on v30 — a gate
-implemented in the medium it gates is not a gate. Cursor's cloud marketplace install also
-**rehydrates within ~25 seconds** of being moved aside, so a manual prep step cannot be trusted;
-re-check at suite start, which is what the harness check is for. See
+**Plugin identity is a precondition of a lifecycle result.** The lifecycle harness asserts loaded
+plugin VERSION against `LR_FRAMEWORK_DIR` before trusting results, including per-run
+`framework_dir` overrides, with the verdict inherited by child subprocesses via an
+`engine|realpath|VERSION` token rather than cached per process. Codex reads
+`~/.codex/config.toml` + plugin cache; Cursor walks `~/.cursor/plugins/{local,marketplaces,cache}`;
+the loaded-plugin probe covers Claude too. Parse the leading version token only, because Cursor can
+append completion prose directly to its required identity line. The Cursor arm was originally an
+engine-side prompt and passed while the suite ran on v30 — a gate implemented in the medium it
+gates is not a gate. Cursor's cloud marketplace install also **rehydrates within ~25 seconds** of
+being moved aside, so a manual prep step cannot be trusted; re-check at suite start, which is what
+the harness check is for. See
 `lifecycle-harness-plugin-identity-unverified.md`, `a-gate-cannot-be-a-model-self-report.md`,
 `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
 
@@ -264,11 +266,10 @@ Workspace holds **`lore-framework/`**, **`lore-framework-dev/`**, **`lore-agents
 **`lore-chronicler/`** (Being; on disk). Meta-repo `AGENTS.md` lists them after a
 `/lr:workspace-init --refresh`.
 
-Local `main` is at **framework v33** (matches `lore-framework-dev` stamp) and is **ahead of
-origin** — includes v32 shortcut-bootstrap work, v33 shortcut refresh migration, and the merged
-workspace-owned-ignore / `.tmp` fixture changes. Unrelated uncommitted WIP may still sit on those
-`main` checkouts; do not sweep it into lore finalize commits (`git add agents/` only). Auto-pull
-can fail while local main is ahead/diverged — continue degraded and push deliberately.
+Framework and dev-repo `main` both carry **v33** and match `origin/main`. The v33 release gate
+passed the standard and Keeper lifecycle suites on Composer 2.5, gpt-5.4-mini, and Haiku. Unrelated
+uncommitted WIP may still sit on these checkouts; do not sweep it into lore-finalize commits
+(`git add agents/` only).
 
 **Preserve unrelated dirty-tree changes** during release or fold-into-main work; stash around
 feature merges when needed (`fold-feature-into-local-main-via-stash.md`).

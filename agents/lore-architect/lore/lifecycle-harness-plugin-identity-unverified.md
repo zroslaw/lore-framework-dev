@@ -86,12 +86,34 @@ Cursor arm:
   rejects any tree whose `VERSION` differs from `LR_FRAMEWORK_DIR`. Filesystem only, no engine
   call. Against the real machine state it named both stale v30 trees immediately.
 
-**These fixes are themselves ungated** — no lifecycle run has exercised them. See
-`v31-lr-core-parked-2026-07-25.md` § ungated commit ledger.
+**These fixes were subsequently exercised by the v33 full release gate** on Cursor/Composer 2.5,
+Codex/gpt-5.4-mini, and Claude/Haiku, including the separate Keeper track. The result is valid
+only because the installed-source checks and the identity probe passed before each shard.
 
 **Cursor operational companion:** disabling/repointing alone is incomplete — Cursor's cloud
 marketplace install rehydrates the cache from GitHub over `--plugin-dir`, and does so within ~25
 seconds of a move-aside. See `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
+
+## v33 refinements (2026-07-29)
+
+Plugin identity has two evidence layers: deterministic installed-source preflight where an engine
+has a persistent marketplace/cache path (Codex and Cursor), and a loaded-plugin
+`FRAMEWORK-ROOT`/`PLUGIN-VERSION` probe for the engine invocation. Keep both. The former prevents
+an installed tree from silently taking precedence; the latter verifies the emitted identity of the
+loaded bundle. Claude has no corresponding local marketplace preflight in this harness, so its
+probe remains especially important.
+
+The identity parser must be strict about the identity token but tolerant of presentation noise.
+Cursor/Composer appended its completion sentence directly to `PLUGIN-VERSION: 33`; extracting only
+the leading bare or manifest-version token preserves the assertion against the expected framework
+version without accepting a mismatched version.
+
+Per-run temporary framework copies are also engine-specific. Claude and Cursor load an explicit
+plugin directory, so their override scenarios retain the deterministic installed-source check.
+Codex has no per-invocation plugin-directory flag: its fallback fixture names the copied docs
+directly while the installed marketplace baseline remains the identity being preflighted. Do not
+require Codex's marketplace source to equal a temporary fixture copy; that would make the fallback
+scenario impossible rather than safer.
 
 ## Concrete instance this bit
 
