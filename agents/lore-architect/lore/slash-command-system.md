@@ -17,6 +17,8 @@ A second category is **style skills** (`/lr:plain-language`, `/lr:dialogue`, `/l
 change how the agent *communicates or collaborates*, not what it does. Both kinds share the exact
 same thin-pointer mechanics; the split is only about what the skill affects. See `style-skills.md`.
 
+The current catalog is implementation ground truth, not the intended newcomer information architecture. A planned curation will organize the surface around the daily adopter path and progressively disclose collaboration, maintenance, setup, advanced modules, and style controls; it should not reduce commands merely to reduce their count. See `adopter-command-surface-curation.md`.
+
 **How skills work:**
 - Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter (`description`, `argument-hint`)
 - Skills are thin references — the body is a one-line pointer to a doc in `${CLAUDE_PLUGIN_ROOT}/docs/<file>.md`. All operational logic lives in the doc, which the model reads at invocation time. Keeps skills short, docs authoritative, and logic in one place. See `skill-doc-pattern.md`.

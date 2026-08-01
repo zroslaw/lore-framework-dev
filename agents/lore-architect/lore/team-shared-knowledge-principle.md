@@ -22,7 +22,7 @@ Treating lore agents as personal-private notebooks produces wrong instincts. Red
 - "Multi-author lore is a coherence problem" → reverses the framework's purpose.
 - "Workdir leaks half-formed drafts" → drafts in workdir are intentional artifacts for handoff.
 - "Voice drift across contributors is undesirable" → it's an accepted property of collective knowledge; coherence comes from `role.md` and topic structure, not single authorship.
-- "Finalized knowledge should stay local until reviewed" → contradicts the auto-push default; finalization publishes by design (see `finalize-autopush.md`).
+- "Every team needs a Lore-specific approval system" → start with ordinary Git permissions and protections. Trusted teams may retain direct finalization; review belongs where the team's risk model calls for it (see `team-lore-contribution-governance.md`).
 
 If a proposed design starts from any of these instincts, the framing is wrong, not the design.
 
@@ -55,3 +55,4 @@ The principle's guarantees apply to the standard finalization flow (sequential s
 - `plugin-vs-agent-repo-separation.md` — downstream consequence: framework design knowledge gets its own team-shared agent repo, not a personal one
 - `freshness-contracts-at-session-boundaries.md` — staleness in a team-shared repo is the primary read-side failure mode; v13's auto-pull mechanism crystallized this into a named principle
 - `architecture-review-dispositions.md` — the 2026-06-13 review affirmed this principle (and multi-author voice) as a deliberate current decision, not an open question
+- `team-lore-contribution-governance.md` — proposed graduated publication and review model for shared lore

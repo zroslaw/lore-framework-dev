@@ -13,7 +13,11 @@ The invariant preserves three things:
 
 Non-default-branch work — new features, bug fixes, or inspecting someone else's branch — happens in a git worktree at `<workspace>/.worktrees/<repo>/<slug>/`. Both contribution and inspection cases use the same mechanism. Standard git worktree commands; no framework wrappers.
 
-Branch naming `<agent-name>/<slug>` is a suggestion for signaling ownership in multi-agent workspaces, not enforced.
+Branch naming `<agent-name>/<slug>` is a suggestion for signaling ownership in multi-agent workspaces, not enforced. One writer owns an active worktree; others may inspect it but do not edit it concurrently.
+
+## Lifecycle Direction
+
+The placement rule needs a companion lifecycle to prevent abandoned dirty trees: create, active, park or hand off, ready to land, land, then retire. A dirty worktree is acceptable only while actively owned; parking requires a WIP commit or an explicit diff-and-owner handoff. After landing, remove the worktree and delete its branch only when merged or deliberately abandoned. This lifecycle and its Git-derived audit are proposed follow-up work, not yet automated by the framework. See `worktree-lifecycle-and-audit.md`.
 
 ## Optional Per-Agent Notes
 
@@ -26,7 +30,7 @@ Explicitly not framework concerns (repo-specific, belong in agent lore or repo-s
 - Commit conventions, signoff requirements
 - CI/CD interactions
 - Branch protection rules
-- Cleanup discipline
+- Repo-specific PR/MR workflow, review conventions, and branch-protection policy
 
 ## Enforcement
 
@@ -40,4 +44,5 @@ Replaces the earlier contributions-feature design (v8-era draft, not shipped). K
 
 - `lr-init-feature.md` — writes the compact convention into the workspace's CLAUDE.md
 - `framework-improvements-backlog.md` — tracks deferred extensions
+- `worktree-lifecycle-and-audit.md` — proposed lifecycle and audit
 - `framework-scope-vs-agent-scope.md` — the principle this convention applies

@@ -47,6 +47,8 @@ See `system-design-principles.md` (the full list and the overreach diagnostics),
 Operations are Claude Code plugin skills, `lr:` prefix on Claude; Cursor uses `/lr-<skill>` via
 prefixed wrappers (`cursor-dual-skill-tree-one-repo.md`). **Skills are thin pointers** — each `skills/<name>/SKILL.md` is a one-line reference to `docs/<name>.md`, where all logic lives. Same for generated `/lr-<agent>-agent` boot commands (thin delegations to `agent-boot.md`). When a skill orchestrates sub-skills, the orchestration gets its own `docs/<skill>.md`; non-skill procedures shared across call sites get a `docs/<procedure>.md` (e.g. `auto-pull.md`). See `slash-command-system.md`, `skill-doc-pattern.md`, `shared-procedure-doc-pattern.md`, `single-canonical-source-discipline.md`.
 
+The current skill catalog is implementation ground truth, but newcomer-facing information architecture needs a dedicated curation pass: organize it around a daily path and progressively disclose the rest. See `adopter-command-surface-curation.md`.
+
 An **accelerator** script (Script Fallback Contract) can go one step further and become
 **literate**: the procedure lives in the script's own instructional comments rather than in a
 companion doc, so there's one artifact instead of two that can drift apart. First applied to
@@ -163,6 +165,8 @@ See `lore-search-pattern.md`, `consult-pattern.md`, `attach-pattern.md`, `spawn-
 ## Finalization
 
 User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone): **reflect** (inline, host-first, per agent — needs session context) → **merge** (parallel subagents, one per agent booted as itself, file-driven — integrates reflections into `lore/`, `lore-context.md`, `role.md`) → **summarize** (host writes the canonical session summary + short guest summaries) → **commit+push** (one commit per touched repo; conflict-resolution on push rejection). Do not finalize unless the user triggers it. See `finalization-process.md`, `finalize.md`, `merge-in-booted-subagents.md`, `reflect-merge-execution-asymmetry.md`.
+
+Shared-lore publication is a separate, unshipped governance direction: retain direct publish for trusted teams, but use Git branches, review, and protections where the team's risk model requires them. See `team-lore-contribution-governance.md`.
 
 ## Versioning & Migration
 
