@@ -36,6 +36,15 @@ The pattern is emergent from the backlog, not driving any current ship. Promote 
 
 The v24 takeover feature (`takeover-feature.md`) is the first built feature in this territory: it reads the raw engine-native transcript (member #4's substrate) and delivers a working cross-engine resume path (member #3's goal) — by on-demand conversion to a portable markdown digest, not by archiving. It doesn't retire any cluster member (#4's durable-searchable-archive framing and #3's deliberate suspend ceremony remain unbuilt), but it proves the transcript-reading half is practical and gives future suspend/archive work a tested parsing layer (`scripts/session-takeover`, per-engine formats in `engine-session-log-formats.md`).
 
+## Archive status update (v34)
+
+v28–v29 briefly implemented member #4 as automatic committed transcript archives, but v34 retires
+that behavior: summarize and finalize preserve summaries plus optional aggregate usage metadata, not
+raw engine logs. Existing archives remain historical artifacts. `session-takeover archive` remains a
+dormant manual primitive, so a future archive design can reuse or modify it only after an explicit
+decision on privacy, retention, and lifecycle integration. The on-demand takeover digest remains the
+shipped transcript-reading path.
+
 ## Adjacent
 
 - `autonomous-agents-vision.md` is the *autonomous* sibling — what happens when sessions never end. This cluster is the *interactive* sibling — what happens between deliberately-ending sessions. They share the durability vocabulary.
