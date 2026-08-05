@@ -48,6 +48,7 @@ Deterministic test source files:
 - [`tests/test_wait.py`](tests/test_wait.py)
 - [`tests/test_session_takeover.py`](tests/test_session_takeover.py)
 - [`tests/test_session_archive.py`](tests/test_session_archive.py)
+- [`tests/test_archive_lifecycle_disabled.py`](tests/test_archive_lifecycle_disabled.py)
 - [`tests/test_lrb.py`](tests/test_lrb.py)
 
 ## Testing At A Glance

@@ -171,11 +171,9 @@ Shared-lore publication is a separate, unshipped governance direction: retain di
 ## Versioning & Migration
 
 `lore-framework/VERSION` is the single source of truth; **the current shipped-and-pushed version is
-v31** (`lr-core` substrate, shipped under a recorded gate waiver — see Current State below,
-`v31-lr-core-parked-2026-07-25.md`). **v32** (version-agnostic registered boot shortcuts) is locally
-committed in both `lore-framework` and `lore-framework-dev` but **not yet merged to `main` or
-pushed** — see Current State below and `versioning-release-types.md`'s v32 entry. Each
-agent repo stamps that version in its `lore-repo.md`, and four version-bearing plugin manifests mirror
+v34**. It disables automatic full-session transcript archives while retaining the dormant manual
+`session-takeover archive` primitive and aggregate `usage:` metadata. Each agent repo stamps that
+version in its `lore-repo.md`, and four version-bearing plugin manifests mirror
 `1.<VERSION>.0` (`/lr:check` #19 enforces). A version is either **migration**, **release-notes-only**,
 or both, and independently **cache-affecting** or not — those two axes are orthogonal, and every ship
 records both in `versioning-release-types.md`, which holds the full per-version history. Read that
@@ -275,9 +273,10 @@ Workspace holds **`lore-framework/`**, **`lore-framework-dev/`**, **`lore-agents
 **`lore-chronicler/`** (Being; on disk). Meta-repo `AGENTS.md` lists them after a
 `/lr:workspace-init --refresh`.
 
-Framework and dev-repo `main` both carry **v33** and match `origin/main`. The v33 release gate
-passed the standard and Keeper lifecycle suites on Composer 2.5, gpt-5.4-mini, and Haiku. Unrelated
-uncommitted WIP may still sit on these checkouts; do not sweep it into lore-finalize commits
+Framework and dev-repo `main` both carry **v34** and match `origin/main`. The v34 release used the
+deterministic test suite and active-reference audit; real-engine lifecycle and TriLens gates were
+intentionally not run at user direction. Unrelated uncommitted WIP may still sit on these checkouts;
+do not sweep it into lore-finalize commits
 (`git add agents/` only).
 
 **Preserve unrelated dirty-tree changes** during release or fold-into-main work; stash around

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unit tests for the session-archive + usage features of session-takeover.
+"""Unit tests for the manual, dormant session-archive command and usage parsing.
 
 Run:  python3 tests/test_session_archive.py -v
 
@@ -24,7 +24,7 @@ FRAMEWORK_DIR = os.environ.get(
 )
 SCRIPT = os.path.join(FRAMEWORK_DIR, "scripts", "session-takeover")
 
-# `stats` always carries the live framework VERSION (the archive frontmatter,
+# `stats` always carries the live framework VERSION (the manual archive frontmatter,
 # by contrast, keeps whatever the caller supplied). Read it instead of pinning a
 # literal: the stats assertion was pinned to "29" and went red from v30 onward.
 with open(os.path.join(FRAMEWORK_DIR, "VERSION")) as _fh:
