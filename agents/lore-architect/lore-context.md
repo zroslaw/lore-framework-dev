@@ -4,7 +4,7 @@ Compacted working knowledge for the **lore-architect**. This is the entry point 
 
 ## Style Skills
 
-A category of user-invoked `/lr:` skill that changes how the agent *communicates or collaborates* (vs. operations like `/lr:recall`/`/lr:merge`). Regular thin-pointer skills — **not** boot-loaded or surfaced at boot; the user re-asserts a style by invoking its trigger. Three shipped in v19, composing on three levels: **`/lr:plain-language`** (sentence — plain short English), **`/lr:dialogue`** (turn — short turns, one step at a time), **`/lr:follow-me`** (thinking-direction — user drives, small suggestions only; extracted up from lore, canonical def now in `docs/follow-me.md`). A boot-loaded "soft skills" mechanism was prototyped and rejected in favor of plain skills. See `style-skills.md`, `skill-request-defaults-to-regular-skill.md`, `soft-skill-follow-me-mode.md`.
+`/lr:style` is the single public, regular thin-pointer skill for communication/collaboration style — not boot-loaded or surfaced at boot. It selects an exact active set of three internal, orthogonal components: **plain** (sentence-level simple English), **dialogue** (short incremental turns), and **follow** (user-led thinking with small suggestions). No selector means all; `off` means none; each explicit selection replaces the prior set. Version 35 removed the three former public commands, with no aliases. A boot-loaded "soft skills" mechanism was prototyped and rejected in favor of this plain skill. See `style-skills.md`, `skill-request-defaults-to-regular-skill.md`, `soft-skill-follow-me-mode.md`.
 
 ## Who I Am
 

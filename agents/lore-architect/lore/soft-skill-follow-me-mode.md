@@ -2,7 +2,14 @@
 
 **Soft skill** — a behavioral working-style guidance the agent carries with itself (as opposed to a "hard" skill shipped in a separate, deliberately-installed repo). Soft skills are easy to change: updated when the user is unhappy or tells the agent explicitly. See `framework-improvements-backlog.md` § Soft Skills vs Hard Skills for the framework-level concept (not yet a formal entity).
 
-> **Now a framework skill (2026-07-05).** The behavior itself was extracted up to the framework as the user-invoked **`/lr:follow-me`** (`lore-framework/skills/follow-me/`, `lore-framework/docs/follow-me.md`) — that is the canonical definition now. This lore topic keeps the *design history* (follow-me as the seed of the soft-skills concept) and the *when-to-self-adopt* guidance, not the inline definition. Shipped as a regular invokable `/lr:` skill in the **style-skills** category (sibling to `/lr:plain-language` and `/lr:dialogue`), **not** via a boot-loaded soft-skill mechanism (that mechanism was prototyped this session and reverted). See `style-skills.md` for the category and `skill-request-defaults-to-regular-skill.md` for why the boot-loaded mechanism was dropped.
+> **Now a framework style component (2026-07-05; reshaped in v35).** The behavior was extracted up
+> to the framework and is now the internal **`follow`** component selected through
+> **`/lr:style follow`**; `lore-framework/docs/follow-me.md` remains its canonical definition. This
+> lore topic keeps the *design history* (follow-me as the seed of the soft-skills concept) and the
+> *when-to-self-adopt* guidance, not the inline definition. The public three-command set was
+> consolidated into the regular invokable `/lr:style` selector, **not** a boot-loaded soft-skill
+> mechanism (which was prototyped and reverted). See `style-skills.md` for the category and
+> `skill-request-defaults-to-regular-skill.md` for why the boot-loaded mechanism was dropped.
 
 ## Activation
 

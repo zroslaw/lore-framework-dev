@@ -184,6 +184,13 @@ UPDATE_DRYRUN_PROMPT = (
     "Print the full report verbatim."
 )
 
+STYLE_PROMPT = (
+    "Invoke the lr:style skill with no selector, then invoke it again with selectors "
+    "'dialogue, follow'. Follow the style procedure exactly. Then answer this user question "
+    "in no more than two short sentences: 'Should I document this now?' Start that answer with "
+    "STYLE-REPLY:. Do not boot, reflect, merge, finalize, commit, or push."
+)
+
 REGISTER_AGENT_PROMPT = (
     f"Invoke the lr:register-agent skill to create a direct boot shortcut for agent "
     f"'{AGENT_NAME}' in repo '{REPO_NAME}'. Print DONE when complete."
@@ -381,6 +388,13 @@ def codex_prompt(prompt):
         )
     if prompt == UPDATE_DRYRUN_PROMPT:
         return f"Read '{FRAMEWORK_DIR}/docs/update.md' and follow it with --dry-run in this workspace. Print the full report verbatim."
+    if prompt == STYLE_PROMPT:
+        return (
+            f"Read '{FRAMEWORK_DIR}/docs/style.md' and follow it first with no selector, then "
+            "with selectors 'dialogue, follow'. Then answer this user question in no more than two "
+            "short sentences: 'Should I document this now?' Start that answer with STYLE-REPLY:. "
+            "Do not boot, reflect, merge, finalize, commit, or push."
+        )
     if prompt == REGISTER_AGENT_PROMPT:
         return (
             f"Read '{FRAMEWORK_DIR}/docs/register-repo.md' and follow the Register Agent "

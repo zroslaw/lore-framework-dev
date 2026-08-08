@@ -2,7 +2,7 @@ The framework packages operations as `lr` plugin skills. User-facing invocation 
 per-agent shortcut artifacts follow each engine's native conventions.
 
 **Plugin skill naming (Claude Code syntax):**
-- `/lr:<action>` — all framework operations. Current set (v30, `ls lore-framework/skills/` is the ground truth — don't trust this list over the filesystem): boot, reflect, merge, summarize, finalize, recall, attach, consult, pull-lore, register-agent, unregister-agent, register-repo, unregister-repo, create-repo, create-agent, list-agents, list-repos, check, doctor, update, trilens-loop, wait, workspace-init, workspace-pull, plus BETA: spawn-teammate, takeover, being, df-repo-init, df-ula-file. Plus the three style skills below.
+- `/lr:<action>` — all framework operations. Current set (v30, `ls lore-framework/skills/` is the ground truth — don't trust this list over the filesystem): boot, reflect, merge, summarize, finalize, recall, attach, consult, pull-lore, register-agent, unregister-agent, register-repo, unregister-repo, create-repo, create-agent, list-agents, list-repos, check, doctor, update, trilens-loop, wait, workspace-init, workspace-pull, plus BETA: spawn-teammate, takeover, being, df-repo-init, df-ula-file. The single style selector is below.
 - `/lr-<agent-name>-agent` — optional per-agent boot commands, generated into `.claude/commands/`
 
 **Cursor plugin skill naming (folder = picker identity):**
@@ -13,9 +13,10 @@ Codex exposes optional per-agent autocomplete through engine-native personal ski
 Claude command, each is a thin absolute-path delegation to canonical `agent-boot.md`.
 
 **Two kinds of `/lr:` skill:** most are **operations** (the list above — they *do* framework work).
-A second category is **style skills** (`/lr:plain-language`, `/lr:dialogue`, `/lr:follow-me`) — they
-change how the agent *communicates or collaborates*, not what it does. Both kinds share the exact
-same thin-pointer mechanics; the split is only about what the skill affects. See `style-skills.md`.
+The **style** category is the single selector **`/lr:style`**, which selects the internal `plain`,
+`dialogue`, and `follow` communication/collaboration components rather than changing what the agent
+does. Both kinds share the exact same thin-pointer mechanics; the split is only about what the skill
+affects. See `style-skills.md`.
 
 The current catalog is implementation ground truth, not the intended newcomer information architecture. A planned curation will organize the surface around the daily adopter path and progressively disclose collaboration, maintenance, setup, advanced modules, and style controls; it should not reduce commands merely to reduce their count. See `adopter-command-surface-curation.md`.
 

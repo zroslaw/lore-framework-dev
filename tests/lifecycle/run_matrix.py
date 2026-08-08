@@ -38,6 +38,7 @@ STANDARD_MODULES = [
     "test_finalize.py",
     "test_recall.py",
     "test_repo_workspace.py",
+    "test_style.py",
     "test_takeover.py",
     "test_trilens_loop.py",
 ]
