@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "The shipped /lr:trilens-loop skill: shape, load-bearing design points, termination guards, verification record, and what to do when the round cap ends a loop without a clean round."
+parent: lore-context.md
+---
+
 # `/lr:trilens-loop` — Change-Scoped Iterated Review (v30 Feature)
 
 The shipped instrument for the architect's multi-round multi-lens review discipline. Shipped in
@@ -59,6 +66,20 @@ All of these were earned during the ship, not assumed:
   stay fixed for the whole loop, and each brief tells its reviewer what the other two own.
 - **Briefs carry the goal, not the rationale** — see `parallel-reviewer-fanout-pattern.md`
   § Brief the goal, not the rationale.
+
+## When the round cap bites (v36 practice)
+
+The three-round cap can end a review with **"all known findings applied" but no clean-round
+attestation** — the v36 ship record said exactly that, honestly. What closed the gap: a subsequent
+**independent full-diff architect review** (different session, cold context) served as the missing
+attestation — it found zero correctness defects and three doc-only editorial fixes. When the cap
+bites, an independent deep review is a legitimate substitute round, with two obligations:
+
+- **Keep the distinction in the record** — "all findings applied" and "a reviewer returned clean"
+  are different claims; never let the first quietly stand in for the second.
+- **Gate follows artifact state** — post-review doc-only fixes were amended and the deterministic
+  suite re-run green against the final tree
+  (`post-convergence-edits-need-their-own-gate.md`).
 
 ## Sibling non-overlap
 
