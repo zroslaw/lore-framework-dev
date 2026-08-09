@@ -184,11 +184,51 @@ UPDATE_DRYRUN_PROMPT = (
     "Print the full report verbatim."
 )
 
+UPDATE_APPLY_PROMPT = (
+    "Invoke the lr:update skill in this workspace. Follow its automatic publication procedure "
+    "through commit and push. Print the full report verbatim. Do not perform any other work."
+)
+
 STYLE_PROMPT = (
     "Invoke the lr:style skill with no selector, then invoke it again with selectors "
     "'dialogue, follow'. Follow the style procedure exactly. Then answer this user question "
     "in no more than two short sentences: 'Should I document this now?' Start that answer with "
     "STYLE-REPLY:. Do not boot, reflect, merge, finalize, commit, or push."
+)
+
+LORE_MAP_BOOT_PROMPT = (
+    f"Invoke the lr:boot skill to boot as lore agent '{AGENT_NAME}'. "
+    "Keep the standard three-line boot report. After it, use the compact Lore map already loaded "
+    "into context and print exactly:\n"
+    "LORE-COVERAGE: <complete|partial|legacy>\n"
+    "TOP-AREA: <path of the mapped top-level area>\n"
+    "Do not run a separate full-corpus search. Do not reflect, merge, finalize, commit, or push."
+)
+
+LORE_MERGE_PROMPT = (
+    f"Invoke the lr:boot skill to boot as lore agent '{AGENT_NAME}'. "
+    "A reflection topic already exists. Invoke the lr:merge skill to integrate it. Follow the "
+    "Lore v1 creation and lazy-migration rules exactly. Print DONE after merge. "
+    "Do not finalize, commit, or push."
+)
+
+GROOM_DRY_RUN_PROMPT = (
+    f"Invoke the lr:boot skill to boot as lore agent '{AGENT_NAME}'. Then invoke the lr:groom "
+    "skill with arguments 'lore/verbose.md --dry-run'. Follow the procedure through its dry-run "
+    "report and print GROOM-DRY-RUN-DONE. Do not edit any file, commit, or push."
+)
+
+GROOM_APPLY_PROMPT = (
+    f"Invoke the lr:boot skill to boot as lore agent '{AGENT_NAME}'. Then invoke the lr:groom "
+    "skill with scope 'lore/verbose.md'. Apply one bounded grooming pass: remove the clearly "
+    "repeated generic filler while preserving the exact durable timeout fact and its reason. "
+    "Print GROOM-APPLY-DONE. Do not commit or push."
+)
+
+GROOM_ALL_PROPOSAL_PROMPT = (
+    f"Invoke the lr:boot skill to boot as lore agent '{AGENT_NAME}'. Then invoke the lr:groom "
+    "skill with '--all'. Review and present the approval-gated proposal, but do not approve or "
+    "apply it. Print GROOM-PROPOSAL-DONE. Do not edit any file, commit, or push."
 )
 
 REGISTER_AGENT_PROMPT = (
@@ -388,12 +428,57 @@ def codex_prompt(prompt):
         )
     if prompt == UPDATE_DRYRUN_PROMPT:
         return f"Read '{FRAMEWORK_DIR}/docs/update.md' and follow it with --dry-run in this workspace. Print the full report verbatim."
+    if prompt == UPDATE_APPLY_PROMPT:
+        return (
+            f"Read '{FRAMEWORK_DIR}/docs/update.md' and follow it in this workspace, including "
+            "automatic publication through commit and push. Print the full report verbatim. "
+            "Do not perform any other work."
+        )
     if prompt == STYLE_PROMPT:
         return (
             f"Read '{FRAMEWORK_DIR}/docs/style.md' and follow it first with no selector, then "
             "with selectors 'dialogue, follow'. Then answer this user question in no more than two "
             "short sentences: 'Should I document this now?' Start that answer with STYLE-REPLY:. "
             "Do not boot, reflect, merge, finalize, commit, or push."
+        )
+    if prompt == LORE_MAP_BOOT_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            "Keep the standard three-line boot report. After it, use the compact Lore map already "
+            "loaded into context and print exactly:\n"
+            "LORE-COVERAGE: <complete|partial|legacy>\n"
+            "TOP-AREA: <path of the mapped top-level area>\n"
+            "Do not search the full corpus. Do not reflect, merge, finalize, commit, or push.",
+        )
+    if prompt == LORE_MERGE_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            "A reflection topic already exists. Read "
+            f"'{FRAMEWORK_DIR}/docs/process-merge.md' and follow it to integrate the reflection, "
+            "including the Lore v1 creation and lazy-migration rules. Print DONE after merge. "
+            "Do not finalize, commit, or push.",
+        )
+    if prompt == GROOM_DRY_RUN_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            f"Then read '{FRAMEWORK_DIR}/docs/groom.md' and follow it with arguments "
+            "'lore/verbose.md --dry-run'. Print GROOM-DRY-RUN-DONE after the report. "
+            "Do not edit any file, commit, or push.",
+        )
+    if prompt == GROOM_APPLY_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            f"Then read '{FRAMEWORK_DIR}/docs/groom.md' and follow it with scope "
+            "'lore/verbose.md'. Apply one bounded pass: remove clearly repeated generic filler "
+            "while preserving the exact durable timeout fact and reason. Print "
+            "GROOM-APPLY-DONE. Do not commit or push.",
+        )
+    if prompt == GROOM_ALL_PROPOSAL_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            f"Then read '{FRAMEWORK_DIR}/docs/groom.md' and follow its --all mode. Review and "
+            "present the approval-gated proposal, but do not approve or apply it. Print "
+            "GROOM-PROPOSAL-DONE. Do not edit any file, commit, or push.",
         )
     if prompt == REGISTER_AGENT_PROMPT:
         return (

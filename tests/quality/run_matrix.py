@@ -626,13 +626,13 @@ def release_notes_section(summary):
         f"<!-- lr-quality-report:start schema=1 run_id={run_id} -->",
         "## Quality Benchmark",
         "",
-        f"Status: **{summary['status'].upper()}**  ",
-        f"Matrix: `{summary['matrix']}`  ",
-        f"Run: `{run_id}`  ",
-        f"Wall time: `{summary['duration_s']:.1f}s`  ",
+        f"Status: **{summary['status'].upper()}**",
+        f"Matrix: `{summary['matrix']}`",
+        f"Run: `{run_id}`",
+        f"Wall time: `{summary['duration_s']:.1f}s`",
         (
             f"Known cost: `${summary['cost']['known_usd']:.4f}` "
-            f"(unavailable cost fields: `{summary['cost']['unavailable_fields']}`)  "
+            f"(unavailable cost fields: `{summary['cost']['unavailable_fields']}`)"
         ),
         f"Field guide: `{summary.get('reporting_guide', REPORTING_GUIDE)}`",
         "",

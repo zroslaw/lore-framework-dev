@@ -40,6 +40,13 @@ class ConsultAttachScenarios(unittest.TestCase):
         r = run_engine(self.fx.workspace, ATTACH_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
+        self.assertIn("Attached: helper-agent —", r.text)
+        self.assertRegex(
+            r.text,
+            r"Added Context: ~[1-9][0-9]*k tokens total "
+            r"· ~[1-9][0-9]*k lore context · ~[1-9][0-9]*k lore map "
+            r"· ~[1-9][0-9]*k role",
+        )
         self.assertIn(
             HELPER_FACT, r.text,
             f"recall after attach did not surface the guest's fact:\n{r.text}",

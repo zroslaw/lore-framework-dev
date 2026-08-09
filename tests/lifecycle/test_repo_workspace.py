@@ -20,7 +20,7 @@ from harness import (
     AGENT_NAME, BROKEN_REF, CHECK_PROMPT, CREATE_AGENT_PROMPT, CREATE_REPO_PROMPT,
     HELPER_AGENT_NAME, INIT_PROMPT, REGISTER_AGENT_PROMPT, REGISTER_REPO_PROMPT,
     SKIP_REASON, UNREGISTER_AGENT_PROMPT, UNREGISTER_REPO_PROMPT,
-    UPDATE_DRYRUN_PROMPT, WORKSPACE_PULL_PROMPT,
+    UPDATE_APPLY_PROMPT, UPDATE_DRYRUN_PROMPT, WORKSPACE_PULL_PROMPT,
     build_empty_workspace, build_fixture, declare_sibling_repo, head,
     make_origin_ahead, memory_file_name, read_repo_version, run_engine, seed_broken_reference,
 )
@@ -77,6 +77,10 @@ class RepoWorkspaceScenarios(unittest.TestCase):
                 os.path.exists(os.path.join(new_agent_dir, required)),
                 f"new agent missing {required}",
             )
+        with open(os.path.join(new_agent_dir, "lore-context.md"), encoding="utf-8") as f:
+            context = f.read()
+        self.assertIn("lore: 1", context, "new agent root is not Lore v1")
+        self.assertIn("type: context", context, "new agent root lacks context type")
 
     def test_18_workspace_init(self):
         """workspace-init writes the marker-delimited framework section into the engine's memory file."""
@@ -132,16 +136,64 @@ class RepoWorkspaceScenarios(unittest.TestCase):
         # migration. Keep exactly one pending version so an engine spends its
         # budget exercising the contract under test instead of narrating the
         # entire release history.
-        fx = build_fixture(self.tmp, version="32")
+        fx = build_fixture(self.tmp, version="35")
         r = run_engine(fx.workspace, UPDATE_DRYRUN_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
         self.assertEqual(
-            read_repo_version(fx), "32",
+            read_repo_version(fx), "35",
             "dry-run must not modify lore-repo.md",
         )
-        self.assertIn("32", r.text)
+        self.assertIn("35", r.text)
         self.assertIn(harness.framework_version(), r.text)
+
+    def test_21b_update_commits_and_pushes_owned_changes(self):
+        """A successful update publishes its narrow commit to the existing upstream."""
+        fx = build_fixture(self.tmp, version="35")
+        subprocess.run(
+            ["git", "-C", fx.repo, "config", "user.name", "lr-tests"],
+            check=True,
+        )
+        subprocess.run(
+            ["git", "-C", fx.repo, "config", "user.email", "lr-tests@localhost"],
+            check=True,
+        )
+        before = head(fx.repo)
+        self.assertEqual(before, head(fx.origin, "refs/heads/main"))
+
+        r = run_engine(fx.workspace, UPDATE_APPLY_PROMPT)
+        print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
+        self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
+
+        after = head(fx.repo)
+        self.assertNotEqual(after, before, "update must create a commit")
+        self.assertEqual(
+            after, head(fx.origin, "refs/heads/main"),
+            "update commit must reach the existing upstream",
+        )
+        self.assertEqual(read_repo_version(fx), harness.framework_version())
+        status = subprocess.run(
+            ["git", "-C", fx.repo, "status", "--porcelain"],
+            capture_output=True, text=True, check=True,
+        ).stdout
+        self.assertEqual(status, "", "published update must leave a clean fixture")
+        subject = subprocess.run(
+            ["git", "-C", fx.repo, "log", "-1", "--format=%s"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        self.assertEqual(
+            subject,
+            f"chore(lore): update framework to v{harness.framework_version()}",
+        )
+        git_dir = subprocess.run(
+            ["git", "-C", fx.repo, "rev-parse", "--absolute-git-dir"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        self.assertFalse(
+            os.path.exists(os.path.join(git_dir, "lr-update-pending")),
+            "successful push must clear its retry marker",
+        )
+        self.assertIn("committed and pushed", r.text)
 
     def _shortcut_paths(self, workspace, agent_name):
         if harness.ENGINE == "cursor":

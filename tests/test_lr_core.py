@@ -65,7 +65,8 @@ def run_core(*args):
 def load_lr_core():
     """Import lr-core as a module — it has no .py suffix, so load it by path."""
     spec = importlib.util.spec_from_loader(
-        "lr_core", importlib.machinery.SourceFileLoader("lr_core", LR_CORE))
+        "lr_core_entry",
+        importlib.machinery.SourceFileLoader("lr_core_entry", LR_CORE))
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -520,12 +521,12 @@ class TestGitUnrunnableAtEveryCallSite(unittest.TestCase):
                 return remote_result
             raise AssertionError("pull_repo should have stopped by now: %r" % (args,))
 
-        original = self.mod.git
-        self.mod.git = fake_git
+        original = self.mod.preflight.git
+        self.mod.preflight.git = fake_git
         try:
             result = self.mod.pull_repo(repo, ttl=0)
         finally:
-            self.mod.git = original
+            self.mod.preflight.git = original
         return result, calls
 
     def test_unrunnable_remote_get_url_is_failed_not_no_origin(self):
@@ -554,12 +555,12 @@ class TestGitUnrunnableAtEveryCallSite(unittest.TestCase):
                 calls.append(list(args))
                 return (-signum, "", "")
 
-            original = self.mod.git
-            self.mod.git = fake_git
+            original = self.mod.preflight.git
+            self.mod.preflight.git = fake_git
             try:
                 result = self.mod.pull_repo("/tmp", ttl=0)
             finally:
-                self.mod.git = original
+                self.mod.preflight.git = original
             self.assertEqual(result["status"], "failed", "signal %d" % signum)
             self.assertIn("killed by signal %d" % signum, result["detail"])
 
@@ -580,12 +581,12 @@ class TestGitUnrunnableAtEveryCallSite(unittest.TestCase):
         def fake_git(repo_arg, args, timeout=None, env_extra=None):
             return (1, "", "mise: git is not installed for this directory")
 
-        original = self.mod.git
-        self.mod.git = fake_git
+        original = self.mod.preflight.git
+        self.mod.preflight.git = fake_git
         try:
             result = self.mod.pull_repo("/tmp", ttl=0)
         finally:
-            self.mod.git = original
+            self.mod.preflight.git = original
         self.assertEqual(result["status"], "failed")
         self.assertIn("mise", result["detail"])
 
@@ -614,12 +615,12 @@ class TestGitUnrunnableAtEveryCallSite(unittest.TestCase):
                 return (1, "", stderr)
             return (0, "", "")
 
-        original = self.mod.git
-        self.mod.git = fake_git
+        original = self.mod.preflight.git
+        self.mod.preflight.git = fake_git
         try:
             result = self.mod.pull_repo("/tmp", ttl=0)
         finally:
-            self.mod.git = original
+            self.mod.preflight.git = original
         self.assertEqual(result["status"], "failed")
         self.assertIn("not currently on a branch", result["detail"])
         self.assertNotIn("git pull <remote>", result["detail"])
@@ -845,14 +846,14 @@ class TestEngineDetection(unittest.TestCase):
     def test_signal_precedence_and_default(self):
         mod = self.mod
         root = FRAMEWORK_DIR
-        saved_walk = mod._walk_ancestors
+        saved_walk = mod.preflight._walk_ancestors
         saved_env = os.environ.get("CLAUDE_PLUGIN_ROOT")
         try:
             # An explicit override outranks everything.
             self.assertEqual(
                 mod.detect_engine(root, override="codex")["name"], "codex")
 
-            mod._walk_ancestors = lambda: iter(())
+            mod.preflight._walk_ancestors = lambda: iter(())
             os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
 
             # Containment: the tree lives inside an engine's plugin store.
@@ -871,7 +872,7 @@ class TestEngineDetection(unittest.TestCase):
 
             # Ancestry beats containment: a Claude Code session may be launched
             # with --plugin-dir against a checkout inside another engine's store.
-            mod._walk_ancestors = lambda: iter([(42, "claude --print")])
+            mod.preflight._walk_ancestors = lambda: iter([(42, "claude --print")])
             inside_codex = os.path.join(
                 os.path.expanduser("~/.codex"), "plugins", "cache", "lr", "1")
             result = mod.detect_engine(inside_codex)
@@ -880,10 +881,10 @@ class TestEngineDetection(unittest.TestCase):
 
             # The env var is checked before ancestry.
             os.environ["CLAUDE_PLUGIN_ROOT"] = "/some/plugin/root"
-            mod._walk_ancestors = lambda: iter([(42, "codex exec")])
+            mod.preflight._walk_ancestors = lambda: iter([(42, "codex exec")])
             self.assertEqual(mod.detect_engine(root)["signal"], "env")
         finally:
-            mod._walk_ancestors = saved_walk
+            mod.preflight._walk_ancestors = saved_walk
             os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
             if saved_env is not None:
                 os.environ["CLAUDE_PLUGIN_ROOT"] = saved_env
@@ -897,10 +898,10 @@ class TestEngineDetection(unittest.TestCase):
         Code sessions to the codex profile.
         """
         mod = self.mod
-        saved_walk = mod._walk_ancestors
+        saved_walk = mod.preflight._walk_ancestors
         saved_env = os.environ.get("CLAUDE_PLUGIN_ROOT")
         try:
-            mod._walk_ancestors = lambda: iter(())
+            mod.preflight._walk_ancestors = lambda: iter(())
             os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
             with tempfile.TemporaryDirectory() as home:
                 # Every engine's home dir exists; the framework is in none of them.
@@ -917,7 +918,7 @@ class TestEngineDetection(unittest.TestCase):
             self.assertEqual(result["signal"], "default")
             self.assertEqual(result["confidence"], "assumed")
         finally:
-            mod._walk_ancestors = saved_walk
+            mod.preflight._walk_ancestors = saved_walk
             if saved_env is not None:
                 os.environ["CLAUDE_PLUGIN_ROOT"] = saved_env
 
@@ -929,7 +930,7 @@ class TestEngineDetection(unittest.TestCase):
         reintroduces the /var -> /private/var trap, so both forms have to count.
         """
         mod = self.mod
-        saved_walk = mod._walk_ancestors
+        saved_walk = mod.preflight._walk_ancestors
         saved_env = os.environ.get("CLAUDE_PLUGIN_ROOT")
         with tempfile.TemporaryDirectory() as tmp:
             home = os.path.join(tmp, "home")
@@ -941,7 +942,7 @@ class TestEngineDetection(unittest.TestCase):
             os.symlink(checkout, link)
             real_home = os.environ.get("HOME")
             try:
-                mod._walk_ancestors = lambda: iter(())
+                mod.preflight._walk_ancestors = lambda: iter(())
                 os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
                 os.environ["HOME"] = home
                 through_link = mod.detect_engine(link)
@@ -949,7 +950,7 @@ class TestEngineDetection(unittest.TestCase):
                 # and must not be claimed by containment.
                 direct = mod.detect_engine(checkout)
             finally:
-                mod._walk_ancestors = saved_walk
+                mod.preflight._walk_ancestors = saved_walk
                 if real_home is not None:
                     os.environ["HOME"] = real_home
                 if saved_env is not None:
@@ -969,18 +970,18 @@ class TestEngineDetection(unittest.TestCase):
         accident.
         """
         mod = self.mod
-        saved_walk = mod._walk_ancestors
+        saved_walk = mod.preflight._walk_ancestors
         saved_env = os.environ.get("CLAUDE_PLUGIN_ROOT")
         try:
             os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
 
-            mod._walk_ancestors = lambda: iter(())
+            mod.preflight._walk_ancestors = lambda: iter(())
             blocked = mod.detect_engine("/nowhere/lore-framework")
 
-            mod._walk_ancestors = lambda: iter([(7, "/bin/zsh -c true")])
+            mod.preflight._walk_ancestors = lambda: iter([(7, "/bin/zsh -c true")])
             readable = mod.detect_engine("/nowhere/lore-framework")
         finally:
-            mod._walk_ancestors = saved_walk
+            mod.preflight._walk_ancestors = saved_walk
             if saved_env is not None:
                 os.environ["CLAUDE_PLUGIN_ROOT"] = saved_env
 
@@ -998,10 +999,10 @@ class TestEngineDetection(unittest.TestCase):
         would detect that engine and never reach the branch under test.
         """
         mod = self.mod
-        saved_walk = mod._walk_ancestors
+        saved_walk = mod.preflight._walk_ancestors
         saved_env = os.environ.get("CLAUDE_PLUGIN_ROOT")
         try:
-            mod._walk_ancestors = lambda: iter(())
+            mod.preflight._walk_ancestors = lambda: iter(())
             os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
             args = mod.build_parser().parse_args([
                 "preflight",
@@ -1010,7 +1011,7 @@ class TestEngineDetection(unittest.TestCase):
             ])
             res = mod.cmd_preflight(args, mod.Result())
         finally:
-            mod._walk_ancestors = saved_walk
+            mod.preflight._walk_ancestors = saved_walk
             if saved_env is not None:
                 os.environ["CLAUDE_PLUGIN_ROOT"] = saved_env
 
@@ -1087,6 +1088,32 @@ class TestOutputContract(LrCoreTestBase):
         self.assertTrue(out["ok"])
         self.assertEqual(out["data"]["version"]["verdict"], "unknown")
         self.assertTrue(out["warnings"])
+
+
+class TestModuleLayout(unittest.TestCase):
+    """Keep the stable CLI small and fallback procedures focused."""
+
+    def test_entry_point_is_a_thin_compatibility_wrapper(self):
+        with open(LR_CORE, "r", encoding="utf-8") as handle:
+            lines = handle.readlines()
+        self.assertLessEqual(len(lines), 40)
+        self.assertTrue(any("from lr_core import *" in line for line in lines))
+
+    def test_responsibilities_live_in_focused_modules(self):
+        module_dir = os.path.join(FRAMEWORK_DIR, "scripts", "lr_core")
+        expected = {
+            "common.py", "preflight.py", "scan.py", "lore_graph.py",
+            "lore_map.py", "lore_workset.py", "cli.py", "__init__.py",
+        }
+        self.assertTrue(expected.issubset(set(os.listdir(module_dir))))
+
+        core = load_lr_core()
+        self.assertEqual(core.pull_repo.__module__, "lr_core.preflight")
+        self.assertEqual(core.scan_lore.__module__, "lr_core.scan")
+        self.assertEqual(core.build_lore_graph.__module__, "lr_core.lore_graph")
+        self.assertEqual(core.boot_lore_map.__module__, "lr_core.lore_map")
+        self.assertEqual(core.select_lore_workset.__module__,
+                         "lr_core.lore_workset")
 
 
 if __name__ == "__main__":

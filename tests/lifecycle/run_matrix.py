@@ -36,6 +36,7 @@ STANDARD_MODULES = [
     "test_boot.py",
     "test_consult_attach.py",
     "test_finalize.py",
+    "test_lore_v1.py",
     "test_recall.py",
     "test_repo_workspace.py",
     "test_style.py",
