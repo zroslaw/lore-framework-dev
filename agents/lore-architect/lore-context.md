@@ -293,6 +293,22 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
   `/.worktrees/`, `/.lr-beings/`, and `/.tmp/` (init seeds, pull phase 3 re-asserts, check #22 warns).
   Disposable scaffolds go under `.tmp/<name>/`. See `v25-workspace-pull-init-design.md`,
   `workspace-owned-default-ignore-lines.md`, `workspace-meta-repo-pattern.md`.
+- **Workspace lifecycle redesign** — designed 2026-08-09, reviewed-ready, **not yet implemented**
+  (targets the release after v36). Closes the gap that v25 shipped a consumer half
+  (`pull`) with no producer half: `init` never commits, `pull` phase 3 never commits, `finalize`
+  stays scoped to agent repos, and `update` deliberately excludes the workspace repo — so
+  framework-generated refreshes accumulate as uncommitted drift with no push path. Design: a
+  four-command surface (`init` reworked to converge-to-disk and absorb `--refresh`/`--reconfigure`;
+  `pull` gets small deltas; new **`push`** commits/pushes only a canonical workspace-owned-paths
+  set, never child repos or arbitrary dirty files; new **`status`** is a read-only 13-finding
+  diagnostic sharing one deterministic scanner with `/lr:check`) plus a v3 memory-file contract
+  (named sections `## Lore Framework` / `## Repositories` / `## Agents` replacing the
+  `<!-- lr:workspace-init:* -->` markers, one writer per section) and an init remote-sync
+  found-vs-join seam. Absorbs and supersedes the backlog's "Undeclared-top-level-repo nudge";
+  touches without resolving "Workspace-root paths gap" and B7 "Orphan version stamps" (different
+  git roots/scopes — noted, not closed). Full design (12 decisions D1–D12, six open questions,
+  phased implementation plan): `workdir/draft-workspace-lifecycle.md`. See
+  `framework-improvements-backlog.md` § Workspace & Environment.
 
 ## Current State
 

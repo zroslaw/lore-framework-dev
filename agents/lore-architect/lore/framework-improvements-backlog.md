@@ -112,7 +112,7 @@ New module/mode for development & SDLC automation; first feature is bug-finding 
 
 ### Boot-Time Auto-Commit + Auto-Push of Upgrades (parked 2026-06-05)
 
-- **Auto-commit + auto-push the boot-time version upgrade.** User-raised 2026-06-05; designed to draft, then parked as too complicated to ship right now. The motivating failure: a lore agent repo can be locally upgraded (migrations applied, version stamped, committed) but never pushed — leaving the team unaware. Real instance: `activities-lore-agents` carrying unpushed `stamp version 13` + `stamp version 15`. Today's `version-check.md` Step 4 explicitly forbids commits ("user reviews and commits themselves"), which makes this orphan-commit state structurally available at every unattended boot. Proposal shape: after Step 3 (Stamp), add Step 4 (commit, scope = write-set ∪ `lore-repo.md`, never `git add -A`) and Step 5 (`git push --ff-only`, with content-equality reconciliation on push-rejection — fetch, compare remote write-set bytes against ours, on match `reset --soft HEAD~1` + `checkout origin/<branch> -- <write-set>`, on divergence keep local commit + warn). Same scoping applies to the reconciliation checkout (never full `git pull`). Boot must never fail — every commit/push/fetch failure path lands in degraded-mode boot with a warning. Asymmetry with `/lr:update` is preserved (boot is unattended → carries gate + auto-push; `/lr:update` is interactive → user commits/pushes themselves). Open seams: branch detection (`@{u}` resolution + no-upstream fallback), write-set grammar for migration-time deletions/renames so `git add -- <path>` picks them up, identity/network failure paths, ship as a procedural-doc release (cache-clear footer + manifest bump + `versioning-release-types.md` backfill + multi-round multi-lens review). Composes cleanly with the v13 auto-pull (which already defuses the common race). Full draft preserved in `workdir/draft-auto-push-after-upgrade.md` — resume from there. See `freshness-contracts-at-session-boundaries.md` (the principle, mirror of auto-pull on the *push* side), `dirty-tree-gates-write-vs-read-distinction.md` (the write-set discipline this extends), `auto-pull-mechanism.md` (model for graduated network-failure handling).
+- **Auto-commit + auto-push the boot-time version upgrade.** User-raised 2026-06-05; designed to draft, then parked as too complicated to ship right now. The motivating failure: a lore agent repo can be locally upgraded (migrations applied, version stamped, committed) but never pushed — leaving the team unaware. Real instance: `activities-lore-agents` carrying unpushed `stamp version 13` + `stamp version 15`. Today's `version-check.md` Step 4 explicitly forbids commits ("user reviews and commits themselves"), which makes this orphan-commit state structurally available at every unattended boot. Proposal shape: after Step 3 (Stamp), add Step 4 (commit, scope = write-set ∪ `lore-repo.md`, never `git add -A`) and Step 5 (`git push --ff-only`, with content-equality reconciliation on push-rejection — fetch, compare remote write-set bytes against ours, on match `reset --soft HEAD~1` + `checkout origin/<branch> -- <write-set>`, on divergence keep local commit + warn). Same scoping applies to the reconciliation checkout (never full `git pull`). Boot must never fail — every commit/push/fetch failure path lands in degraded-mode boot with a warning. Asymmetry with `/lr:update` is preserved (boot is unattended → carries gate + auto-push; `/lr:update` is interactive → user commits/pushes themselves). Open seams: branch detection (`@{u}` resolution + no-upstream fallback), write-set grammar for migration-time deletions/renames so `git add -- <path>` picks them up, identity/network failure paths, ship as a procedural-doc release (cache-clear footer + manifest bump + `versioning-release-types.md` backfill + multi-round multi-lens review). Composes cleanly with the v13 auto-pull (which already defuses the common race). Full draft preserved in `workdir/draft-auto-push-after-upgrade.md` — resume from there. See `freshness-contracts-at-session-boundaries.md` (the principle, mirror of auto-pull on the *push* side), `dirty-tree-gates-write-vs-read-distinction.md` (the write-set discipline this extends), `auto-pull-mechanism.md` (model for graduated network-failure handling). Related but distinct scope: the 2026-08-09 workspace-lifecycle redesign's `push` command (§ Workspace & Environment above) publishes the *workspace meta-repo*; this item is about per-*child-repo* upgrade-stamp commits — touched, not resolved, by that design (also referenced as B7 in `workdir/what-to-improve.md`).
 
 ## Knowledge Quality & Curation
 
@@ -186,6 +186,35 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 
 ## Workspace & Environment
 
+### Workspace Lifecycle Redesign (designed 2026-08-09, not yet implemented)
+
+- **Full producer/publish-half design for the workspace layer.** v25 shipped a consumer-only
+  workspace layer: `workspace-pull` clones/pulls but nothing ever commits or pushes workspace-root
+  state (`workspace-init` never commits, `workspace-pull` phase 3 edits `.gitignore` without
+  committing, `finalize` phase 4 is scoped to `agents/`, `/lr:update` explicitly excludes the
+  workspace repo). Live evidence on the dogfood workspace: dirty `AGENTS.md` and a dirty registered
+  shortcut from framework-generated refreshes, a stray untracked `scripts/lr_core/` copy, and no
+  origin remote at all. A full design session (2026-08-09) produced a reviewed-ready four-command
+  surface — `init` (rework: converges to disk reality, absorbs `--refresh`/`--reconfigure`), `pull`
+  (small deltas: all-child-repos `.gitignore` coverage, undeclared-repo nudge), new **`push`**
+  (commits/pushes only a canonical workspace-owned-paths set — descriptor, memory files,
+  `.gitignore`, `README.md`, registered shortcuts — never child repos or arbitrary dirty files),
+  new **`status`** (read-only, 13-finding diagnostic catalog sharing one deterministic scanner with
+  `/lr:check` #22–24) — plus a v3 memory-file contract (named sections `## Lore Framework` /
+  `## Repositories` / `## Agents` replacing the `<!-- lr:workspace-init:* -->` markers, one writer
+  per section) and an init remote-sync found-vs-join seam. Status: designed and reviewed-ready, not
+  implemented; four independently-shippable phases planned. **Absorbs and supersedes** the
+  "Undeclared-top-level-repo nudge" bullet below (§ Workspace Pull) — it ships as a
+  `workspace-pull` delta in the design (§ 5.2), not a separate feature. **Touches without
+  resolving** — different scope/git-root, connection noted only: "Workspace-root paths gap
+  (documented, not fixed)" below (§ Write-Aware Gate — the new `push` command publishes
+  workspace-root files but is not a workspace-aware *gate*), and B7 "Orphan version stamps"
+  (`workdir/what-to-improve.md`; backlog entry § Boot-Time Auto-Commit + Auto-Push of Upgrades
+  above — that item is about per-*child-repo* upgrade-stamp commits, a different git root than the
+  workspace meta-repo `push` operates on). Full design (12 numbered decisions D1–D12, six open
+  questions, phased implementation plan): `workdir/draft-workspace-lifecycle.md`. See
+  `v25-workspace-pull-init-design.md` (the shipped predecessor this reworks/extends).
+
 ### Init / Workspace Bootstrap
 
 - ~~**Workspace creation automation**~~ — resolved by the v25 `/lr:workspace-init` setup wizard; no
@@ -204,7 +233,11 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 ### Workspace Pull (`/lr:workspace-pull`; lineage from `/lr:workspace-sync`)
 
 - **`repos:` validators in `/lr:check`** — verify URL syntax (parseable, has scheme), reachability (probe with `git ls-remote`, run sparingly because network), dir-name collision (two declared URLs deriving the same dir name across descriptors). Not added in v11 by design; v25 added unsafe URL rejection in the script but not the full check suite. Trigger: user reports stale or broken URL lists; multi-domain workspaces accumulate friction. See `v25-workspace-pull-init-design.md`.
-- **Undeclared-top-level-repo nudge** — when `/lr:workspace-pull` finishes and there are top-level git repos in the workspace that aren't declared in `lore-workspace.md` or any domain `repos:` field, print a one-liner: *"N undeclared top-level repos: foo, bar, baz. Add to lore-workspace.md or a lore-repo.md repos block to share workspace structure."* Contextual nudge, not a guide. Cheap to add. Trigger: real adopters with multi-domain workspaces want their setups to bootstrap for teammates.
+- ~~**Undeclared-top-level-repo nudge**~~ — *absorbed 2026-08-09* into the workspace-lifecycle
+  redesign above (design draft, not yet implemented) — ships as a `workspace-pull` phase-4 delta
+  per the design's § 5.2. Original ask: when `/lr:workspace-pull` finishes and there are top-level
+  git repos in the workspace that aren't declared in `lore-workspace.md` or any domain `repos:`
+  field, print a one-liner naming them and suggesting declaration.
 - **Per-entry overrides in `repos:`** — schema currently is a flat URL list. Branch pinning, custom dir name, depth, etc. would need an object-form entry: `{ url: ..., branch: ..., dir: ... }`. Defer until real-world usage demands it; v11 schema is deliberately tight. See `workspace-sync.md` Limitations.
 - **Inline-flow form (`repos: [a, b]`)** — deliberately not supported in v11 to keep the awk parser surface small. Reconsider only if users complain.
 - **workspace-sync BatchMode behavior-change note (v14, doc follow-up)** — v14 added `GIT_SSH_COMMAND` `BatchMode=yes` to `scripts/workspace-sync`; SSH keys needing an interactive passphrase (not in an ssh-agent), or unknown host keys, now fail-fast instead of prompting. Correct for parallel jobs, but currently undocumented — add a one-line note to `release-notes/14.md` § workspace-sync (or a future release-notes). Low-severity `/code-review` finding, shipped as-is. See `portable-shell-in-framework-docs.md`.
@@ -263,7 +296,7 @@ Cross-engine plugin-marketplace readiness. Anchor topics: `engine-marketplace-re
 
 - **Bring the v15 collision-check gate to `/lr:update`.** Currently `/lr:update` is interactive-by-design and writes through dirty files unconditionally. Bringing the `dirty ∩ write-set` gate to it would make the principle universal across automatic and user-invoked write paths. Trade-off: `/lr:update` is interactive so the friction trade is different (the user is already at the keyboard), but a same-shape gate would still prevent accidental overwrites. See `dirty-tree-gates-write-vs-read-distinction.md`.
 - **A3-arch deferred to v16.** The architecture-lens finding from a late v15 review round, deferred so v15 could ship. Carry forward to v16 design discussions; the specific finding is in the v15 review notes (round-by-round summary in `parallel-reviewer-fanout-pattern.md` § v15 operational lessons).
-- **Workspace-root paths gap (documented, not fixed).** The boot-time gate is per-repo and cannot see workspace-root files (`.claude/commands/lr-*-agent.md`). v15 documents this in `conventions.md` § Known gap; protection there is the in-migration three-way merge, not the gate. Fix would require a workspace-aware gate layer; defer until a real bug surfaces.
+- **Workspace-root paths gap (documented, not fixed).** The boot-time gate is per-repo and cannot see workspace-root files (`.claude/commands/lr-*-agent.md`). v15 documents this in `conventions.md` § Known gap; protection there is the in-migration three-way merge, not the gate. Fix would require a workspace-aware gate layer; defer until a real bug surfaces. **Touched, not resolved, by the 2026-08-09 workspace-lifecycle redesign** (§ Workspace & Environment above) — its `push` command publishes workspace-root files under user confirmation, but that is a publication path, not a write-time gate; the gap itself is still open.
 
 ### Ailment Catalog (`/lr:doctor`, v12)
 

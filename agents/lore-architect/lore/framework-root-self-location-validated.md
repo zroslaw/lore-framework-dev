@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Framework-root self-location design, validated on Claude and Codex; includes the trap where a manual boot and a later slash-command invocation resolve to different framework roots within one session."
+parent: lore-context.md
+---
+
 # `<framework-root>` Self-Location Design — Empirically Validated on Claude
 
 The Phase-0 lever for multi-engine portability — replacing the Claude-only `${CLAUDE_PLUGIN_ROOT}` with a neutral, engine-agnostic term — now has an empirical result, not just a plan. This is the detail topic behind `multi-engine-portability-direction.md` § Architectural levers.
@@ -20,6 +27,38 @@ The Phase-0 lever for multi-engine portability — replacing the Claude-only `${
 
 Independently re-confirmed on the second engine: in the `lore-framework-codex` end-to-end run, Boot Step-0 self-located `<framework-root>` and the whole lifecycle executed with **zero `${CLAUDE_PLUGIN_ROOT}` leak** — on Codex the env var is genuinely empty (not just avoided), so self-location was the only path that could work, and it did. Two engines, two model families now agree. See `codex-port-validated-end-to-end.md`, `docs-engines-convention.md`.
 
+## Operational trap: two legitimate roots can coexist in one session
+
+Observed live 2026-08-09. A session booted via an explicit instruction pointing `<framework-root>`
+at the **workspace dev checkout** (self-location's two-levels-up rule applied to a
+`skills/boot/SKILL.md` under the checkout). Later in the *same* session, invoking `/lr:finalize` as
+an ordinary slash command resolved *its own* `<framework-root>` to the **installed marketplace
+plugin cache** instead — a different filesystem path — because that skill's `SKILL.md` self-locates
+from where it actually lives on disk, not from wherever an earlier manual instruction pointed.
+
+This is self-location working exactly as designed, not a bug in the mechanism above: resolution is
+per-file and per-invocation, independent of any earlier override in the same session. The
+coexistence is the correct, expected consequence.
+
+Both roots agreed this time (`VERSION` 36, byte-identical `docs/finalize.md`), so it was a
+non-event — but they are not guaranteed to agree, especially during active framework development,
+where a dev checkout can be ahead of (unreleased changes) or behind (freshly migrated) whatever the
+marketplace cache last synced.
+
+**Operational guidance:** when a session mixes a manually-pointed boot (dev checkout,
+`--agent-dir`-style explicit path) with ordinary slash-command invocations of other framework
+skills, do not assume they share a framework root. Before trusting content from a
+slash-command-resolved skill as consistent with what boot loaded, spot-check (`VERSION`, or `diff`
+the specific doc) rather than assuming — cheap to check, and the failure mode if skipped (silently
+executing a stale-or-ahead procedure) is hard to detect after the fact.
+
+**Distinct from `ephemeral-session-plugin-snapshot-topology.md`:** that topic is one Claude host
+flavor taking a single, physically-separate snapshot of the *entire* plugin bundle **once**, at
+session start, which then never updates for the session's lifetime (a staleness-over-time hazard).
+This trap has no snapshot involved — *different skill invocations resolve different roots* from the
+first invocation of each, because each `SKILL.md`'s self-location is purely a function of where
+that particular file lives on disk.
+
 ## Operational guidance
 
 - Mechanical scale: `${CLAUDE_PLUGIN_ROOT}` was 103 sites (~55% of all Claude coupling — see `claude-coupling-inventory-and-port-tiers.md`) but is the *easiest* coupling to neutralize. Swapped across `docs/` + all 26 `SKILL.md`.
@@ -33,3 +72,5 @@ Independently re-confirmed on the second engine: in the `lore-framework-codex` e
 - `haiku-ambiguity-detector.md` — the separate doc-clarity regression the same run surfaced.
 - `docs-engines-convention.md`, `codex-port-validated-end-to-end.md` — the Codex re-validation of this binding.
 - `port-landing-next-steps.md` — the staged-but-unapplied change set and how it lands.
+- `ephemeral-session-plugin-snapshot-topology.md` — a distinct within-session divergence hazard (one
+  immutable snapshot taken once, vs this topic's different-invocations-different-roots trap above).

@@ -48,3 +48,8 @@ plugin state instead of live workspace state).
   cache, not a per-session ephemeral copy).
 - `macos-case-insensitive-filename-collision-with-memory-files.md` — another host-flavor-specific
   Claude fact recorded the same way (atomic topic, linked from the hub) before being folded in.
+- `framework-root-self-location-validated.md` § Operational trap — a related but distinct
+  within-session divergence: a manually-pointed boot and a later ordinary slash-command invocation
+  resolving to *different* framework roots, with no snapshot involved (each `SKILL.md` self-locates
+  independently). This topic is one immutable snapshot taken once, at spawn; that one is
+  different-invocations-different-roots by design, from the first invocation of each.
