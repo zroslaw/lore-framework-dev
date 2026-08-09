@@ -1,9 +1,10 @@
 # Lore v1 Implementation Handoff
 
-Status: implementation and local release preparation are complete. Deterministic checks and the
-canonical regular quality matrix have finished. The framework candidate is committed locally;
-this handoff and the dev/test changes are the companion local commit. Real-engine lifecycle tests
-were deliberately not run at the user's direction. Nothing is pushed or tagged.
+Status: **shipped**. v36 was released 2026-08-09 as framework commit `e5e097b` on `main`,
+tag `lr--v1.36.0`, pushed. Three doc-only fixes from a final independent architect review were
+amended onto the earlier candidate `1cda4cd`; the deterministic suite was re-run green against the
+final tree. Real-engine lifecycle tests were explicitly waived by the user at ship time (recorded
+in `versioning-release-types.md`).
 
 ## Working Trees
 
@@ -110,8 +111,8 @@ was declined for this preparation because lifecycle work was explicitly excluded
 
 ## Remaining Release Gate
 
-Real-engine lifecycle remains the only intentionally omitted release-gate layer; run it or record
-an explicit waiver before the eventual push. The earlier Cursor run used
+Real-engine lifecycle was the only intentionally omitted release-gate layer; the user explicitly
+waived it at ship time (2026-08-09), so this gate is closed by waiver, not by execution. The earlier Cursor run used
 `LR_SKIP_PLUGIN_IDENTITY=1`, so it remains historical smoke evidence only. The one quality timeout
 can be rerun with the exact command in `release-notes/36.md`; the quality policy permits a useful
 partial result when technical failures are explicit. No real Lore Architect topics were migrated
