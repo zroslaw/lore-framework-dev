@@ -102,6 +102,11 @@ was declined for this preparation because lifecycle work was explicitly excluded
   `P10-parametric-gotcha/treatment`; there were no judge failures. Durable artifacts are under
   `tests/quality/results/matrix-20260809T045314Z-regular/` and the generated block is in
   `release-notes/36.md`.
+- Candidate-identity limitation: the matrix ran against the frozen v36 worktrees before the local
+  candidate commits were created, but `summary.json` records only their base `HEAD` values
+  (`9d4c3b9` / `5fc9cef`). Those SHA fields do not identify the tested dirty state. The runtime
+  files were frozen for the canonical run; the final candidate commits are recorded above. Future
+  harness output should add dirty status, a diff fingerprint, and changed paths.
 
 ## Remaining Release Gate
 

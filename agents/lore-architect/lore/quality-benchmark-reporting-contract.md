@@ -28,6 +28,22 @@ enough execution metadata to answer:
 Future quality-reporting changes should extend this contract rather than
 replace it ad hoc.
 
+## Candidate identity
+
+Quality evidence identifies the filesystem state it tested, not merely the
+repository `HEAD`. Prefer committing a local release candidate before running
+the canonical matrix so its SHA names that state exactly.
+
+If the candidate must remain uncommitted, the report records that it was dirty,
+a deterministic diff fingerprint, and the changed-path list. A base `HEAD`
+alone must not be presented as certification of the candidate tree. Until the
+harness records this evidence, release notes and handoffs state the limitation
+explicitly.
+
+Post-run changes to generated report insertion or report formatting do not
+alter the measured runtime behavior, but they still belong in the final
+evidence ledger rather than being silently included in an exact-state claim.
+
 ## Vocabulary and field guide
 
 Quality reports use specialized terms: `S1`, `S2`, `S3`, `LUS`, `Engine OK`,
