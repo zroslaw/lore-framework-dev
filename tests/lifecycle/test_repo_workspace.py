@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Lifecycle scenarios 17-26: repo & workspace skills (catalog: workdir/draft-testing-pipeline.md).
+"""Lifecycle scenarios 16-27: repo & workspace skills (catalog: workdir/draft-testing-pipeline.md).
 
-create-repo, create-agent, workspace-init, workspace-pull, check, update --dry-run, and registration flows.
+create-repo, create-agent, the four workspace commands (init, pull, push, status), check,
+update --dry-run, and the registration flows.
 
 Run:  LR_LIFECYCLE=1 python3 tests/lifecycle/test_repo_workspace.py -v
 One:  LR_LIFECYCLE=1 python3 tests/lifecycle/test_repo_workspace.py -v -k 16
@@ -17,12 +18,16 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import harness
 from harness import (
-    AGENT_NAME, BROKEN_REF, CHECK_PROMPT, CREATE_AGENT_PROMPT, CREATE_REPO_PROMPT,
-    HELPER_AGENT_NAME, INIT_PROMPT, REGISTER_AGENT_PROMPT, REGISTER_REPO_PROMPT,
+    AGENT_NAME, BROKEN_REF, CHECK_PROMPT, CLAUDE_IMPORT_LINE, CREATE_AGENT_PROMPT,
+    CREATE_REPO_PROMPT, ENGINE, HELPER_AGENT_NAME, INIT_PROMPT, MANAGED_PROVENANCE,
+    MEMORY_SECTIONS, REGISTER_AGENT_PROMPT, REGISTER_REPO_PROMPT,
     SKIP_REASON, UNREGISTER_AGENT_PROMPT, UNREGISTER_REPO_PROMPT,
     UPDATE_APPLY_PROMPT, UPDATE_DRYRUN_PROMPT, WORKSPACE_PULL_PROMPT,
-    build_empty_workspace, build_fixture, declare_sibling_repo, head,
-    make_origin_ahead, memory_file_name, read_repo_version, run_engine, seed_broken_reference,
+    WORKSPACE_PUSH_PROMPT, WORKSPACE_STATUS_PROMPT,
+    add_undeclared_child_repo, build_empty_workspace, build_fixture,
+    declare_sibling_repo, dirty_managed_and_unmanaged, head, make_origin_ahead,
+    make_workspace_meta_repo, memory_files, read_gitignore, read_repo_version,
+    run_engine, seed_broken_reference,
 )
 
 
@@ -83,19 +88,56 @@ class RepoWorkspaceScenarios(unittest.TestCase):
         self.assertIn("type: context", context, "new agent root lacks context type")
 
     def test_18_workspace_init(self):
-        """workspace-init writes the marker-delimited framework section into the engine's memory file."""
+        """workspace-init writes the v3 sectioned payload into AGENTS.md, on every engine."""
         workspace = build_empty_workspace(self.tmp)
         r = run_engine(workspace, INIT_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
 
-        memory_file = os.path.join(workspace, memory_file_name())
-        self.assertTrue(os.path.isfile(memory_file), f"{memory_file_name()} was not created")
-        with open(memory_file) as f:
+        canonical, _stub = memory_files()
+        memory_file = os.path.join(workspace, canonical)
+        self.assertTrue(os.path.isfile(memory_file), f"{canonical} was not created")
+        with open(memory_file, encoding="utf-8") as f:
             content = f.read()
-        self.assertIn("<!-- lr:workspace-init:start -->", content)
-        self.assertIn("<!-- lr:workspace-init:end -->", content)
-        self.assertIn("Lore Framework Workspace", content)
+
+        for heading in MEMORY_SECTIONS:
+            self.assertIn(heading, content, f"missing canonical section heading {heading!r}")
+        self.assertIn(MANAGED_PROVENANCE, content,
+                      "managed sections carry no lr:managed provenance comment")
+        # The v3 payload replaced the marker protocol outright; a marker here
+        # means the executor followed a pre-v37 doc.
+        self.assertNotIn("<!-- lr:workspace-init:start -->", content,
+                         "v3 payload must not carry the retired marker protocol")
+
+    def test_18b_claude_md_import(self):
+        """CLAUDE.md is a one-line @AGENTS.md import stub, never a second copy of the payload.
+
+        This is the standing re-verification of the memory-file experiment: Claude
+        Code does not read AGENTS.md, so the import line is the only thing making
+        workspace memory reach a Claude Code session. It is engine behavior rather
+        than a contract, so it is re-measured every run instead of assumed.
+        """
+        if ENGINE != "claude":
+            self.skipTest("the CLAUDE.md import stub is only load-bearing on Claude Code")
+        workspace = build_empty_workspace(self.tmp)
+        r = run_engine(workspace, INIT_PROMPT)
+        print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
+        self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
+
+        _canonical, stub = memory_files()
+        stub_path = os.path.join(workspace, stub)
+        self.assertTrue(os.path.isfile(stub_path), f"{stub} was not created")
+        with open(stub_path, encoding="utf-8") as f:
+            lines = [line.strip() for line in f]
+
+        imports = [line for line in lines if line == CLAUDE_IMPORT_LINE]
+        self.assertEqual(len(imports), 1,
+                         f"expected exactly one {CLAUDE_IMPORT_LINE} line, found {len(imports)}")
+        stub_text = "\n".join(lines)
+        for heading in MEMORY_SECTIONS:
+            self.assertNotIn(heading, stub_text,
+                             f"{stub} carries the payload section {heading!r} — "
+                             "the payload belongs in AGENTS.md only, or it will drift")
 
     def test_19_workspace_pull(self):
         """workspace-pull clones a declared-but-missing sibling and pulls an existing repo."""
@@ -107,6 +149,12 @@ class RepoWorkspaceScenarios(unittest.TestCase):
                         capture_output=True, text=True, check=True)
         declare_sibling_repo(fx, sibling_bare)
 
+        # Phase 3 must ignore EVERY child git repo on disk, not only declared
+        # ones: an undeclared clone can be committed into the workspace repo
+        # just as easily as a declared one.
+        make_workspace_meta_repo(fx)
+        add_undeclared_child_repo(fx, "undeclared-child")
+
         r = run_engine(fx.workspace, WORKSPACE_PULL_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
@@ -117,6 +165,12 @@ class RepoWorkspaceScenarios(unittest.TestCase):
             head(fx.repo), head(fx.origin, "main"),
             "existing repo (test-lore) was not pulled up to date",
         )
+
+        ignore_lines = read_gitignore(fx.workspace)
+        self.assertIn("/undeclared-child/", ignore_lines,
+                      "phase 3 did not ignore an undeclared child git repo")
+        self.assertIn("undeclared-child", r.text,
+                      "the run did not name the undeclared top-level repo")
 
     def test_20_check_catches_seeded_violation(self):
         """check surfaces a deliberately broken lore-context.md cross-reference."""
@@ -267,6 +321,71 @@ class RepoWorkspaceScenarios(unittest.TestCase):
         for agent_name in (AGENT_NAME, HELPER_AGENT_NAME):
             target_dir, _ = self._shortcut_paths(fx.workspace, agent_name)
             self.assertFalse(os.path.exists(target_dir), f"shortcut still exists for {agent_name}")
+
+    def test_26_workspace_push(self):
+        """workspace-push commits only framework-managed paths, and a teammate receives them."""
+        fx = build_fixture(self.tmp)
+        workspace_origin = make_workspace_meta_repo(fx)
+        managed, unmanaged = dirty_managed_and_unmanaged(fx)
+
+        r = run_engine(fx.workspace, WORKSPACE_PUSH_PROMPT)
+        print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
+        self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
+
+        committed = subprocess.run(
+            ["git", "-C", fx.workspace, "show", "--name-only", "--format=", "HEAD"],
+            capture_output=True, text=True,
+        ).stdout.split()
+        self.assertIn("AGENTS.md", committed,
+                      f"the dirty framework-managed file was not committed: {committed}")
+        self.assertNotIn(
+            os.path.basename(unmanaged), committed,
+            "workspace-push committed a path outside the framework-managed set — "
+            "unrelated user work must never ship under a generic message",
+        )
+        self.assertTrue(
+            os.path.isfile(unmanaged),
+            "workspace-push must leave non-managed dirty files on disk untouched",
+        )
+        self.assertTrue(managed)  # named for readability of the failure above
+
+        # The point of publishing is that somebody else receives it.
+        teammate = os.path.join(self.tmp, "teammate-workspace")
+        subprocess.run(["git", "clone", workspace_origin, teammate],
+                       capture_output=True, text=True, check=True)
+        self.assertTrue(
+            os.path.isfile(os.path.join(teammate, "AGENTS.md")),
+            "a fresh clone of the workspace origin did not receive the pushed memory file",
+        )
+
+    def test_27_workspace_status(self):
+        """workspace-status reports the expected finding IDs on a deliberately messy workspace."""
+        fx = build_fixture(self.tmp)
+        make_workspace_meta_repo(fx)
+        dirty_managed_and_unmanaged(fx)          # -> S1 (dirty managed), S12 (dirty other)
+        add_undeclared_child_repo(fx, "undeclared-child")  # -> S5 (undeclared), S7 (unignored)
+
+        r = run_engine(fx.workspace, WORKSPACE_STATUS_PROMPT)
+        print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
+        self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
+
+        for finding in ("S1", "S5", "S7"):
+            self.assertIn(finding, r.text,
+                          f"status did not report {finding} on a workspace that exhibits it:\n{r.text}")
+        self.assertNotIn(
+            "workspace clean", r.text,
+            "status reported a clean workspace while findings were present",
+        )
+        # Read-only: the messy state must survive the diagnosis untouched.
+        self.assertTrue(
+            os.path.isfile(os.path.join(fx.workspace, "my-private-notes.md")),
+            "workspace-status is read-only and must not remove user files",
+        )
+        self.assertTrue(
+            subprocess.run(["git", "-C", fx.workspace, "status", "--porcelain"],
+                           capture_output=True, text=True).stdout.strip(),
+            "workspace-status committed or cleaned something — it must write nothing",
+        )
 
 
 if __name__ == "__main__":
