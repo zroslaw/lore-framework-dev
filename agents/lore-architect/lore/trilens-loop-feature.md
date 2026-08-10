@@ -50,7 +50,9 @@ All of these were earned during the ship, not assumed:
   while any reviewer's latest verdict is `BLOCK` unless the host says out loud it is overriding); and
   **"a silent round is not a clean round"** (≥1 reviewer must actually return; retry once, and the
   retry does not count against the cap). The second guard exists because otherwise the same session
-  writes the fixes *and* grades its own convergence.
+  writes the fixes *and* grades its own convergence. In practice the third guard's cheapest form is a
+  *follow-up ask* rather than a re-spawn — a lens that went idle without reporting is often alive and
+  merely silent (`a-gate-that-died-is-not-a-gate.md` § Alive but silent).
 - **Three-state ledger:** `APPLIED` / `DECLINED` / `ACCEPTED (not applied — report-only)`. The third
   state exists because "no fixes" is a legitimate amendment, and folding those into `DECLINED` would
   misreport agreed findings as rejected.
@@ -62,8 +64,12 @@ All of these were earned during the ship, not assumed:
   record, and the correction of record is in `release-notes/31.md`.
 - **Lenses are ways of looking, not places to look.** Splitting by file or target gives three
   reviewers doing identical thinking on different slices. Codex's cheapest tier did exactly that
-  (`diff` / `lore-context` / `references`) until the doc said otherwise explicitly. The three lenses
-  stay fixed for the whole loop, and each brief tells its reviewer what the other two own.
+  (`diff` / `lore-context` / `references`) until the doc said otherwise explicitly. Each brief tells
+  its reviewer what the other two own. Within a round the trio is fixed; **across rounds it should
+  not be** — see `parallel-reviewer-fanout-pattern.md` § Choose lenses per *round*, not per loop.
+  `docs/trilens-loop.md` step 5 currently says only "fresh reviewers each round" and never says
+  re-pick the lenses, so that judgement lives in lore alone today — a candidate doc fix, since a
+  guardrail recorded only as lore protects nobody (`point-of-use-guardrails-beat-recorded-lore.md`).
 - **Briefs carry the goal, not the rationale** — see `parallel-reviewer-fanout-pattern.md`
   § Brief the goal, not the rationale.
 
@@ -120,7 +126,11 @@ first-class part of the feature. Rejected: `/lr:review` (collides conceptually w
 ## See Also
 
 - `parallel-reviewer-fanout-pattern.md` — the practice this was promoted from; still the judgement
-  layer (lens catalog, convergence profiles, stall handling, triage rules).
+  layer (lens catalog, convergence profiles, stall handling, triage rules), including
+  § Choose lenses per *round*, not per loop — the loop fixes the mechanics, not which three lenses
+  each round should use.
+- `a-fix-is-a-change-and-changes-need-review.md` — why a round that ended with fixes applied is not a
+  stopping condition.
 - `subagent-as-optimization-vs-subagent-as-semantics.md` — the principle that forbids a host-side
   fallback here and forced the v30 Cursor profile carve-out.
 - `post-convergence-edits-need-their-own-gate.md` — a converged loop only certifies the artifact state

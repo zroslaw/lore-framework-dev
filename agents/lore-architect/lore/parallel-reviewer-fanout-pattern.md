@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "The judgement layer for multi-lens adversarial review fan-out: lens choice per ship and per round, brief shape, triage, convergence profiles, stall handling, and when not to fan out."
+parent: lore-context.md
+---
+
 When shipping a substantive change (script, skill, doc set), run **three parallel reviewers with mutually-exclusive lenses**. Different from `sonnet-subagent-review-pattern.md`, which is single-lens role-as-perspective; this is multi-lens adversarial fan-out specifically for shipped artifacts.
 
 ## This pattern is now a shipped skill — run `/lr:trilens-loop`
@@ -58,6 +65,12 @@ The lens choice should be deliberate per ship. Lenses that worked well:
 - **Release readiness / disclosure** — are breaking changes mentioned? Is auto-upgrade safe? Are version stamps consistent? Is the backlog updated?
 - **Framework architectural consistency** — does the change compose with the three-layer model, skill-doc pattern, framework-scope-vs-agent-scope, naming-foundational-principles meta-rule, sibling-skill non-overlap? Especially powerful when the architecture reviewer is given the architect's own `lore-context.md` as a baseline — applies the architect's stated meta-rules to the change being reviewed.
 - **Correctness with filesystem verification** — for doc edits that promise commands, paths, or behaviors, the correctness reviewer should run actual bash commands (`ls ~/.claude/plugins/cache/`, `cat .../VERSION`, `find ...`) and ground every finding in observed state. Catches defects pure prose review misses.
+- **Findings as a system** — hand one reviewer the *set* of diagnostics/messages a release ships and
+  ask whether they cohere: do two findings ever give the user contradictory remedies, does any of them
+  describe state inaccurately? This lens has no analogue in ordinary code review and was
+  disproportionately productive on v37 — it caught S6 and S13 handing contradictory remedies, and S12
+  calling framework scratch state "your own files, nothing will touch them". **Any release that ships
+  a set of diagnostics deserves it.**
 - **AI-installer (literal executor)** — for the paste-link installer doc genre (`paste-link-installer-doc-genre.md`): brief the reviewer to read the doc *as the agent that must execute it literally*, tracing each instruction against real files/commands rather than judging tone. Catches a distinct class the newcomer/editorial lenses miss — see `ai-installer-review-lens.md` for the full brief shape and the empirical case that justified naming it as a fourth lens.
 
 **Rule:** the lenses should be *mutually exclusive* — if two reviewers are likely to find the same issues, you've wasted a slot. Tell each lens explicitly what to skip (what the others will catch).
@@ -174,6 +187,34 @@ Three things follow, and the first two are corrections to how I used to reason a
 
 Trust your own judgment after reading the actual code/docs. Reviewers operate from limited context. The user's standard ("production-ready, high quality") is the bar — not consensus among reviewers.
 
+## Choose lenses per *round*, not per loop (v37, 2026-08-10)
+
+The lens rule above ("pick three that don't overlap") applies within a round. Across rounds, let the
+round number change the *kind* of lens. Re-running the same trio over a changed tree buys the same
+thinking three times.
+
+The shape that worked over v37 (nine lenses, three rounds):
+
+- **Round 1 — lenses about the release itself.** Script↔doc equivalence (the Script Fallback Contract
+  is this framework's signature failure mode), destructive safety (the procedures delete and commit on
+  a real machine), cold-user coherence (a late change had left stale copies of a superseded claim in
+  four docs).
+- **Round 2 — one lens aimed at round 1's own output.** "Did the fixes fix it, and did they break
+  anything" caught a fix of mine that was worse than the bug
+  (`a-fix-is-a-change-and-changes-need-review.md`). **Make this the standing first lens of round 2 in
+  any loop where round 1 ended with fixes applied.** The other two go where round 1 didn't:
+  executability (simulate being the agent that runs the doc) and the installed base (version skips,
+  mixed-version teammates, state older versions left behind).
+- **Round 3 — narrow to where the evidence says the risk concentrated.** On v37 that was shell signal
+  handling, the finding set as a system, and whether ~20 piecemeal prose patches still read as one
+  document. The last of those found the round's blocker — patch-on-patch editing is exactly how a doc
+  acquires two rules for one thing.
+
+General shape: **round 1 reviews the work, round 2 reviews the fixes and widens the frame, round 3 goes
+where the evidence points.** This is the multi-round refinement of the v13 note below, which framed
+round 2 as a single verification reviewer; the lens *kinds* are the part that must change, not
+necessarily the reviewer count.
+
 ## Two rounds, not one, when the change is large
 
 Two rounds proved valuable in v11, v12, and v13 ships:
@@ -223,6 +264,10 @@ Parallel reviewer fan-out can stall on individual reviewers — Claude's stream-
 3. **Round 2 closes the gap.** A focused single-reviewer round 2 with the full diff in scope catches cross-doc drift round 1's per-doc reviewers structurally cannot. Especially valuable when round 1 had stalls — round 2 is the consistency check.
 4. **Internal contradictions across docs are the highest-yield round-2 finding.** Round 1's per-doc reviewers each see one slice; round 2 with the full diff catches drift like "doc A says X, doc B references the now-removed X."
 5. **Filesystem verification beats prose review.** Round 2 should run actual bash commands (constructing scenarios in `/tmp`, `ls`/`cat`/`diff` against the real cache or repo). The v13 dirty-tree-no-gate decision was *verified live* by setting up dirty-tree scenarios and observing git's actual behavior — irreplaceable evidence vs prose claims.
+
+6. **A reviewer that went idle without reporting may simply not have spoken.** Ask once for its
+   findings and verdict before writing the lens off — see
+   `a-gate-that-died-is-not-a-gate.md` § Alive but silent, which owns the rule.
 
 **Don't mistake graceful degradation for tolerance of broken reviewers.** If reviewers are stalling consistently across runs, that's a workflow signal — the brief may be too long, the model may be wrong-sized, or the prompt may be triggering the watchdog. Investigate. Graceful degradation is the safety net, not the design goal.
 

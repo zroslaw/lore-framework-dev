@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Prose review is structurally blind to execution-fidelity ambiguity, because the reviewer resolves it as charitably as the author did; run the doc against a real (weaker) model — and run that leg first."
+parent: lore-context.md
+---
+
 **Doc wording that a strong model resolves correctly by inference can still be genuinely ambiguous — and prose review alone won't catch it, because the reviewer is itself a strong model exercising the same charitable inference the doc's author relied on.** Only running the literal text against a weaker (or just different) model surfaces the gap.
 
 ## Why This Matters
@@ -53,6 +60,34 @@ Corollary that bit me in the same ship: **each leg certifies the artifact state 
 against.** Two doc edits made after both gates passed were ungated work, and the recheck was destroyed
 by an environment failure. See `post-convergence-edits-need-their-own-gate.md`.
 
+## Order the legs: execution first, review second (v37, 2026-08-10)
+
+The two legs are independent, but they are not interchangeable *in sequence*. When the deliverable is
+executable prose, **run the execution leg first** — it is the cheaper of the two and it produces
+evidence the review leg cannot generate by reading.
+
+The v37 evidence: three TriLens rounds and nine cold lenses over the release. Round 3's `BLOCKER` was
+a bulk-registration step that skipped the `CLAUDE.md` import stub — reopening the exact whole-engine
+outage v37 exists to close. A reviewer found it by noticing that a helper's three sub-items had been
+bundled under one name. *Running* `register-repo` once against a workspace without the stub would
+have found it in seconds, with no reviewer at all.
+
+Ordering for a procedure-touching release:
+
+1. Lifecycle suite against the change.
+2. Dogfood the change onto this workspace (converge it onto the new version).
+3. *Then* TriLens over whatever those two disturbed — a failed lifecycle run or a surprising dogfood
+   hands reviewers evidence that reading alone cannot produce.
+
+For prose-only changes the order does not matter; there is nothing to run.
+
+**Reporting corollary.** After a review-only gate, say plainly what remains *untested*. "Three rounds,
+nine lenses, 28 findings" implies coverage it does not have: reading is the only thing a review round
+does. v37's real remaining gap was never a missing finding — it was that S1–S14 had no unit coverage,
+the lifecycle suite had not run, and the framework's own workspace had never been converged onto the
+release. That is the same discipline `a-gate-that-died-is-not-a-gate.md` applies to a gate that was
+launched, applied here to a gate that was never launched at all.
+
 ## The weak-model sharpening
 
 The execution-fidelity leg of this principle has a named, sharper form: **the weakest available model (haiku) is an *ambiguity detector*.** Where it stumbles, the doc is usually under-specified — a stronger model silently resolves the gap. The operative bar is therefore not "works on sonnet" but "explanatory enough that even haiku executes it faithfully," which doubles as a port-readiness bar (non-Claude engines are also not top-tier). See `haiku-ambiguity-detector.md` for the principle, its concrete instance (the defer-clarity fix), and the generalizable "put reassurance adjacent to the alarming message" rule.
@@ -72,5 +107,8 @@ When a procedure doc has been reviewed multiple times and still ships with an ex
 - `trilens-loop-feature.md` — the shipped instrument for the review leg (v30); the harness remains the empirical leg.
 - `post-convergence-edits-need-their-own-gate.md` — both legs certify a specific artifact state; edits after a gate are ungated.
 - `haiku-ambiguity-detector.md` — the sharpened weak-model form of the execution-fidelity leg.
+- `a-gate-that-died-is-not-a-gate.md` — the three dispositions a ship record must name; § Order the legs
+  is the "never launched" case.
+- `a-fix-is-a-change-and-changes-need-review.md` — the v37 three-round run this ordering came out of.
 - `naming-foundational-principles.md` — the meta-rule this topic's own existence follows.
 - `quality-benchmark-feature.md`, `benchmark-measurement-design-principles.md` — the same "measure by running, not by reviewing" premise applied to lore *utilization* (did knowledge change behavior) rather than procedure fidelity.
