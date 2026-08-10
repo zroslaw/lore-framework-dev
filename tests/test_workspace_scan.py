@@ -228,6 +228,104 @@ class TestS15LegacyCodexShortcuts(unittest.TestCase):
         self.assertIn("S11", findings_by_id(ws.build_findings(data)))
 
 
+class TestS13DirnameCollisions(unittest.TestCase):
+    """Two declared URLs deriving to one directory must not silently cancel out.
+
+    `declared_repos` dedupes by URL, so both survive into `build_findings`. A
+    dirname-keyed map that kept the last one would hide the collision *and* check
+    the child's origin against the wrong declaration.
+    """
+
+    def _declared(self):
+        return [
+            {"url": "git@a.example.com:team/shared.git", "dirname": "shared",
+             "source": "workspace"},
+            {"url": "git@b.example.com:other/shared.git", "dirname": "shared",
+             "source": "domain"},
+        ]
+
+    def test_collision_is_reported(self):
+        data = base_data(descriptors={**base_data()["descriptors"],
+                                      "declared": self._declared()})
+        f = findings_by_id(ws.build_findings(data))
+        self.assertIn("S13", f)
+        reasons = [c["reason"] for c in f["S13"]["data"]]
+        self.assertIn("two declared URLs derive to the same directory name", reasons)
+
+    def test_first_declarer_wins_the_origin_check(self):
+        # The child matches the FIRST declaration; keeping the last one instead
+        # would produce a spurious "origin does not match" conflict.
+        declared = self._declared()
+        data = base_data(
+            descriptors={**base_data()["descriptors"], "declared": declared},
+            children=[{"dirname": "shared", "git": True, "ignorable": True,
+                       "escapes_workspace": False, "declared": True,
+                       "lore_repo": True, "ignored": True,
+                       "default_branch": "main", "current_branch": "main",
+                       "origin": declared[0]["url"]}])
+        f = findings_by_id(ws.build_findings(data))
+        reasons = [c["reason"] for c in f["S13"]["data"]]
+        self.assertNotIn("origin does not match declaration", reasons)
+
+    def test_collided_dirname_is_not_also_reported_missing(self):
+        # S6's remedy is "run workspace-pull", and pull refuses to place either URL
+        # until a descriptor is edited. Only S13 may own this state.
+        data = base_data(descriptors={**base_data()["descriptors"],
+                                      "declared": self._declared()})
+        f = findings_by_id(ws.build_findings(data))
+        self.assertNotIn("S6", f)
+        self.assertIn("S13", f)
+
+    def test_uncollided_missing_repo_still_reports_s6(self):
+        declared = self._declared() + [{"url": "git@x:t/solo.git", "dirname": "solo",
+                                        "source": "workspace"}]
+        data = base_data(descriptors={**base_data()["descriptors"],
+                                      "declared": declared})
+        f = findings_by_id(ws.build_findings(data))
+        self.assertEqual([m["dirname"] for m in f["S6"]["data"]], ["solo"])
+
+    def test_child_cloned_from_second_declarer_yields_one_row(self):
+        # The collision entry names both URLs. Also reporting "origin does not match
+        # declaration" against the first declarer would be two rows for one problem,
+        # naming a URL the user never cloned from.
+        declared = self._declared()
+        data = base_data(
+            descriptors={**base_data()["descriptors"], "declared": declared},
+            children=[{"dirname": "shared", "git": True, "ignorable": True,
+                       "escapes_workspace": False, "declared": True,
+                       "lore_repo": True, "ignored": True,
+                       "default_branch": "main", "current_branch": "main",
+                       "origin": declared[1]["url"]}])
+        rows = findings_by_id(ws.build_findings(data))["S13"]["data"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["reason"],
+                         "two declared URLs derive to the same directory name")
+
+    def test_no_collision_when_dirnames_differ(self):
+        declared = [{"url": "git@x:t/a.git", "dirname": "a", "source": "workspace"},
+                    {"url": "git@x:t/b.git", "dirname": "b", "source": "workspace"}]
+        data = base_data(descriptors={**base_data()["descriptors"],
+                                      "declared": declared})
+        self.assertNotIn("S13", findings_by_id(ws.build_findings(data)))
+
+
+class TestS4EnclosingRepo(unittest.TestCase):
+    """A workspace nested in someone else's repo is not one more info line."""
+
+    def _data(self, enclosing):
+        git = {**base_data()["git"], "own_root": False,
+               "enclosing_root": enclosing}
+        return base_data(git=git)
+
+    def test_local_only_workspace_stays_info(self):
+        f = findings_by_id(ws.build_findings(self._data(None)))
+        self.assertEqual(f["S4"]["severity"], "info")
+
+    def test_enclosed_workspace_warns(self):
+        f = findings_by_id(ws.build_findings(self._data("/somewhere/other-repo")))
+        self.assertEqual(f["S4"]["severity"], "warn")
+
+
 class TestScanEndToEnd(unittest.TestCase):
     """The CLI path: a dirty Codex shortcut must classify as managed, not other."""
 
