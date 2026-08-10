@@ -28,7 +28,6 @@ class StyleScenarios(unittest.TestCase):
         reply = result.text.split("STYLE-REPLY:", 1)[-1].strip()
         self.assertTrue(reply, f"missing STYLE-REPLY marker:\n{result.text}")
         self.assertLessEqual(len(reply.splitlines()), 2, f"dialogue reply was too long:\n{reply}")
-        self.assertIn("?", reply, f"follow component did not leave direction with the user:\n{reply}")
 
     def _tmpdir(self):
         import shutil

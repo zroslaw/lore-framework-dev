@@ -119,8 +119,9 @@ ATTACH_PROMPT = (
     f"Invoke the lr:boot skill to boot as lore agent '{AGENT_NAME}'. "
     f"Once booted, invoke the lr:attach skill to attach '{HELPER_AGENT_NAME}' as a "
     "guest. Then invoke the lr:recall skill with hint \"caching layer\" to search "
-    "lore across active agents. Print the attach confirmation and the recall "
-    "synthesis verbatim. Do not reflect, merge, finalize, commit, or push."
+    "lore across active agents. In your final response, print the standard four-line "
+    "attach confirmation first, then the recall synthesis verbatim. Do not reflect, "
+    "merge, finalize, commit, or push."
 )
 
 SUMMARIZE_PROMPT = (
@@ -381,9 +382,9 @@ def codex_prompt(prompt):
             AGENT_NAME,
             f"Once booted, read '{FRAMEWORK_DIR}/docs/attach.md' and follow it to attach "
             f"'{HELPER_AGENT_NAME}' as a guest. Then read '{FRAMEWORK_DIR}/docs/recall.md' and "
-            "follow it with hint \"caching layer\" to search lore across active agents. Print "
-            "the attach confirmation and the recall synthesis verbatim. Do not reflect, merge, "
-            "finalize, commit, or push.",
+            "follow it with hint \"caching layer\" to search lore across active agents. In "
+            "your final response, print the standard four-line attach confirmation first, then "
+            "the recall synthesis verbatim. Do not reflect, merge, finalize, commit, or push.",
         )
     if prompt == SUMMARIZE_PROMPT:
         return _codex_boot_prompt(

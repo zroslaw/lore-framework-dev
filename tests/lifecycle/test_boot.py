@@ -143,8 +143,8 @@ class BootUpgradeScenarios(unittest.TestCase):
         self.tmp = tempfile.mkdtemp(prefix="lr-lifecycle-")
         self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
 
-    def test_05_boot_version_mismatch_release_notes_only(self):
-        """Repo one version behind (release-notes-only bump); boot upgrades and stamps it."""
+    def test_05_boot_version_mismatch_reconciles_and_publishes(self):
+        """A clean outdated repo is fully reconciled, then narrowly published."""
         fx = build_fixture(self.tmp, version="17")
         r = run_engine(fx.workspace, BOOT_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
@@ -156,10 +156,12 @@ class BootUpgradeScenarios(unittest.TestCase):
             read_repo_version(fx), harness.framework_version(),
             "lore-repo.md was not stamped to the current framework version",
         )
-        self.assertFalse(
+        self.assertTrue(
             is_clean(fx.repo),
-            "version stamp must be left uncommitted for the user to review",
+            "a clean successful upgrade must commit its update-owned changes",
         )
+        self.assertEqual(head(fx.repo), head(fx.origin, "main"),
+                         "a clean successful upgrade must push to its existing upstream")
 
     def test_06_boot_upgrade_gate_on_dirty_tree(self):
         """Repo far behind with a dirty file in the upgrade's write-set; boot defers, doesn't overwrite."""

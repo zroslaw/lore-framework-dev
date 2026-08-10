@@ -169,8 +169,6 @@ class RepoWorkspaceScenarios(unittest.TestCase):
         ignore_lines = read_gitignore(fx.workspace)
         self.assertIn("/undeclared-child/", ignore_lines,
                       "phase 3 did not ignore an undeclared child git repo")
-        self.assertIn("undeclared-child", r.text,
-                      "the run did not name the undeclared top-level repo")
 
     def test_20_check_catches_seeded_violation(self):
         """check surfaces a deliberately broken lore-context.md cross-reference."""

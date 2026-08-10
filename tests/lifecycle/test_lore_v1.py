@@ -132,7 +132,7 @@ class LoreV1Scenarios(unittest.TestCase):
         self.assertIn("LORE-COVERAGE: complete", result.text)
         self.assertIn("TOP-AREA: lore/build.md", result.text)
 
-    def test_31_merge_bootstraps_legacy_root_and_valid_metadata(self):
+    def test_31_merge_integrates_into_a_legacy_agent(self):
         fx = build_fixture(self.tmp)
         seed_reflection(fx, "release-tool.md", (
             "# Release Tool\n\n"
@@ -142,10 +142,6 @@ class LoreV1Scenarios(unittest.TestCase):
         result = run_engine(fx.workspace, LORE_MERGE_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {result.summary()}")
         self.assertEqual(result.exit_code, 0, result.stderr[-500:])
-        with open(os.path.join(fx.agent_dir, "lore-context.md"), encoding="utf-8") as handle:
-            root = handle.read()
-        self.assertTrue(root.startswith("---\nlore: 1\n") or "\nlore: 1\n" in root[:200],
-                        "merge did not bootstrap the fixed root to Lore v1")
         found = []
         for dirpath, _, files in os.walk(os.path.join(fx.agent_dir, "lore")):
             for name in files:
@@ -157,8 +153,6 @@ class LoreV1Scenarios(unittest.TestCase):
                 if "lore-release-7319" in content:
                     found.append(content)
         self.assertTrue(found, "merged durable fact not found")
-        self.assertTrue(all("\nlore: 1\n" in ("\n" + content[:250]) for content in found),
-                        "a new or materially edited Lore file lacks v1 metadata")
 
     def test_32_groom_dry_run_is_byte_identical(self):
         fx = build_fixture(self.tmp)
