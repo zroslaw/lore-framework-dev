@@ -183,6 +183,14 @@ See `lore-search-pattern.md`, `consult-pattern.md`, `attach-pattern.md`, `spawn-
 
 User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone): **reflect** (inline, host-first, per agent — needs session context) → **merge** (parallel subagents, one per agent booted as itself, file-driven — integrates reflections into `lore/`, `lore-context.md`, `role.md`) → **summarize** (host writes the canonical session summary + short guest summaries) → **commit+push** (one commit per touched repo; conflict-resolution on push rejection). Do not finalize unless the user triggers it. See `finalization-process.md`, `finalize.md`, `merge-in-booted-subagents.md`, `reflect-merge-execution-asymmetry.md`.
 
+**Transcript-backed reflection is an active, unshipped MVP design:** opt-in
+`finalize --transcript` recovers parser-retained main-thread dialogue into ordinary reflection
+topics, then rejoins the same merge/summarize/commit/push lifecycle. The current design is
+host-only, bounded, fail-closed, and keeps raw logs in local ignored scratch; four
+implementation-readiness findings remain to classify before coding. See
+`transcript-backed-finalization-mvp.md` and
+`workdir/draft-transcript-backed-finalization.md`.
+
 Shared-lore publication is a separate, unshipped governance direction: retain direct publish for trusted teams, but use Git branches, review, and protections where the team's risk model requires them. See `team-lore-contribution-governance.md`.
 
 ## Versioning & Migration
@@ -291,7 +299,7 @@ Co-authoring framework onboarding docs for adopting teams is part of the role. T
   `claude-coupling-inventory-and-port-tiers.md`, `cursor-dual-skill-tree-one-repo.md`,
   `quality-benchmark-feature.md`, `positioning-triad-differentiation.md`, `port-landing-next-steps.md`.
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** review item — active follow-ups from the 2026-06-13 architecture review; see `framework-improvements-backlog.md`. That review's settled dispositions (incl. DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in `architecture-review-dispositions.md`. A newer 2026-07-02 review added two further backlog items (post-merge diff verification, recall-time staleness surfacing) — see `framework-improvements-backlog.md` § Merge Quality, § Search / Scaling.
-- Parked: workdir-as-reference-library; vector-DB search (until >100 topics/agent); the session-as-durable-artifact cluster (boot auto-push, boot-context cache, suspend/resume, JSONL archive). All in `framework-improvements-backlog.md`.
+- Parked: workdir-as-reference-library; vector-DB search (until >100 topics/agent); the remaining session-as-durable-artifact cluster (boot auto-push, boot-context cache, suspend/resume, JSONL archive). Transcript-backed reflection is the active, non-archival branch described under Finalization. All in `framework-improvements-backlog.md` and `session-as-durable-artifact-cluster.md`.
 - **v25 workspace layer (pull + init)** — shipped; standard workspace-owned ignore lines now include
   `/.worktrees/`, `/.lr-beings/`, and `/.tmp/` (init seeds, pull phase 3 re-asserts, check #22 warns).
   Disposable scaffolds go under `.tmp/<name>/`. See `v25-workspace-pull-init-design.md`,
