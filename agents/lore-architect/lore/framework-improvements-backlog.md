@@ -184,6 +184,32 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 
 - **Real-world trial run for `/lr:spawn-teammate`** — `~/.claude/settings.json` now sets `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (configured this session). Next session after Claude Code restart, `/lr:spawn-teammate` is usable. Worth a real trial on framework work — the feature is BETA with open design questions (last-write-wins lore serialization, finalization across teammates). First usage will inform graduation. See `spawn-teammate-feature.md` for the open beta questions.
 
+### TriLens Fix Boundary (`/lr:trilens-loop`, designed 2026-08-11, not yet implemented)
+
+- **Close the boundary that ships the last round's fixes unreviewed.** Two releases in a row (v37,
+  v38) had every round after the first find a defect created by the previous round's fix, and both
+  ended at the three-round ceiling — so both shipped unreviewed repairs. This is arithmetic, not bad
+  luck: N rounds of review produce N rounds of fixes and review only N−1 of them, so any loop that
+  ends on findings rather than on a clean round ships unreviewed material by construction. Evidence
+  and mechanisms in `fix-defects-are-context-errors.md`; the sample also shows **7 of 8 fix-defects
+  were context errors** (scope, placement, prerequisites, completeness) rather than logic errors, so
+  a fix pass must be reviewed for context, not correctness.
+
+  Design in `workdir/draft-trilens-fix-boundary.md` — five decisions: **D1** the final round is
+  fix-free (findings recorded `DEFERRED`, so the shipped tree equals what the last reviewers read);
+  **D2** a fix-audit pass that does not consume a round (one cold reviewer given only the ledger plus
+  the repairs diff, briefed on context questions and on auditing every proposition the fix added);
+  **D3** the host states blast radius before applying each finding — implementations, *statements* of
+  the same rule, container requirements; **D4** re-read the fix in its container, never in the diff,
+  since context errors are invisible in diffs by definition; **D5** deterministic checks where they
+  exist (a markdown table/link lint would have caught v38's broken findings table outright).
+
+  Sequencing: D3+D4 first (free host discipline, attacks the dominant failure class), then D1+D2
+  together since D1 is unsafe alone, D5 independently. Four open questions, chiefly whether the
+  fix-audit runs every round or only after the last, and whether the ceiling should be restated as
+  bounding *rounds that may produce fixes*. See `trilens-loop-feature.md`,
+  `parallel-reviewer-fanout-pattern.md`, `a-fix-is-a-change-and-changes-need-review.md`.
+
 ## Workspace & Environment
 
 ### Workspace Lifecycle Redesign (designed 2026-08-09, not yet implemented)

@@ -47,4 +47,12 @@ saying "I verified" is evidence, not a gate; see
 unverified claim in a commit message is how a claim becomes a fact with no owner — the same failure
 as [codex-shortcuts-are-workspace-local.md](codex-shortcuts-are-workspace-local.md), one layer up.
 
+**Second occurrence, and the analysis.** v38 repeated the pattern exactly — three rounds, and each
+round after the first found a defect created by the previous round's fix. Two releases is enough to
+generalise, and the generalisation is sharper than this topic's rule:
+[fix-defects-are-context-errors.md](fix-defects-are-context-errors.md) shows that 7 of the 8
+self-inflicted defects across both releases were *context* errors rather than logic errors, names the
+four mechanisms that make it systematic, and works out why the round cap guarantees the last round's
+fixes ship unreviewed. Read that one for what to *do*; this one is the case record it rests on.
+
 See also [versioning-release-types.md](versioning-release-types.md) for v37's gate record.

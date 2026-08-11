@@ -141,6 +141,18 @@ Step 0's `<engine>` → filename mapping) or document the quirk. Low priority.
 
 ## B. Known gaps to promote from the backlog (fresh justification attached)
 
+### B0. TriLens fix boundary — OPEN, added 2026-08-11
+Two releases running (v37, v38), every round after the first found a defect created by the
+previous round's fix, and both loops ended at the ceiling — so both **shipped unreviewed
+repairs**. It is arithmetic: N rounds review only N−1 rounds of fixes. This is our own
+pre-ship gate leaking, which is why it ranks above the rest of B. **Do:** D3+D4 first, they
+are free — state each finding's blast radius (implementations, *statements* of the rule,
+container requirements) before editing, and re-read the fix in its container rather than in
+the diff, since 7 of 8 observed fix-defects were context errors that a diff cannot show. Then
+D1+D2 together: a fix-free final round, plus a fix-audit reviewer that does not consume a
+round. Design: `draft-trilens-fix-boundary.md`. Lore: `fix-defects-are-context-errors.md`.
+Backlog ref: § Multi-Agent Collaboration § TriLens Fix Boundary.
+
 ### B1. Post-merge diff verification — OPEN
 Merge remains the highest-risk operation with no safety net (outside review 2026-07-02;
 still true). **Do:** ship as opt-in `/lr:finalize --verify-merge` — a second booted-as-self
