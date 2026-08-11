@@ -363,6 +363,43 @@ class TestScanEndToEnd(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr.decode())
         return json.loads(proc.stdout.decode())["data"]
 
+    def scan_envelope(self):
+        """The whole envelope — `warnings` live outside `data`."""
+        env = os.environ.copy()
+        env.update(GIT_ENV)
+        env["HOME"] = self.home
+        proc = subprocess.run(
+            [sys.executable, LR_CORE, "workspace-scan",
+             "--workspace", self.workspace],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, check=False)
+        self.assertEqual(proc.returncode, 0, proc.stderr.decode())
+        return json.loads(proc.stdout.decode())
+
+    def test_unterminated_descriptor_frontmatter_warns_through_the_cli(self):
+        # v38: the helper is unit-tested, but the wiring into the envelope is
+        # what an executor actually reads. A finding is not a warning — this
+        # must arrive in `warnings`, and the scan must still exit 0.
+        write(os.path.join(self.workspace, "lore-workspace.md"),
+              "---\ndescription: Test workspace\nrepos:\n  - git@x:o/a.git\n\nprose\n")
+        envelope = self.scan_envelope()
+        self.assertTrue(any("no closing ---" in w for w in envelope["warnings"]),
+                        envelope["warnings"])
+
+    def test_terminated_descriptor_produces_no_such_warning(self):
+        envelope = self.scan_envelope()
+        self.assertFalse([w for w in envelope["warnings"] if "no closing ---" in w],
+                         envelope["warnings"])
+
+    def test_detached_workspace_head_reports_s16_through_the_cli(self):
+        self.git("checkout", "-q", "--detach", "HEAD")
+        data = self.scan()
+        found = findings_by_id(data["findings"])
+        self.assertIn("S16", found)
+        self.assertTrue(found["S16"]["data"]["head"])
+
+    def test_attached_workspace_head_reports_no_s16(self):
+        self.assertNotIn("S16", findings_by_id(self.scan()["findings"]))
+
     def test_dirty_codex_shortcut_is_managed_and_publishable(self):
         write_codex_shortcut(os.path.join(self.workspace, ".codex", "skills"),
                              "alpha", self.agent_dir)
@@ -381,6 +418,204 @@ class TestScanEndToEnd(unittest.TestCase):
         self.assertEqual(data["shortcuts"]["codex_home"], ["alpha"])
         self.assertEqual(data["managed_paths"]["dirty"], [])
         self.assertIn("S15", findings_by_id(data["findings"]))
+
+
+class TestDuplicateBlockKey(unittest.TestCase):
+    """A repeated `repos:` block must not discard the first block's URLs.
+
+    v38 fix. `parse_frontmatter` reset the list on every `key:` header, so a
+    hand-merged descriptor declaring repos in two blocks lost the first block
+    silently — while `workspace-pull`'s awk parser kept both. The two parsers
+    disagreeing about the declared repo set is the actual defect; those repos
+    then read as undeclared (S5) despite being declared.
+    """
+
+    def test_second_repos_block_does_not_erase_the_first(self):
+        from lr_core.common import parse_frontmatter
+        fm = parse_frontmatter(
+            "---\n"
+            "description: w\n"
+            "repos:\n"
+            "  - git@example.com:x/one.git\n"
+            "repos:\n"
+            "  - git@example.com:x/two.git\n"
+            "---\n\nbody\n")
+        self.assertEqual(fm["repos"], ["git@example.com:x/one.git",
+                                       "git@example.com:x/two.git"])
+
+    def test_single_block_is_unchanged(self):
+        from lr_core.common import parse_frontmatter
+        fm = parse_frontmatter("---\nrepos:\n  - a\n  - b\n---\n")
+        self.assertEqual(fm["repos"], ["a", "b"])
+
+    def test_scalar_key_still_overwrites(self):
+        from lr_core.common import parse_frontmatter
+        fm = parse_frontmatter("---\ndescription: first\ndescription: second\n---\n")
+        self.assertEqual(fm["description"], "second")
+
+
+class TestListItemComments(unittest.TestCase):
+    """Block-sequence items must be comment-stripped like the awk parser.
+
+    v38 fix. `workspace-pull` strips a trailing ` # comment` from an unquoted
+    item; the Python parser did not, so a commented declaration produced a URL
+    with the comment baked in. Its derived dirname then matched nothing on
+    disk, and a correctly cloned repo was reported missing (S6) forever.
+    """
+
+    def _repos(self, item):
+        from lr_core.common import parse_frontmatter
+        return parse_frontmatter("---\nrepos:\n  - %s\n---\n" % item)["repos"][0]
+
+    def test_trailing_comment_is_stripped(self):
+        self.assertEqual(self._repos("https://x/y.git  # primary repo"),
+                         "https://x/y.git")
+
+    def test_quoted_value_keeps_its_hash(self):
+        # Inside quotes `#` is data, not a comment — the awk side agrees.
+        self.assertEqual(self._repos('"https://x/y.git#frag"'),
+                         "https://x/y.git#frag")
+
+    def test_hash_without_leading_space_is_not_a_comment(self):
+        # awk strips on `[[:space:]]+#` only, so this stays whole.
+        self.assertEqual(self._repos("https://x/y.git#frag"),
+                         "https://x/y.git#frag")
+
+    def test_plain_url_is_untouched(self):
+        self.assertEqual(self._repos("https://x/y.git"), "https://x/y.git")
+
+    def test_commented_url_derives_a_usable_dirname(self):
+        # The actual consequence the fix exists to prevent.
+        self.assertEqual(ws.derive_dirname(self._repos("git@x:o/y.git  # note")),
+                         "y")
+
+
+class TestDeriveDirnameDotRule(unittest.TestCase):
+    """A derived dirname may not start with a dot.
+
+    v38 fix. `scan_children` skips dot-directories, so accepting `.hidden` here
+    let `workspace-pull` clone a repo that every later pass treated as
+    permanently missing (S6 forever) and that `.gitignore` maintenance never
+    saw. Refusing the name reports it as S13 instead.
+    """
+
+    def test_leading_dot_is_refused(self):
+        self.assertIsNone(ws.derive_dirname("git@example.com:x/.hidden.git"))
+        self.assertIsNone(ws.derive_dirname("https://example.com/x/.config"))
+
+    def test_dot_elsewhere_in_the_name_is_fine(self):
+        self.assertEqual(ws.derive_dirname("git@example.com:x/my.repo.git"),
+                         "my.repo")
+
+    def test_ordinary_names_still_derive(self):
+        self.assertEqual(ws.derive_dirname("git@example.com:x/lore-agents.git"),
+                         "lore-agents")
+
+
+class TestUnterminatedFrontmatter(unittest.TestCase):
+    """The Python parser must warn where the awk parser already warns.
+
+    v38 fix. `parse_frontmatter` degrades by consuming the rest of the file, so
+    a descriptor that lost its closing `---` yields a plausible but wrong repo
+    set with no signal at all on the Python side.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(__import__("shutil").rmtree, self.tmp, True)
+
+    def _write(self, content):
+        path = os.path.join(self.tmp, "lore-workspace.md")
+        write(path, content)
+        return path
+
+    def test_unterminated_is_detected(self):
+        path = self._write("---\ndescription: w\nrepos:\n  - a\n\nprose\n")
+        self.assertTrue(ws.frontmatter_unterminated(path))
+
+    def test_terminated_is_not_flagged(self):
+        path = self._write("---\ndescription: w\n---\n\nprose\n")
+        self.assertFalse(ws.frontmatter_unterminated(path))
+
+    def test_file_without_frontmatter_is_not_flagged(self):
+        path = self._write("# just a heading\n")
+        self.assertFalse(ws.frontmatter_unterminated(path))
+
+    def test_missing_file_is_not_flagged(self):
+        self.assertFalse(
+            ws.frontmatter_unterminated(os.path.join(self.tmp, "nope.md")))
+
+
+class TestS16DetachedWorkspaceHead(unittest.TestCase):
+    """S16 — the workspace root itself on a detached HEAD.
+
+    v38 addition. `git_state` recorded `detached` from the start but no finding
+    ever read it. It is the one root state that makes the git section quiet
+    rather than loud: no upstream means S2/S14 cannot fire, so their silence
+    proves nothing, and a commit made detached is dropped by the next checkout.
+    """
+
+    def test_detached_root_reports_s16(self):
+        data = base_data(git=dict(base_data()["git"], detached=True,
+                                  head="abc1234", upstream=None,
+                                  ahead=None, behind=None))
+        found = findings_by_id(ws.build_findings(data))
+        self.assertIn("S16", found)
+        self.assertEqual(found["S16"]["severity"], "warn")
+        self.assertEqual(found["S16"]["data"]["head"], "abc1234")
+
+    def test_attached_root_is_quiet(self):
+        self.assertNotIn("S16", findings_by_id(ws.build_findings(base_data())))
+
+    def test_untracked_workspace_does_not_report_s16(self):
+        # Not a git repo at all: S4 owns that state, and a detached flag that
+        # never came from a real repo must not surface as a git-health finding.
+        data = base_data(git=dict(base_data()["git"], tracked=False,
+                                  own_root=False, detached=True))
+        self.assertNotIn("S16", findings_by_id(ws.build_findings(data)))
+
+
+class TestS8DetachedChild(unittest.TestCase):
+    """S8 must cover a detached child, not just one on another branch.
+
+    v38 fix. The off-branch comprehension required a truthy `current_branch`,
+    which a detached child never has — silently exempting the worse state.
+    """
+
+    def _child(self, **kw):
+        base = {"dirname": "repo", "git": True, "declared": True,
+                "ignorable": True, "ignored": True, "origin": None,
+                "default_branch": "main", "current_branch": None,
+                "detached": False, "lore_repo": False,
+                "escapes_workspace": False}
+        base.update(kw)
+        return base
+
+    def test_detached_child_is_reported(self):
+        data = base_data(children=[self._child(detached=True)])
+        found = findings_by_id(ws.build_findings(data))
+        self.assertIn("S8", found)
+        self.assertTrue(found["S8"]["data"][0]["detached"])
+
+    def test_detached_child_reported_even_without_known_default(self):
+        data = base_data(children=[self._child(detached=True,
+                                               default_branch=None)])
+        self.assertIn("S8", findings_by_id(ws.build_findings(data)))
+
+    def test_child_on_default_branch_is_quiet(self):
+        data = base_data(children=[self._child(current_branch="main")])
+        self.assertNotIn("S8", findings_by_id(ws.build_findings(data)))
+
+    def test_child_on_other_branch_still_reported(self):
+        data = base_data(children=[self._child(current_branch="feature")])
+        found = findings_by_id(ws.build_findings(data))
+        self.assertIn("S8", found)
+        self.assertFalse(found["S8"]["data"][0]["detached"])
+
+    def test_unknown_branch_without_detached_stays_quiet(self):
+        # git could not answer: ignorance, not a detached head.
+        data = base_data(children=[self._child()])
+        self.assertNotIn("S8", findings_by_id(ws.build_findings(data)))
 
 
 if __name__ == "__main__":
