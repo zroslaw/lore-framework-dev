@@ -326,6 +326,15 @@ suite with every new test verified red at `lr--v1.37.0`; **lifecycle and quality
 and not run**, so the release makes no model-execution-fidelity claim. **The loop ended at its
 three-round ceiling, not on a clean round** — all findings applied, round 3's own fixes unreviewed.
 
+**v39 is implemented locally at framework commit `d53d8b4` and awaits release review/push**: opt-in `finalize --transcript`
+uses a marker-verified native main-session transcript as an alternate reflection evidence source,
+then rejoins unchanged merge/summarize/publication phases. `session-takeover` owns strict log
+resolution plus private bounded dialogue chunks; workers remain fresh, read-only evidence readers;
+raw logs/chunks never enter Lore. The deterministic suite is green at **429 tests**. Lifecycle and
+quality were waived by the user, and TriLens has not yet run, so do not call it release-green or
+model-execution verified. See `transcript-backed-finalization-mvp.md` and
+`workdir/draft-transcript-backed-finalization.md`.
+
 My own Lore corpus is still essentially legacy; v1 adoption is lazy via merge or explicit via
 `/lr:groom`, and **`lore-context.md` is over its 10K v1 target** — a grooming pass, not a merge, is
 the fix. Unrelated uncommitted WIP may sit on these checkouts; do not sweep it into lore-finalize

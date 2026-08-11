@@ -46,20 +46,36 @@ Compaction counting, transcript-backed session summaries, guests, sidechains, au
 activation, richer tool evidence, resume/checkpoints, and hierarchical reduction stay outside the
 MVP.
 
-## Open Implementation-Readiness Findings
+## v39 Implementation and Residual Limits
 
-Three consecutive design reviews are integrated into the draft. A fourth feedback-only review
-rates implementation readiness at 68% and leaves four questions open:
+Implemented locally in framework v39 (pending push, 2026-08-11):
 
-- overlap can push a rendered chunk beyond the nominal size bound;
-- read-only fresh-worker behavior is a procedural promise rather than a technically enforced
-  least-privilege sandbox;
-- the candidate-result contract has no formal machine grammar; and
-- sensitive-data exclusion still depends on model judgment rather than an enforceable guarantee.
+- `session-takeover reflection-input` reuses the three parsers, groups visible dialogue, creates
+  `0700` private chunk directories through exclusive writes, records a schema-1 manifest, and cleans
+  exact files on a write failure;
+- `--require-verified` prevents transcript reflection from selecting the usual heuristic recent log;
+- Cursor counts omitted `[REDACTED]` assistant turns; and
+- `process-transcript-reflection.md` routes a verified host-only run through fresh read-only workers,
+  contract validation, retry, bounded consolidation, and exact scratch cleanup before normal merge.
 
-Before implementation, classify each finding as a ship blocker or an explicitly accepted MVP
-limitation. Do not treat any of the four as resolved merely because earlier review rounds tightened
-the draft.
+The former readiness questions are now explicit v1 limits, not silently implied guarantees:
+
+1. Required overlap can make a chunk exceed its nominal bound even when either source unit alone
+   fits. The manifest flags every such `oversize` chunk rather than truncating evidence. This is
+   safe and visible; a future alternative needs a different overlap policy.
+2. Fresh/read-only worker isolation is supplied by the active engine's subagent mechanism and
+   procedure contract, not a framework-owned capability sandbox. Transcript mode fails when that
+   engine capability is absent; it does not claim technical least privilege beyond the engine.
+3. Candidate validation is deliberately a host procedure, because candidates are natural-language
+   Lore. The strict structured return contract makes malformed results fail closed, but a parser is
+   a growth seam if real runs show host validation is inconsistent.
+4. Sensitive-data eligibility remains a judgment gate. Literal credentials and raw private URLs are
+   forbidden; ambiguous sensitive material is omitted. A deterministic detector would be a separate
+   privacy design, not an honest claim for this v1.
+
+The deterministic suite covers the parser, bounds, overlap, strict resolver, redactions, and safe
+write behavior. Real-engine lifecycle and quality verification were waived by the user for v39, so
+the release does not claim model-execution fidelity for the procedure.
 
 ## Relationships
 
