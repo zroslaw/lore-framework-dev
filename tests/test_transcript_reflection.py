@@ -48,6 +48,11 @@ def unit(user, *following):
 class TranscriptReflectionInputTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="lr-transcript-reflection-")
+        # Run directories must sit under a .tmp/lr-finalize scratch root; the
+        # writer enforces that so a mistyped path cannot put raw dialogue
+        # somewhere committable.
+        self.scratch = os.path.join(self.tmp, ".tmp", "lr-finalize")
+        os.makedirs(self.scratch)
         self.mod = load_mod()
 
     def tearDown(self):
@@ -100,7 +105,7 @@ class TranscriptReflectionInputTests(unittest.TestCase):
     def test_manifest_chars_include_rendered_headers_and_overlap(self):
         messages = unit("first", {"role": "assistant", "content": "answer"})
         messages += unit("second", {"role": "assistant", "content": "answer"})
-        out = os.path.join(self.tmp, "run")
+        out = os.path.join(self.scratch, "run")
         manifest = self.mod.write_reflection_input(
             out, "codex", {"source": self.tmp, "session_id": "fixture"}, messages, 10000
         )
@@ -110,17 +115,43 @@ class TranscriptReflectionInputTests(unittest.TestCase):
 
     def test_existing_output_path_and_symlink_are_rejected_without_writes(self):
         messages = unit("request", {"role": "assistant", "content": "answer"})
-        existing = os.path.join(self.tmp, "existing")
+        existing = os.path.join(self.scratch, "existing")
         os.mkdir(existing)
         with self.assertRaises(ValueError):
             self.mod.write_reflection_input(existing, "codex", {"source": self.tmp}, messages)
-        target = os.path.join(self.tmp, "target")
+        target = os.path.join(self.scratch, "target")
         os.mkdir(target)
-        symlink = os.path.join(self.tmp, "linked")
+        symlink = os.path.join(self.scratch, "linked")
         os.symlink(target, symlink)
         with self.assertRaises(ValueError):
             self.mod.write_reflection_input(symlink, "codex", {"source": self.tmp}, messages)
         self.assertEqual(os.listdir(target), [])
+
+    def test_run_directory_outside_the_scratch_root_is_refused(self):
+        messages = unit("request", {"role": "assistant", "content": "answer"})
+        stray = os.path.join(self.tmp, "run")
+        with self.assertRaises(ValueError):
+            self.mod.write_reflection_input(stray, "codex", {"source": self.tmp}, messages)
+        self.assertFalse(os.path.exists(stray))
+        wrong_grandparent = os.path.join(self.tmp, "lr-finalize")
+        os.makedirs(wrong_grandparent)
+        with self.assertRaises(ValueError):
+            self.mod.write_reflection_input(
+                os.path.join(wrong_grandparent, "run"), "codex", {"source": self.tmp}, messages
+            )
+
+    def test_manifest_counts_messages_no_dialogue_unit_carries(self):
+        messages = [
+            {"role": "assistant", "content": "engine preface"},
+            {"role": "assistant", "content": "private", "sidechain": True},
+            {"role": "user", "content": "Record this"},
+            {"role": "assistant", "content": "Recorded"},
+        ]
+        manifest = self.mod.write_reflection_input(
+            os.path.join(self.scratch, "run"), "codex", {"source": self.tmp}, messages
+        )
+        self.assertEqual(manifest["dialogue_units"], 1)
+        self.assertEqual(manifest["excluded_messages"], 2)
 
     def test_failed_chunk_write_removes_only_this_runs_directory(self):
         messages = unit("request", {"role": "assistant", "content": "answer"})
@@ -137,12 +168,12 @@ class TranscriptReflectionInputTests(unittest.TestCase):
         try:
             with self.assertRaises(OSError):
                 self.mod.write_reflection_input(
-                    os.path.join(self.tmp, "run"), "codex", {"source": self.tmp}, messages
+                    os.path.join(self.scratch, "run"), "codex", {"source": self.tmp}, messages
                 )
         finally:
             self.mod._exclusive_write_text = original
         self.assertEqual(calls, ["chunk-0001.md", "manifest.json"])
-        self.assertFalse(os.path.exists(os.path.join(self.tmp, "run")))
+        self.assertFalse(os.path.exists(os.path.join(self.scratch, "run")))
 
     def test_partial_exclusive_write_unlinks_its_own_file(self):
         path = os.path.join(self.tmp, "partial.md")
@@ -254,6 +285,8 @@ class VerifiedResolverTests(unittest.TestCase):
 class ReflectionInputCliTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="lr-transcript-cli-")
+        self.scratch = os.path.join(self.tmp, ".tmp", "lr-finalize")
+        os.makedirs(self.scratch)
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
@@ -261,7 +294,7 @@ class ReflectionInputCliTests(unittest.TestCase):
     def test_cli_writes_private_manifest_and_chunks(self):
         log = os.path.join(self.tmp, "rollout.jsonl")
         write_codex_log(log)
-        output = os.path.join(self.tmp, "run")
+        output = os.path.join(self.scratch, "run")
         proc = subprocess.run(
             [sys.executable, SCRIPT, "reflection-input", log, "--engine", "codex", "--output-dir", output],
             text=True, capture_output=True,
@@ -298,7 +331,10 @@ class FinalizeProcedureContractTests(unittest.TestCase):
         self.assertIn("process-transcript-reflection.md", finalize)
         self.assertIn("must complete verified transcript resolution", finalize)
         self.assertIn("--require-verified", procedure)
-        self.assertIn("fork_turns: \"none\"", procedure)
+        # The dispatch step must not invent a spawn argument: every engine's
+        # binding says to pass only what the active tool schema exposes.
+        self.assertNotIn("fork_turns", procedure)
+        self.assertIn("only arguments the active tool schema", procedure)
         self.assertIn("never copied into `agents/`, `sessions/`, `archive/`", procedure)
 
 
