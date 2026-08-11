@@ -131,6 +131,34 @@ New module/mode for development & SDLC automation; first feature is bug-finding 
 
   Status: parked vision, captured the day the per-session shape discipline landed — they're the incremental / consolidation pair. Promote to its own lore topic + `workdir/` draft when active. See § Architecture-Review Follow-Ups (subitem 3), `process-merge.md` Step 4, `autonomous-agents-vision.md`, `consistency-checks.md`, `naming-foundational-principles.md`.
 
+### Transcript-Backed Reflection — accepted gaps (v39, 2026-08-11)
+
+Both were raised by the v39 TriLens review, **accepted and deliberately left unfixed** at ship time;
+the shipped prose states the limit rather than implying a guarantee. Neither blocks the feature.
+
+- **No secret-pattern scan before candidate text becomes committed Lore.** `finalize --transcript`
+  turns parser-retained dialogue into reflection topics that then merge into `lore/` and get pushed
+  to a team-shared repo. The only thing standing between a pasted API key, password, or client name
+  in the transcript and a committed, shared Lore file is the worker model's judgement — there is no
+  deterministic pattern scan anywhere on the path. Candidate shape: a cheap regex/entropy screen over
+  candidate reflection text at the worker→reflection boundary (the same class of check
+  `docs/summarize.md` already asks the model to perform by judgement), failing closed on a hit. This
+  is the knowledge-quality analogue of `a-gate-cannot-be-a-model-self-report.md`: a
+  privacy gate implemented as model self-restraint is not a gate. See
+  `transcript-backed-finalization-mvp.md`, `versioning-release-types.md` (v39).
+
+- **No engine exposes a parameter that mechanically sandboxes a subagent worker to read-only.** The
+  transcript workers are specified as read-only evidence readers, but on every supported engine that
+  is a *briefing*, not an enforced capability: Claude's `Explore` is read-only by tool selection but
+  excerpt-based and not a general worker, Codex's `spawn_agent` takes no write-scope argument, and
+  Cursor's `Task` has no equivalent either. So "read-only worker" is a prompt-level promise across
+  the board, and `fork-scope-creep-under-standing-goal.md` is the recorded evidence that a capable
+  worker will act on the largest goal it can see. Until an engine ships a real parameter, the
+  mitigation is the existing one — verify the worker's actual filesystem footprint (`git status`)
+  after it returns, rather than trusting its summary. Track upstream engine capability; re-check at
+  each engine-profile revision. See `unenforceable-caps-are-prompt-theater.md`,
+  `subagent-as-optimization-vs-subagent-as-semantics.md`.
+
 ### Merge Quality (parked, 2026-07-02)
 
 - **Post-merge diff verification** — an outside architecture review (2026-07-02) flagged merge as the framework's highest-risk operation with no automated safety net: a bad `lore-context.md` compaction, or a reflection that silently overwrites/contradicts an existing topic, is currently only caught if a human happens to read the `git diff`. Nothing checks it automatically. Proposed shape: after a merge subagent finishes (still pre-commit, since merge already leaves changes uncommitted), spawn a second subagent — booted with the same agent context — whose only job is to adversarially review that agent's `git diff` in the working tree and answer: was anything lost, contradicted, or made unreachable from `lore-context.md`'s summary references? Deliberately **per-merge and cheap**, distinct from the "sleep pass" housekeeping job above, which is periodic and deep — the two are complementary in the same way merge (incremental) and the sleep pass (consolidation) already are. Not designed yet — this is a backlog capture, not a spec. Natural first cut: ship as an opt-in `/lr:finalize --verify-merge` flag before making it the default, consistent with how other safety gates in this framework started opt-in. See `process-merge.md` Step 4 (the compaction step most likely to lose information), § Lore Housekeeping / the "sleep" pass above.

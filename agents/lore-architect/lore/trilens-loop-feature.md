@@ -73,7 +73,7 @@ All of these were earned during the ship, not assumed:
 - **Briefs carry the goal, not the rationale** — see `parallel-reviewer-fanout-pattern.md`
   § Brief the goal, not the rationale.
 
-## When the round cap bites (v36 practice)
+## When the round cap bites (v36 practice, shaped on v39)
 
 The three-round cap can end a review with **"all known findings applied" but no clean-round
 attestation** — the v36 ship record said exactly that, honestly. What closed the gap: a subsequent
@@ -86,6 +86,30 @@ bites, an independent deep review is a legitimate substitute round, with two obl
 - **Gate follows artifact state** — post-review doc-only fixes were amended and the deterministic
   suite re-run green against the final tree
   (`post-convergence-edits-need-their-own-gate.md`).
+
+### The substitute is one deep reviewer, not a fourth round (v39)
+
+v39 ran the substitute deliberately for the first time, and the shape is worth keeping:
+
+- **One reviewer, not three lenses.** The point is to obtain the attestation the cap denied — "a
+  reviewer read the shipped tree and returned clean." One reader can produce that; it cannot produce
+  a round's coverage, and the record must not call it a round.
+- **Deep and unconstrained, not single-lens.** Because it stands in for three lenses, narrowing it to
+  one perspective wastes the pass.
+- **Brief it with the base rate.** v39's was told that all three prior rounds had found defects in
+  the previous round's fixes, so an unreviewed fix commit is high-risk. It went straight at the diff.
+- **Hand it every settled disposition** — applied, declined, and accepted — so it re-checks the
+  handling without re-litigating what is closed.
+- **Say a clean result is legitimate.** Without that, a reviewer told "three rounds found defects,
+  now read this" will manufacture findings.
+
+The economics are good: one reviewer caught a HIGH that would have left raw session transcripts on
+disk after every successful run — exactly the class the three-round loop existed to prevent,
+surviving to the last commit. The honest limit: **a substitute that finds something does not convert
+into a clean attestation**, because its own fix then ships unreviewed. Running it feedback-only
+(fixes withheld until the user decides) keeps that boundary clean and is what v39 did — see
+`trilens-feedback-only-selective-apply.md` and `a-gate-that-died-is-not-a-gate.md` for the
+disposition vocabulary, and `versioning-release-types.md` for the v39 record.
 
 ## Sibling non-overlap
 

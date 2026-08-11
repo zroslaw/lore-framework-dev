@@ -1,17 +1,17 @@
 ---
 lore: 1
 type: topic
-summary: "Across v37 and v38, 7 of 8 defects introduced by TriLens fixes were context errors, not logic errors — and the round cap guarantees the last round's fixes ship unreviewed, by arithmetic rather than bad luck."
+summary: "Across v37-v39, defects introduced by TriLens fixes are context errors rather than logic errors and concentrate in the prose describing a fix — and the round cap guarantees the last round's fixes ship unreviewed."
 parent: lore-context.md
 ---
 
 # Fix Defects Are Context Errors, and the Round Cap Guarantees They Ship
 
 [a-fix-is-a-change-and-changes-need-review.md](a-fix-is-a-change-and-changes-need-review.md)
-established that a review round's output is unreviewed code. Two releases now show the same pattern —
-v37 and v38 each ran three rounds, and in both, **every round after the first found a defect created
-by the previous round's fix**. That is enough data to ask *why*, and the answer is more specific than
-"fixes are risky".
+established that a review round's output is unreviewed code. Three releases now show the same
+pattern — v37, v38 and v39 each ran the loop to its ceiling, and in all three, **every round after
+the first found a defect created by the previous round's fix**. That is enough data to ask *why*, and
+the answer is more specific than "fixes are risky".
 
 ## It is mostly the loop working
 
@@ -45,6 +45,42 @@ Each is correct in isolation and wrong in its surroundings.
 **Design consequence:** a fix pass should be reviewed for *context*, not correctness. Asking "is this
 change right?" finds one defect in eight. Asking "what else does this touch, and does its container
 still work?" finds seven.
+
+## v39 sharpens it: the drift is in the prose, not the code
+
+v39 ran four consecutive fix rounds (three TriLens rounds plus the substitute round), each finding a
+defect introduced by the previous round's fix — and the distribution was lopsided in a way worth
+planning around:
+
+- Round 1 fixed a containment gap in the script. That guard needed one correction (round 2) and was
+  then correct for the rest of the release.
+- Every defect found by rounds 2, 3 and the substitute round was in *prose about* the guard, not the
+  guard: a Cleanup rule stating the pre-fix semantics, an engine-profile binding table left behind
+  while two sibling sentences in the same file were updated, a deleted step, a circular retry
+  sentence, and release-note claims that had gone stale.
+
+Three of the four were the same shape — **one rule stated in more than one place, with the sites
+drifting apart**. That is
+[single-canonical-source-discipline.md](single-canonical-source-discipline.md) failing under edit
+pressure, and it is predictable enough to plan for: the code has a compiler, a test suite, and a type
+system of sorts; the prose has none of those, so each edit to it is an unverified change to an
+implementation. It also explains why mechanism 1 below bites hardest on docs — execution never visits
+the documentation.
+
+Two triage practices fall out, on top of the ones below:
+
+- **After changing a rule, enumerate every site that states it** before moving on — not just the site
+  the finding named. v39 round 1's Cursor-profile fix updated two sentences and missed the binding
+  table, which is the site an executor actually consults.
+- **Give at least one round a lens that reads the artifact as a whole document rather than as a
+  diff.** v39's cold-read lens found the buried step and the unreachable Cleanup path that three
+  diff-scoped lenses had walked past.
+
+The concrete v39 pair is recorded in
+[realpath-for-identity-logical-for-contract-shape.md](realpath-for-identity-logical-for-contract-shape.md)
+(correct in code from round 2, wrong in its prose restatement two rounds later) and
+[a-release-record-goes-stale-while-you-fix-it.md](a-release-record-goes-stale-while-you-fix-it.md)
+(the release notes as the prose that decays once per round).
 
 ## Why it is systematic
 

@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "A gate must not be implemented in the medium it gates — ask what evidence it rests on and whether the thing under test could have produced that evidence; coverage parity is not evidence parity."
+parent: lore-context.md
+---
+
 # A Gate Cannot Be a Model Self-Report
 
 **A gate must not be implemented in the medium it is gating.** If the failure mode is "the model
@@ -30,6 +37,29 @@ engines "had A7 coverage" — a coverage checkbox hid an evidence-class differen
 `check_cursor_plugin_sources()` now walks `~/.cursor/plugins/{local,marketplaces,cache}` and rejects
 any tree whose `VERSION` differs from `LR_FRAMEWORK_DIR`. Filesystem only, no engine call. Run
 against the real machine state it named both stale v30 trees immediately.
+
+## The deterministic-test form: a contract test over prose can pin the defect (v39)
+
+A green deterministic test *looks* like external evidence, which makes this variant easy to miss. The
+v39 candidate carried a test asserting that `process-transcript-reflection.md` contained the literal
+`fork_turns: "none"`. That string was an **invented** `spawn_agent` argument, present nowhere in
+Codex's binding — which explicitly says to pass only arguments the active tool schema exposes — and
+nowhere else in the repo. The test passed because the author wrote the doc and then asserted the doc
+said what they wrote.
+
+The mechanism is the tell: a string-containment assertion over prose can only verify that a doc still
+*says* a thing, never that the thing is *true*. It is a regression guard, not a correctness gate, and
+it silently converts into a ratchet holding a defect in place.
+
+- When a contract test asserts a doc contains an identifier — a tool argument, a flag, a filename, a
+  command — that identifier needs a second, independent source: the tool schema, the engine binding,
+  the script's own argument parser. Assert against **that source's rule** where possible ("passes
+  only schema-exposed arguments") rather than against the literal token.
+- When review kills a doc string, **grep the test suite for it**. The fix and the test that pinned it
+  are one change; leaving the test green against the old string means the next round re-derives the
+  same finding or, worse, restores the defect.
+- **Inverting the assertion is often the right repair:** v39's now asserts the invented argument is
+  *absent* and that the schema-only rule is present.
 
 ## Diagnostic
 

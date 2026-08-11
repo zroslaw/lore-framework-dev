@@ -50,6 +50,9 @@ by running the real doc against a real weak-tier engine on real macOS paths.
 
 ## See Also
 
+- `realpath-for-identity-logical-for-contract-shape.md` — the other half of the rule: resolve for
+  *identity* questions (this topic), but **do not** resolve when validating that a caller typed a
+  contract-shaped path, or a user with a symlinked scratch root is wrongly refused.
 - `macos-ps-o-multi-field-single-line.md` — sibling macOS trap: `ps -o` with multiple fields prints
   one line, not one line per field.
 - `macos-documents-permission-loss-mid-session.md` — sibling macOS trap: TCC permission revocation

@@ -41,7 +41,10 @@ git -C lore-framework worktree remove <path> --force
 ## See Also
 
 - `a-gate-cannot-be-a-model-self-report.md` — the rule this implements: a gate must not be
-  implemented in the medium it gates, and a suite grading its own author is exactly that.
+  implemented in the medium it gates, and a suite grading its own author is exactly that. Its
+  § deterministic-test form is the complement to red-then-green: a *string-containment test over
+  prose* can be red against the previous tag and still be a self-report, because it only proves the
+  doc still says what its author wrote.
 - `a-red-test-may-be-asserting-a-true-fact.md` — the mirror case on the other side: before turning a
   red test green, establish which side is wrong.
 - `point-of-use-guardrails-beat-recorded-lore.md` — this belongs in the test-writing step, not only
