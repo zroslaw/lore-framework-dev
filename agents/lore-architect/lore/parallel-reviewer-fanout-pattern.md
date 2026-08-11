@@ -71,6 +71,9 @@ The lens choice should be deliberate per ship. Lenses that worked well:
   disproportionately productive on v37 — it caught S6 and S13 handing contradictory remedies, and S12
   calling framework scratch state "your own files, nothing will touch them". **Any release that ships
   a set of diagnostics deserves it.**
+- **Claim audit** — after a round of fixes, hand a reviewer the *new prose* and ask it to extract every
+  checkable assertion and test it. Fix rounds generate confident prose, and confident prose is where
+  overclaims live; see `lens-novelty-is-the-scarce-resource-on-re-review.md` § Claim audit.
 - **AI-installer (literal executor)** — for the paste-link installer doc genre (`paste-link-installer-doc-genre.md`): brief the reviewer to read the doc *as the agent that must execute it literally*, tracing each instruction against real files/commands rather than judging tone. Catches a distinct class the newcomer/editorial lenses miss — see `ai-installer-review-lens.md` for the full brief shape and the empirical case that justified naming it as a fourth lens.
 
 **Rule:** the lenses should be *mutually exclusive* — if two reviewers are likely to find the same issues, you've wasted a slot. Tell each lens explicitly what to skip (what the others will catch).
@@ -215,6 +218,11 @@ where the evidence points.** This is the multi-round refinement of the v13 note 
 round 2 as a single verification reviewer; the lens *kinds* are the part that must change, not
 necessarily the reviewer count.
 
+**When the artifact has been reviewed before**, the same rule extends across loops and sessions:
+inventory the lenses already spent before choosing new ones, and let the artifact's life stage
+(proposal vs shipped-with-an-installed-base) pick the lens family. Owned by
+`lens-novelty-is-the-scarce-resource-on-re-review.md`.
+
 ## Two rounds, not one, when the change is large
 
 Two rounds proved valuable in v11, v12, and v13 ships:
@@ -310,7 +318,8 @@ Often complementary: use sonnet-subagent for the lore-side polish; use parallel-
 - `trilens-loop-v31-restructured.md` — the parked v31 doc, whose host/reviewer exchange contract the § Cost measurement above was taken against.
 - `check-own-lore-before-dismissing-a-finding.md` — triage-time discipline: verify the rule a finding rests on before calling it moot; convergent lenses get the benefit of the doubt.
 - `subagent-as-optimization-vs-subagent-as-semantics.md` — why reviewer independence has no host-side fallback.
-- `post-convergence-edits-need-their-own-gate.md` — a clean round certifies only the artifact state the reviewers read.
+- `post-convergence-edits-need-their-own-gate.md` — a clean round certifies only the artifact state the reviewers read; § Point it at the input too — commit and freeze before spawning a round.
+- `lens-novelty-is-the-scarce-resource-on-re-review.md` — lens choice across loops: inventory what was already spent, and let the artifact's life stage pick the family.
 - `docs-engines-convention.md` — where engine spawn traps belong (the named-teammate trap's real home).
 - `sonnet-subagent-review-pattern.md` — single-lens role-as-perspective review (different shape, often complementary).
 - `use-cases-via-parallel-consult-pattern.md` — adjacent: parallel fan-out for *content gathering*, not review.

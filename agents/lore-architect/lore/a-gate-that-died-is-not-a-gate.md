@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "A gate that was launched and never reported is neither a pass nor a waiver — record it as 'did not run', and don't retry a structural failure."
+summary: "A gate that was launched and never reported is neither a pass nor a waiver — record it as 'did not run', and retry only when the cause of death has actually been removed."
 parent: lore-context.md
 ---
 
@@ -51,6 +51,29 @@ This is cheap to tell apart from the spend-limit case above — **ask**. A dead 
 a quiet one answers immediately. The distinction matters because the two need opposite responses:
 retrying a structural failure is theater, while re-asking a live reviewer is nearly free and recovers
 real findings.
+
+## Retry the cause, not the category (v38, 2026-08-11)
+
+"An account spend limit fails identically on retry" is true only while the limit is still in force.
+On v38 all three round-1 lenses died on the monthly spend limit — the same failure that killed v37's
+round 2 — so the round was not banked. The user then lifted the limit, and at that moment the retry
+became an ordinary re-run.
+
+**The rule is about retrying into an unchanged cause, not about the failure class.** "Account-level"
+was only shorthand for "you cannot fix this from inside the loop"; it is not a permanent property of
+the failure. So the question on any dead gate is **what would have to change for a retry to differ**,
+never which category the error belongs to:
+
+- a flake changes by itself → retry immediately;
+- a spend limit changes when someone outside the loop raises it → retry after, not before;
+- a structural failure changes only when the structure does → fix the structure or record "did not run".
+
+The retry of a never-reported lens **does not count against the three-round ceiling** (the loop's own
+stopping rule), which is what makes "never bank a silent round" affordable rather than a round tax.
+And the record must still say the first attempt died and was re-run, and why the re-run was
+legitimate — a ship record showing three clean rounds while hiding a dead one is the exact failure
+this rule family exists to prevent. The v38 entry in `versioning-release-types.md` is the worked
+example.
 
 ## See Also
 

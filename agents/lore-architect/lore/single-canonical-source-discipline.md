@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Pointer-not-restatement: one canonical site per rule, pointers everywhere else — including the prose sites that merely state a rule you just fixed in code."
+parent: lore-context.md
+---
+
 **Pointer-not-restatement: when two doc sites mention the same grammar/rule/spec, one must be canonical and the other(s) must be pointer-only.** No inline restatement "for clarity" — that's the failure mode. Looks fixed today; drifts silently tomorrow when one site updates and the others don't.
 
 The negative form of `shared-procedure-doc-pattern.md`. That topic is the positive form (one doc carries the body, callers point at it); this is the discipline that prevents inline copies leaking back in once the pointer is established.
@@ -19,6 +26,30 @@ The pattern across all three: *establishing a canonical site is necessary but no
 ## The operational rule
 
 > When two doc sites mention the same grammar/rule/spec, **one** must be declared canonical and the other(s) must be pointer-only. "Pointer-AND-restatement" is the failure mode — it looks fixed but the restatement still drifts. Resist the temptation to "leave the inline summary for clarity"; the cost is silent drift.
+
+## Fixing a duplicated rule in code can recreate it in prose (v38, 2026-08-11)
+
+v38 existed to fix exactly this defect in code: one rule implemented twice — `derive_dirname` in the
+Python scanner and `url_to_dir` in the bash puller — had drifted, so the tool that *reports* on the
+workspace and the tool that *acts* on it disagreed. I fixed both implementations, added the missing
+rules to each, and commented both sides asserting they now agree. Round 3 then found that
+`docs/workspace-pull.md` still enumerated the **old** rule list — and that is the doc finding S13
+explicitly tells a user to consult when their directory name is rejected. The release fixed the code
+instance of a duplicated rule and created a prose instance of the same defect.
+
+> When you fix a rule that was duplicated, enumerate every site that **states** the rule, not only
+> every site that **implements** it.
+
+A rule's stated form is a second implementation with a second drift surface — and it is the one the
+consistency checks and the test suite cannot see, so nothing fails when it goes stale. For any rule
+you have just changed, ask: *who tells the user what this rule is?* Docs, catalog/findings rows,
+error-message text, the script's own literate comments, and release notes are all answers.
+
+Two smaller instances from the same release: the manual-fallback docstrings in `git_state` and
+`scan_children` still described the pre-fix behavior. Under `literate-accelerator-pattern.md` those
+docstrings **are** the normative spec when the accelerator fails, so an executor following a stale
+fallback silently reproduces the bug that was just fixed — a stated rule can be load-bearing
+execution, not just documentation.
 
 ## Verification trick — grep across all sites
 
@@ -71,3 +102,7 @@ In framework code/docs, default to pointer-only. The bootstrap-recap exception i
 - `consistency-sweep-read-not-just-grep.md` — detecting restatement drift after the fact: grep finds tokens, only reading the prose finds the false restatement.
 - `script-emits-data-doc-owns-the-words.md` — this discipline at the script/doc seam: a script must
   not emit a user-facing message the doc owns, or the executor prints it instead of routing.
+- `literate-accelerator-pattern.md` — why a stale fallback docstring is a stale *implementation*, not
+  stale documentation.
+- `a-fix-is-a-change-and-changes-need-review.md` — the v38 prose instance was caught by round 3, not
+  by the fix itself.

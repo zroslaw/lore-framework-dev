@@ -134,7 +134,10 @@ first-class part of the feature. Rejected: `/lr:review` (collides conceptually w
 - `subagent-as-optimization-vs-subagent-as-semantics.md` — the principle that forbids a host-side
   fallback here and forced the v30 Cursor profile carve-out.
 - `post-convergence-edits-need-their-own-gate.md` — a converged loop only certifies the artifact state
-  it ran against.
+  it ran against, and § Point it at the input too: **commit and freeze the tree before spawning a
+  round**, tag only after the loop ends. Editing while reviewers read invalidates the round.
+- `lens-novelty-is-the-scarce-resource-on-re-review.md` — before a re-review, inventory the lenses
+  already spent; the loop re-spawns reviewers but never tells you which lenses are still new.
 - `execution-testing-catches-blind-ambiguity.md`, `lifecycle-testing-harness.md` — the separate
   empirical leg; v30's review loop converged clean *and* the lifecycle run then exposed a weak-model
   fidelity gap the four rounds had not predicted.

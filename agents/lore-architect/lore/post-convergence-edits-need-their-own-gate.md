@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "A gate result belongs to a specific artifact state — re-run or revert post-gate edits, and freeze the tree before spawning reviewers so the round has one state to certify."
+parent: lore-context.md
+---
+
 # Post-Convergence Edits Need Their Own Gate
 
 **A gate result belongs to a specific artifact state.** An edit made after the gates have passed is
@@ -47,6 +54,30 @@ working tree as of the R4 fixes" — not just the count.
   actually executed. This is the sharper sibling of "pre-ship = pre-push": the push is not the only
   boundary that matters; each *edit* moves the boundary.
 
+## Point it at the *input* too — freeze before spawning (v38, 2026-08-11)
+
+The same discipline runs backwards. If a gate result belongs to one artifact state, then every
+reviewer in a round must see the **same** state, and that state must still exist when their findings
+arrive. On v38 round 2 I spawned three reviewers against an **uncommitted working tree** and kept
+editing while they read. One opened its report with a process note: files had changed under it, one
+finding had been fixed out from under it, and it asked to be re-run against a frozen snapshot. The
+objection was correct, and it degrades the whole round — findings point at line numbers that have
+moved, a reviewer can report a defect that no longer exists, and worse, a reviewer can *miss* one
+because it read the already-fixed half of an inconsistent pair.
+
+Practice, from round 3 which was run correctly:
+
+- **Commit before spawning.** Name the commit SHA in the brief and say the tree is clean and frozen.
+  Reviewers can then run `git diff <previous-tag>..HEAD` themselves — orientation they produce
+  without the host handing over a diff.
+- Freezing is about **immutability during the round, not finishedness**: reviewers can perfectly well
+  be spawned against a commit that is not yet the final release commit.
+- **Tag only after the loop ends**, so the release commit can gain follow-up commits without the tag
+  ever pointing at a state no reviewer saw.
+- Second benefit in this workspace specifically: it stops ungated work sitting dirty where a
+  concurrent or unattended session can sweep it into an unrelated commit
+  (`concurrent-session-committed-my-uncommitted-work.md`).
+
 ## See Also
 
 - `execution-testing-catches-blind-ambiguity.md` — § pre-ship = pre-push, the discipline this sharpens.
@@ -57,3 +88,4 @@ working tree as of the R4 fixes" — not just the count.
 - `macos-documents-permission-loss-mid-session.md` — the environment failure that made the recheck
   uninterpretable in this instance.
 - `verify-before-acting-on-suspected-bugs.md` — the sibling reflex on the diagnosis side.
+- `concurrent-session-committed-my-uncommitted-work.md` — why a dirty tree is doubly unsafe here.

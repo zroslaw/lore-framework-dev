@@ -57,6 +57,9 @@ until you check what *class* of evidence each one rests on.
   result belongs to.
 - `point-of-use-guardrails-beat-recorded-lore.md` — why the fix belongs in the harness rather than
   in a human prep step.
+- `prove-a-new-test-red-against-the-previous-tag.md` — the same diagnostic applied to a test suite: a
+  green suite written by the author of the fix is a self-report until each test is shown red against
+  the previous tag.
 - `independent-engine-review-catches-structural-blind-spots.md` — an adjacent but distinct family:
   a fully-functional review still misses things a *different engine* catches, with no environmental
   defect or silent substitution involved.
