@@ -140,6 +140,21 @@ class TranscriptReflectionInputTests(unittest.TestCase):
                 os.path.join(wrong_grandparent, "run"), "codex", {"source": self.tmp}, messages
             )
 
+    def test_symlinked_scratch_root_is_still_accepted(self):
+        # A redirected .tmp is a legitimate setup; resolving before the
+        # component check would refuse the contract path mid-finalization.
+        messages = unit("request", {"role": "assistant", "content": "answer"})
+        elsewhere = os.path.join(self.tmp, "elsewhere")
+        os.makedirs(os.path.join(elsewhere, "lr-finalize"))
+        linked_workspace = os.path.join(self.tmp, "linked-ws")
+        os.mkdir(linked_workspace)
+        os.symlink(elsewhere, os.path.join(linked_workspace, ".tmp"))
+        manifest = self.mod.write_reflection_input(
+            os.path.join(linked_workspace, ".tmp", "lr-finalize", "run"),
+            "codex", {"source": self.tmp}, messages,
+        )
+        self.assertEqual(len(manifest["chunks"]), 1)
+
     def test_manifest_counts_messages_no_dialogue_unit_carries(self):
         messages = [
             {"role": "assistant", "content": "engine preface"},
