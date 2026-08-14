@@ -1,18 +1,26 @@
 lore_grooming: 1
-last_successful_at: "2026-08-14T12:42:15Z"
-last_successful_commit: 83b85e10e44ec7c32eddfc37934604c3a6c6da66
+last_successful_at: "2026-08-14T14:23:29Z"
+last_successful_commit: 9b498d3430615c801a28d51c15ac2629b419aad9
 reviewed:
-  - {file: lore-context.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore-context.md, at: "2026-08-14T14:23:29Z"}
   - {file: lore/a-fix-is-a-change-and-changes-need-review.md, at: "2026-08-14T12:42:15Z"}
   - {file: lore/a-gate-cannot-be-a-model-self-report.md, at: "2026-08-14T12:42:15Z"}
   - {file: lore/a-gate-that-died-is-not-a-gate.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/a-red-test-may-be-asserting-a-true-fact.md, at: "2026-08-14T14:23:29Z"}
   - {file: lore/a-release-record-goes-stale-while-you-fix-it.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/adopter-command-surface-curation.md, at: "2026-08-14T14:23:29Z"}
+  - {file: lore/agent-as-universal-working-environment.md, at: "2026-08-14T14:23:29Z"}
+  - {file: lore/agent-being-consciousness-substrate-split.md, at: "2026-08-14T14:23:29Z"}
+  - {file: lore/agent-boot-doc-fidelity-fixes.md, at: "2026-08-14T14:23:29Z"}
+  - {file: lore/feedback-composer-25-subagent-reviews.md, at: "2026-08-14T14:23:29Z"}
   - {file: lore/fix-defects-are-context-errors.md, at: "2026-08-14T12:42:15Z"}
-  - {file: lore/fold-feature-into-local-main-via-stash.md, at: "2026-08-14T12:42:15Z"}
-  - {file: lore/macos-var-symlink-realpath-ambiguity.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/fold-feature-into-local-main-via-stash.md, at: "2026-08-14T14:23:29Z"}
+  - {file: lore/lore-topic-format.md, at: "2026-08-14T14:23:29Z"}
+  - {file: lore/macos-var-symlink-realpath-ambiguity.md, at: "2026-08-14T14:23:29Z"}
+  - {file: lore/parallel-reviewer-fanout-pattern.md, at: "2026-08-14T14:23:29Z"}
   - {file: lore/prove-a-new-test-red-against-the-previous-tag.md, at: "2026-08-14T12:42:15Z"}
   - {file: lore/public-communication-ownership.md, at: "2026-08-14T12:42:15Z"}
   - {file: lore/realpath-for-identity-logical-for-contract-shape.md, at: "2026-08-14T12:42:15Z"}
-  - {file: lore/single-canonical-source-discipline.md, at: "2026-08-14T12:42:15Z"}
-  - {file: lore/transcript-backed-finalization-mvp.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/single-canonical-source-discipline.md, at: "2026-08-14T14:23:29Z"}
+  - {file: lore/transcript-backed-finalization-mvp.md, at: "2026-08-14T14:23:29Z"}
   - {file: lore/trilens-loop-feature.md, at: "2026-08-14T12:42:15Z"}

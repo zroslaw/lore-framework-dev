@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "An autonomous agent's reasoning must be LLM-driven but its scheduling, budget enforcement, and kill switch must be deterministic code — an agent cannot reliably be its own circuit breaker."
+parent: lore-context.md
+---
+
 # Agent Being = LLM Consciousness + Deterministic Supervisor Substrate
 
 Named principle surfaced during the 2026-07-19 "Agent Beings" brainstorm. The direction has since settled its design and naming (same day, design dialogue): the module is **Lore Beings**, the supervisor daemon is the **Being Keeper** — see `lore-beings-design.md` (anchor) and `workdir/draft-lore-beings.md` (full agreed design). This topic keeps its original filename; the principle it names is unchanged and governs that design.

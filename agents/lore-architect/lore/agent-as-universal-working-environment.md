@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Onboarding framing: people already do everything through an agent, so a Lore Agent is that same working environment specialized with an area's knowledge — positions the product inside an existing behavior rather than a new one."
+parent: lore-context.md
+---
+
 # The agent as universal working environment
 
 A framing that lands well when explaining where Lore Agents fit in a developer's daily life. **People increasingly do *everything* through an agent** — writing code, reviewing MRs, arranging tickets, querying logs, reading runbooks, drafting messages.

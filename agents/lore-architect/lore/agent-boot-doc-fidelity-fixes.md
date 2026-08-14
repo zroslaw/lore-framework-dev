@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "Case study: the lifecycle harness's first run found two real agent-boot.md ambiguities by running haiku against it — 'current working directory' and 'best-effort' both misread — plus the stream-json debugging technique that pinpointed them."
+parent: lore-context.md
+---
+
+# `agent-boot.md` Fidelity Fixes Found by Execution Testing
+
 The lifecycle testing harness's (`lifecycle-testing-harness.md`) first real use (2026-07-03) found two genuine bugs in `agent-boot.md` — not by review, but by running haiku against it and watching it fail. Both are now fixed on disk. Case study for the general principle in `execution-testing-catches-blind-ambiguity.md`.
 
 ## Bug 1 — "current working directory" was ambiguous under a weaker model

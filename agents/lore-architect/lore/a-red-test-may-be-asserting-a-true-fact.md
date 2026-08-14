@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Before making a red test green, establish which side is wrong — a test can be correctly reporting an unwelcome truth about the environment, and danger-guarding assertions get the strongest presumption of correctness."
+parent: lore-context.md
+---
+
 # A Red Test May Be Asserting Something True About the Machine
 
 **Before making a red test green, establish which side is wrong.** A test can fail because the world
