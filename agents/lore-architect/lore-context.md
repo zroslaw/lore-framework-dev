@@ -178,6 +178,11 @@ identity, logical components for shape. See `macos-var-symlink-realpath-ambiguit
 
 See `lore-search-pattern.md`, `consult-pattern.md`, `attach-pattern.md`, `spawn-teammate-feature.md`, `teammate-conventions.md`.
 
+**Division of ownership with `lore-advocate`:** the advocate owns Lore Agents public positioning,
+advocacy, and channel strategy; I own architecture, implementation, design history, and product
+truth, and supply or verify the technical facts its copy rests on. Public-outreach work leads with
+the advocate and consults or attaches me. See `public-communication-ownership.md`.
+
 ## Session Takeover (BETA)
 
 **`/lr:takeover`** converts engine-native session logs into a markdown digest so a new session on any engine can continue interrupted work. Codex, Claude Code, and Cursor are supported (`scripts/session-takeover` — list, convert, render). Cursor's tool-result pairing is heuristic and flags `pairing_uncertain`. See `takeover-feature.md`, `cursor-takeover-batch-pairing.md`, `engine-session-log-formats.md`.
@@ -368,7 +373,7 @@ See `versioning-release-types.md`, `trilens-loop-feature.md`, `lifecycle-testing
 
 `framework-improvements-backlog.md` is the canonical list of deferred items; its § Ship Closures
 archives per-ship gate dispositions. Quality benchmark tier/probe expansion is in the dev repo with
-regular/deep matrix defaults and local override support. ~215 lore topics. The
+regular/deep matrix defaults and local override support. ~235 lore topics. The
 backlog is organized into top-level `##` categories (Major Directions, Session Lifecycle &
 Durability, Knowledge Quality & Curation, Multi-Agent Collaboration, Workspace & Environment,
 Framework Upkeep/Distribution/Docs, Ship Closures archive), each holding `###` topical sections —

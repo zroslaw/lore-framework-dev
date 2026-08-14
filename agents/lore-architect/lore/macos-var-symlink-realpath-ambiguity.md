@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "On macOS `/var` is a symlink, so bash `pwd` and git `--show-toplevel` disagree — \"resolve both to real paths\" is not self-executing prose; name the exact realpath command."
+parent: lore-context.md
+---
+
 # macOS `/var` Symlink Makes `pwd` vs. `realpath` Disagree (Environment Trap)
 
 Third macOS-specific environment trap found in a single stretch of work (siblings:

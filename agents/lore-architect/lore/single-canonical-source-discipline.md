@@ -45,11 +45,10 @@ consistency checks and the test suite cannot see, so nothing fails when it goes 
 you have just changed, ask: *who tells the user what this rule is?* Docs, catalog/findings rows,
 error-message text, the script's own literate comments, and release notes are all answers.
 
-**v39 made this the dominant fix-round failure mode.** Its guard was correct in code from round 2
-onward; every later defect was a second statement of that guard drifting — a Cleanup rule describing
-the pre-fix semantics, an engine-profile binding table left behind while two sibling sentences in the
-same file were updated, and release-note claims that had gone stale. Three of four fix-round defects
-were this shape. See [fix-defects-are-context-errors.md](fix-defects-are-context-errors.md) § v39 and
+**v39 made this the dominant fix-round failure mode** — three of its four fix-round defects were a
+second statement of a guard drifting away from the guard itself. The defect-by-defect record and its
+analysis live in [fix-defects-are-context-errors.md](fix-defects-are-context-errors.md) § v39; the
+concrete code-versus-prose pair is in
 [realpath-for-identity-logical-for-contract-shape.md](realpath-for-identity-logical-for-contract-shape.md).
 
 Two smaller instances from the same release: the manual-fallback docstrings in `git_state` and

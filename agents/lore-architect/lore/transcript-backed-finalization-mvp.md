@@ -48,7 +48,7 @@ MVP.
 
 ## v39 Implementation and Residual Limits
 
-Implemented locally in framework v39 (pending push, 2026-08-11):
+Shipped in framework v39 (`lore-framework` main `90bf644`, tag `lr--v1.39.0`, pushed):
 
 - `session-takeover reflection-input` reuses the three parsers, groups visible dialogue, creates
   `0700` private chunk directories through exclusive writes, records a schema-1 manifest, and cleans

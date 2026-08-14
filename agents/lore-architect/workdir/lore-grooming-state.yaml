@@ -1,0 +1,18 @@
+lore_grooming: 1
+last_successful_at: "2026-08-14T12:42:15Z"
+last_successful_commit: 83b85e10e44ec7c32eddfc37934604c3a6c6da66
+reviewed:
+  - {file: lore-context.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/a-fix-is-a-change-and-changes-need-review.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/a-gate-cannot-be-a-model-self-report.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/a-gate-that-died-is-not-a-gate.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/a-release-record-goes-stale-while-you-fix-it.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/fix-defects-are-context-errors.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/fold-feature-into-local-main-via-stash.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/macos-var-symlink-realpath-ambiguity.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/prove-a-new-test-red-against-the-previous-tag.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/public-communication-ownership.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/realpath-for-identity-logical-for-contract-shape.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/single-canonical-source-discipline.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/transcript-backed-finalization-mvp.md, at: "2026-08-14T12:42:15Z"}
+  - {file: lore/trilens-loop-feature.md, at: "2026-08-14T12:42:15Z"}
