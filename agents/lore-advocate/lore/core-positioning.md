@@ -19,11 +19,15 @@ Lore Agents are the named specialists themselves, not a separate coordinator tha
 
 Explain the product in layers: lead with the pain, working model, and benefit; introduce Git, Markdown, boot maps, reflection, merge, and other machinery afterward. A plain lifecycle is:
 
-1. **Give a domain or project a named expert.**
+1. **Give a domain or project a named expert.** Define a clear role and domain so relevance has a boundary and the agent learns the right things instead of storing everything.
 2. **Summon that expert through its registered direct shortcut.** Use `/lr:boot <agent-name>` as the generic fallback.
 3. **Work together normally.** Supply resources, guidance, and feedback as the work develops.
-4. **Finalize the session.** The agent reflects and merges durable lessons into Lore.
+4. **Finalize the session.** The agent reflects and merges durable lessons into Lore, using its role and domain to decide what is worth preserving.
 5. **Return to accumulated expertise.** The next session begins with the agent's curated knowledge available.
+
+When explaining technical anatomy, keep framework distribution separate from an individual agent's Lore. Put framework detail in getting started: Lore Agents is a plugin for Claude Code, Cursor, and Codex; its canonical behavior is expressed in Markdown instructions; and Python scripts only accelerate operations to save time and context tokens. Point readers to the canonical docs collection.
+
+Describe Lore itself as the agent's Git-backed directory, not as a workspace. `role.md` defines the specialist's domain, `lore-context.md` carries essential every-session knowledge, and `lore/*.md` holds focused topics. The parent hierarchy forms a taxonomy while Markdown links form the wider knowledge graph; a generated Lore map makes both economical to navigate. At boot, the role, context, and map enter the agent's context. On complex work, the agent follows the map and uses ordinary shell, file-search, and read tools to open relevant topics. Finalization maintains the graph, Git supplies history, versioning, review, and sharing, and periodic grooming improves structure, links, concision, and retrieval.
 
 The positioning has three connected pillars:
 
