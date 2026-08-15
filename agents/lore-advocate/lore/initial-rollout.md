@@ -9,7 +9,7 @@ parent: lore-context.md
 
 The first campaign stays deliberately small and ordered:
 
-1. Improve the GitHub destination. Keep the plugin descriptions, marketplace copy, Quick Start, and first screen of the README aligned around named AI specialists that learn and grow with the user; then make curated knowledge, collaboration, and how to try Lore Agents immediately clear.
+1. Use the GitHub destination as the campaign anchor. The README leads with “Named AI specialists that learn and grow with you” and the pain of repeatedly maintaining context and instructions. Keep the plugin descriptions, marketplace copy, Quick Start, and first screen aligned with that message; then make curated knowledge, collaboration, and how to try Lore Agents immediately clear.
 2. Prepare one short, public-safe demonstration with a non-Agoda agent or synthetic example.
 3. Publish a personal internal message in Agoda developer-AI channels. The maintainer already uses an elaborate set of lore agents in daily work, making this the most credible source of early users and practical feedback.
 4. Adapt the same story into one post from the maintainer's personal LinkedIn profile.

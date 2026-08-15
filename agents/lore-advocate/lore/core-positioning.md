@@ -15,7 +15,15 @@ Lead with this product idea:
 
 > Build a team of named AI specialists that learns and grows with you.
 
-The supporting explanation is: agents do not merely remember conversations; they grow into named specialists that deliberately curate knowledge and share it with other agents.
+Lore Agents are the named specialists themselves, not a separate coordinator that delegates to specialists. Guided by their roles and the user's feedback, they take responsibility for maintaining the context and instructions they need. Their curated, evolving context and knowledge is called **Lore**. The user retains direction and judgment while the agents perform the ongoing context maintenance.
+
+Explain the product in layers: lead with the pain, working model, and benefit; introduce Git, Markdown, boot maps, reflection, merge, and other machinery afterward. A plain lifecycle is:
+
+1. **Give a domain or project a named expert.**
+2. **Summon that expert through its registered direct shortcut.** Use `/lr:boot <agent-name>` as the generic fallback.
+3. **Work together normally.** Supply resources, guidance, and feedback as the work develops.
+4. **Finalize the session.** The agent reflects and merges durable lessons into Lore.
+5. **Return to accumulated expertise.** The next session begins with the agent's curated knowledge available.
 
 The positioning has three connected pillars:
 
@@ -29,7 +37,9 @@ Git-backed Markdown, portability, team sharing, and support across coding engine
 
 The strongest current proof story is self-hosting: Lore Agents is developed with Lore Architect, a lore agent that holds the framework's design history and operational knowledge. Prefer this and other concrete demonstrations over abstract claims.
 
-The first target audience is people who already use coding agents daily across multiple sessions or projects and are tired of repeatedly rebuilding context. The voice mainly explains the practical product, then occasionally explores role-based agents, deliberate curation, shared team knowledge, and agent collaboration as design ideas.
+The first target audience is people who already use coding agents daily across multiple sessions or projects and are tired of repeatedly rebuilding context. This is a beachhead, not the category boundary. Start use cases with the broad continuity pattern, then show personal domains, research and evaluation, long-running projects, integrations, multi-specialist collaboration, and shared software expertise. Individual expertise can accumulate first and become team-shared by publishing the agent repo.
+
+The voice mainly explains the practical product, then occasionally explores role-based agents, deliberate curation, shared team knowledge, and agent collaboration as design ideas. Even for technical audiences, do not reduce the core story to software engineering or the SDLC. Keep terminology exact: distinguish the Lore Agents framework from Lore Agents as named specialists whenever grammar or product meaning could be ambiguous.
 
 Working pitch:
 
