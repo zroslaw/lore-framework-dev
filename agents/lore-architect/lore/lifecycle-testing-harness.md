@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "The multi-engine real-execution harness, its scenario coverage, assertion discipline, release-gate evidence states, and operational caveats."
+parent: lore-context.md
+---
+
 # Lifecycle Testing Harness
 
 The multi-engine lifecycle testing harness — designed in `workdir/draft-testing-pipeline.md`,
@@ -114,6 +121,16 @@ Out of scope for this harness (covered elsewhere or not headless-scriptable):
 ## Assertion style
 
 Assertions are structural, matching the design premise: git HEAD before/after, file existence, canary tokens planted in fixture files (to prove a file was actually read, not paraphrased around), `grep`-based fact checks after reflect/merge. No LLM-as-judge needed for any of the 19 — the catalog's premise (procedure outputs are files + git state, verifiable by script) held up in practice.
+
+**For model-composed semantic output, assert the concrete payload as well as its container.** A
+heading or category proves only that the output has the requested shape. The v40 scoped Codex
+`test_13_finalize_end_to_end` run asserted the reflection's concrete canary, its Lore destination,
+residual and confidence states, plus commit and push. Its first execution produced a structurally
+valid Learning section that generalized the learned fact into a category and dropped the canary — a
+heading/category-only assertion would have passed the defect. Requiring the concrete fact or
+decision and its useful reason tightened the procedure; rerunning the same scenario on `gpt-5.4`
+passed against the shipped tree. For learning reports, test the learned content and merge evidence,
+not merely the presence of `## Learning`. See `session-summaries-feature.md`.
 
 **Exercise the stated contract, not incidental release history.** A non-mutation dry-run scenario
 needs one pending migration, not the complete migration chain from an old fixture version; otherwise
@@ -256,6 +273,8 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `headless-cli-smoke-testing-discipline.md` — how to run manual engine probes without a hard-kill timeout destroying the evidence.
 - `lifecycle-harness-parallelization.md` — future improvement: parallel scenario execution.
 - `quality-benchmark-feature.md` — the sibling quality track (`tests/quality/`): lore utilization, planted-needle probes, treatment/control uplift.
+- `session-summaries-feature.md` — the v40 Learning-audit contract exercised by the concrete-canary
+  finalization scenario.
 - `testing-docs-root-discoverability.md` — root README / `lore-repo.md` pointer discipline for
   testing docs.
 - `benchmark-measurement-design-principles.md` — the measurement-design principles shared with (and extending) this harness's assertion style.

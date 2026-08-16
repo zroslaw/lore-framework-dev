@@ -1,16 +1,54 @@
-# Session Summaries (v7, expanded v8)
+---
+lore: 1
+type: topic
+summary: "Canonical host and guest session-summary design, including the per-agent Learning audit, review gate, privacy boundary, and finalization integration."
+parent: lore-context.md
+---
+
+# Session Summaries (v7+, Learning audit v40)
 
 Introduced in v7 as the third phase of finalization — capturing session narrative alongside lore's capture of session learnings. Expanded in v8 with short guest summaries.
 
 ## What it is
 
-A model-composed markdown file written at finalization, committed to the host agent's repo. Complements lore: lore records *what was learned*; summaries record *what happened*.
+A model-composed markdown file written at finalization, committed to the host agent's repo. Lore
+records durable knowledge; summaries record what happened and audit what the learning phases did
+without duplicating the resulting Lore.
 
 **Host summary file layout:** `<lore-agent-repo>/agents/<host-agent>/sessions/<YYYY>/<MM>/<YYYY-MM-DD>-<short-uuid>.md`. Year/month nesting prevents single-directory bloat. Short UUID (8 hex chars) in filename; full UUIDv4 in frontmatter.
 
 **Host frontmatter:** `uuid`, `start`, `end`, `host_agent`, `host_repo`, `participants`, `username`, `full_name`, `topics` (free-form kebab-case tags for later analysis), `artifacts` (list of `{path, kind}` entries), `consulted`.
 
 **Body:** a 3–7 paragraph narrative in past tense, third person, covering context → what happened → plot twists → where it landed → next steps. The process doc contains the exact narrative prompt.
+
+## Canonical Learning audit (v40)
+
+Every canonical host summary carries a mandatory `## Learning` section with one subsection per
+active agent. Each subsection has four compact fields: `What mattered`, `Lore changes`, `Not
+merged`, and `Issues`. `What mattered` preserves the concrete durable fact, decision, or lesson and
+its useful reason; `Lore changes` names destination paths and the semantic operation, including
+consolidation or simplification. The other fields keep residual topics and confidence problems
+visible. This is an audit of the learning process, not a second copy of Lore.
+
+The audit has an explicit evidence chain:
+
+1. Finalize retains each per-agent Reflection outcome, including its paths and one-line themes, a
+   completed-zero result, or a failed/unavailable state.
+2. Merge receives the known current-session paths and returns a structured handoff covering what
+   mattered, Lore changes, unmerged inputs, and anomalies.
+3. Summarize retains both phase outputs and renders them into the canonical host summary.
+
+Only a completed Reflection set makes every unlisted reflection provably carried over. A failed
+outcome supports current-session attribution only for its known partial paths; an unavailable
+outcome makes origins unknown. Carried-over material may be integrated, but it must not appear
+under `What mattered` as learning from this session. Missing phase evidence is reported as
+unavailable, never silently converted into “nothing learned.” These states describe provenance and
+evidence availability, not the verification-confidence ladder in
+`graduated-verification-confidence.md`.
+
+The audit is derived from retained phase outputs. It does not make ordinary session-summary
+composition transcript-backed; transcript-backed summaries remain outside the bounded design in
+`transcript-backed-finalization-mvp.md`.
 
 ## Guest summaries (v8)
 
@@ -22,6 +60,9 @@ When one or more guests are attached via `/lr:attach` and a guest has **lore upd
 - **Slim frontmatter:** `uuid`, `date`, `role: guest`, `host_agent`, `host_summary_repo`, `host_summary_path`, `lore_changes`. The `host_summary_repo` / `host_summary_path` split (review outcome) keeps the path robust across checkout layouts — path is repo-relative, not domain-relative.
 - **Short body:** one participation sentence, one contribution sentence, bulleted lore updates with one-line reasons, back-reference to the host summary. No plot-twists, no next-steps — those live in the canonical host narrative.
 - **Composed by the host inline in phase 3**, from (a) the host summary just composed, (b) session memory of what the guest contributed, and (c) the merge subagent's return for that guest. No additional subagents are spawned for summarization.
+- **Closed action kinds remain unchanged:** merge actions `updated`, `consolidated`, and
+  `simplified` map to guest-frontmatter kind `modified`; the body keeps the precise semantic action
+  in prose.
 
 **Privacy:** guest repos may have different visibility than the host's. The review gate (phase 3) shows every summary for approval; the approver must consider each guest summary against its destination repo specifically, not uniformly. Individual guest summaries can be dropped at review without blocking the host or other guests.
 
@@ -62,9 +103,13 @@ The pivot to model-composed markdown sidesteps all of these. The cost is that su
 
 **Partially revisited since.** `/lr:takeover` (v24) *does* read engine-native session logs — but as a one-shot conversion into a digest for continuing interrupted work, not as the durable record (`takeover-feature.md`, `engine-session-log-formats.md`). v29 also temporarily kept a full log authored as Markdown rather than parsed from a proprietary format; v34 retires its automatic export. The original objections still hold: native logs remain local by default, and a future archive would require an explicit design decision.
 
-## Integration with finalize (v8)
+## Integration with finalize
 
-`/lr:finalize` now runs reflect → merge → summarize → commit+push. `/lr:summarize` standalone still works for mid-session checkpoints or for sessions without lore changes worth recording. Standalone summarize does not commit — the user commits what they want to keep. See `finalization-process.md`.
+`/lr:finalize` runs reflect → merge → summarize → commit+push. Its retained Reflection outcomes and
+Merge handoffs are the evidence source for the Learning audit. `/lr:summarize` standalone still
+works for mid-session checkpoints or sessions without lore changes worth recording; when phase
+evidence is unavailable, it says so. Standalone summarize does not commit — the user commits what
+they want to keep. See `finalization-process.md`.
 
 ## Known limitations (tracked in workdir/framework-improvements.md)
 
@@ -81,3 +126,4 @@ The pivot to model-composed markdown sidesteps all of these. The cost is that su
 - `docs/conventions.md` — `sessions/` directory in the agent-repo tree
 - `release-notes/7.md` — v7 user-facing description (introduction)
 - `release-notes/8.md` — v8 user-facing description (guest summaries, four-phase finalize)
+- `release-notes/40.md` — v40 Learning-audit contract and scoped validation record

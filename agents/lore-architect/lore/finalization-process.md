@@ -1,10 +1,19 @@
-Session finalization is user-triggered. As of v8 it is a four-phase process orchestrated by `docs/finalize.md`:
+---
+lore: 1
+type: topic
+summary: "The user-triggered reflect, merge, summarize, and publication lifecycle, including phase-evidence retention, guest iteration, and failure boundaries."
+parent: lore-context.md
+---
 
-**Phase 1 — Reflect** (`/lr:reflect`): runs **inline**, host-first, per active agent. The agent reviews the session and writes reflection topics to each active agent's `reflections/`. Each topic is one atomic insight, lesson, or decision. Topics named `role-update-*.md` signal that `role.md` needs updating. Stays inline because reflection needs the current session context — a fresh-booted subagent wouldn't have it. Detailed instructions in `lore-framework/docs/process-reflection.md`.
+# Finalization Process
 
-**Phase 2 — Merge** (`/lr:merge`): runs in **parallel subagents, one per active agent**. Each `general-purpose` subagent boots as its target agent and integrates that agent's reflections into its `lore/`, `lore-context.md`, and `role.md`. Cleans up `reflections/`. Does **not** commit — phase 4 handles that. Detailed instructions in `lore-framework/docs/process-merge.md`. See `merge-in-booted-subagents.md` and `reflect-merge-execution-asymmetry.md`.
+Session finalization is user-triggered. It is a four-phase process orchestrated by `docs/finalize.md`:
 
-**Phase 3 — Summarize** (`/lr:summarize`, v7+, expanded v8): composed inline by the host. Writes the canonical session-wide narrative summary to the host agent's `sessions/YYYY/MM/` directory with a UUIDv4 in frontmatter. **As of v8**, also writes a short guest summary into each attached guest's repo when that guest had lore updates in phase 2 — same session UUID, slim frontmatter pointing back to the host summary. Consultants get no summary. Detailed instructions in `lore-framework/docs/summarize.md`. See `session-summaries-feature.md`.
+**Phase 1 — Reflect** (`/lr:reflect`): runs **inline**, host-first, per active agent. The agent reviews the session and writes reflection topics to each active agent's `reflections/`. Each topic is one atomic insight, lesson, or decision. Topics named `role-update-*.md` signal that `role.md` needs updating. The host retains a per-agent Reflection outcome — completed paths and themes (including completed with zero topics), or a failed result with any known partial paths. Reflection stays inline because it needs the current session context; a fresh-booted subagent would not have it. Detailed instructions in `lore-framework/docs/process-reflection.md`.
+
+**Phase 2 — Merge** (`/lr:merge`): runs in **parallel subagents, one per active agent**. Each write-capable subagent boots as its target agent, receives that agent's known current-session reflection paths, and integrates its reflections into `lore/`, `lore-context.md`, and `role.md`. It cleans up only successfully integrated reflections and returns a structured Merge handoff: concrete current-session learning, Lore destinations and semantic actions, residual unmerged inputs, and anomalies. It does **not** commit — phase 4 handles that. Detailed instructions in `lore-framework/docs/process-merge.md`. See `merge-in-booted-subagents.md` and `reflect-merge-execution-asymmetry.md`.
+
+**Phase 3 — Summarize** (`/lr:summarize`, v7+): composed inline by the host. Writes the canonical session-wide narrative summary to the host agent's `sessions/YYYY/MM/` directory with a UUIDv4 in frontmatter. Its mandatory per-agent `## Learning` audit is built from the retained Reflection outcomes and Merge handoffs; failed or unavailable evidence stays explicit instead of becoming a false “nothing learned.” Attached guests with phase-2 Lore updates also receive a short summary in their own repo — same session UUID, slim frontmatter pointing back to the host summary. Consultants get no summary. Detailed instructions in `lore-framework/docs/summarize.md`. See `session-summaries-feature.md`.
 
 **Phase 4 — Commit and Push** (v8+, only from `/lr:finalize`): one commit per touched repo with a mandatory review gate, then push. Commit message default: `Finalize session <short-uuid>`. Only `/lr:finalize` touches git at the end; standalone `/lr:reflect`, `/lr:merge`, and `/lr:summarize` leave all changes uncommitted for the user to review and commit themselves.
 
@@ -14,7 +23,14 @@ All four phases combined: `/lr:finalize`.
 
 Prior to v8, merge ran inline in a single-agent session and only dispatched subagents when guests were attached. v8 makes subagent execution uniform — a single-agent session just spawns one subagent. Rationale: booting gives each subagent the agent's role perspective as the natural lens for merge decisions (same pattern as `/lr:consult`); subagent context isolation keeps session noise out of merge reasoning; parallel execution speeds up multi-agent finalizes. The asymmetry with reflect (which stays inline) is deliberate — see `reflect-merge-execution-asymmetry.md`.
 
-**The host must retain each merge subagent's return value through to phase 3.** Summarize composes each guest summary from (a) the host summary, (b) session memory of what the guest contributed, and (c) the merge subagent's return for that guest — so dropping those returns after phase 2 loses the lore-changes list for guest summaries.
+## Phase-evidence retention
+
+**The host must retain every Reflection outcome and every Merge handoff through phase 3.** The
+canonical Learning audit needs both sides of the chain: reflection establishes what is known to be
+from this session, while merge establishes what changed, what remained, and whether confidence was
+weakened. Dropping either side makes a truthful audit impossible. Guest summaries also depend on
+their merge handoff for the Lore-changes list. `session-summaries-feature.md` owns the audit schema
+and attribution rules; this topic owns the phase-to-phase retention obligation.
 
 ## Per-agent iteration when guests are attached (v4+)
 
@@ -56,7 +72,7 @@ rule that a decision relayed from one session's user isn't authority for another
 
 ## Related topics
 
-- `session-summaries-feature.md` — summary feature specifics, including v8 guest summaries
+- `session-summaries-feature.md` — canonical host Learning-audit schema and guest-summary specifics
 - `merge-in-booted-subagents.md` — merge execution model in detail
 - `reflect-merge-execution-asymmetry.md` — why reflect is inline and merge is in subagents
 - `push-conflict-resolution.md` — what happens when phase 4 push is rejected

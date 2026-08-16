@@ -230,6 +230,13 @@ agent booted as itself, file-driven) → **summarize** (host writes the canonica
 finalize unless the user triggers it. See `finalization-process.md`, `finalize.md`,
 `merge-in-booted-subagents.md`, `reflect-merge-execution-asymmetry.md`.
 
+Canonical host summaries carry a compact per-agent **Learning audit**. Finalize retains each
+Reflection outcome and Merge handoff through summarize so the audit can preserve concrete learning,
+Lore destinations/actions, residual topics, and confidence problems. Only a completed reflection
+set can classify every unlisted input as carried over; a failed outcome attributes only known
+partial paths, and unavailable evidence leaves origins unknown rather than becoming “nothing
+learned.” See `session-summaries-feature.md`.
+
 **Transcript-backed reflection shipped in v39:** opt-in `finalize --transcript` recovers
 parser-retained main-thread dialogue into ordinary reflection topics, then rejoins the same
 merge/summarize/commit/push lifecycle — host-only, bounded, fail-closed, raw logs staying in local
@@ -243,7 +250,7 @@ Shared-lore publication is a separate, unshipped governance direction. See
 ## Versioning & Migration
 
 `lore-framework/VERSION` is the single source of truth; **the current shipped-and-pushed version is
-v39**. Each agent repo stamps that version in its `lore-repo.md`, and four version-bearing plugin
+v40**. Each agent repo stamps that version in its `lore-repo.md`, and four version-bearing plugin
 manifests mirror `1.<VERSION>.0` (`/lr:check` #19 enforces). A version is either **migration**,
 **release-notes-only**, or both, and independently **cache-affecting** or not — orthogonal axes,
 both recorded at every ship. `versioning-release-types.md` holds the full per-version history; read
@@ -494,11 +501,11 @@ Workspace holds **`lore-framework/`**, **`lore-framework-dev/`**, **`lore-agents
 **`lore-chronicler/`** (Being; on disk, undeclared). Meta-repo `AGENTS.md` lists them after
 `/lr:workspace-init`, which converges — there is no `--refresh` flag as of v37.
 
-Framework `main` carries **v39** shipped, tagged, and pushed — opt-in `finalize --transcript`. Its
-full gate record lives in `versioning-release-types.md`; the load-bearing parts to carry are that
-**no reviewer returned clean on the shipped tree**, the final fix is unreviewed, and **lifecycle and
-quality were waived by the user and not run**, so the release makes no model-execution-fidelity
-claim. v38 before it ended the same way — at the round cap, not on a clean round.
+Framework `main` carries **v40** shipped, tagged, and pushed. Its canonical host-summary Learning
+audit is live. The current real-engine fidelity evidence is deliberately scoped: the deterministic
+suite is green and one Codex `gpt-5.4` finalization lifecycle passed; quality and Claude/Cursor
+lifecycle runs did not run, so no broader claim follows. The full gate record lives in
+`versioning-release-types.md`.
 
 My own Lore corpus is still largely legacy; v1 adoption is lazy via merge or explicit via
 `/lr:groom`. Unrelated uncommitted WIP may sit on these checkouts; do not sweep it into
