@@ -212,7 +212,10 @@ LORE_MAP_BOOT_PROMPT = (
     "Keep the standard three-line boot report. After it, use the compact Lore map already loaded "
     "into context and print exactly:\n"
     "LORE-COVERAGE: <complete|partial|legacy>\n"
-    "TOP-AREA: <path of the mapped top-level area>\n"
+    # "top-level area" was ambiguous against a map that carries BOTH a `root:`
+    # (lore-context.md) and an `areas:` list, and a run answered with the root.
+    # The map was correct; the question wasn't. Name the field instead.
+    "TOP-AREA: <the `file` value of the first entry under the map's `areas:` list>\n"
     "Do not run a separate full-corpus search. Do not reflect, merge, finalize, commit, or push."
 )
 
@@ -649,7 +652,9 @@ def _identity_fix_message(framework_dir, *, detail):
         f"  expected VERSION: {expected}\n"
         f"  detail: {detail}\n"
         "  Fix: point this engine's installed/cached lore-framework source at "
-        "LR_FRAMEWORK_DIR (Codex: marketplace source in ~/.codex/config.toml; "
+        "LR_FRAMEWORK_DIR (Claude: --plugin-dir normally wins outright, so check "
+        "LR_FRAMEWORK_DIR itself and that plugin.json's version matches VERSION; "
+        "Codex: marketplace source in ~/.codex/config.toml; "
         "Cursor: local plugin / cache), then re-run. "
         "Or set LR_SKIP_PLUGIN_IDENTITY=1 only for debugging."
     )
@@ -853,10 +858,112 @@ def check_cursor_plugin_sources(framework_dir, plugins_root=None):
         )
 
 
+def parse_claude_init_plugins(stdout):
+    """Return the `plugins` array from Claude Code's stream-json init event.
+
+    The `system`/`init` event is emitted by the engine itself, before any model
+    turn, and lists every plugin actually loaded for the session with its
+    resolved `path` and manifest `version`. That is ground truth about which
+    tree is under test — unlike asking the model, which is a self-report.
+    """
+    for line in (stdout or "").splitlines():
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if event.get("type") == "system" and event.get("subtype") == "init":
+            plugins = event.get("plugins")
+            return plugins if isinstance(plugins, list) else []
+    return None
+
+
+def loaded_lr_plugin(plugins):
+    """The loaded plugin named `lr`, or None. Plugin name, not marketplace."""
+    for entry in plugins or []:
+        if isinstance(entry, dict) and entry.get("name") == "lr":
+            return entry
+    return None
+
+
+def check_claude_plugin_load(framework_dir, workspace):
+    """Assert Claude Code loaded LR_FRAMEWORK_DIR as the `lr` plugin.
+
+    Deterministic in the sense that matters: the verdict is read from the
+    engine's own init event, not composed by the model. This replaces the shared
+    PLUGIN_IDENTITY_PROMPT probe for Claude, which was a model self-report and
+    failed exactly the way `a-gate-cannot-be-a-model-self-report.md` predicts —
+    asked which plugin root supplied its skills, a model with filesystem access
+    greps `~/.claude/plugins/cache` and reports whatever it finds there, so a
+    correct run (`--plugin-dir` does win, `source: lr@inline`) was reported as a
+    mismatch and the whole Claude shard refused to run.
+
+    Returns the loaded plugin entry.
+    """
+    cmd = [
+        "claude", "-p", "ok",
+        "--plugin-dir", framework_dir,
+        "--model", MODEL,
+        "--output-format", "stream-json",
+        "--verbose",
+        "--dangerously-skip-permissions",
+    ]
+    proc = subprocess.run(
+        cmd, cwd=workspace, capture_output=True, text=True, timeout=RUN_TIMEOUT,
+        env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+    )
+    plugins = parse_claude_init_plugins(proc.stdout)
+    if plugins is None:
+        raise PluginIdentityError(
+            _identity_fix_message(
+                framework_dir,
+                detail=(
+                    f"no system/init event in claude stream-json output "
+                    f"(exit={proc.returncode}; "
+                    f"stderr_tail={(proc.stderr or '')[-400:]!r})"
+                ),
+            )
+        )
+    entry = loaded_lr_plugin(plugins)
+    if entry is None:
+        listed = ", ".join(str(p.get("name")) for p in plugins if isinstance(p, dict))
+        raise PluginIdentityError(
+            _identity_fix_message(
+                framework_dir,
+                detail=(
+                    "claude loaded no plugin named 'lr' — --plugin-dir supplied no "
+                    f"usable plugin (loaded: {listed or 'none'})"
+                ),
+            )
+        )
+    problems = []
+    expected_root = os.path.realpath(framework_dir)
+    got_root = os.path.realpath(entry.get("path") or "")
+    if got_root != expected_root:
+        problems.append(
+            f"loaded lr plugin path {entry.get('path')!r} (realpath {got_root!r}) "
+            f"!= {expected_root!r} — an installed plugin outranked --plugin-dir"
+        )
+    expected_version = read_framework_version(framework_dir)
+    got_version = normalize_framework_version(entry.get("version"))
+    if got_version != normalize_framework_version(expected_version):
+        problems.append(
+            f"loaded lr plugin version {entry.get('version')!r} != expected "
+            f"{expected_version!r} — plugin.json and VERSION disagree in the tree "
+            "under test (manifest bump missed?)"
+        )
+    if problems:
+        raise PluginIdentityError(
+            _identity_fix_message(framework_dir, detail="; ".join(problems))
+        )
+    return entry
+
+
 def check_installed_plugin_sources(framework_dir):
     """Run the current engine's deterministic installed-plugin preflight, if it has one.
 
     Filesystem-only, no engine call — safe to run per-run as well as per-process.
+    Claude's equivalent needs the engine's init event, so it lives in
+    verify_plugin_identity instead (see check_claude_plugin_load).
     """
     if ENGINE == "codex":
         check_codex_plugin_sources(framework_dir)
@@ -920,6 +1027,16 @@ def verify_plugin_identity(workspace=None, framework_dir=None, *, force=False):
         own_tmp = tempfile.mkdtemp(prefix="lr-plugin-identity-")
         workspace = own_tmp
     try:
+        if ENGINE == "claude":
+            entry = check_claude_plugin_load(framework_dir, workspace)
+            _IDENTITY_CHECKED_FOR.add(key)
+            return {
+                "skipped": False,
+                "framework_dir": framework_dir,
+                "reported_root": entry.get("path"),
+                "reported_version": entry.get("version"),
+                "cost_usd": None,
+            }
         result = run_engine(
             workspace, PLUGIN_IDENTITY_PROMPT, framework_dir=framework_dir,
             _skip_identity_check=True,

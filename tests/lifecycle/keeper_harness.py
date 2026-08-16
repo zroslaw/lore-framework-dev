@@ -217,7 +217,18 @@ class KeeperFixture(object):
         self._daemons = []
 
     def __enter__(self):
-        self.tmp = tempfile.mkdtemp(prefix="lrb-lifecycle-")
+        # realpath, not the bare mkdtemp result: on macOS /var is a symlink to
+        # /private/var, so mkdtemp hands back a logical path while lrb stores and
+        # compares physical ones (`cmd_workspaces_add` and `cmd_schedule` both
+        # realpath). This fixture writes config.json directly and so bypasses the
+        # normalization `lrb workspaces add` would have applied — leaving the
+        # registered workspace unequal to the being's own realpath(getcwd()), and
+        # every self-schedule from inside a being rejected as "not a registered
+        # workspace". Resolve once here so every path this fixture hands out
+        # already agrees with lrb's own identity comparison.
+        # See lore macos-var-symlink-realpath-ambiguity.md and
+        # realpath-for-identity-logical-for-contract-shape.md.
+        self.tmp = os.path.realpath(tempfile.mkdtemp(prefix="lrb-lifecycle-"))
         self.home = os.path.join(self.tmp, "home")
         self.launchagents = os.path.join(self.tmp, "launchagents")
         for k, v in (("LRB_HOME", self.home), ("LRB_LAUNCHAGENTS_DIR", self.launchagents)):

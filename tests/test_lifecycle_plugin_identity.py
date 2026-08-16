@@ -374,5 +374,54 @@ class CodexPromptPassthrough(unittest.TestCase):
         self.assertIn("PLUGIN-VERSION:", rewritten)
 
 
+class ClaudeInitPlugins(unittest.TestCase):
+    """Claude's identity verdict comes from the engine's own init event.
+
+    The model self-report it replaced reported the plugin *cache* on a machine
+    where the framework is installed, even though --plugin-dir had won and
+    `source` was `lr@inline` — a false mismatch that refused every Claude run.
+    """
+
+    INIT = (
+        '{"type":"system","subtype":"other"}\n'
+        'not json at all\n'
+        '{"type":"system","subtype":"init","plugins":['
+        '{"name":"lr","path":"/w/lore-framework","source":"lr@inline","version":"1.40.0"},'
+        '{"name":"clangd-lsp","path":"/c/clangd","version":"1.0.0"}]}\n'
+        '{"type":"result"}\n'
+    )
+
+    def test_parses_plugins_from_init_event(self):
+        plugins = harness.parse_claude_init_plugins(self.INIT)
+        self.assertEqual([p["name"] for p in plugins], ["lr", "clangd-lsp"])
+
+    def test_missing_init_event_is_none_not_empty(self):
+        """None means 'no verdict available'; [] means 'nothing loaded'."""
+        self.assertIsNone(harness.parse_claude_init_plugins('{"type":"result"}'))
+        self.assertIsNone(harness.parse_claude_init_plugins(""))
+
+    def test_init_event_without_plugins_key_is_empty_list(self):
+        self.assertEqual(
+            harness.parse_claude_init_plugins('{"type":"system","subtype":"init"}'), [],
+        )
+
+    def test_picks_lr_by_plugin_name(self):
+        entry = harness.loaded_lr_plugin(harness.parse_claude_init_plugins(self.INIT))
+        self.assertEqual(entry["path"], "/w/lore-framework")
+        self.assertEqual(entry["source"], "lr@inline")
+
+    def test_no_lr_plugin_returns_none(self):
+        self.assertIsNone(harness.loaded_lr_plugin([{"name": "clangd-lsp"}]))
+        self.assertIsNone(harness.loaded_lr_plugin([]))
+        self.assertIsNone(harness.loaded_lr_plugin(None))
+
+    def test_manifest_version_normalizes_onto_VERSION(self):
+        """plugin.json carries 1.<N>.0; VERSION carries <N>. Same identity."""
+        entry = harness.loaded_lr_plugin(harness.parse_claude_init_plugins(self.INIT))
+        self.assertEqual(
+            harness.normalize_framework_version(entry["version"]), "40",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
