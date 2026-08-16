@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "One Claude host flavor snapshots the whole plugin bundle per session and can serve a stale procedure; the operational rule for detecting and handling the mismatch."
+parent: lore/claude-engine-capabilities.md
+---
+
 # Ephemeral Session Plugin Snapshot Topology (Claude)
 
 New Claude engine-capability fact, confirmed twice in one session: at least one Claude Code host
@@ -32,17 +39,27 @@ spawn.
 
 ## Status
 
-Recorded as its own atomic topic rather than inlined into `claude-engine-capabilities.md` — this
-repo's practice is not to write durable lore mid-session without cause, and this is a single
-confirmed instance without an observed design-decision consequence yet. Promote the content into
-the hub topic's "Operational shape" section if this recurs, or if a future finalize/version-check
-procedure needs to account for it explicitly (e.g., a version-skew check that trusts session-start
-plugin state instead of live workspace state).
+**Promoted 2026-08-16.** Second confirmed occurrence (2026-08-16): the snapshot resolved to `VERSION`
+31 while the boot-resolved installed root was already at v40 — nine versions behind, with a
+**materially obsolete procedure** in the stale `attach.md` (pre-v36 `lr-core` layout, no `--engine`
+pass-through, no guest boot-map step). Unlike the first (benign, byte-identical doc) occurrence,
+following the snapshot here would have silently executed a v31-shaped procedure. Per the trigger
+this topic itself named, the content is now folded into `claude-engine-capabilities.md` § Operational
+shape as the canonical summary; this topic remains the atomic record of both confirmed instances and
+the operational rule applied (read both `VERSION` files; prefer the boot-resolved root on mismatch;
+`diff` the specific doc when the delta matters; say so to the user in one line).
+
+**Open guardrail question:** lore alone doesn't protect here — the cue arrives at slash-command
+dispatch, not at a task boundary a session would think to check lore for
+(`point-of-use-guardrails-beat-recorded-lore.md`). Candidate point-of-use sites (undecided): a
+version-consistency line in the skill self-location preamble, or an `lr-core` check comparing the
+invoking skill's root against the booted root. Tracked in `framework-improvements-backlog.md` §
+Documentation / Meta.
 
 ## See Also
 
-- `claude-engine-capabilities.md` — the hub topic for Claude-specific operational facts; this
-  snapshot mode is a candidate addition to its "Operational shape" section on a second occurrence.
+- `claude-engine-capabilities.md` — the hub topic; this snapshot mode's summary now lives in its
+  "Operational shape" section, promoted from this topic on the second occurrence.
 - `plugin-manifest-versioning.md`, `doctor-stale-plugin-cache.md` — the existing stale-cache
   disciplines this snapshot mode is adjacent to but distinct from (those concern the marketplace
   cache, not a per-session ephemeral copy).
@@ -53,3 +70,5 @@ plugin state instead of live workspace state).
   resolving to *different* framework roots, with no snapshot involved (each `SKILL.md` self-locates
   independently). This topic is one immutable snapshot taken once, at spawn; that one is
   different-invocations-different-roots by design, from the first invocation of each.
+- `point-of-use-guardrails-beat-recorded-lore.md` — why the open guardrail question needs a site,
+  not only this topic.

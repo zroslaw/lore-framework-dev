@@ -38,3 +38,6 @@ Editorial defaults:
 - Avoid metaphors that skip a logical step. State the mechanism and benefit plainly rather than turning repeated context directly into a durable team.
 - Use idiomatic English. For `понимать с полуслова`, prefer “understand without needing everything spelled out” over a literal translation.
 - Distinguish the Lore Agents framework from Lore Agents as named specialists whenever the wording could blur the product model.
+- Convert dense, enumerable prose into bold-led bullets; reserve one closing paragraph for the consequence or payoff so bullets carry the scan-path and prose carries the meaning.
+- Highlight commands at their point of use, in code style, linked to the relevant `docs/` page rather than left as plain text.
+- For a multi-section document, add one light, dot-separated contents line after the intro (top-level sections only, no sub-items) — structure at a glance without an index that rots.

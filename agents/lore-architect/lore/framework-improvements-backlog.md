@@ -361,6 +361,15 @@ Cross-engine plugin-marketplace readiness. Anchor topics: `engine-marketplace-re
 
 ### Documentation / Meta
 
+- **Guardrail for stale per-session plugin snapshot at slash-command dispatch (found 2026-08-16).**
+  On the "local-agent-mode-sessions" host flavor, a slash command's `SKILL.md` can resolve through a
+  per-session plugin snapshot that has diverged materially from the boot-resolved installed root
+  (confirmed nine versions stale with an obsolete procedure). Lore alone doesn't protect here — the
+  cue arrives at slash-command dispatch, not a task boundary a session would think to check lore for.
+  Candidate point-of-use sites, undecided: a version-consistency line in the skill self-location
+  preamble, or an `lr-core` check comparing the invoking skill's root against the booted root. See
+  `ephemeral-session-plugin-snapshot-topology.md`, `claude-engine-capabilities.md` § Operational
+  shape, `point-of-use-guardrails-beat-recorded-lore.md`.
 - ~~**README skills table sync**~~ — done in v11. Table now lists all skills, grouped by purpose (workspace setup / working with agents / session lifecycle / authoring / maintenance), with `/lr:finalize` description corrected to the four-phase form. Quick Start was also restructured to lead with the team-joining path.
 - **README skill table refresh for v12** — verify `/lr:doctor` is added to the skills table (Maintenance group is the natural home). Trigger: next time the README is touched, or sooner if asked.
 - **Adopter command-surface curation** — inventory every skill and classify it as daily workflow, collaboration, maintenance, setup, advanced module, or style. Decide retain/rename/combine/progressively disclose/retire, so a newcomer sees load → work/recall → collaborate → finalize → diagnose/refresh without learning the full catalog. Not a raw command-count reduction exercise. See `adopter-command-surface-curation.md`.

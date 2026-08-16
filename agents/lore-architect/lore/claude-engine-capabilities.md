@@ -1,3 +1,10 @@
+---
+lore: 1
+type: area
+summary: "Hub for Claude-specific install, invocation, plugin-cache, and subagent operational facts."
+parent: lore-context.md
+---
+
 # Claude Engine Capabilities
 
 The Claude Code profile is the reference engine path for Lore Framework: the shared procedure docs
@@ -51,7 +58,17 @@ are written in Claude terms first, and other engines override only the binding p
   session rather than referencing the marketplace cache or workspace checkout; skill dispatch
   resolves through that snapshot for the session's whole lifetime, even when
   `${CLAUDE_PLUGIN_ROOT}` is empty and the workspace checkout is git-pulled or version-bumped
-  mid-session. See `ephemeral-session-plugin-snapshot-topology.md`.
+  mid-session. Confirmed twice; the second occurrence (2026-08-16) showed the snapshot **nine
+  versions behind** the boot-resolved installed root (v31 vs. v40) with a **materially obsolete
+  procedure** in the stale copy (`attach.md` missing the v36 `lr_core` package split, `--engine`
+  pass-through, and guest boot-map generation) — following it would have silently executed a
+  v31-shaped procedure. The snapshot's version cannot be assumed to track the install; it must be
+  read, not inferred. **Operational rule:** when a slash-command `SKILL.md` base directory differs
+  from the boot-resolved framework root, read both `VERSION` files before following the skill's
+  doc; on a mismatch, prefer the boot-resolved installed root (the version the agent repo is
+  stamped against); `diff` the specific doc when the delta matters rather than assuming
+  equivalence; and say so to the user in one line — a silently-substituted framework root is
+  invisible afterward otherwise. See `ephemeral-session-plugin-snapshot-topology.md`.
 
 ## Why this hub exists
 
