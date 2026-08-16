@@ -37,6 +37,15 @@ def _read_summary(agent_dir):
     return None, None
 
 
+def _learning_section(summary_text):
+    """Return the Learning section body, stopping at the next level-2 heading."""
+    marker = "## Learning"
+    if marker not in summary_text:
+        return ""
+    tail = summary_text.split(marker, 1)[1]
+    return tail.split("\n## ", 1)[0].strip()
+
+
 # Engines whose CLI agent reliably executes summarize Step 1.5.
 # Cursor (`cursor-agent`) is a KNOWN BETA GAP: empirically it skips Step 1.5 in the
 # long summarize.md procedure — it never invokes session-takeover at all — while
@@ -149,6 +158,14 @@ class FinalizeScenarios(unittest.TestCase):
         self.assertIn("uuid:", content, "summary missing uuid frontmatter")
         self.assertIn(f"host_agent: {AGENT_NAME}", content, "summary missing host_agent frontmatter")
 
+        learning = _learning_section(content)
+        self.assertTrue(learning, "standalone summary missing Learning section")
+        self.assertIn(
+            "Learning was not assessed because no completed reflection-and-merge handoff was available.",
+            learning,
+            "standalone summarize must not invent a reflection or merge outcome",
+        )
+
         assert_usage_without_archive(self, self.fx.agent_dir, content)
 
     def test_13_finalize_end_to_end(self):
@@ -178,6 +195,26 @@ class FinalizeScenarios(unittest.TestCase):
 
         summary_path, summary_text = _read_summary(self.fx.agent_dir)
         self.assertTrue(summary_path, "no session summary was written by finalize")
+
+        learning = _learning_section(summary_text)
+        self.assertTrue(learning, "finalize summary missing Learning section")
+        self.assertIn(
+            FINALIZE_TOOL_CANARY,
+            learning,
+            "Learning section missing the durable fact selected during reflection",
+        )
+        self.assertIn("Lore changes:", learning, "Learning section missing merge outcomes")
+        self.assertIn("Not merged:", learning, "Learning section missing residual merge status")
+        self.assertIn("Issues:", learning, "Learning section missing merge confidence status")
+        self.assertTrue(
+            "lore/" in learning or "lore-context.md" in learning,
+            "Learning section must name the Lore destination changed by merge",
+        )
+        self.assertNotIn(
+            "Learning was not assessed",
+            learning,
+            "full finalize must use its reflection and merge handoffs",
+        )
 
         assert_usage_without_archive(self, self.fx.agent_dir, summary_text)
 
