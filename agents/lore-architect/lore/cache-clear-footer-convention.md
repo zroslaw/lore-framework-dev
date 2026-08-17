@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Cache-affecting releases must carry a hoisted Clear Plugin Cache footer with concrete commands — including for the ship session itself, which resolves the previous version's cache."
+parent: lore-context.md
+---
+
 **Migration / release-notes docs whose changes touch plugin-cached state must include a "Clear Plugin Cache" footer with concrete commands.** Codified in v12 alongside `/lr:doctor`.
 
 The convention's canonical wording lives in `lore-framework/docs/conventions.md` § Migration / Release-Note Authoring. `release-notes/12.md` is the worked example. `docs/version-check.md` § For Framework Authors signposts the same rule from the procedure that authors actually consult when writing release notes.
@@ -50,6 +57,23 @@ Footer-by-position is misleading — the convention is "include it" plus "place 
 This convention belongs to the rhythm of every framework version ship. Author the release-notes, evaluate triggers, hoist the footer if any apply, write the disambiguating phrasing, prefer the targeted cache wipe. The discipline is mechanical once internalized; the alternative is repeating v11's failure mode where users hit "skill is missing" with no in-line fix.
 
 The discipline composes with the versioning history backfill discipline: every finalization that lands a `VERSION` bump should both (a) author the release-notes with the footer if applicable, and (b) backfill `versioning-release-types.md` history with the new entry, including the cache-affecting annotation.
+
+## The ship session is itself a victim — and the first one (2026-08-17)
+
+The practical, self-inflicted case: **immediately after shipping a version, invoking a framework
+skill in the same session resolved from the *previous* version's plugin cache.** Following it would
+have executed the old procedure and skipped a fix shipped an hour earlier.
+
+The version that most needs the new procedure is the one whose own ship session cannot see it. So
+the discipline has a personal half:
+
+- **Detect** by comparing the skill's base directory version against `VERSION` in the checkout.
+- **Recover** by running the just-shipped procedure from the shipped checkout's `docs/`, not from
+  the resolved skill.
+
+This is the same mechanism the footer exists to warn adopters about, arriving one session earlier
+than the adopters do. See `ephemeral-session-plugin-snapshot-topology.md` for the host flavor that
+snapshots a whole bundle per session.
 
 ## See Also
 

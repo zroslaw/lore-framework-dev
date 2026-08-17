@@ -1,3 +1,10 @@
+---
+lore: 1
+type: area
+summary: "Hub for Codex-specific plugin install/refresh, invocation, subagent, sandbox, headless-exec, and lifecycle-harness operational facts."
+parent: lore-context.md
+---
+
 # Codex Engine Capabilities
 
 Codex is a shipped Tier-1 engine path for Lore Framework, but its operational model differs from
@@ -25,7 +32,16 @@ the linked topics below.
   requires `.git` writable through launch or configuration. Network denial is expected and Lore
   degrades around it.
 - **Lifecycle-harness caveat** — when a test is meant to validate newly-shipped plugin docs, verify
-  which installed plugin version Codex will actually load before trusting the result.
+  which installed plugin version Codex will actually load before trusting the result. Because Codex
+  has no `--plugin-dir`, **refreshing the plugin cache is a required pre-gate step at every VERSION
+  bump**; skip it and every module reports `0.0s` as the identity gate correctly refuses to run
+  (`lifecycle-testing-harness.md` § Running the gate). The marketplace `upgrade` subcommand fails for
+  a non-Git-configured marketplace; re-adding the plugin updates the cache.
+- **The shell tool does hold long blocking calls** (probed 2026-08-17, `gpt-5.4-mini`) — a plain 45s
+  sleep held 54s wall, and a background-and-wait construction held 101s for a 90s sleep. So a Keeper
+  timeout scenario finishing early is **model-compliance variance at the cheap tier**, not a shell
+  limitation. Don't reshape a test around a shell constraint that isn't there; see
+  `verify-before-acting-on-suspected-bugs.md` § Probe the hypothesis before reshaping a test.
 - **`codex exec` headless contract** — `codex exec --json --skip-git-repo-check -m <model> <prompt>`
   streams JSONL events (`thread.started` → `turn.started` → `item.completed`* → `turn.completed`/
   `turn.failed`), carries a token `usage` object but **no USD cost field at all**, and writes

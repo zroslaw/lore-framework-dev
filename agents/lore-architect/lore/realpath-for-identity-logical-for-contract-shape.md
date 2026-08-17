@@ -39,6 +39,22 @@ Two corollaries worth carrying:
   satisfy. See [fix-defects-are-context-errors.md](fix-defects-are-context-errors.md) § v39 and
   [single-canonical-source-discipline.md](single-canonical-source-discipline.md).
 
+## Third instance — a fixture that writes a tool's config bypasses its normalization (v41, 2026-08-17)
+
+A Keeper self-scheduling scenario failed with "cwd is not a registered workspace." The tool was
+entirely correct: its register path stores realpaths and its schedule path compares realpaths. The
+**fixture** wrote the config file directly with the bare `mkdtemp()` result, which on macOS is the
+logical `/var/...` path — so the registered workspace could never match and no being could ever be
+found.
+
+The generalization is not about paths at all: **a fixture that hand-writes a tool's config inherits
+none of the normalization the tool's own entry point applies.** Construct through the command, or
+realpath at the fixture root. Fixed at the fixture, the scenario passed in 80s versus a 356s timeout
+loop.
+
+Honesty note kept in the ship record: lore showed this scenario green earlier with no relevant code
+change since, so no regression was claimed — only that it fails now, and why.
+
 ## See Also
 
 - [macos-var-symlink-realpath-ambiguity.md](macos-var-symlink-realpath-ambiguity.md) — the identity

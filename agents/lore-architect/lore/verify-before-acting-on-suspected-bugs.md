@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Verify state, and verify which bug, before acting on it — diagnosis is cheap and a wrong fix is not; a failing gate names an observation, never a mechanism, and a model-routed probe is not ground truth."
+parent: lore-context.md
+---
+
 **Before repointing, deleting, or "fixing" something you believe is broken, verify the actual filesystem/state directly. Don't act on an inference — especially a dangling-reference claim.**
 
 Stating a wrong diagnosis to the user is cheap to correct; *acting* on it is not. The most dangerous move is "fixing" a bug in code you did **not** just write, on the strength of an inference.
@@ -78,6 +85,39 @@ reporting an unwelcome truth about the *environment* — and the third kind is w
 deletes a real guarantee. A sandboxed-install escape check went red because a real launchd Keeper
 exists on this machine; making it green would have removed the safety assertion, not repaired it.
 See `a-red-test-may-be-asserting-a-true-fact.md`.
+
+## Don't build a fix on an unverified symptom hypothesis (2026-08-17)
+
+The sharpest instance yet, because the cost was a day of work rather than a sentence. A lifecycle
+plugin-identity gate was failing. Taking that at face value, an entire `--settings
+enabledPlugins:false` mechanism was designed, factored into a shared test module, and **wired into
+three harnesses** — all on the model's claim that the marketplace cache outranks `--plugin-dir`. The
+engine's own init event then showed the opposite: `--plugin-dir` wins cleanly. Everything built on
+the premise was reverted.
+
+Two things to carry:
+
+- **A failing gate names an observation, never a mechanism.** The red says *what* was seen. The
+  cause is a hypothesis until something deterministic confirms it.
+- **A canary probe can still be a self-report.** The intermediate step here — planting a marker in a
+  copied tree and asking the model which body it saw — felt like empirical evidence and was not; it
+  gave the wrong answer. Engine-emitted ground truth (`a-gate-cannot-be-a-model-self-report.md`)
+  outranks anything routed through the model.
+
+When the symptom *is* a suspect self-report, get engine-emitted ground truth **first**. The probe is
+always cheaper than the fix designed against a confabulated premise.
+
+## Probe the hypothesis before reshaping a test (2026-08-17)
+
+Same reflex on the test side. A Keeper timeout scenario finished `ok` in 31s instead of timing out.
+First hypothesis: the engine's shell tool cannot hold a long blocking background-and-wait
+construction. Two direct probes disproved it — a plain 45s sleep held 54s wall, and the *exact*
+construction under test held 101s for a 90s sleep (recorded in `codex-engine-capabilities.md`).
+
+The probe design was sound; the session simply returned early. That is model-compliance variance at
+the cheap tier under the Keeper spawn prompt, and it passed on one retry. **One retry is legitimate
+when the draw is genuinely stochastic. A repeat failure gets recorded as a known gap — never
+reshaped until the test goes green.** See `a-red-test-may-be-asserting-a-true-fact.md`.
 
 ## See Also
 

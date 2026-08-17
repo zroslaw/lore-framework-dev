@@ -150,6 +150,73 @@ v31 re-run from stored logs overturned four of six failures at zero engine cost 
 confident-sounding assertion messages were the wrong ones. See
 `v31-lifecycle-rerun-partial-green-2026-07-27.md`.
 
+**The prompt is part of the assertion — phrase it in the artifact's own schema keys (v41).** A red
+lore-map scenario was the *test* being wrong, not the framework: the prompt asked for "the mapped
+top-level area" while the map emits both a `root:` and an `areas:` key, and the model echoed the
+root. Running the map generator directly against the same fixture proved the framework correct
+first; only then was the prompt fixed, never the framework. When a lifecycle prompt names an
+artifact with two plausible referents, use the **literal key**, or the test measures prompt ambiguity
+rather than execution fidelity.
+
+**Planted canaries and completion markers are mid-run assertions (v41).** The trilens scenarios
+failed on both engines because the defect canary and the completion markers were asserted against
+the agent's *final message*. A canary appears where reviewers report it — mid-round — while the
+closing report compresses it into a table row, and "when the skill finishes, print exactly these
+lines" permits printing them and then adding a wrap-up. Asserting on the final message tested report
+*style*, not review *substance*. Those assertions moved to the captured transcript, which still
+preserved a genuine miss (one run lacked the lens line on both surfaces). The **filesystem** checks
+deliberately stayed put: whether the review target was actually edited is ground truth, not agent
+self-report, and that is the scenario's real rail. See
+`transcript-vs-final-message-assertions.md`.
+
+## Running the gate: fixture and scheduling discipline (v41, 2026-08-17)
+
+Lessons from running v40's deferred full battery. All were self-inflicted; none were framework
+defects.
+
+**Never pin a fixture to an absolute framework version.** One scenario pinned its fixture at a
+hardcoded old version. With the framework far ahead, that forced a long upgrade walk — each hop
+displaying release notes — before the behavior under test was reached, and **the walk grows by one
+every release**. At the cheap gate tier it exhausted the action budget. The fixture now derives as
+*one version behind current*; deliberately-far-behind multi-version coverage lives in its own
+scenario. Same family as § Assertion style's "exercise the stated contract, not incidental release
+history."
+
+**Diagnostic: alternating failure locations mean budget exhaustion.** A scenario that fails at a
+*different* step on each run, passes intermittently, and passes consistently on another engine is
+running out of budget, not executing a broken procedure. Six runs of one scenario failed at three
+distinct steps with two passes interleaved. The first reading — generic "tier variance" — was too
+vague to act on and hid that the underlying framework fix was already working. Prefer a **mechanism**
+over a variance label before accepting flakiness.
+
+**Diagnostic: a whole shard at `0.0s` is an identity refusal, not breakage.** After a VERSION bump,
+every Codex lifecycle module reported `0.0s` — the plugin-identity gate correctly refusing to run
+because the Codex plugin cache still held the previous version. Read zero-duration results as
+refusal first. **Refreshing the Codex plugin cache is a required pre-gate step at any version bump**
+(`codex-engine-capabilities.md` § Plugin refresh).
+
+**Serialize real-engine tracks; do not run four suites concurrently.** Over-parallelizing exhausted
+the environment and *contaminated* a gate: one shard hit the account spend limit mid-run, another
+died with the shell launcher unavailable. Per § Claude account-limit signature those results are
+**uninterpretable, not red** — but here the contamination was self-inflicted. Reusable fingerprint:
+a run of modules failing in **3–46s against a 200–400s norm** is the account-limit signature; confirm
+by grepping the `LR_DEBUG_DIR` captures for the limit strings, then scope precisely which modules it
+touched rather than discarding the whole run.
+
+**A fixture that hand-writes a tool's config inherits none of that tool's normalization.** A Keeper
+self-scheduling scenario failed with "cwd is not a registered workspace." The tool was correct —
+both its register and schedule paths realpath — but the fixture wrote the config directly with the
+bare `mkdtemp()` result, which on macOS is the logical `/var/...` path, so no being could ever match.
+Construct through the tool's own command, or realpath at the fixture root. Fixed there, the scenario
+passed in 80s versus a 356s timeout loop. Third instance of the identity rule — see
+`realpath-for-identity-logical-for-contract-shape.md`.
+
+**This workspace's own git log is a free production sample.** Because the workspace runs the
+framework it develops, its history corroborated a fixture failure as a real production defect: the
+`chore(lore): update framework to v<F>` commit existed for v37 and v38 and for nothing since, and the
+v40 stamp was sitting uncommitted in the working tree. Check it before classifying a lifecycle
+failure as fixture-only.
+
 ## Cost and gating
 
 Gated behind `LR_LIFECYCLE=1` (real API cost; the default tier is the cheapest practical
@@ -211,7 +278,9 @@ reachable from the repo root, not only from deep test directories: root `README.
   verdict was cached per process — plus a Cursor arm implemented as a model self-report. All three
   closed 2026-07-28 (`check_cursor_plugin_sources()`, override verification,
   `engine|realpath|VERSION` verdict inheritance), and the fixes are themselves not yet gated by a
-  run. See `lifecycle-harness-plugin-identity-unverified.md`,
+  run. **The Claude arm was still a model self-report until v41**, when it moved to the engine's own
+  stream-json `system`/`init` event — until then every correct Claude run was reported as a mismatch
+  and the whole shard refused to start. See `lifecycle-harness-plugin-identity-unverified.md`,
   `a-gate-cannot-be-a-model-self-report.md`.
 - **Parallelize the suite** — scenarios are fixture-isolated; today they run serially via
   `unittest discover` (~15–45 min/engine). Future: `LR_LIFECYCLE_JOBS`, parallel by test file, or
@@ -281,3 +350,7 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `lore-beings-design.md` — the feature the `LR_LIFECYCLE_KEEPER=1` track exercises; `keeper-spawn-prompt-boilerplate-distraction.md`, `cursor-agent-real-invocation-contract.md` — the two issues hit getting the Keeper scenarios green.
 - `testing-simulate-process-escape-without-setsid-binary.md` — a fast synthetic-process-tree technique that complements this harness's real-engine B1/B2/B3 scenarios when only the process-tree *shape* (not real engine behavior) needs reproducing.
 - `kill-tree-enumerate-before-signal-ordering.md`, `hot-path-latency-can-expose-latent-test-timing-races.md` — operational lessons from the B2/B3 Keeper kill-tree fix that produced this harness's cursor coverage.
+- `the-terminal-step-is-the-step-that-gets-dropped.md`,
+  `instruction-location-beats-emphasis-in-long-docs.md`, `models-copy-what-they-should-compute.md` —
+  the three execution-fidelity defect shapes this harness surfaced in the v41 battery, and the
+  structural (not exhortative) fixes each one takes.

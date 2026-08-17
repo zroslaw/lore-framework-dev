@@ -78,6 +78,38 @@ Practice, from round 3 which was run correctly:
   concurrent or unattended session can sweep it into an unrelated commit
   (`concurrent-session-committed-my-uncommitted-work.md`).
 
+## Enumerate what the gate *reads*, not only what the change touches (v41, 2026-08-17)
+
+Freezing the tree is necessary but not sufficient, because a real-engine gate reads the **live
+framework checkout** — so anything in that checkout is gate input, including files that feel like
+outputs of the ship rather than inputs to it.
+
+Concrete slip: a release-notes file was edited while a ship gate ran. The boot-upgrade scenario
+**walks and displays release notes** during its version walk, so that file sits squarely in the
+gate's read path. The assertions almost certainly did not depend on its text — but "almost
+certainly" is not what a release gate produces. The run was stopped a minute in and restarted
+against a frozen commit.
+
+Practice that followed, and worked:
+
+- **Draft fixes into scratch during a run; apply only between runs.** Commit the tree, with both
+  SHAs named, before gating, so each result belongs to a specific state.
+- **Serialize tracks rather than running them concurrently**, so token-pool contention cannot make
+  results uninterpretable (`lifecycle-testing-harness.md` § Running the gate).
+- Before starting, enumerate the files each scenario *reads* — not just the files the change edits.
+
+## The tag commit is not the gated commit — disclose the delta (v41)
+
+The v41 version-history entry initially named the gate's frozen tree, but the **tag landed on a
+later commit**: the release-notes finalization necessarily lands *after* the gate, because the notes
+are audited last (`a-release-record-goes-stale-while-you-fix-it.md`). These are **always two
+different SHAs** under that discipline.
+
+Rule: record the **tagged** commit as the version's identity, and disclose the delta explicitly —
+what the tag contains that no gate saw — instead of silently attributing the gate result to the
+tagged tree. v41's entry says the tagged tree is one prose-only commit beyond the gated one, and
+names which scenario reads that prose.
+
 ## See Also
 
 - `execution-testing-catches-blind-ambiguity.md` — § pre-ship = pre-push, the discipline this sharpens.

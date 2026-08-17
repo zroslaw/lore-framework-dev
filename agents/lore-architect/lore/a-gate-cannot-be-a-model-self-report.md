@@ -38,6 +38,24 @@ engines "had A7 coverage" — a coverage checkbox hid an evidence-class differen
 any tree whose `VERSION` differs from `LR_FRAMEWORK_DIR`. Filesystem only, no engine call. Run
 against the real machine state it named both stale v30 trees immediately.
 
+## The same arm, second engine, two years of latency (v41, 2026-08-17)
+
+Fixing Cursor's arm did not fix the rule's other instances. **Claude's arm was still a model
+self-report** and eventually blocked the entire Claude shard: the model greps the plugin cache and
+reports that path while the engine had actually loaded `--plugin-dir`'s tree, so every *correct* run
+was reported as a mismatch. In one probe it cited a `.cursor-skills/` path Claude Code never
+registers.
+
+The replacement is the engine's own stream-json **`system`/`init` event**, which enumerates each
+loaded plugin with `path` and `source` — engine-emitted, not model-reported. Faster (~4.5s vs ~20.5s)
+and strictly more capable: it also catches a `plugin.json` disagreeing with `VERSION`.
+
+Two things generalize. First, **when this rule catches one arm, sweep every arm** — the asymmetry
+hides behind "all engines have coverage," which is precisely the parity trap below. Second, a
+self-report failure is dangerous in *both* directions: v33's instance was a false green, v41's was a
+false red that cost a day of building a fix on a premise the model had confabulated
+(`verify-before-acting-on-suspected-bugs.md` § Don't build a fix on an unverified premise).
+
 ## The deterministic-test form: a contract test over prose can pin the defect (v39)
 
 A green deterministic test *looks* like external evidence, which makes this variant easy to miss. The

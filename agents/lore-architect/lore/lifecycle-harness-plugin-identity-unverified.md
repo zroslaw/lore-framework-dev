@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "The harness's per-engine plugin-identity gate: how an installed plugin silently substitutes the tree under test, and the deterministic filesystem and engine-init-event checks that close it."
+parent: lore-context.md
+---
+
 # Lifecycle Harness Doesn't Verify Which Plugin Actually Loaded
 
 `tests/lifecycle/harness.py`'s `run_engine()` passes `--plugin-dir <framework_dir>` to every engine,
@@ -114,6 +121,36 @@ Codex has no per-invocation plugin-directory flag: its fallback fixture names th
 directly while the installed marketplace baseline remains the identity being preflighted. Do not
 require Codex's marketplace source to equal a temporary fixture copy; that would make the fallback
 scenario impossible rather than safer.
+
+## The Claude arm was the *third* self-report — fixed from the engine init event (v41, 2026-08-17)
+
+Cursor's model-self-report arm was fixed in v33; **Claude's was the same defect, left standing, and
+it eventually blocked an entire engine.** The Claude arm asked the *model* which plugin root supplied
+its `lr` skills. On a machine with `lr` installed from the marketplace, the model greps the plugin
+cache and reports that path, while the engine had actually loaded the `--plugin-dir` tree. In one
+probe it cited a `.cursor-skills/` path Claude Code never registers at all. Result: **every correct
+Claude run was reported as a mismatch and the whole shard refused to start.**
+
+Ground truth is the engine's own stream-json **`system`/`init` event**, which enumerates each loaded
+plugin with its `path` and `source`. It showed exactly one `lr` plugin, `source: lr@inline`, path =
+the tree under test — so `--plugin-dir` wins cleanly over the installed marketplace plugin, the
+opposite of what the model reported.
+
+Reading that event removes the model from the loop entirely: green on the real tree, red on a
+mismatched one, **~4.5s instead of ~20.5s**, and it now also catches a `plugin.json` disagreeing with
+`VERSION`.
+
+This is the second confirmed instance of the Cursor-arm failure shape, this time blocking a whole
+engine rather than one arm. See `a-gate-cannot-be-a-model-self-report.md`.
+
+**Costly corollary — don't build the fix on the self-report's premise.** Before touching the identity
+gate, an entire `--settings enabledPlugins:false` mechanism plus a new shared test module wired into
+three harnesses was built on the model's claim that the marketplace cache outranks `--plugin-dir`.
+Deterministic ground truth showed the opposite, and all of it was reverted. Even the intermediate
+canary probe — planting a marker in a copied tree and asking the model which body it saw — was still
+a model self-report, and gave a wrong answer. A failing gate names an **observation, never a
+mechanism**: get engine-emitted ground truth first. See
+`verify-before-acting-on-suspected-bugs.md`.
 
 ## Concrete instance this bit
 

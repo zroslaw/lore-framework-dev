@@ -56,3 +56,19 @@ Framework is at version 5.
 **Ownership-aware migrations (v5+):** migrations that touch user-side generated files must distinguish framework-owned-stale from orphaned. Owned-stale regenerates (three-way-merge on user edits); orphans prompt the user. See `migration-ownership.md`.
 
 **Template-emission audit:** when the framework changes its file-reference form (e.g., sibling-path → plugin form), every template that emits content — not just runtime code — must be audited. Missed emission sites produce broken artifacts on user machines indefinitely. See `plugin-compat-template-audit.md`.
+
+## Auto-publication confirmed in the wild (2026-08-17)
+
+The boot-upgrade publish step had been silently skipped for several versions — the stamp was
+committed and never pushed (`the-terminal-step-is-the-step-that-gets-dropped.md`). The v41 fix
+confirmed itself while it was being written up: a dev-repo push was **rejected** because a concurrent
+session on this machine had already pushed the framework-update stamp commit — the very commit that
+had been missing.
+
+Operational consequences worth keeping:
+
+- Expect the **`lore-repo.md` version-stamp line to be the conflict site** whenever a concurrent
+  session publishes an update.
+- Resolve to the **newer** version.
+- After the rebase, **verify each of your own changes survived** rather than trusting that the rebase
+  completed. See `concurrent-session-committed-my-uncommitted-work.md`.

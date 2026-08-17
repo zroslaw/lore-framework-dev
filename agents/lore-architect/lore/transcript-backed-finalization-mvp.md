@@ -77,6 +77,24 @@ The deterministic suite covers the parser, bounds, overlap, strict resolver, red
 write behavior. Real-engine lifecycle and quality verification were waived by the user for v39, so
 the release does not claim model-execution fidelity for the procedure.
 
+## First real run: expect ~3 candidates per distinct insight (2026-08-17)
+
+The first production use over a long session produced **five chunks and roughly three dozen
+candidates**, with heavy cross-chunk near-duplication. Adjacent chunks carry the preceding dialogue
+unit as labelled overlap, so the same insight is independently distilled two or three times under
+different proposed names.
+
+This is working as designed, not a defect. The procedure's dedup rule is deliberately narrow —
+exact name **and** exact body — and it explicitly declines to decide semantic equivalence, leaving
+**merge as the only semantic reducer**. The division of labour is right, but it has an operational
+consequence worth stating plainly:
+
+- Merge receives **substantially more input than the session actually taught**.
+- The host must brief merge to **consolidate aggressively**, not treat each reflection file as a
+  distinct lesson, and should name the known near-duplicate clusters it can see.
+- Measured ratio on this run: **about three candidates per genuinely distinct insight**. Worth
+  re-measuring rather than assuming it generalizes.
+
 ## Relationships
 
 This design advances the correctness concern in
