@@ -145,7 +145,18 @@ class BootUpgradeScenarios(unittest.TestCase):
 
     def test_05_boot_version_mismatch_reconciles_and_publishes(self):
         """A clean outdated repo is fully reconciled, then narrowly published."""
-        fx = build_fixture(self.tmp, version="17")
+        # One version behind, not a hardcoded old stamp. This scenario's contract
+        # is "reconcile, then publish" — the length of the release history in
+        # front of that is incidental, and a fixed stamp made it grow by one
+        # every release. At "17" against a v41 framework the agent had to walk
+        # and display 24 versions of release notes before reaching the behavior
+        # under test, and at the cheap gate tier it ran out of budget in a
+        # different place each run (no stamp / stamp-no-commit / commit-no-push
+        # across four runs) while codex passed consistently. See lore
+        # lifecycle-testing-harness.md § "Exercise the stated contract, not
+        # incidental release history". End-to-end multi-version migration
+        # coverage belongs to test_06, which deliberately starts far behind.
+        fx = build_fixture(self.tmp, version=str(int(harness.framework_version()) - 1))
         r = run_engine(fx.workspace, BOOT_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
