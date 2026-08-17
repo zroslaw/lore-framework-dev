@@ -65,14 +65,21 @@ class TrilensLoopScenarios(unittest.TestCase):
         r = run_engine(self.fx.workspace, TRILENS_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
-        self.assertIn("TRILENS-DONE", r.text, f"skill did not run to completion:\n{r.text}")
-        self._assert_three_lenses(r.text)
-        # Transcript, not final message: "did the reviewers surface it" is about
-        # what was said during the round. The closing report legitimately
-        # compresses findings into a table ("Broken ghost-topic reference"), so
-        # asserting the filename against the final message tests report style
-        # rather than review substance. TRILENS-DONE and LENSES: stay on text —
-        # those really are end-state.
+        self.assertIn("TRILENS-DONE", r.transcript,
+                      f"skill did not run to completion:\n{r.transcript}")
+        self._assert_three_lenses(r.transcript)
+        # Every text assertion here is on the transcript, because every one of
+        # them is about something said *during* the round. The prompt asks for
+        # the markers "when the skill finishes", which the agent satisfies by
+        # printing them at skill completion and then adding a wrap-up — so the
+        # final message is a summary, not the instrumentation. The closing
+        # report also compresses findings into a table row ("Broken ghost-topic
+        # reference"), so asserting the planted filename against the final
+        # message tested report style rather than review substance.
+        #
+        # The rails that must not move to the transcript are the two filesystem
+        # checks below: whether the target was edited is ground truth, not
+        # something the agent reports about itself.
         self.assertIn(
             REVIEW_DEFECT_CANARY, r.transcript,
             f"reviewers did not surface the planted dangling reference:\n{r.transcript}",
@@ -87,7 +94,8 @@ class TrilensLoopScenarios(unittest.TestCase):
         r = run_engine(self.fx.workspace, TRILENS_REPORT_ONLY_PROMPT)
         print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
-        self.assertIn("TRILENS-DONE", r.text, f"skill did not run to completion:\n{r.text}")
+        self.assertIn("TRILENS-DONE", r.transcript,
+                      f"skill did not run to completion:\n{r.transcript}")
         self.assertIn(
             REVIEW_DEFECT_CANARY, r.transcript,
             f"reviewers did not surface the planted dangling reference:\n{r.transcript}",
