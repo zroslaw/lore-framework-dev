@@ -459,3 +459,17 @@ Anchors: `v25-cursor-ops-parity-design.md`, `v25-workspace-pull-init-design.md`,
 - `design-doc-before-implement.md` — why active items get a workdir draft before framework-file edits
 - `framework-scope-vs-agent-scope.md` — test for whether a proposed framework item belongs here or in agent-owned territory
 - `feedback-don-t-defer-completable-scope.md` — when *not* to add to this backlog: bounded mechanical sweeps belong in the current ship, not deferred
+
+### summarize.md is long enough that agents page it and miss the tail (v41)
+
+`docs/summarize.md` is 492 lines. Observed agent reads during the v41 gate were lines 1–100,
+100–299, 300–449 — the tail was never read. That is how the `usage:` obligation at line 383 went
+unperformed while the agent held both the stats JSON and the frontmatter schema.
+
+v41 worked around it by moving the *order* into `finalize.md` Phase 3 (96 lines, read whole) and
+restating the obligation at the end of Step 2. Neither addresses the underlying shape: a procedure
+doc whose instructions can fall outside what the executor reads.
+
+Options not taken: split the doc, or move usage resolution into `lr-core` as a literate accelerator
+so the step is one deterministic call rather than a documented sub-procedure. The second is the
+better fit for the framework's own patterns.
