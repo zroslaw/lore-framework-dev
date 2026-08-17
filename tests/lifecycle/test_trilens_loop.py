@@ -67,9 +67,15 @@ class TrilensLoopScenarios(unittest.TestCase):
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
         self.assertIn("TRILENS-DONE", r.text, f"skill did not run to completion:\n{r.text}")
         self._assert_three_lenses(r.text)
+        # Transcript, not final message: "did the reviewers surface it" is about
+        # what was said during the round. The closing report legitimately
+        # compresses findings into a table ("Broken ghost-topic reference"), so
+        # asserting the filename against the final message tests report style
+        # rather than review substance. TRILENS-DONE and LENSES: stay on text —
+        # those really are end-state.
         self.assertIn(
-            REVIEW_DEFECT_CANARY, r.text,
-            f"reviewers did not surface the planted dangling reference:\n{r.text}",
+            REVIEW_DEFECT_CANARY, r.transcript,
+            f"reviewers did not surface the planted dangling reference:\n{r.transcript}",
         )
         self.assertNotEqual(
             self.before, self._target_now(),
@@ -83,8 +89,8 @@ class TrilensLoopScenarios(unittest.TestCase):
         self.assertEqual(r.exit_code, 0, f"engine run failed: {r.stderr[-500:]}")
         self.assertIn("TRILENS-DONE", r.text, f"skill did not run to completion:\n{r.text}")
         self.assertIn(
-            REVIEW_DEFECT_CANARY, r.text,
-            f"reviewers did not surface the planted dangling reference:\n{r.text}",
+            REVIEW_DEFECT_CANARY, r.transcript,
+            f"reviewers did not surface the planted dangling reference:\n{r.transcript}",
         )
         self.assertEqual(
             self.before, self._target_now(),
