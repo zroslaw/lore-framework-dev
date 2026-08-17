@@ -1474,8 +1474,10 @@ class RunResult:
         # notice, a version warning) is absent from it entirely. Assertions of
         # the form "the user was told X" belong here; assertions about the end
         # state (canaries, DONE markers) belong on `text`.
-        # Claude and Cursor are driven with --output-format json, which returns
-        # one result string and no event stream, so transcript == text there.
+        # Claude is driven with --output-format stream-json, so its transcript is
+        # the concatenated mid-run assistant text. Cursor is still --output-format
+        # json, which returns one result string and no event stream, so
+        # transcript == text there.
         self.transcript = transcript if transcript is not None else text
 
     def summary(self):
@@ -1534,17 +1536,45 @@ def run_engine(workspace, prompt, framework_dir=None, _skip_identity_check=False
             check_installed_plugin_sources(framework_dir)
     env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
     if ENGINE == "claude":
+        # stream-json, not json: the plain json format returns only the final
+        # result string, so anything the agent said mid-run is unrecoverable and
+        # RunResult.transcript degrades to text. That silently breaks every
+        # "the user was told X" assertion — a compliant run that printed the
+        # notice mid-run and a violating run that never printed it look
+        # identical. See transcript-vs-final-message-assertions.md.
         cmd = [
             "claude", "-p", prompt,
             "--plugin-dir", framework_dir,
             "--model", MODEL,
-            "--output-format", "json",
+            "--output-format", "stream-json",
+            "--verbose",
             "--dangerously-skip-permissions",
         ]
         proc = subprocess.run(
             cmd, cwd=workspace, capture_output=True, text=True, timeout=RUN_TIMEOUT,
             env=env,
         )
+        text, cost, duration, said = "", None, None, []
+        for line in proc.stdout.splitlines():
+            try:
+                event = json.loads(line)
+            except ValueError:
+                continue
+            if event.get("type") == "assistant":
+                for block in (event.get("message") or {}).get("content") or []:
+                    if isinstance(block, dict) and block.get("type") == "text":
+                        chunk = block.get("text") or ""
+                        if chunk.strip():
+                            said.append(chunk)
+            elif event.get("type") == "result":
+                text = event.get("result") or ""
+                cost = event.get("total_cost_usd")
+                duration = event.get("duration_ms")
+        rr = RunResult(proc.returncode, text or (said[-1] if said else proc.stdout),
+                       cost, duration, proc.stderr,
+                       transcript="\n".join(said) or text)
+        _debug_dump(rr)
+        return rr
     elif ENGINE == "cursor":
         cmd = [
             "cursor-agent", "-p", prompt,
