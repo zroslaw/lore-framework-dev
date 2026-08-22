@@ -8,9 +8,8 @@ summary: "Root working knowledge and navigation for the lore-architect."
 
 Compacted working knowledge for the **lore-architect**. This is the entry point to the lore graph,
 not a catalog — each theme points at its summary topic, which fans out to detail. For exhaustive
-lookup, scan `lore/` directly. (Follows the `lore-context` shape discipline: working-knowledge +
-summary-topic references, present-tense, no index, no version-history narrative — see
-`process-merge.md` § Step 4.)
+lookup, scan `lore/` directly. (Shape rule: working knowledge plus summary-topic references,
+present tense, no index — `lore-context-shape-discipline.md`, `process-merge.md` § Step 4.)
 
 ## Who I Am
 
@@ -113,8 +112,8 @@ timer. See `plugin-mcp-server-convention.md`, `wait-primitive-feature.md`.
 Engine-specific operational knowledge has one hub topic per engine:
 `claude-engine-capabilities.md`, `codex-engine-capabilities.md`, `cursor-engine-capabilities.md`.
 Use them as entry points for install/update model, invocation surface, subagent mechanism, memory
-file, MCP/plugin loading, sandbox constraints, and lifecycle-harness caveats; keep atomic findings
-in the linked topics rather than rediscovering them from old session notes. Cursor live usage
+file, MCP/plugin loading, sandbox constraints, boot cost, and lifecycle-harness caveats; keep
+atomic findings in the linked topics rather than rediscovering them from old session notes. Cursor live usage
 retrieval → `cursor-usage-auto-retrieval.md`.
 
 At least one Claude Code host flavor snapshots the **entire plugin bundle per session** rather than
@@ -127,15 +126,11 @@ in agent lore. Lore is for judgement and history; the profile is the point-of-us
 sibling profiles whenever one binding gains a guardrail. See `docs-engines-convention.md` § Engine
 traps belong in the binding.
 
-**Plugin identity is a precondition of a lifecycle result.** The harness asserts loaded plugin
-VERSION against `LR_FRAMEWORK_DIR` before trusting results, with the verdict inherited by child
-subprocesses via an `engine|realpath|VERSION` token rather than cached per process. Every arm must
-rest on engine-emitted evidence: Codex and Cursor read installed-source state off the filesystem,
-and Claude reads the stream-json `system`/`init` event (which also catches `plugin.json` disagreeing
-with `VERSION`). Parse the leading version token only, because Cursor can append completion prose to
-its identity line.
-Cursor's cloud marketplace install **rehydrates within ~25 seconds** of being moved aside, so a
-manual prep step cannot be trusted; re-check at suite start. See
+**Plugin identity is a precondition of a lifecycle result.** The harness asserts the loaded plugin's
+VERSION against `LR_FRAMEWORK_DIR` before trusting results, and every arm must rest on
+engine-emitted evidence rather than anything the engine could self-report. Cursor's cloud
+marketplace install rehydrates over `--plugin-dir` within ~25 seconds of a move-aside, so a manual
+prep step cannot be trusted; re-check at suite start. See
 `lifecycle-harness-plugin-identity-unverified.md`, `a-gate-cannot-be-a-model-self-report.md`,
 `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
 
@@ -146,9 +141,7 @@ separately** — manifest schema, skill-tree location, and update model all diff
 does *not* imply Cursor/Codex parity. Claude Code is strict-clean; the remaining public step is
 Console-form community submission. Cursor is structurally ready but seamless multi-user propagation
 still needs a team marketplace + Auto Refresh + GitHub App validation. Codex native packaging is
-resolved. Public submission also needs reviewer-facing metadata, and separation of runtime release
-identity, submission-support files, and per-engine publication status. See
-`engine-marketplace-readiness.md`, `plugin-distribution.md`,
+resolved. See `engine-marketplace-readiness.md`, `plugin-distribution.md`,
 `cursor-plugin-distribution-update-model.md`, `plugin-manifest-versioning.md`.
 
 Positioning copy must lead with the **triad** (named role-based agents + deliberate reflect/merge
@@ -187,10 +180,6 @@ chat has the same shape from a different miss. Remedy in both cases is naming `-
 open as backlog B8. See `engine-profile-must-be-observed-not-believed.md`,
 `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`,
 `cursor-ide-engine-detection-blind-spot.md`.
-
-**Cursor boot cost (measured 2026-07-28):** ~20K tokens for a version-match boot, `lore-context.md`
-the largest component; remeasure with `lore-framework/scripts/token-count` (`o200k_base`). See
-`cursor-boot-context-cost-measurement.md`.
 
 `version-check.md`'s nested-repo guard carries a macOS trap: "resolve both to real paths" is not
 self-executing prose — a weak model filled the gap with bare `pwd`, which disagrees with git's
@@ -294,17 +283,23 @@ own topic — these are pointers, not summaries.
 - **On VERSION bumps:** backfill `versioning-release-types.md` history, add the cache-clear footer if
   cache-affecting, bump all four version-bearing manifests to `1.<VERSION>.0`, promote any
   newly-named principle to its own topic. Full curation disciplines live in `role.md`.
-- **Pre-ship review has two legs, ordered execution-first** when the deliverable is executable prose:
-  lifecycle suite → dogfood the change onto this workspace → TriLens over whatever those disturbed.
-  Running a procedure once finds in seconds what nine reading lenses may not find at all, and it
-  hands reviewers evidence reading cannot produce. Review catches reasoning issues; the harness
-  catches model-execution-fidelity issues invisible to a strong-model reviewer, and the fidelity axis
-  is **engine, not just model tier** (cheapest practical tier per engine: Claude → haiku, Codex →
-  gpt-5.4-mini, Cursor → composer-2.5). **The empirical gate runs before the tag, or the release
-  records explicitly that it did not** — deterministic tests plus review do not make a VERSION bump
-  shippable, and "we'll gate it next session" is what published v40's defects to users. Reporting
-  corollary: after a review-only gate, say plainly what remains **untested**. See
-  `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`,
+- **Both expensive pre-ship gates are on request, not default (user decision 2026-08-22).** The
+  lifecycle suite and `/lr:trilens-loop` run only when the user asks; default-on slowed development
+  drastically and burned tokens for little return on most ships. Deterministic tests, `/lr:check`,
+  and dogfooding stay default. **What did not change: the disposition record** — every ship names
+  each gate `passed`, `waived`, or `did not run`, `did not run` is now the default, and it is said
+  out loud in one line rather than silently omitted. After an ungated ship, say plainly what remains
+  **untested**. Default-off is a cost decision, not a claim the gates are unnecessary (v40 is the
+  standing counter-example — see Current State). The policy itself is **agent lore only**: no plugin
+  artifact requires either gate, so flipping a default is a `role.md`/`lore-context.md` edit with no
+  VERSION bump, no manifest bump and no release notes. See
+  `feedback-pre-ship-gates-on-request.md`, `gate-waiver-is-a-record.md`.
+- **When the empirical leg does run, its order is fixed: lifecycle suite → dogfood the change onto
+  this workspace → TriLens over whatever those disturbed.** TriLens comes *after* dogfooding because
+  dogfooding produces the evidence the reviewers read. Running a procedure once finds in seconds what
+  nine reading lenses may not find at all, and the fidelity axis is **engine, not just model tier**
+  (cheapest practical tier per engine: Claude → haiku, Codex → gpt-5.4-mini, Cursor → composer-2.5).
+  See `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`,
   `haiku-ambiguity-detector.md`.
 - **When a procedure doesn't execute, change structure — not wording.** Three shapes, all found by
   running v40's docs and all immune to more emphatic prose: the **terminal step** that publishes or
@@ -314,16 +309,17 @@ own topic — these are pointers, not summaries.
   anything the model can **copy instead of compute** — a concrete example, a machine-resolved path it
   must retype — will be copied. See `the-terminal-step-is-the-step-that-gets-dropped.md`,
   `instruction-location-beats-emphasis-in-long-docs.md`, `models-copy-what-they-should-compute.md`.
-- **Run the loop via `/lr:trilens-loop`**, not by hand — the skill enforces cold-context reviewer
-  independence, the APPLIED/DECLINED ledger, the "a silent round is not a clean round" guard, and
-  rail-removal disclosure, and routes the spawn through the engine binding. Lens *choice* and triage
-  stay mine: brief the **goal, not the rationale**; vary the lens *kind* by round (round 1 reviews
-  the work, round 2 leads with "did the fixes fix it", round 3 goes where the evidence points);
-  treat convergent findings from independent lenses as strong evidence, not redundancy; inventory
-  spent lenses before a re-review. Two standing slots: **findings-as-a-system** on any release
-  shipping a *set* of diagnostics, **claim audit** on any round following fixes. ~94% of a loop's
-  tokens stay inside the subagents, so the exchange contract is justified on independence, never
-  token savings. See `trilens-loop-feature.md`, `parallel-reviewer-fanout-pattern.md`,
+- **When TriLens is requested, run it via `/lr:trilens-loop`**, not by hand — the skill enforces
+  cold-context reviewer independence, the APPLIED/DECLINED ledger, the "a silent round is not a
+  clean round" guard, and rail-removal disclosure, and routes the spawn through the engine binding.
+  Lens *choice* and triage stay mine: brief the **goal, not the rationale**; vary the lens *kind* by
+  round (round 1 reviews the work, round 2 leads with "did the fixes fix it", round 3 goes where the
+  evidence points); treat convergent findings from independent lenses as strong evidence, not
+  redundancy; inventory spent lenses before a re-review. Two standing slots:
+  **findings-as-a-system** on any release shipping a *set* of diagnostics, **claim audit** on any
+  round following fixes. The exchange contract is justified on independence, never token savings.
+  See `trilens-loop-feature.md`,
+  `parallel-reviewer-fanout-pattern.md`,
   `lens-novelty-is-the-scarce-resource-on-re-review.md`, `sonnet-subagent-review-pattern.md`.
 - **A gate result belongs to a specific artifact state.** Freeze before spawning — commit, name the
   SHA in the brief, tag only after the loop ends; editing while reviewers read moves line numbers and
@@ -521,16 +517,17 @@ release or fold-into-main work, stashing around feature merges when needed
 (`fold-feature-into-local-main-via-stash.md`).
 
 **This workspace really does run concurrent sessions, including non-human ones** (the live launchd
-Keeper above). A concurrent session's directory-wide `git add` can commit and push work I left
-uncommitted — no conflict, no loss, but ungated work ships under an unrelated commit message, and
-`git status` stops being a reliable inventory of my own changes. So: stage narrowly (`git add
-<path>`, not a directory), re-check `git status` and `git log` *before reporting* on my own change
-set, and never leave deliberately-ungated work sitting dirty — branch it. See
+Keeper). Another session's directory-wide `git add` can commit and push work I left uncommitted — no
+conflict, no loss, but ungated work ships under an unrelated message and `git status` stops being a
+reliable inventory of my own changes. So: stage narrowly (`git add <path>`, not a directory),
+re-check `git status` and `git log` *before reporting* on my own change set, and branch
+deliberately-ungated work rather than leaving it dirty. See
 `concurrent-session-committed-my-uncommitted-work.md`,
 `same-agent-multiple-engines-single-writer.md`.
 
-Both pre-ship gates work: `/lr:trilens-loop`, and `tests/lifecycle/` (plus Keeper and quality
-tracks). For small doc ships, a feedback-only trilens round then selective apply is valid
+Both pre-ship gates exist and work — `/lr:trilens-loop` and `tests/lifecycle/` (plus Keeper and
+quality tracks) — and since 2026-08-22 both are on request (see Operating Disciplines). For small
+doc ships, a feedback-only trilens round then selective apply is valid
 (`trilens-feedback-only-selective-apply.md`).
 
 ## Running Backlog & Standing Improvement List
@@ -540,7 +537,7 @@ archives per-ship gate dispositions. It is organized into top-level `##` categor
 Directions, Session Lifecycle & Durability, Knowledge Quality & Curation, Multi-Agent Collaboration,
 Workspace & Environment, Framework Upkeep/Distribution/Docs, Ship Closures) each holding `###`
 topical sections — file new items under the matching category
-(`backlog-categorization-precedent.md`). ~239 lore topics.
+(`backlog-categorization-precedent.md`). ~241 lore topics.
 
 **`workdir/what-to-improve.md`** is the **standing prioritized improvement list** — a ranked action
 view over the backlog that must always exist, not a one-off review deliverable (user-established

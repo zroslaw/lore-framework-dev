@@ -35,5 +35,7 @@ rule is a second implementation with its own drift surface
 ## See Also
 
 - `lore-context-shape-discipline.md` — the sibling rule for the root context file: shape over size.
+- `scripted-prose-edit-needs-a-read-back.md` — how to edit these files' long bullets safely, and
+  what a scripted edit cannot see about the prose it writes.
 - `single-canonical-source-discipline.md` — why the field schema is pointed at, not restated here.
 - `naming-foundational-principles.md` — when a framing deserves its own topic at all.
