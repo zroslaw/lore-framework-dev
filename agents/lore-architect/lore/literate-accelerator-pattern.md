@@ -105,3 +105,11 @@ automatically shrink its doc; check the measurement rather than assuming the the
 See `subagent-as-optimization-vs-subagent-as-semantics.md` for a related but distinct classification
 question (what a *subagent* is for, not what a *script's* fallback is) and
 `single-canonical-source-discipline.md` for the general principle this is one instance of.
+
+**Two operational traps found extending `cmd_preflight`'s docstring (v42 workspace-refresh design):**
+appending a new numbered step at the highest number doesn't guarantee its textual position matches
+the real execution order — renumber to match the code path, not the easiest place to add a paragraph
+(`appended-docstring-step-must-match-execution-position.md`); and a new `preflight.py` leg that needs
+`workspace_scan.py` (which itself imports `preflight` at module level) must import it locally inside
+the calling function, or the module graph cycles at load time
+(`deferred-import-breaks-lr-core-preflight-cycle.md`).

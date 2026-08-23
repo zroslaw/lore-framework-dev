@@ -46,6 +46,9 @@ its numbering marks it as optional, and whether it is phrased as an order or a d
 
 ## See Also
 
+- [appended-docstring-step-must-match-execution-position.md](appended-docstring-step-must-match-execution-position.md)
+  — the same defect in a `cmd_preflight`-shaped literate docstring: a step's number can be
+  "correctly" appended while its textual position still contradicts the real execution order.
 - [the-terminal-step-is-the-step-that-gets-dropped.md](the-terminal-step-is-the-step-that-gets-dropped.md)
   — the sibling from the same battery: the terminal step's fix is an observable postcondition.
 - [models-copy-what-they-should-compute.md](models-copy-what-they-should-compute.md) — third member

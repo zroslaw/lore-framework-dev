@@ -55,6 +55,10 @@ git-as-metadata, delete-don't-mark, knowledge graph by filename reference, conci
 detail on demand, skill/doc separation, repo-level versioning. Framework owns the universal; agents
 own repo/host/workflow specifics.
 
+`workspace_scan.py` imports `preflight` at module level, so a new `preflight.py` leg needing it must
+import locally inside the calling function, not at top level, or the load cycles. See
+`deferred-import-breaks-lr-core-preflight-cycle.md`.
+
 **Subagent as optimization vs subagent as semantics** — classify what a subagent is *for* before
 letting any engine degrade a spawning procedure to serial host-side execution. If it buys
 parallelism and context isolation (recall, consult, attach, merge), serialization is lossless. If
@@ -368,19 +372,19 @@ own topic — these are pointers, not summaries.
   old source's validation, so re-attach it at the sink; a verdict with a per-item payload needs a
   per-item trigger; a self-documenting delimiter collides with its own documentation; whitespace
   becomes semantics once a check compares bytes; removing an unsound signal requires replacing the
-  coverage it provided by accident. Two more from the v42 workspace-refresh design: a skip condition
-  keyed on a state that is **normal** for a repo in use silently opts out the feature's heaviest
-  users — ask what population a guard selects, and prefer *reporting* over *guarding* when the risk is
-  "the user did not know"; and **short-circuit on the condition, not a proxy for it** — a proxy is
-  chosen because it is convenient to observe and fails exactly where a user acts deliberately, so
-  write the condition in words first and prefer one an existing component already computes. See
+  coverage it provided by accident. Three more from the v42 workspace-refresh design: a guard keyed
+  on a state **normal** for heavy users opts them out silently (prefer reporting over guarding); a
+  proxy condition fails exactly where a user acts deliberately (write the real condition in words
+  first); and a lock-claim must return a **tri-state result, not a bool** — collapsing "couldn't
+  create the lock" into "contended" misreported a first-ever run as contention. See
   `widening-a-source-drops-its-validation.md`,
   `name-keyed-global-registry-cannot-answer-per-scope.md`,
   `self-documenting-payload-vs-heading-delimiters.md`,
   `template-whitespace-is-contract-under-byte-exact-idempotency.md`,
   `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`,
   `guarding-on-a-normal-state-excludes-what-matters-most.md`,
-  `short-circuit-on-the-condition-not-a-proxy.md`.
+  `short-circuit-on-the-condition-not-a-proxy.md`,
+  `lock-claim-directory-creation-vs-contention.md`.
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source
   (pointer, don't restate — and when fixing a duplicated rule, enumerate every site that *states* it,
   not only every site that *implements* it); reuse an existing correlation signal before inventing
