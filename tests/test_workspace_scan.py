@@ -443,6 +443,19 @@ class TestScanEndToEnd(unittest.TestCase):
         self.assertTrue(any(item["reason"] == "duplicate repo-context block"
                             for item in finding["data"]["repo_context_issues"]))
 
+    def test_s17_qualifies_two_registered_same_named_agents(self):
+        other_dir = make_agent(self.workspace, "other-agents", "alpha")
+        for agent_dir in (self.agent_dir, other_dir):
+            write(os.path.join(agent_dir, "role.md"),
+                  "---\ndescription: \n---\n\n# alpha\n")
+        write_codex_shortcut(os.path.join(self.workspace, ".codex", "skills"),
+                             "alpha", self.agent_dir)
+        write(os.path.join(self.workspace, ".claude", "commands",
+                           "lr-alpha-agent.md"), BOOT_LINE % ("alpha", other_dir))
+        finding = findings_by_id(self.scan()["findings"])["S17"]
+        self.assertEqual(finding["data"]["agents"],
+                         ["other-agents/alpha", "test-agents/alpha"])
+
 
 class TestDuplicateBlockKey(unittest.TestCase):
     """A repeated `repos:` block must not discard the first block's URLs.
