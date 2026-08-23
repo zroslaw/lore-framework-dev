@@ -37,6 +37,28 @@ rules; `docs/workspace-status.md` owns each finding's wording, per
 scanner's findings to zero*, which is exactly what keeps init and status from drifting apart. A
 workspace at canonical state reports `already current` and writes nothing.
 
+## What the scanner does not cover (verified 2026-08-23)
+
+`lr_core/workspace_scan.py` detects dirty working trees **only for the workspace root**. S1 covers
+dirty framework-managed paths, S12 covers other dirty workspace-root paths. **There is no finding of
+any kind for a dirty *child* repo** — confirmed by reading `build_findings` and the `dirty` /
+`other_dirty` computation, both of which derive from a single `git status` on the workspace root.
+
+This matters because "a child repo is dirty and can't be pulled" is the intuitive motivating case for
+workspace-freshness work, and it is easy to assume the scanner already covers it. Any feature that
+wants to report it must derive it itself.
+
+Related boundary in `scripts/workspace-pull`: it dirty-guards only **phase 0** (the workspace root).
+**Phase 4 fast-forwards every top-level child repo with no dirty check at all** — a pull can therefore
+change files under a session that has uncommitted work and still report success, because `--ff-only`
+succeeds whenever the incoming commits do not touch the dirty files.
+
+**How to apply:** to know whether a child repo is dirty, ask git directly —
+`git -C <repo> status --porcelain` for dirty, `git -C <repo> rev-list --count HEAD..@{u}` for behind.
+Both are local and cheap. Do not expect a scanner finding to carry it. Whether reporting it is the
+*right* response is a separate question — see
+[guarding-on-a-normal-state-excludes-what-matters-most.md](guarding-on-a-normal-state-excludes-what-matters-most.md).
+
 ## Decisions worth remembering
 
 - **Push stages framework-managed paths only**, by explicit path argument, never `git add .`.
@@ -62,3 +84,7 @@ workspace at canonical state reports `already current` and writes nothing.
 - [workspace-meta-repo-pattern.md](workspace-meta-repo-pattern.md), [v25-workspace-pull-init-design.md](v25-workspace-pull-init-design.md) — the layer this completes.
 - [workspace-owned-default-ignore-lines.md](workspace-owned-default-ignore-lines.md) — the ignore lines, and the terminology v37 retired.
 - [literate-accelerator-pattern.md](literate-accelerator-pattern.md) — what the scanner is.
+- [workspace-auto-refresh-design.md](workspace-auto-refresh-design.md) — the v42-candidate design that
+  makes this surface run on its own at boot, and the first consumer of the child-dirty gap above.
+- [consistency-checks.md](consistency-checks.md) — `/lr:check` #22–24, the other renderer of these
+  findings.

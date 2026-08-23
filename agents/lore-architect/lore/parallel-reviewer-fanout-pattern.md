@@ -74,6 +74,24 @@ The lens choice should be deliberate per ship. Lenses that worked well:
 - **Claim audit** — after a round of fixes, hand a reviewer the *new prose* and ask it to extract every
   checkable assertion and test it. Fix rounds generate confident prose, and confident prose is where
   overclaims live; see `lens-novelty-is-the-scarce-resource-on-re-review.md` § Claim audit.
+- **Implementation fidelity (the executor lens)** — for any doc whose purpose is **handover to an
+  implementer** (a design doc, a spec, a plan). Brief shape is the load-bearing part: *"you are the
+  engineer who must build this from the document alone, you did not attend the design discussion, and
+  you cannot ask its authors anything"*, plus an explicit instruction to **verify the doc's claims
+  about existing code by reading that code**. On a 2026-08-23 pre-implementation design doc reviewed
+  by three cold Sonnet lenses (lean design / implementation fidelity / runtime failure modes), this
+  lens produced the highest yield of *factual* defects: an invented JSON schema, a misdescribed
+  control-flow insertion point that does not exist in the code, a false claim about a script's
+  argument handling (`a-negative-grep-proves-the-pattern-absent.md`), an unupdated literate-spec
+  docstring, and a timeout budget exceeding the caller's own documented bound. **Why it outperforms
+  there:** a design doc's failure mode is not bad reasoning, it is **unbuildable specificity** —
+  fields with no derivation path, seams that do not exist, claims about code nobody re-read. A
+  reasoning-focused lens resolves those charitably, exactly as the author did. This is the
+  prose-review analogue of `execution-testing-catches-blind-ambiguity.md`: simulating the executor
+  beats reviewing for plausibility. **Make it a standing slot on handover docs**, and always instruct
+  it to verify code claims rather than trust them. Pair it with a simplicity/lean lens — but note the
+  lean lens only sees the revision it was given, so a fix round needs its own lean pass
+  (`fix-defects-are-context-errors.md` § The second shape).
 - **AI-installer (literal executor)** — for the paste-link installer doc genre (`paste-link-installer-doc-genre.md`): brief the reviewer to read the doc *as the agent that must execute it literally*, tracing each instruction against real files/commands rather than judging tone. Catches a distinct class the newcomer/editorial lenses miss — see `ai-installer-review-lens.md` for the full brief shape and the empirical case that justified naming it as a fourth lens.
 
 **Rule:** the lenses should be *mutually exclusive* — if two reviewers are likely to find the same issues, you've wasted a slot. Tell each lens explicitly what to skip (what the others will catch).

@@ -269,6 +269,28 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
   questions, phased implementation plan): `workdir/draft-workspace-lifecycle.md`. See
   `v25-workspace-pull-init-design.md` (the shipped predecessor this reworks/extends).
 
+### Automatic Workspace Refresh (designed 2026-08-23, not yet implemented)
+
+- **Daily workspace refresh at agent boot — v42 candidate, cache-affecting.** `/lr:workspace-status`
+  already diagnoses workspace drift and names every fix; what is missing is that it never runs on its
+  own. Design: `lr-core preflight` gains a second leg after the agent-repo pull — if the workspace has
+  not been refreshed in **16h** (not 24h: a 24h window drifts later every day, 16h always clears
+  overnight), run `workspace-pull`, then an **in-process** `workspace_scan`, and report only `warn`
+  findings, reusing the scanner's `{id, severity, data}` verbatim so `docs/workspace-status.md` keeps
+  ownership of message and fix prose. Sequential with the agent-repo pull, because `workspace-pull` has
+  no TTL awareness and would contend on `index.lock`. TTL keys on **last-attempt**, never last-success.
+  An `O_EXCL` lock file with a 300s stale reclaim, because a killed refresh that left a fresh timestamp
+  silently disables the feature for a full window. **Never clones** (missing declared repos
+  short-circuit to `setup-required`), and **reports rather than guards** on dirty child repos. Two
+  implementation traps recorded in the draft: `cli.py` wraps all of `cmd_preflight` in one
+  `except Exception` → exit 2 → *every* boot routes into the Manual Boot Procedure, so each new I/O
+  call must degrade to a status value rather than raise; and `subprocess.run(timeout=)` SIGKILLs bash
+  only, leaving `workspace-pull`'s backgrounded `git` children alive (needs `start_new_session=True`
+  plus a process-group kill). Deliberately out of scope: a workspace cleanup command. Reviewed by three
+  cold reviewers plus a lean pass; no code written. Full design:
+  `workdir/draft-workspace-auto-refresh.md` (commit `f09ed9a`). See `workspace-auto-refresh-design.md`,
+  `freshness-contracts-at-session-boundaries.md`, `workspace-lifecycle-four-commands.md`.
+
 ### Init / Workspace Bootstrap
 
 - ~~**Workspace creation automation**~~ — resolved by the v25 `/lr:workspace-init` setup wizard; no

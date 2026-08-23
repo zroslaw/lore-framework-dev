@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "On a re-review, inventory the lenses already spent before choosing new ones; let the artifact's life stage pick the lens family, and add a claim-audit lens after a fix round."
+summary: "On a re-review, inventory the lenses already spent before choosing new ones; let the artifact's life stage pick the lens family (design doc → executor lens), and after a fix round add a claim audit plus a cheap redundancy pass."
 parent: lore-context.md
 ---
 
@@ -47,6 +47,24 @@ still disagreed. Fix rounds generate confident prose, and confident prose is whe
 
 This pairs with the standing round-2 lens ("did the fixes fix it, and did they break anything") —
 that one audits the *code and behavior* a fix round produced, this one audits the *claims* it wrote.
+
+**A third, cheaper companion: the redundancy pass.** After a fix round, also ask *what does this now
+say twice?* A fix adds a mechanism, and the new mechanism often re-expresses a fact an existing one
+already carried — two overlapping enums, a state duplicating a lock file's existence, a stored
+timestamp the filesystem already keeps. Unlike the claim audit, this one needs no cold context and no
+review slot: the defects are visible in the diff. Note that a simplicity lens run *before* the fix
+round does not cover it, because it only ever saw the revision it was given. See
+`fix-defects-are-context-errors.md` § The second shape.
+
+## Life stage also picks the lens on a pre-implementation doc
+
+The pre-ship / post-ship split above has a third stage worth naming: a **design doc awaiting
+handover**. Its failure mode is neither unsound reasoning nor messy-environment behavior but
+**unbuildable specificity**, so the standing slot there is the **implementation-fidelity (executor)
+lens** — briefed as the engineer who must build it from the document alone and cannot ask the
+authors anything, and explicitly instructed to verify the doc's claims about existing code. On the
+2026-08-23 design-doc review it out-yielded both a lean-design lens and a runtime-failure-modes lens
+on *factual* defects. Full brief shape and case: `parallel-reviewer-fanout-pattern.md` § Lens choice.
 
 ## See Also
 

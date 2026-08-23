@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Across v37-v39, defects introduced by TriLens fixes are context errors rather than logic errors and concentrate in the prose describing a fix — and the round cap guarantees the last round's fixes ship unreviewed."
+summary: "Defects introduced by fix rounds are context errors, not logic errors, and concentrate in the prose describing the fix; the second shape is redundancy added while fixing. The round cap guarantees the last round's fixes ship unreviewed."
 parent: lore-context.md
 ---
 
@@ -81,6 +81,34 @@ The concrete v39 pair is recorded in
 (correct in code from round 2, wrong in its prose restatement two rounds later) and
 [a-release-record-goes-stale-while-you-fix-it.md](a-release-record-goes-stale-while-you-fix-it.md)
 (the release notes as the prose that decays once per round).
+
+## The second shape: fixes introduce *redundancy*, not only context errors (2026-08-23)
+
+A design-doc review found a class this topic's original data did not contain. Three cold reviewers
+found real defects in revision 1 of a design doc; revision 2 fixed all of them. A later **lean pass
+over revision 2's own additions** found four more defects, and every one was a *duplicate
+representation of a fact something else already carried*:
+
+- Two overlapping enums (`status` and `result`) that disagreed on a shared value, forcing every
+  reader to check two fields to learn one thing.
+- A `running` state duplicating the existence of a lock file.
+- A `reason: blocked` value duplicating a non-empty `blocked_repos` list.
+- A lock file storing a timestamp the filesystem already keeps as mtime.
+
+The mechanism is mechanism 1 above seen from a different angle: fixing a finding means **adding a
+mechanism**, and the new mechanism frequently re-expresses a fact an existing one already carried —
+because the author is looking at the finding, not at the whole.
+
+Practices, on top of those below:
+
+- **After a fix round, run a pass whose only question is *what does this now say twice?*** This is
+  distinct from the claim-audit lens, which asks whether statements are still *true*; two
+  representations of one fact are a defect even when they currently agree, because they can diverge
+  later and each reader must consult both.
+- **Prefer deleting the new representation over reconciling the two.**
+- **This pass is cheap and needs no cold context** — the defects are visible in the diff, which makes
+  it the rare fix-round check that does not cost a review round. A simplicity lens run *before* the
+  fix round does not substitute: it only ever saw the revision it was given.
 
 ## Why it is systematic
 

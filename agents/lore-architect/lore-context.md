@@ -57,10 +57,9 @@ own repo/host/workflow specifics.
 
 **Subagent as optimization vs subagent as semantics** — classify what a subagent is *for* before
 letting any engine degrade a spawning procedure to serial host-side execution. If it buys
-parallelism and context isolation (recall, consult, attach, conflict resolution, merge),
-serialization is lossless. If the subagent's *independence from the caller* is the deliverable
-(`/lr:trilens-loop`), serialization destroys the feature and the procedure must stop and report.
-Profile degradation clauses need carve-outs, not blanket rules. See
+parallelism and context isolation (recall, consult, attach, merge), serialization is lossless. If
+the subagent's *independence from the caller* is the deliverable (`/lr:trilens-loop`), serialization
+destroys the feature and the procedure must stop and report. See
 `subagent-as-optimization-vs-subagent-as-semantics.md`, `cursor-merge-via-task.md`,
 `cursor-task-free-text-brief-validated.md`.
 
@@ -94,9 +93,9 @@ An **accelerator** script (Script Fallback Contract) can go one step further and
 doc, so there's one artifact instead of two that drift apart. Since v36 **`lr-core` is a package** —
 the stable `scripts/lr-core` wrapper fronts `scripts/lr_core/`, where `preflight.py` and `scan.py`
 carry the literate fallbacks. Hard constraint at that seam: **the script emits data, the doc owns
-the user-facing words** — a script string that reads like a finished message gets printed as one,
-and printing it *looks* like handling the situation, so the executor never reaches the doc that owns
-the remedy. And scripting a procedure does not automatically shrink its doc. See
+the user-facing words** — printing a finished-sounding script string *looks* like handling the
+situation, so the executor never reaches the doc that owns the remedy. And scripting a procedure
+does not automatically shrink its doc. See
 `literate-accelerator-pattern.md`, `script-emits-data-doc-owns-the-words.md`,
 `agent-boot-doc-grew-when-scripted.md`.
 
@@ -127,10 +126,9 @@ sibling profiles whenever one binding gains a guardrail. See `docs-engines-conve
 traps belong in the binding.
 
 **Plugin identity is a precondition of a lifecycle result.** The harness asserts the loaded plugin's
-VERSION against `LR_FRAMEWORK_DIR` before trusting results, and every arm must rest on
-engine-emitted evidence rather than anything the engine could self-report. Cursor's cloud
-marketplace install rehydrates over `--plugin-dir` within ~25 seconds of a move-aside, so a manual
-prep step cannot be trusted; re-check at suite start. See
+VERSION against `LR_FRAMEWORK_DIR` before trusting results, on engine-emitted evidence rather than
+anything the engine could self-report. Cursor's cloud marketplace install rehydrates over
+`--plugin-dir` within ~25 seconds of a move-aside, so re-check at suite start. See
 `lifecycle-harness-plugin-identity-unverified.md`, `a-gate-cannot-be-a-model-self-report.md`,
 `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
 
@@ -138,10 +136,9 @@ prep step cannot be trusted; re-check at suite start. See
 
 Shipping one repo to multiple engines' marketplaces means handling **each engine's packaging
 separately** — manifest schema, skill-tree location, and update model all differ, so Claude parity
-does *not* imply Cursor/Codex parity. Claude Code is strict-clean; the remaining public step is
-Console-form community submission. Cursor is structurally ready but seamless multi-user propagation
-still needs a team marketplace + Auto Refresh + GitHub App validation. Codex native packaging is
-resolved. See `engine-marketplace-readiness.md`, `plugin-distribution.md`,
+does *not* imply Cursor/Codex parity. Claude Code is strict-clean, remaining step: Console-form
+community submission. Cursor is structurally ready but seamless multi-user propagation still needs a
+team marketplace + Auto Refresh + GitHub App validation. Codex packaging is resolved. See `engine-marketplace-readiness.md`, `plugin-distribution.md`,
 `cursor-plugin-distribution-update-model.md`, `plugin-manifest-versioning.md`.
 
 Positioning copy must lead with the **triad** (named role-based agents + deliberate reflect/merge
@@ -160,13 +157,13 @@ session-context boundary (boot, attach, pre-merge); `/lr:pull-lore` is the manua
 `freshness-contracts-at-session-boundaries.md`, `auto-pull-mechanism.md`.
 
 **Lore v1 structure (v36):** `docs/lore-structure.md` is the canonical contract — one fixed
-`lore-context.md` root, recursive `area` hubs, leaf `topic`s, four-field scalar frontmatter. Every
-**new** Lore file carries v1 frontmatter; existing legacy files migrate lazily via merge or
-explicitly via **`/lr:groom [scope] [--dry-run] [--all]`** — bounded semantic grooming over a
-deterministic ≤30K-token workset with read-only halo, SHA-256 snapshots, and approval-gated
-Whole-Lore mode. Practical limit found 2026-08-14: `--all` is single-session and non-resumable in
-v1, so on a corpus far above the 30K partition budget it cannot complete — groom iteratively, or
-scope `--all` to one subtree. See `lore-topic-format.md`, `lore-context-shape-discipline.md`.
+`lore-context.md` root, recursive `area` hubs, leaf `topic`s, four-field scalar frontmatter
+(`summary` ≤240 chars). Every **new** Lore file carries v1 frontmatter; existing legacy files
+migrate lazily via merge or explicitly via **`/lr:groom [scope] [--dry-run] [--all]`** — bounded
+semantic grooming over a deterministic ≤30K-token workset with read-only halo, SHA-256 snapshots,
+and approval-gated Whole-Lore mode. Practical limit found 2026-08-14: `--all` is single-session and
+non-resumable, so on a corpus far above the 30K partition budget it cannot complete — groom
+iteratively, or scope `--all` to one subtree. See `lore-topic-format.md`, `lore-context-shape-discipline.md`.
 
 **The engine profile is observed, not believed.** Selection is `lr-core`'s deterministic
 `detect_engine` (ordered: `--engine` override → `CLAUDE_PLUGIN_ROOT` → process ancestry matching the
@@ -174,17 +171,16 @@ scope `--all` to one subtree. See `lore-topic-format.md`, `lore-context-shape-di
 `confidence: "assumed"`). A model must never pick the binding that governs its own execution — the
 sibling of "a gate cannot be a model self-report," and why a boot step whose input is a fact about
 the running environment belongs in the accelerator rather than in prose. Codex's two remaining
-signals fail *together* (sandbox blocks `ps`; containment only matches under `~/.codex/`), so a
-Codex session on a worktree or dev checkout silently lands on the claude profile. Cursor IDE agent
-chat has the same shape from a different miss. Remedy in both cases is naming `--engine <name>`;
-open as backlog B8. See `engine-profile-must-be-observed-not-believed.md`,
+signals fail *together*, so a Codex session on a worktree or dev checkout silently lands on the
+claude profile; Cursor IDE agent chat has the same shape from a different miss. Remedy in both cases
+is naming `--engine <name>`; open as backlog B8. See `engine-profile-must-be-observed-not-believed.md`,
 `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`,
 `cursor-ide-engine-detection-blind-spot.md`.
 
 `version-check.md`'s nested-repo guard carries a macOS trap: "resolve both to real paths" is not
-self-executing prose — a weak model filled the gap with bare `pwd`, which disagrees with git's
-`--show-toplevel` under the `/var`→`/private/var` symlink. **The mirror rule: realpath for identity,
-logical components for contract shape.** See `macos-var-symlink-realpath-ambiguity.md`,
+self-executing prose — a weak model filled the gap with bare `pwd`, which disagrees with git under
+the `/var`→`/private/var` symlink. **Mirror rule: realpath for identity, logical components for
+contract shape.** See `macos-var-symlink-realpath-ambiguity.md`,
 `realpath-for-identity-logical-for-contract-shape.md`.
 
 ## Cross-Agent Collaboration
@@ -192,8 +188,7 @@ logical components for contract shape.** See `macos-var-symlink-realpath-ambigui
 - **`/lr:recall [hint]`** — search lore of already-loaded agents (host + guests); fan-out per agent.
 - **`/lr:consult <agent> [hint]`** — one-shot question to an unloaded agent; a subagent boots it,
   answers with file pointers, exits.
-- **`/lr:attach <agent>`** — load another agent as a sustained guest; host stays sole executor,
-  host-wins on conflicts.
+- **`/lr:attach <agent>`** — load another agent as a sustained guest; host stays sole executor.
 - **`/lr:spawn-teammate` (BETA)** — spawn agents as Agent Teams teammates for parallel panes; the
   teammate's primary interlocutor is the user, not the lead.
 
@@ -208,17 +203,16 @@ the advocate and consults or attaches me. See `public-communication-ownership.md
 ## Session Takeover (BETA)
 
 **`/lr:takeover`** converts engine-native session logs into a markdown digest so a new session on any
-engine can continue interrupted work; all three engines are supported (`scripts/session-takeover` —
-list, convert, render). Cursor's tool-result pairing is heuristic and flags `pairing_uncertain`. See `takeover-feature.md`, `cursor-takeover-batch-pairing.md`,
-`engine-session-log-formats.md`.
+engine can continue interrupted work; all three engines are supported (`scripts/session-takeover`).
+Cursor's tool-result pairing is heuristic and flags `pairing_uncertain`. See `takeover-feature.md`,
+`cursor-takeover-batch-pairing.md`, `engine-session-log-formats.md`.
 
 ## Finalization
 
 User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone): **reflect**
 (inline, host-first, per agent — needs session context) → **merge** (parallel subagents, one per
-agent booted as itself, file-driven) → **summarize** (host writes the canonical session summary) →
-**commit+push** (one commit per touched repo; conflict resolution on push rejection). Do not
-finalize unless the user triggers it. See `finalization-process.md`, `finalize.md`,
+agent booted as itself, file-driven) → **summarize** → **commit+push** (one commit per touched repo;
+conflict resolution on push rejection). Do not finalize unless the user triggers it. See `finalization-process.md`, `finalize.md`,
 `merge-in-booted-subagents.md`, `reflect-merge-execution-asymmetry.md`.
 
 Canonical host summaries carry a compact per-agent **Learning audit**. Finalize retains each
@@ -230,11 +224,10 @@ learned.” See `session-summaries-feature.md`.
 
 **Transcript-backed reflection shipped in v39:** opt-in `finalize --transcript` recovers
 parser-retained main-thread dialogue into ordinary reflection topics, then rejoins the same
-merge/summarize/commit/push lifecycle — host-only, bounded, fail-closed, raw logs staying in local
-ignored scratch. Two limits are accepted, not solved: no secret-pattern scan on candidate text, and
-no engine parameter that mechanically sandboxes a worker read-only. **Chunk overlap makes merge the
-semantic reducer** — expect roughly three near-duplicate candidates per distinct insight and brief
-merge to consolidate aggressively. See `transcript-backed-finalization-mvp.md`.
+merge/summarize/commit/push lifecycle — host-only, bounded, fail-closed. Two limits are accepted,
+not solved: no secret-pattern scan on candidate text, and no engine parameter that mechanically
+sandboxes a worker read-only. **Chunk overlap makes merge the semantic reducer** — expect roughly
+three near-duplicate candidates per distinct insight and brief merge to consolidate aggressively. See `transcript-backed-finalization-mvp.md`.
 
 Shared-lore publication is a separate, unshipped governance direction. See
 `team-lore-contribution-governance.md`.
@@ -252,12 +245,11 @@ it for what any given version contained rather than reconstructing from here.
 staging, sole-commit-ahead gate, `lr-update-pending` marker retry, never force); both paths share
 the write-aware dirty-target collision gate.
 
-Ship mechanics that bite: verify `git HEAD` rather than trusting lore's "commit pending" (it
-accumulates across versions); scan the whole history tail for gaps at each ship rather than only
-appending the current entry; **tag at every ship as part of the push step** — check the tag list,
-not just `git log` (tags lapsed v32–v35; v36 resumed); and **re-audit the release notes' claims
-about themselves as the last pre-push step**, since they are drafted while the gates are still
-running and decay once per fix round. See `versioning-release-types.md`,
+Ship mechanics that bite: verify `git HEAD` rather than trusting lore's "commit pending"; scan the
+whole history tail for gaps at each ship, not only appending the current entry; **tag at every ship
+as part of the push step** — check the tag list, not just `git log` (tags lapsed v32–v35); and
+**re-audit the release notes' claims about themselves as the last pre-push step**, since they are
+drafted while the gates run and decay once per fix round. See `versioning-release-types.md`,
 `plugin-manifest-versioning.md`, `cache-clear-footer-convention.md`, `update-process.md`,
 `release-commit-hash-from-tag.md`, `a-release-record-goes-stale-while-you-fix-it.md`.
 
@@ -265,10 +257,9 @@ running and decay once per fix round. See `versioning-release-types.md`,
 
 Three surfaces, three scopes:
 
-- **`/lr:check`** — 24 content-consistency checks *inside agent repos*, rendering scanner
-  findings rather than restating the rules. At scale, prefer a deterministic script sweep for the
-  mechanical subset over an LLM read-through: checks #9–10 alone missed 14 dangling references in a
-  147-topic graph. See `consistency-checks.md`.
+- **`/lr:check`** — 24 content-consistency checks *inside agent repos*, rendering scanner findings
+  rather than restating the rules. At scale, prefer a deterministic script sweep for the mechanical
+  subset over an LLM read-through. See `consistency-checks.md`.
 - **`/lr:doctor`** — *engine/plugin runtime* issues that escape content checks (esp. stale plugin
   cache), via an accreting ailment catalog. See `ailment-catalog-pattern.md`.
 - **`/lr:workspace-status`** — read-only diagnosis of the *workspace layer* (git state,
@@ -284,15 +275,11 @@ own topic — these are pointers, not summaries.
   cache-affecting, bump all four version-bearing manifests to `1.<VERSION>.0`, promote any
   newly-named principle to its own topic. Full curation disciplines live in `role.md`.
 - **Both expensive pre-ship gates are on request, not default (user decision 2026-08-22).** The
-  lifecycle suite and `/lr:trilens-loop` run only when the user asks; default-on slowed development
-  drastically and burned tokens for little return on most ships. Deterministic tests, `/lr:check`,
-  and dogfooding stay default. **What did not change: the disposition record** — every ship names
-  each gate `passed`, `waived`, or `did not run`, `did not run` is now the default, and it is said
-  out loud in one line rather than silently omitted. After an ungated ship, say plainly what remains
-  **untested**. Default-off is a cost decision, not a claim the gates are unnecessary (v40 is the
-  standing counter-example — see Current State). The policy itself is **agent lore only**: no plugin
-  artifact requires either gate, so flipping a default is a `role.md`/`lore-context.md` edit with no
-  VERSION bump, no manifest bump and no release notes. See
+  lifecycle suite and `/lr:trilens-loop` run only when the user asks; deterministic tests,
+  `/lr:check`, and dogfooding stay default. **What did not change: the disposition record** — every
+  ship names each gate `passed`, `waived`, or `did not run` (now the default) out loud, and after an
+  ungated ship says plainly what remains **untested**. Default-off is a cost decision, not a claim
+  the gates are unnecessary (v40 is the standing counter-example — see Current State). See
   `feedback-pre-ship-gates-on-request.md`, `gate-waiver-is-a-record.md`.
 - **When the empirical leg does run, its order is fixed: lifecycle suite → dogfood the change onto
   this workspace → TriLens over whatever those disturbed.** TriLens comes *after* dogfooding because
@@ -302,12 +289,11 @@ own topic — these are pointers, not summaries.
   See `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`,
   `haiku-ambiguity-detector.md`.
 - **When a procedure doesn't execute, change structure — not wording.** Three shapes, all found by
-  running v40's docs and all immune to more emphatic prose: the **terminal step** that publishes or
-  confirms an outcome is the one silently dropped, and its fix is an observable postcondition sited
-  where the artifact is assembled; once a doc is long enough to be **paged**, an obligation's
-  location decides whether it runs (and a fractional step number reads as an optional aside); and
-  anything the model can **copy instead of compute** — a concrete example, a machine-resolved path it
-  must retype — will be copied. See `the-terminal-step-is-the-step-that-gets-dropped.md`,
+  running v40's docs and all immune to more emphatic prose: the **terminal step** that publishes an
+  outcome is the one silently dropped (fix: an observable postcondition where the artifact is
+  assembled); once a doc is long enough to be **paged**, an obligation's location decides whether it
+  runs; and anything the model can **copy instead of compute** will be copied. See
+  `the-terminal-step-is-the-step-that-gets-dropped.md`,
   `instruction-location-beats-emphasis-in-long-docs.md`, `models-copy-what-they-should-compute.md`.
 - **When TriLens is requested, run it via `/lr:trilens-loop`**, not by hand — the skill enforces
   cold-context reviewer independence, the APPLIED/DECLINED ledger, the "a silent round is not a
@@ -317,84 +303,103 @@ own topic — these are pointers, not summaries.
   evidence points); treat convergent findings from independent lenses as strong evidence, not
   redundancy; inventory spent lenses before a re-review. Two standing slots:
   **findings-as-a-system** on any release shipping a *set* of diagnostics, **claim audit** on any
-  round following fixes. The exchange contract is justified on independence, never token savings.
-  See `trilens-loop-feature.md`,
+  round following fixes, and on any doc whose purpose is **handover to an implementer** the
+  **implementation-fidelity (executor) lens** — briefed as the engineer who must build it from the
+  document alone and cannot ask its authors anything, and told to verify its code claims by reading
+  the code, because a design doc's failure mode is unbuildable specificity rather than bad reasoning.
+  The exchange contract is justified on independence, never token savings. See `trilens-loop-feature.md`,
   `parallel-reviewer-fanout-pattern.md`,
   `lens-novelty-is-the-scarce-resource-on-re-review.md`, `sonnet-subagent-review-pattern.md`.
 - **A gate result belongs to a specific artifact state.** Freeze before spawning — commit, name the
-  SHA in the brief, tag only after the loop ends; editing while reviewers read moves line numbers and
-  invents phantom findings. An edit landed after the gates pass is ungated: re-run the affected gate
-  or revert and file a follow-up, and never report "converged and green" for a tree neither gate saw.
-  An environment failure mid-run, or the engine resolving a *different* plugin tree, makes results
-  **uninterpretable** rather than red. See `post-convergence-edits-need-their-own-gate.md`,
+  SHA in the brief, tag only after the loop ends; editing while reviewers read invents phantom
+  findings. An edit landed after the gates pass is ungated: re-run the affected gate or revert and
+  file a follow-up. An environment failure mid-run, or the engine resolving a *different* plugin
+  tree, makes results **uninterpretable** rather than red. See `post-convergence-edits-need-their-own-gate.md`,
   `macos-documents-permission-loss-mid-session.md`.
 - **Three gate dispositions — passed, waived, did not run** — and a ship record must name which
   applies. A waiver is itself a record; a recorded measurement names the environment it was taken in.
   A reviewer that dies surfaces as *idle*, which reads exactly like "finished and found nothing", so
-  the check is "did it report?", never "did it complain?" — and one follow-up ask recovers a merely
-  silent lens for free, without counting against the round cap. Before retrying, ask **what would
-  have to change for the retry to differ**. When the round cap ends a loop without a clean round, the
-  substitute is **one deep unconstrained cold reviewer, not a fourth round**, and a substitute that
-  *finds* something does not convert into a clean attestation. Expect its findings in the **prose**:
-  fix-round defects are context errors, usually one rule stated in two places drifting apart. See
+  the check is "did it report?", never "did it complain?"; one follow-up ask recovers a merely silent
+  lens for free. Before retrying, ask **what would have to change for the retry to differ**. When the
+  round cap ends a loop without a clean round, the substitute is **one deep unconstrained cold
+  reviewer, not a fourth round**, and a substitute that *finds* something does not convert into a
+  clean attestation. Expect its findings in the **prose**:
+  fix-round defects are context errors, usually one rule stated in two places drifting apart — and
+  the second shape is **redundancy added while fixing** (a new mechanism re-expressing a fact an
+  existing one already carried), caught by a cheap diff-scoped "what does this now say twice?" pass
+  that costs no review round. See
   `a-gate-that-died-is-not-a-gate.md`, `gate-waiver-is-a-record.md`,
   `measurement-records-name-their-environment.md`, `fix-defects-are-context-errors.md`,
   `a-fix-is-a-change-and-changes-need-review.md`.
-- **A gate cannot be a model self-report** — a gate must not be implemented in the medium it gates.
-  Ask what evidence it rests on and whether the thing under test could have produced that evidence;
-  coverage parity is not evidence parity. Sibling: **a binding must not be selected by the thing it
-  binds**. Everyday form: a green suite written by the author of the fix is a self-report until each
-  new test is shown **red against the previous tag and green against HEAD** (detached worktree via
+- **A gate cannot be a model self-report** — never implement a gate in the medium it gates. Ask what
+  evidence it rests on and whether the thing under test could have produced that evidence; coverage
+  parity is not evidence parity. Sibling: **a binding must not be selected by the thing it binds**.
+  Everyday form: a green suite written by the author of the fix is a self-report until each new test
+  is shown **red against the previous tag and green against HEAD** (detached worktree via
   `LR_FRAMEWORK_DIR`). Sharpest form: a **string-containment test over prose** proves only that a doc
-  still says what its author wrote — assert against the identifier's independent source, and grep the
-  suite whenever review kills a doc string. See `a-gate-cannot-be-a-model-self-report.md`,
+  still says what its author wrote. See `a-gate-cannot-be-a-model-self-report.md`,
   `prove-a-new-test-red-against-the-previous-tag.md`.
 - **A failure list is a hypothesis until someone reads the transcripts.** An assertion message names
-  what was observed, never why; re-triage a red run from stored logs before planning fixes, and
-  classify each text assertion as mid-run or end-state. At the single-test level, **a red test may be
-  asserting something true about the machine** — establish which side is wrong before turning it
-  green, and give danger-guarding assertions the strongest presumption of correctness. See
+  what was observed, never why; re-triage a red run from stored logs before planning fixes. At the
+  single-test level, **a red test may be asserting something true about the machine** — establish
+  which side is wrong before turning it green, and give danger-guarding assertions the strongest
+  presumption of correctness. See
   `v31-lifecycle-rerun-partial-green-2026-07-27.md`, `a-red-test-may-be-asserting-a-true-fact.md`,
   `transcript-vs-final-message-assertions.md`.
 - **Sandboxed-review blind spot** — a review environment that structurally blocks a capability can
-  green-light code whose primary path never executed. Check whether the environment blocks something
-  the code under test depends on before trusting a green suite. See
-  `lore-beings-mvp-takeover-review.md`.
-- **Decide where the guardrail lives before writing the topic** — lore is retrieved when a task cues
-  it, and a one-off command cues nothing, so a trap recorded only as knowledge protects nobody. Name
-  the point-of-use site (script check, exact command in the doc, test) as part of the fix, and prefer
-  a deterministic harness check over a human prep step. See
+  green-light code whose primary path never executed. Check for a blocked capability the code under
+  test depends on before trusting a green suite. See `lore-beings-mvp-takeover-review.md`.
+- **Decide where the guardrail lives before writing the topic** — a trap recorded only as knowledge
+  protects nobody, because lore is retrieved when a task cues it and a one-off command cues nothing.
+  Name the point-of-use site (script check, exact command, test) as part of the fix, and prefer a
+  deterministic harness check over a human prep step. See
   `point-of-use-guardrails-beat-recorded-lore.md`.
 - **Verify before asserting** — check filesystem/state directly before "fixing" a suspected bug, and
-  verify *which* bug. Before declaring a known finding moot, read the lore rule it rests on rather
-  than reconstructing it; reconstruction keeps a rule's motivating case and drops its obligation.
-  Fetch volatile external facts live with a dated citation. After any scoped subagent or fork
-  returns, verify its actual filesystem footprint rather than its summary. See
+  verify *which* bug. **A negative grep proves the searched pattern absent, never the capability
+  absent** — before an absence claim carries a decision, read the entry point (header, usage line,
+  first ~50 lines) and state the absence at the granularity actually verified
+  (`a-negative-grep-proves-the-pattern-absent.md`). Before declaring a known finding moot, read the
+  lore rule it rests on rather than reconstructing it; reconstruction keeps a rule's motivating case
+  and drops its obligation. Fetch volatile external facts live with a dated citation. After any
+  scoped subagent or fork returns, verify its filesystem footprint, not its summary. See
   `verify-before-acting-on-suspected-bugs.md`, `check-own-lore-before-dismissing-a-finding.md`,
   `fetch-volatile-facts-live-not-memory.md`, `fork-scope-creep-under-standing-goal.md`.
 - **Design-time rules sharing one shape** — a change that widens where a value comes from drops the
   old source's validation, so re-attach it at the sink; a verdict with a per-item payload needs a
   per-item trigger; a self-documenting delimiter collides with its own documentation; whitespace
   becomes semantics once a check compares bytes; removing an unsound signal requires replacing the
-  coverage it provided by accident. See `widening-a-source-drops-its-validation.md`,
+  coverage it provided by accident. Two more from the v42 workspace-refresh design: a skip condition
+  keyed on a state that is **normal** for a repo in use silently opts out the feature's heaviest
+  users — ask what population a guard selects, and prefer *reporting* over *guarding* when the risk is
+  "the user did not know"; and **short-circuit on the condition, not a proxy for it** — a proxy is
+  chosen because it is convenient to observe and fails exactly where a user acts deliberately, so
+  write the condition in words first and prefer one an existing component already computes. See
+  `widening-a-source-drops-its-validation.md`,
   `name-keyed-global-registry-cannot-answer-per-scope.md`,
   `self-documenting-payload-vs-heading-delimiters.md`,
   `template-whitespace-is-contract-under-byte-exact-idempotency.md`,
-  `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`.
+  `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`,
+  `guarding-on-a-normal-state-excludes-what-matters-most.md`,
+  `short-circuit-on-the-condition-not-a-proxy.md`.
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source
   (pointer, don't restate — and when fixing a duplicated rule, enumerate every site that *states* it,
-  not only every site that *implements* it: docs, findings rows, error text, literate docstrings,
-  release notes); reuse an existing correlation signal before inventing new plumbing; don't defer
-  completable bounded sweeps; graduated verification. See `naming-foundational-principles.md`,
+  not only every site that *implements* it); reuse an existing correlation signal before inventing
+  new plumbing; don't defer completable bounded sweeps; graduated verification. See `naming-foundational-principles.md`,
   `single-canonical-source-discipline.md`, `reuse-existing-correlation-signal.md`,
   `feedback-don-t-defer-completable-scope.md`, `graduated-verification-confidence.md`.
-- **User-feedback working style:** ranked shortlist over exhaustive enumeration; confirm before
+- **User-feedback working style:** **commit to a recommendation** — a balanced menu of options I could
+  have resolved myself reads as absence of judgement and costs trust ("boneless", 2026-08-23); state
+  the view and the reason, then at most one question, and reserve open questions for decisions
+  genuinely the user's (cost, scope, risk appetite). `/lr:style follow` gives the user the
+  *direction*, not my silence on the *substance*. Also: ranked shortlist over exhaustive enumeration;
+  confirm before
   writing durable lore mid-session; in design dialogues write the draft only when the user triggers
   it; populate dry-run counters with would-be outcomes; "enforce X" ≠ add a required schema field;
   decompose broad open-ended asks into hidden axes and sequence by dependency; on a second pushback
   on the same axis, act instead of re-justifying; a short measurement question gets a short factual
   answer; several style skills invoked at once is a stop signal for the rest of the session. Review
-  subagents default to Composer 2.5, not Sonnet. See `feedback-too-many-words.md`,
+  subagents default to Composer 2.5, not Sonnet. See `feedback-commit-to-a-recommendation.md`,
+  `feedback-too-many-words.md`,
   `feedback-confirm-before-writing-lore.md`, `feedback-draft-only-when-user-triggers.md`,
   `feedback-schemas-as-enforcement-overreach.md`,
   `feedback-layered-decomposition-for-open-ended-asks.md`, `feedback-mvp-minimalism.md`,
@@ -431,9 +436,8 @@ framings first, then the toolkit: `use-cases-via-parallel-consult-pattern.md`,
 genre additionally needs the **AI-installer (literal executor)** lens
 (`ai-installer-review-lens.md`), which catches execution-fidelity bugs the newcomer/editorial lenses
 miss (`skill-doc-filename-divergence-bug-class.md`). Recurring funnel bug: an author writing from
-the fresh-start perspective leaves the **team-join path** invisible at every layer — check README
-prose, QUICKSTART, and the INSTALL preambles, and keep the fork question verbatim-identical across
-sites (`onboarding-funnel-team-join-path.md`). Adopter-facing prose carries the product name
+the fresh-start perspective leaves the **team-join path** invisible at every layer
+(`onboarding-funnel-team-join-path.md`). Adopter-facing prose carries the product name
 **"Lore Agents"** while the engine keeps `lore-framework`/`lr` (`lore-agents-product-name.md`).
 
 ## Active Design Explorations
@@ -450,10 +454,8 @@ sites (`onboarding-funnel-team-join-path.md`). Adopter-facing prose carries the 
   engines are explicit user config; budget = daily-USD spawn gate + per-task wall-clock kill. Engine
   kinds `claude`, `codex`, `cursor`. BETA since v28, with the `/lr:being` surface added in v29;
   Keeper real-engine coverage sits behind `LR_LIFECYCLE_KEEPER=1`. Two per-kind contract gaps stay
-  open as backlog schema decisions: `cursor` is empirically cost-blind so its flat
-  `--session-cost-usd` fallback is load-bearing, and `claude` has no `--plugin-dir` field so a
-  claude-kind being needs a wrapper-script `command`. **The persistent `--launchd` Keeper install is
-  live on this machine** — treat it as a candidate explanation whenever a repo changes under me
+  open as backlog schema decisions (`cursor` cost-blindness, `claude` lacking a `--plugin-dir`
+  field). **The persistent `--launchd` Keeper install is live on this machine** — treat it as a candidate explanation whenever a repo changes under me
   mid-session; the Chronicler soak is a *separate*, still-unverified question. Open gap: headless
   permissions, and self-scheduling under the safe default. Anchor:
   `lore-beings-design.md`; see `agent-being-consciousness-substrate-split.md`,
@@ -469,13 +471,10 @@ sites (`onboarding-funnel-team-join-path.md`). Adopter-facing prose carries the 
   Both other engines have native in-session subagents (Codex `spawn_agent`, **no `role` argument**;
   Cursor `Task`, free-text briefs), and one repo carries both skill namespaces (synced by
   `scripts/sync-cursor-skills`, `/lr:check` #21). Standing facts: **trust rollout/tool-call logs, not
-  model self-report**, when validating an engine path; Codex's default sandbox blocks `.git` writes
-  and network, so finalization needs `.git` writable; Codex per-agent shortcut
-  register/unregister/list is an unvalidated gap. Cross-engine sessions coordinating on a real task
-  have a validated substrate (shared append-only folder) — check same-agent identity before writing,
-  and never relay a user decision there as settled authority. A genuinely different engine catches
-  design flaws same-engine review misses, worth the cost on high-stakes decisions only. Quality
-  uplift is positive on every engine+model config, with **model–engine fit beating model tier**.
+  model self-report** when validating an engine path; Codex's default sandbox blocks `.git` writes
+  and network, so finalization needs `.git` writable; cross-engine co-work has a validated substrate
+  but no relayed authority. A genuinely different engine catches design flaws same-engine review
+  misses, worth the cost on high-stakes decisions only, and **model–engine fit beats model tier**.
   Anchor: `multi-engine-portability-direction.md`; see `docs-engines-convention.md`,
   `claude-coupling-inventory-and-port-tiers.md`, `cursor-dual-skill-tree-one-repo.md`,
   `quality-benchmark-feature.md`, `cross-engine-team-substrate-validated.md`,
@@ -494,7 +493,12 @@ sites (`onboarding-funnel-team-join-path.md`). Adopter-facing prose carries the 
   explorations. The four-command surface (`init` converges, `pull`, `push`, `status`) and the v3
   memory-file contract are live; standard workspace-owned ignore lines include `/.worktrees/`,
   `/.lr-beings/`, and `/.tmp/`, and disposable scaffolds go under `.tmp/<name>/`. Still open and
-  *not* closed by it: the backlog's "Workspace-root paths gap" and B7 "Orphan version stamps". See
+  *not* closed by it: the backlog's "Workspace-root paths gap" and B7 "Orphan version stamps".
+  **Designed 2026-08-23, unimplemented (v42 candidate, cache-affecting): automatic 16h workspace
+  refresh as a second leg of `lr-core preflight`** — `/lr:workspace-status` already names every fix,
+  it just never ran on its own. Known scanner limit it had to work around: `workspace_scan` detects
+  dirty trees only for the workspace **root**, and `workspace-pull` phase 4 fast-forwards child repos
+  with no dirty check at all — ask git per repo. See `workspace-auto-refresh-design.md`,
   `workspace-lifecycle-four-commands.md`, `workspace-memory-file-contract.md`,
   `v25-workspace-pull-init-design.md`, `workspace-owned-default-ignore-lines.md`,
   `workspace-meta-repo-pattern.md`.
@@ -511,33 +515,30 @@ evidence is a **release-prep checkpoint accepted by the user, not a clean full-s
 single run covered the full matrix on the shipped tree, Cursor did not run, and Keeper was closed by
 waiver. The full gate record lives in `versioning-release-types.md`.
 
-My Lore corpus is still largely legacy; v1 adoption is lazy via merge or explicit via `/lr:groom`. Unrelated uncommitted WIP may sit on these checkouts; do not sweep it into
-lore-finalize commits (`git add agents/` only), and preserve unrelated dirty-tree changes during
-release or fold-into-main work, stashing around feature merges when needed
+My Lore corpus is still largely legacy; v1 adoption is lazy via merge or explicit via `/lr:groom`.
+Unrelated uncommitted WIP may sit on these checkouts: never sweep it into lore-finalize commits
+(`git add agents/` only), and stash around feature merges
 (`fold-feature-into-local-main-via-stash.md`).
 
 **This workspace really does run concurrent sessions, including non-human ones** (the live launchd
 Keeper). Another session's directory-wide `git add` can commit and push work I left uncommitted — no
-conflict, no loss, but ungated work ships under an unrelated message and `git status` stops being a
-reliable inventory of my own changes. So: stage narrowly (`git add <path>`, not a directory),
-re-check `git status` and `git log` *before reporting* on my own change set, and branch
-deliberately-ungated work rather than leaving it dirty. See
+loss, but ungated work ships under an unrelated message and `git status` stops being a reliable
+inventory of my own changes. So: stage narrowly (`git add <path>`, not a directory), re-check
+`git status` and `git log` *before reporting* on my own change set, and branch deliberately-ungated
+work rather than leaving it dirty. See
 `concurrent-session-committed-my-uncommitted-work.md`,
 `same-agent-multiple-engines-single-writer.md`.
 
-Both pre-ship gates exist and work — `/lr:trilens-loop` and `tests/lifecycle/` (plus Keeper and
-quality tracks) — and since 2026-08-22 both are on request (see Operating Disciplines). For small
-doc ships, a feedback-only trilens round then selective apply is valid
-(`trilens-feedback-only-selective-apply.md`).
+Both pre-ship gates exist and work (`/lr:trilens-loop`, `tests/lifecycle/`, plus Keeper and quality
+tracks); both are on request — see Operating Disciplines. For small doc ships, a feedback-only
+trilens round then selective apply is valid (`trilens-feedback-only-selective-apply.md`).
 
 ## Running Backlog & Standing Improvement List
 
 `framework-improvements-backlog.md` is the canonical list of deferred items; its § Ship Closures
-archives per-ship gate dispositions. It is organized into top-level `##` categories (Major
-Directions, Session Lifecycle & Durability, Knowledge Quality & Curation, Multi-Agent Collaboration,
-Workspace & Environment, Framework Upkeep/Distribution/Docs, Ship Closures) each holding `###`
-topical sections — file new items under the matching category
-(`backlog-categorization-precedent.md`). ~241 lore topics.
+archives per-ship gate dispositions. It is organized into top-level `##` categories each holding
+`###` topical sections — file new items under the matching category
+(`backlog-categorization-precedent.md`). ~246 lore topics.
 
 **`workdir/what-to-improve.md`** is the **standing prioritized improvement list** — a ranked action
 view over the backlog that must always exist, not a one-off review deliverable (user-established

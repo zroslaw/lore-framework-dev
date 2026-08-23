@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "A rename/restructure sweep needs both a grep for old tokens and a semantic read of the touched prose — grep verifies tokens, only reading verifies facts."
+parent: lore-context.md
+---
+
 # Consistency Sweeps: Grep Catches Tokens, Reading Catches Prose
 
 For a rename/restructure consistency pass, a clean grep is **necessary but not sufficient**. Grep finds mechanical references to the *old token*; it cannot find prose that became **semantically false** but shares no token with the change.
@@ -27,3 +34,4 @@ A rename changes *names*; a restructure changes *facts*. Names are greppable; fa
 - `single-canonical-source-discipline.md` — the discipline that *prevents* the restatement drift this rule *detects*.
 - `df-per-repo-backbone.md` — the DF rename/restructure whose sweep produced this lesson.
 - `deterministic-sweep-catches-check-blind-spots.md` — sibling lesson, opposite direction: LLM-alone misses mechanical existence rot at scale, where this topic shows grep-alone misses semantic drift.
+- `a-negative-grep-proves-the-pattern-absent.md` — the other half of grep's limit: an *empty* result proves the searched pattern absent, never the capability absent. This topic covers the clean-sweep case; that one covers the absence-claim case.

@@ -55,7 +55,9 @@ generalisation is sharper than this topic's rule:
 self-inflicted defects across v37 and v38 were *context* errors rather than logic errors, that on v39
 they concentrated almost entirely in the **prose describing** the fix rather than the fix itself,
 names the four mechanisms that make it systematic, and works out why the round cap guarantees the
-last round's fixes ship unreviewed. Read that one for what to *do*; this one is the case record it
-rests on.
+last round's fixes ship unreviewed. A 2026-08-23 design-doc review added a **second shape** to it:
+fixes also introduce *redundancy* — a new mechanism re-expressing a fact an existing one already
+carried — which a cheap diff-scoped "what does this now say twice?" pass catches without spending a
+review round. Read that one for what to *do*; this one is the case record it rests on.
 
 See also [versioning-release-types.md](versioning-release-types.md) for v37's gate record.

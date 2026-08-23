@@ -134,6 +134,9 @@ reshaped until the test goes green.** See `a-red-test-may-be-asserting-a-true-fa
 - `sonnet-subagent-review-pattern.md` — second-pair-of-eyes discipline for high-stakes changes
 - `plugin-manifest-versioning.md` — its open auto-invalidation question is a "verify before acting" candidate (test empirically before dropping the cache-clear footer)
 - `consistency-sweep-read-not-just-grep.md` — sibling: a grep sweep verifies tokens; only *reading the prose* verifies semantics (a rename sweep near-miss)
+- `a-negative-grep-proves-the-pattern-absent.md` — this rule applied to *absence* claims: an empty
+  grep is an inference about the pattern, not a fact about the capability, and it looks identical to
+  a clean answer
 - `canonicalize-testbed-fixes.md` — sibling: verify what actually persisted to disk from a testbed session before declaring a fix done
 - `hot-path-latency-can-expose-latent-test-timing-races.md` — the same "confirm which cause, not just whether it's broken" discipline applied to a test-failure diagnosis (stash-and-rerun A/B, not assuming new code is wrong)
 - `workflow-primitive-operational-notes.md` — the size-vs-coercion misdiagnosis this session's "which bug" lesson came from
