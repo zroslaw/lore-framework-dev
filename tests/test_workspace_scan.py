@@ -429,8 +429,19 @@ class TestScanEndToEnd(unittest.TestCase):
         self.assertEqual(len(rows), 2)
         by_repo = {row["repo"]: row["registered"] for row in rows}
         self.assertEqual(by_repo, {"test-agents": True, "other-agents": False})
+        self.assertEqual(findings_by_id(data["findings"])["S11"]["data"]["agents"],
+                         ["other-agents/alpha"])
         self.assertNotEqual(os.path.realpath(self.agent_dir),
                             os.path.realpath(other_dir))
+
+    def test_duplicate_repo_context_blocks_reach_s17(self):
+        write(os.path.join(self.workspace, "lore-workspace.md"),
+              "---\ndescription: Test workspace\nrepo-context:\n"
+              "  - repo: one\n    description: First.\n"
+              "repo-context:\n  - repo: two\n    description: Second.\n---\n")
+        finding = findings_by_id(self.scan()["findings"])["S17"]
+        self.assertTrue(any(item["reason"] == "duplicate repo-context block"
+                            for item in finding["data"]["repo_context_issues"]))
 
 
 class TestDuplicateBlockKey(unittest.TestCase):
@@ -544,6 +555,14 @@ class TestRepoContext(unittest.TestCase):
         self.assertEqual(entries[0]["description"], "First.")
         self.assertIn({"line": 5, "reason": "duplicate field",
                        "field": "description"}, issues)
+
+    def test_non_block_repo_context_is_reported(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context: not-a-list\n---\n")
+        entries, issues = ws.repo_context_entries(self.tmp)
+        self.assertEqual(entries, [])
+        self.assertEqual(issues, [{"line": 2,
+                                   "reason": "repo-context must be a block"}])
 
 
 class TestS17RoutingDescriptions(unittest.TestCase):
