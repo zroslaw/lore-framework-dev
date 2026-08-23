@@ -419,6 +419,19 @@ class TestScanEndToEnd(unittest.TestCase):
         self.assertEqual(data["managed_paths"]["dirty"], [])
         self.assertIn("S15", findings_by_id(data["findings"]))
 
+    def test_same_named_agents_are_registered_by_target_path(self):
+        other_dir = make_agent(self.workspace, "other-agents", "alpha")
+        write_codex_shortcut(os.path.join(self.workspace, ".codex", "skills"),
+                             "alpha", self.agent_dir)
+        data = self.scan_envelope()["data"]
+        rows = [row for row in data["routing"]["agents"]
+                if row["name"] == "alpha"]
+        self.assertEqual(len(rows), 2)
+        by_repo = {row["repo"]: row["registered"] for row in rows}
+        self.assertEqual(by_repo, {"test-agents": True, "other-agents": False})
+        self.assertNotEqual(os.path.realpath(self.agent_dir),
+                            os.path.realpath(other_dir))
+
 
 class TestDuplicateBlockKey(unittest.TestCase):
     """A repeated `repos:` block must not discard the first block's URLs.
@@ -461,19 +474,14 @@ class TestRepoContext(unittest.TestCase):
         self.tmp = tempfile.mkdtemp(prefix="lr-repo-context-")
         self.addCleanup(__import__("shutil").rmtree, self.tmp, True)
 
-    def test_frontmatter_parser_supports_shallow_mapping_lists(self):
-        from lr_core.common import parse_frontmatter
-        fm = parse_frontmatter(
-            "---\n"
-            "repos:\n"
-            "  - https://example.com/team/product.git\n"
-            "repo-context:\n"
-            "  - repo: product\n"
-            "    description: Owns the product. Inspect for product changes.\n"
-            "---\n")
-        self.assertEqual(fm["repos"],
-                         ["https://example.com/team/product.git"])
-        self.assertEqual(fm["repo-context"], [{
+    def test_repo_context_parser_reads_fixed_mapping_shape(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n  - repo: product\n"
+              "    description: Owns the product. Inspect for product changes.\n"
+              "---\n")
+        entries, issues = ws.repo_context_entries(self.tmp)
+        self.assertEqual(issues, [])
+        self.assertEqual(entries, [{
             "repo": "product",
             "description": "Owns the product. Inspect for product changes.",
         }])
@@ -518,6 +526,24 @@ class TestRepoContext(unittest.TestCase):
         _entries, issues = ws.repo_context_entries(self.tmp)
         self.assertEqual(issues, [{"index": 0, "reason": "unsupported keys",
                                    "keys": ["owner"]}])
+
+    def test_malformed_indentation_is_reported(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n   - repo: product\n"
+              "    description: Owns product.\n---\n")
+        entries, issues = ws.repo_context_entries(self.tmp)
+        self.assertEqual(entries, [])
+        self.assertTrue(any(item["reason"] == "malformed repo-context line"
+                            for item in issues))
+
+    def test_duplicate_mapping_field_is_reported(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n  - repo: product\n"
+              "    description: First.\n    description: Second.\n---\n")
+        entries, issues = ws.repo_context_entries(self.tmp)
+        self.assertEqual(entries[0]["description"], "First.")
+        self.assertIn({"line": 5, "reason": "duplicate field",
+                       "field": "description"}, issues)
 
 
 class TestS17RoutingDescriptions(unittest.TestCase):
