@@ -779,6 +779,50 @@ class TestScan(LrCoreTestBase):
         self.assertEqual(out["data"]["count"], 2)
 
 
+class TestParseYamlSubset(unittest.TestCase):
+    """parse_yaml_subset — the fence-free half of parse_frontmatter, extracted
+    for the workspace-refresh state store (no `---` fences of its own).
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, os.path.join(FRAMEWORK_DIR, "scripts"))
+        from lr_core.common import parse_yaml_subset, parse_frontmatter
+        cls.parse_yaml_subset = staticmethod(parse_yaml_subset)
+        cls.parse_frontmatter = staticmethod(parse_frontmatter)
+
+    def test_fence_free_file_with_leading_comments(self):
+        lines = [
+            "# Lore workspace refresh state.",
+            "# Delete this file to force a refresh.",
+            'last-attempt: "2026-08-23T08:12:44+07:00"',
+            "result: ok",
+        ]
+        out = self.parse_yaml_subset(lines)
+        self.assertEqual(out["last-attempt"], "2026-08-23T08:12:44+07:00")
+        self.assertEqual(out["result"], "ok")
+
+    def test_blank_lines_are_skipped(self):
+        out = self.parse_yaml_subset(["a: 1", "", "  ", "b: 2"])
+        self.assertEqual(out, {"a": "1", "b": "2"})
+
+    def test_block_sequence_still_works_without_fences(self):
+        out = self.parse_yaml_subset(["repos:", "  - one", "  - two"])
+        self.assertEqual(out["repos"], ["one", "two"])
+
+    def test_parse_frontmatter_delegates_unchanged(self):
+        """The extraction must not change parse_frontmatter's own behaviour —
+        fence detection stays there, only the body parsing moved.
+        """
+        fm = self.parse_frontmatter("---\ndescription: x\nrepos:\n  - a\n---\n")
+        self.assertEqual(fm, {"description": "x", "repos": ["a"]})
+
+    def test_parse_frontmatter_still_requires_the_opening_fence(self):
+        # parse_yaml_subset has no fence concept at all; parse_frontmatter
+        # must still refuse a fence-free file rather than reading it as a body.
+        self.assertEqual(self.parse_frontmatter("description: x\n"), {})
+
+
 class TestTeammateMarkerMatching(unittest.TestCase):
     """The marker must match as a flag, not as a substring.
 
