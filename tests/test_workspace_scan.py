@@ -168,6 +168,25 @@ class TestShortcutInventory(unittest.TestCase):
         self.assertEqual(inv, {"claude": [], "codex": [], "cursor": [],
                                "codex_home": []})
 
+    def test_shortcut_targets_cover_every_supported_location(self):
+        write(os.path.join(self.workspace, ".claude", "commands",
+                           "lr-alpha-agent.md"), BOOT_LINE % ("alpha", "/x/alpha/"))
+        write_codex_shortcut(os.path.join(self.workspace, ".codex", "skills"),
+                             "beta", "/x/beta")
+        write_codex_shortcut(os.path.join(self.workspace, ".cursor", "skills"),
+                             "gamma", "/x/gamma")
+        write_codex_shortcut(os.path.join(self.home, ".codex", "skills"),
+                             "delta", "/x/delta")
+        self.assertEqual(ws.shortcut_targets(self.workspace), {
+            os.path.realpath("/x/alpha"), os.path.realpath("/x/beta"),
+            os.path.realpath("/x/gamma"), os.path.realpath("/x/delta"),
+        })
+
+    def test_shortcut_target_ignores_a_file_without_boot_target(self):
+        write(os.path.join(self.workspace, ".claude", "commands",
+                           "lr-broken-agent.md"), "not a bootstrap\n")
+        self.assertEqual(ws.shortcut_targets(self.workspace), set())
+
 
 class TestS15LegacyCodexShortcuts(unittest.TestCase):
     """S15 — Codex shortcuts still in the unpublishable home location."""
@@ -418,6 +437,8 @@ class TestScanEndToEnd(unittest.TestCase):
         self.assertEqual(data["shortcuts"]["codex_home"], ["alpha"])
         self.assertEqual(data["managed_paths"]["dirty"], [])
         self.assertIn("S15", findings_by_id(data["findings"]))
+        self.assertNotIn("S11", findings_by_id(data["findings"]))
+        self.assertTrue(data["routing"]["agents"][0]["registered"])
 
     def test_same_named_agents_are_registered_by_target_path(self):
         other_dir = make_agent(self.workspace, "other-agents", "alpha")
@@ -577,6 +598,25 @@ class TestRepoContext(unittest.TestCase):
         self.assertEqual(issues, [{"line": 2,
                                    "reason": "repo-context must be a block"}])
 
+    def test_missing_and_duplicate_identity_fields_are_reported(self):
+        cases = (
+            ("  - repo:\n    description: text\n", "missing repo"),
+            ("  - repo: product\n", "missing description"),
+            ("  - repo: product\n    description: one\n"
+             "  - repo: product\n    description: two\n", "duplicate repo"),
+        )
+        for block, reason in cases:
+            with self.subTest(reason=reason):
+                write(os.path.join(self.tmp, "lore-workspace.md"),
+                      "---\nrepo-context:\n%s---\n" % block)
+                _entries, issues = ws.repo_context_entries(self.tmp)
+                self.assertIn(reason, [item["reason"] for item in issues])
+
+    def test_absent_repo_context_is_empty_and_valid(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\ndescription: workspace\n---\n")
+        self.assertEqual(ws.repo_context_entries(self.tmp), ([], []))
+
 
 class TestS17RoutingDescriptions(unittest.TestCase):
     def test_fires_for_missing_canonical_descriptions(self):
@@ -607,6 +647,16 @@ class TestS17RoutingDescriptions(unittest.TestCase):
             "repo_context_issues": [],
         })
         self.assertNotIn("S17", findings_by_id(ws.build_findings(data)))
+
+    def test_fires_for_repo_context_schema_issues_alone(self):
+        issue = {"line": 2, "reason": "repo-context must be a block"}
+        data = base_data(routing={
+            "repositories": [], "agents": [], "repo_context_issues": [issue],
+        })
+        finding = findings_by_id(ws.build_findings(data))["S17"]
+        self.assertEqual(finding["data"], {
+            "repositories": [], "agents": [], "repo_context_issues": [issue],
+        })
 
 
 class TestListItemComments(unittest.TestCase):
