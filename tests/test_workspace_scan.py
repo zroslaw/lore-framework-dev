@@ -168,6 +168,25 @@ class TestShortcutInventory(unittest.TestCase):
         self.assertEqual(inv, {"claude": [], "codex": [], "cursor": [],
                                "codex_home": []})
 
+    def test_shortcut_targets_cover_every_supported_location(self):
+        write(os.path.join(self.workspace, ".claude", "commands",
+                           "lr-alpha-agent.md"), BOOT_LINE % ("alpha", "/x/alpha/"))
+        write_codex_shortcut(os.path.join(self.workspace, ".codex", "skills"),
+                             "beta", "/x/beta")
+        write_codex_shortcut(os.path.join(self.workspace, ".cursor", "skills"),
+                             "gamma", "/x/gamma")
+        write_codex_shortcut(os.path.join(self.home, ".codex", "skills"),
+                             "delta", "/x/delta")
+        self.assertEqual(ws.shortcut_targets(self.workspace), {
+            os.path.realpath("/x/alpha"), os.path.realpath("/x/beta"),
+            os.path.realpath("/x/gamma"), os.path.realpath("/x/delta"),
+        })
+
+    def test_shortcut_target_ignores_a_file_without_boot_target(self):
+        write(os.path.join(self.workspace, ".claude", "commands",
+                           "lr-broken-agent.md"), "not a bootstrap\n")
+        self.assertEqual(ws.shortcut_targets(self.workspace), set())
+
 
 class TestS15LegacyCodexShortcuts(unittest.TestCase):
     """S15 — Codex shortcuts still in the unpublishable home location."""
@@ -418,6 +437,45 @@ class TestScanEndToEnd(unittest.TestCase):
         self.assertEqual(data["shortcuts"]["codex_home"], ["alpha"])
         self.assertEqual(data["managed_paths"]["dirty"], [])
         self.assertIn("S15", findings_by_id(data["findings"]))
+        self.assertNotIn("S11", findings_by_id(data["findings"]))
+        self.assertTrue(data["routing"]["agents"][0]["registered"])
+
+    def test_same_named_agents_are_registered_by_target_path(self):
+        other_dir = make_agent(self.workspace, "other-agents", "alpha")
+        write_codex_shortcut(os.path.join(self.workspace, ".codex", "skills"),
+                             "alpha", self.agent_dir)
+        data = self.scan_envelope()["data"]
+        rows = [row for row in data["routing"]["agents"]
+                if row["name"] == "alpha"]
+        self.assertEqual(len(rows), 2)
+        by_repo = {row["repo"]: row["registered"] for row in rows}
+        self.assertEqual(by_repo, {"test-agents": True, "other-agents": False})
+        self.assertEqual(findings_by_id(data["findings"])["S11"]["data"]["agents"],
+                         ["other-agents/alpha"])
+        self.assertNotEqual(os.path.realpath(self.agent_dir),
+                            os.path.realpath(other_dir))
+
+    def test_duplicate_repo_context_blocks_reach_s17(self):
+        write(os.path.join(self.workspace, "lore-workspace.md"),
+              "---\ndescription: Test workspace\nrepo-context:\n"
+              "  - repo: one\n    description: First.\n"
+              "repo-context:\n  - repo: two\n    description: Second.\n---\n")
+        finding = findings_by_id(self.scan()["findings"])["S17"]
+        self.assertTrue(any(item["reason"] == "duplicate repo-context block"
+                            for item in finding["data"]["repo_context_issues"]))
+
+    def test_s17_qualifies_two_registered_same_named_agents(self):
+        other_dir = make_agent(self.workspace, "other-agents", "alpha")
+        for agent_dir in (self.agent_dir, other_dir):
+            write(os.path.join(agent_dir, "role.md"),
+                  "---\ndescription: \n---\n\n# alpha\n")
+        write_codex_shortcut(os.path.join(self.workspace, ".codex", "skills"),
+                             "alpha", self.agent_dir)
+        write(os.path.join(self.workspace, ".claude", "commands",
+                           "lr-alpha-agent.md"), BOOT_LINE % ("alpha", other_dir))
+        finding = findings_by_id(self.scan()["findings"])["S17"]
+        self.assertEqual(finding["data"]["agents"],
+                         ["other-agents/alpha", "test-agents/alpha"])
 
 
 class TestDuplicateBlockKey(unittest.TestCase):
@@ -452,6 +510,153 @@ class TestDuplicateBlockKey(unittest.TestCase):
         from lr_core.common import parse_frontmatter
         fm = parse_frontmatter("---\ndescription: first\ndescription: second\n---\n")
         self.assertEqual(fm["description"], "second")
+
+
+class TestRepoContext(unittest.TestCase):
+    """Workspace-owned routing descriptions for ordinary repositories."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix="lr-repo-context-")
+        self.addCleanup(__import__("shutil").rmtree, self.tmp, True)
+
+    def test_repo_context_parser_reads_fixed_mapping_shape(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n  - repo: product\n"
+              "    description: Owns the product. Inspect for product changes.\n"
+              "---\n")
+        entries, issues = ws.repo_context_entries(self.tmp)
+        self.assertEqual(issues, [])
+        self.assertEqual(entries, [{
+            "repo": "product",
+            "description": "Owns the product. Inspect for product changes.",
+        }])
+
+    def test_repository_routes_use_lore_repo_then_workspace_context(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n  - repo: product\n"
+              "    description: Owns the product. Inspect for app changes.\n---\n")
+        write(os.path.join(self.tmp, "agents", "lore-repo.md"),
+              "---\ndescription: Owns specialist agents. Boot them for domain work.\n"
+              "version: \"41\"\n---\n")
+        declared = [
+            {"url": "https://x/agents.git", "dirname": "agents", "source": "workspace"},
+            {"url": "https://x/product.git", "dirname": "product", "source": "workspace"},
+        ]
+        routes, issues = ws.repository_routes(self.tmp, declared)
+        self.assertEqual(issues, [])
+        self.assertEqual(routes[0]["description_source"], "agents/lore-repo.md")
+        self.assertEqual(routes[0]["kind"], "lore")
+        self.assertEqual(routes[1]["description_source"], "lore-workspace.md")
+        self.assertEqual(routes[1]["kind"], "ordinary")
+
+    def test_stale_and_lore_repo_context_entries_are_issues(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n"
+              "  - repo: stale\n    description: stale\n"
+              "  - repo: agents\n    description: duplicate source\n---\n")
+        write(os.path.join(self.tmp, "agents", "lore-repo.md"),
+              "---\ndescription: canonical\nversion: \"41\"\n---\n")
+        declared = [{"url": "https://x/agents.git", "dirname": "agents",
+                     "source": "workspace"}]
+        _routes, issues = ws.repository_routes(self.tmp, declared)
+        self.assertEqual({item["reason"] for item in issues}, {
+            "repo is not declared",
+            "Lore repo description belongs in lore-repo.md",
+        })
+
+    def test_unknown_repo_context_keys_are_reported(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n  - repo: product\n"
+              "    description: Owns product.\n    owner: platform\n---\n")
+        _entries, issues = ws.repo_context_entries(self.tmp)
+        self.assertEqual(issues, [{"index": 0, "reason": "unsupported keys",
+                                   "keys": ["owner"]}])
+
+    def test_malformed_indentation_is_reported(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n   - repo: product\n"
+              "    description: Owns product.\n---\n")
+        entries, issues = ws.repo_context_entries(self.tmp)
+        self.assertEqual(entries, [])
+        self.assertTrue(any(item["reason"] == "malformed repo-context line"
+                            for item in issues))
+
+    def test_duplicate_mapping_field_is_reported(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n  - repo: product\n"
+              "    description: First.\n    description: Second.\n---\n")
+        entries, issues = ws.repo_context_entries(self.tmp)
+        self.assertEqual(entries[0]["description"], "First.")
+        self.assertIn({"line": 5, "reason": "duplicate field",
+                       "field": "description"}, issues)
+
+    def test_non_block_repo_context_is_reported(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context: not-a-list\n---\n")
+        entries, issues = ws.repo_context_entries(self.tmp)
+        self.assertEqual(entries, [])
+        self.assertEqual(issues, [{"line": 2,
+                                   "reason": "repo-context must be a block"}])
+
+    def test_missing_and_duplicate_identity_fields_are_reported(self):
+        cases = (
+            ("  - repo:\n    description: text\n", "missing repo"),
+            ("  - repo: product\n", "missing description"),
+            ("  - repo: product\n    description: one\n"
+             "  - repo: product\n    description: two\n", "duplicate repo"),
+        )
+        for block, reason in cases:
+            with self.subTest(reason=reason):
+                write(os.path.join(self.tmp, "lore-workspace.md"),
+                      "---\nrepo-context:\n%s---\n" % block)
+                _entries, issues = ws.repo_context_entries(self.tmp)
+                self.assertIn(reason, [item["reason"] for item in issues])
+
+    def test_absent_repo_context_is_empty_and_valid(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\ndescription: workspace\n---\n")
+        self.assertEqual(ws.repo_context_entries(self.tmp), ([], []))
+
+
+class TestS17RoutingDescriptions(unittest.TestCase):
+    def test_fires_for_missing_canonical_descriptions(self):
+        data = base_data(routing={
+            "repositories": [{"repo": "product", "description": ""}],
+            "agents": [{"name": "architect", "registered": True,
+                        "description": ""}],
+            "repo_context_issues": [],
+        })
+        finding = findings_by_id(ws.build_findings(data))["S17"]
+        self.assertEqual(finding["data"]["repositories"], ["product"])
+        self.assertEqual(finding["data"]["agents"], ["architect"])
+
+    def test_ignores_missing_description_on_unregistered_agent(self):
+        data = base_data(routing={
+            "repositories": [],
+            "agents": [{"name": "hidden", "registered": False,
+                        "description": ""}],
+            "repo_context_issues": [],
+        })
+        self.assertNotIn("S17", findings_by_id(ws.build_findings(data)))
+
+    def test_silent_when_routing_sources_are_complete(self):
+        data = base_data(routing={
+            "repositories": [{"repo": "product", "description": "Owns product"}],
+            "agents": [{"name": "architect", "registered": True,
+                        "description": "Owns architecture"}],
+            "repo_context_issues": [],
+        })
+        self.assertNotIn("S17", findings_by_id(ws.build_findings(data)))
+
+    def test_fires_for_repo_context_schema_issues_alone(self):
+        issue = {"line": 2, "reason": "repo-context must be a block"}
+        data = base_data(routing={
+            "repositories": [], "agents": [], "repo_context_issues": [issue],
+        })
+        finding = findings_by_id(ws.build_findings(data))["S17"]
+        self.assertEqual(finding["data"], {
+            "repositories": [], "agents": [], "repo_context_issues": [issue],
+        })
 
 
 class TestListItemComments(unittest.TestCase):
