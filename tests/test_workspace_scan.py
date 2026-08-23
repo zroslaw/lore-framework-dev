@@ -454,6 +454,103 @@ class TestDuplicateBlockKey(unittest.TestCase):
         self.assertEqual(fm["description"], "second")
 
 
+class TestRepoContext(unittest.TestCase):
+    """Workspace-owned routing descriptions for ordinary repositories."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix="lr-repo-context-")
+        self.addCleanup(__import__("shutil").rmtree, self.tmp, True)
+
+    def test_frontmatter_parser_supports_shallow_mapping_lists(self):
+        from lr_core.common import parse_frontmatter
+        fm = parse_frontmatter(
+            "---\n"
+            "repos:\n"
+            "  - https://example.com/team/product.git\n"
+            "repo-context:\n"
+            "  - repo: product\n"
+            "    description: Owns the product. Inspect for product changes.\n"
+            "---\n")
+        self.assertEqual(fm["repos"],
+                         ["https://example.com/team/product.git"])
+        self.assertEqual(fm["repo-context"], [{
+            "repo": "product",
+            "description": "Owns the product. Inspect for product changes.",
+        }])
+
+    def test_repository_routes_use_lore_repo_then_workspace_context(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n  - repo: product\n"
+              "    description: Owns the product. Inspect for app changes.\n---\n")
+        write(os.path.join(self.tmp, "agents", "lore-repo.md"),
+              "---\ndescription: Owns specialist agents. Boot them for domain work.\n"
+              "version: \"41\"\n---\n")
+        declared = [
+            {"url": "https://x/agents.git", "dirname": "agents", "source": "workspace"},
+            {"url": "https://x/product.git", "dirname": "product", "source": "workspace"},
+        ]
+        routes, issues = ws.repository_routes(self.tmp, declared)
+        self.assertEqual(issues, [])
+        self.assertEqual(routes[0]["description_source"], "agents/lore-repo.md")
+        self.assertEqual(routes[0]["kind"], "lore")
+        self.assertEqual(routes[1]["description_source"], "lore-workspace.md")
+        self.assertEqual(routes[1]["kind"], "ordinary")
+
+    def test_stale_and_lore_repo_context_entries_are_issues(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n"
+              "  - repo: stale\n    description: stale\n"
+              "  - repo: agents\n    description: duplicate source\n---\n")
+        write(os.path.join(self.tmp, "agents", "lore-repo.md"),
+              "---\ndescription: canonical\nversion: \"41\"\n---\n")
+        declared = [{"url": "https://x/agents.git", "dirname": "agents",
+                     "source": "workspace"}]
+        _routes, issues = ws.repository_routes(self.tmp, declared)
+        self.assertEqual({item["reason"] for item in issues}, {
+            "repo is not declared",
+            "Lore repo description belongs in lore-repo.md",
+        })
+
+    def test_unknown_repo_context_keys_are_reported(self):
+        write(os.path.join(self.tmp, "lore-workspace.md"),
+              "---\nrepo-context:\n  - repo: product\n"
+              "    description: Owns product.\n    owner: platform\n---\n")
+        _entries, issues = ws.repo_context_entries(self.tmp)
+        self.assertEqual(issues, [{"index": 0, "reason": "unsupported keys",
+                                   "keys": ["owner"]}])
+
+
+class TestS17RoutingDescriptions(unittest.TestCase):
+    def test_fires_for_missing_canonical_descriptions(self):
+        data = base_data(routing={
+            "repositories": [{"repo": "product", "description": ""}],
+            "agents": [{"name": "architect", "registered": True,
+                        "description": ""}],
+            "repo_context_issues": [],
+        })
+        finding = findings_by_id(ws.build_findings(data))["S17"]
+        self.assertEqual(finding["data"]["repositories"], ["product"])
+        self.assertEqual(finding["data"]["agents"], ["architect"])
+
+    def test_ignores_missing_description_on_unregistered_agent(self):
+        data = base_data(routing={
+            "repositories": [],
+            "agents": [{"name": "hidden", "registered": False,
+                        "description": ""}],
+            "repo_context_issues": [],
+        })
+        self.assertNotIn("S17", findings_by_id(ws.build_findings(data)))
+
+    def test_silent_when_routing_sources_are_complete(self):
+        data = base_data(routing={
+            "repositories": [{"repo": "product", "description": "Owns product"}],
+            "agents": [{"name": "architect", "registered": True,
+                        "description": "Owns architecture"}],
+            "repo_context_issues": [],
+        })
+        self.assertNotIn("S17", findings_by_id(ws.build_findings(data)))
+
+
 class TestListItemComments(unittest.TestCase):
     """Block-sequence items must be comment-stripped like the awk parser.
 
