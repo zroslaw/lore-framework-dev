@@ -289,12 +289,12 @@ class TestCheck(TempWorkspace):
         self.assertEqual(sorted(result["missing"]),
                          sorted([pc.CLAUDE_SETTINGS_REL, pc.CURSOR_SETTINGS_REL]))
         self.assertEqual(result["disabled"], [])
-        self.assertEqual(result["unreadable"], [])
+        self.assertEqual(result["unresolvable"], [])
 
     def test_clean_after_apply(self):
         pc.apply_plugin_config(self.ws)
         result = pc.check_plugin_config(self.ws)
-        self.assertEqual(result, {"missing": [], "unreadable": [], "disabled": []})
+        self.assertEqual(result, {"missing": [], "unresolvable": [], "disabled": []})
 
     def test_disabled_is_not_reported_as_missing(self):
         pc.apply_plugin_config(self.ws)
@@ -320,10 +320,10 @@ class TestCheck(TempWorkspace):
         result = pc.check_plugin_config(self.ws)
         self.assertIn(pc.CLAUDE_SETTINGS_REL, result["missing"])
 
-    def test_unreadable_is_not_silently_clean(self):
+    def test_unresolvable_is_not_silently_clean(self):
         write(self.cursor, "{ not json")
         result = pc.check_plugin_config(self.ws)
-        self.assertEqual(result["unreadable"], [pc.CURSOR_SETTINGS_REL])
+        self.assertEqual(result["unresolvable"], [pc.CURSOR_SETTINGS_REL])
 
 
 class TestS18Finding(TempWorkspace):
@@ -357,25 +357,25 @@ class TestS18Finding(TempWorkspace):
 
     def test_missing_fires(self):
         rows = self.build({"missing": [pc.CLAUDE_SETTINGS_REL],
-                           "unreadable": [], "disabled": []})
+                           "unresolvable": [], "disabled": []})
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["severity"], "info")
         self.assertEqual(rows[0]["data"]["missing"], [pc.CLAUDE_SETTINGS_REL])
 
-    def test_unreadable_fires(self):
-        rows = self.build({"missing": [], "unreadable": [pc.CURSOR_SETTINGS_REL],
+    def test_unresolvable_fires(self):
+        rows = self.build({"missing": [], "unresolvable": [pc.CURSOR_SETTINGS_REL],
                            "disabled": []})
         self.assertEqual(len(rows), 1)
 
     def test_disabled_alone_does_not_fire(self):
         # An explicit false is a user's choice, not drift. Reporting it would
         # route them to a fix that undoes what they meant.
-        rows = self.build({"missing": [], "unreadable": [],
+        rows = self.build({"missing": [], "unresolvable": [],
                            "disabled": [pc.CLAUDE_SETTINGS_REL]})
         self.assertEqual(rows, [])
 
     def test_clean_does_not_fire(self):
-        rows = self.build({"missing": [], "unreadable": [], "disabled": []})
+        rows = self.build({"missing": [], "unresolvable": [], "disabled": []})
         self.assertEqual(rows, [])
 
     def test_absent_block_does_not_crash(self):
@@ -390,6 +390,160 @@ class TestManagedPaths(TempWorkspace):
         for rel in (pc.CLAUDE_SETTINGS_REL, pc.CURSOR_SETTINGS_REL):
             self.assertIn(rel, ws.MANAGED_PATHS)
             self.assertTrue(ws.is_managed(rel))
+
+
+class TestDurability(TempWorkspace):
+    """Regressions for the three defects independent review found in v43.
+
+    All three shared one shape: a failure the module *reported* tidily while
+    the filesystem told a different story.
+    """
+
+    def test_failed_write_does_not_destroy_the_previous_file(self):
+        # `open(path, "w")` truncates before it writes. A write that dies
+        # mid-stream used to leave a team's permissions/hooks/env replaced by
+        # a few bytes of garbage, reported as an ordinary `error` row --
+        # indistinguishable from a refusal that never touched the file.
+        #
+        # This test drives the failure through write_atomic's own handle, so
+        # it certifies the new implementation rather than reproducing the old
+        # one; test_write_atomic_never_truncates_on_failure states the
+        # invariant in a form that does not depend on the call shape.
+        original = json.dumps({
+            "permissions": {"allow": ["Bash(ls)"]},
+            "hooks": {"Stop": [{"command": "echo done"}]},
+            "env": {"SECRET": "keep-me"},
+        }, indent=2) + "\n"
+        write(self.claude, original)
+
+        real_fdopen = os.fdopen
+
+        def exploding_fdopen(fd, *a, **kw):
+            handle = real_fdopen(fd, *a, **kw)
+            original_write = handle.write
+
+            def boom(text):
+                original_write(text[:6])
+                raise OSError(28, "No space left on device")
+
+            handle.write = boom
+            return handle
+
+        os.fdopen = exploding_fdopen
+        try:
+            data, errors = pc.apply_plugin_config(self.ws)
+        finally:
+            os.fdopen = real_fdopen
+
+        self.assertTrue(errors)
+        row = [r for r in data["files"] if r["engine"] == "claude"][0]
+        self.assertEqual(row["action"], "error")
+        with open(self.claude, "r", encoding="utf-8") as handle:
+            self.assertEqual(handle.read(), original)
+
+    def test_write_atomic_never_truncates_on_failure(self):
+        # The invariant stated directly, independent of how apply_plugin_config
+        # happens to call it: a failed write leaves the target exactly as it
+        # was, never truncated to zero.
+        target = os.path.join(self.ws, "settings.json")
+        original = '{"keep": "me"}\n'
+        write(target, original)
+        real_replace = os.replace
+        os.replace = lambda *a, **kw: (_ for _ in ()).throw(
+            OSError(28, "No space left on device"))
+        try:
+            with self.assertRaises(OSError):
+                pc.write_atomic(target, '{"clobbered": true}\n')
+        finally:
+            os.replace = real_replace
+        with open(target, "r", encoding="utf-8") as handle:
+            self.assertEqual(handle.read(), original)
+
+    def test_failed_write_leaves_no_temp_files_behind(self):
+        real_replace = os.replace
+
+        def failing_replace(*a, **kw):
+            raise OSError(13, "Permission denied")
+
+        os.replace = failing_replace
+        try:
+            pc.apply_plugin_config(self.ws)
+        finally:
+            os.replace = real_replace
+        leftovers = []
+        for sub in (".claude", ".cursor"):
+            d = os.path.join(self.ws, sub)
+            if os.path.isdir(d):
+                leftovers += [n for n in os.listdir(d) if n.startswith(".lr-")]
+        self.assertEqual(leftovers, [])
+
+    def test_non_utf8_is_reported_not_raised(self):
+        # UnicodeDecodeError is a ValueError, not an OSError. Uncaught, it
+        # crashed the CLI out of its JSON envelope and took every other
+        # workspace-scan finding down with it.
+        os.makedirs(os.path.dirname(self.claude), exist_ok=True)
+        with open(self.claude, "wb") as handle:
+            handle.write(b'{"permissions": "\xff\xfe not utf-8"}')
+        data, errors = pc.apply_plugin_config(self.ws)
+        self.assertTrue(errors)
+        row = [r for r in data["files"] if r["engine"] == "claude"][0]
+        self.assertEqual(row["action"], "error")
+        # and the healthy engine still converges
+        actions = {r["engine"]: r["action"] for r in data["files"]}
+        self.assertEqual(actions["cursor"], "created")
+
+    def test_non_utf8_does_not_crash_the_check(self):
+        os.makedirs(os.path.dirname(self.cursor), exist_ok=True)
+        with open(self.cursor, "wb") as handle:
+            handle.write(b"\xff\xfe\x00")
+        result = pc.check_plugin_config(self.ws)
+        self.assertEqual(result["unresolvable"], [pc.CURSOR_SETTINGS_REL])
+
+
+class TestCheckAndApplyAgree(TempWorkspace):
+    """check_plugin_config must never call a file `missing` that apply refuses.
+
+    That combination is an S18 row telling the user to run workspace-init, on
+    a file workspace-init can structurally never converge — advice that fails
+    silently and forever.
+    """
+
+    FIXTURES = [
+        ('{"enabledPlugins": "not-a-dict"}', "claude"),
+        ('{"extraKnownMarketplaces": []}', "claude"),
+        ('{"plugins": "not-a-dict"}', "cursor"),
+        ('{"plugins": 42}', "cursor"),
+        ("{ not json", "cursor"),
+        ("[1,2,3]", "claude"),
+    ]
+
+    def test_refused_by_apply_is_never_reported_missing(self):
+        for raw, engine in self.FIXTURES:
+            with self.subTest(raw=raw, engine=engine):
+                tmp = tempfile.TemporaryDirectory()
+                self.addCleanup(tmp.cleanup)
+                ws = tmp.name
+                rel = (pc.CLAUDE_SETTINGS_REL if engine == "claude"
+                       else pc.CURSOR_SETTINGS_REL)
+                write(os.path.join(ws, rel), raw)
+
+                data, _ = pc.apply_plugin_config(ws, dry_run=True)
+                row = [r for r in data["files"] if r["engine"] == engine][0]
+                check = pc.check_plugin_config(ws)
+
+                if row["action"] == "error":
+                    self.assertIn(rel, check["unresolvable"])
+                    self.assertNotIn(rel, check["missing"])
+                else:
+                    self.assertNotIn(rel, check["unresolvable"])
+
+    def test_converged_file_is_never_reported_missing(self):
+        pc.apply_plugin_config(self.ws)
+        data, _ = pc.apply_plugin_config(self.ws, dry_run=True)
+        self.assertEqual({r["action"] for r in data["files"]}, {"unchanged"})
+        check = pc.check_plugin_config(self.ws)
+        self.assertEqual(check, {"missing": [], "unresolvable": [],
+                                 "disabled": []})
 
 
 class TestCliEnvelope(TempWorkspace):
