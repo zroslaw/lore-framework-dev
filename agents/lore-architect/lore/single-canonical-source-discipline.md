@@ -57,6 +57,19 @@ docstrings **are** the normative spec when the accelerator fails, so an executor
 fallback silently reproduces the bug that was just fixed — a stated rule can be load-bearing
 execution, not just documentation.
 
+## Two code paths answering one question (v43, 2026-08-25)
+
+The code form of this discipline has a sharper failure mode than the prose form. v43 shipped a
+`workspace-status` checker and a `workspace-init` doer that both answered *is this file configured?*
+by separate logic; they disagreed on one input shape, and the diagnostic routed the user to a fix
+that could never succeed. Prose that drifts confuses a reader; a checker that drifts sends a user
+into a loop. Owned by [one-question-one-code-path.md](one-question-one-code-path.md).
+
+The **approval-surface** variant is a third site class worth grepping for: a confirmation template,
+a dry-run listing, or a summary block that *enumerates* what a procedure will do is maintained by
+hand and silently omits any newly added action. Owned by
+[adding-a-write-means-updating-the-approval-gate.md](adding-a-write-means-updating-the-approval-gate.md).
+
 ## Verification trick — grep across all sites
 
 Useful sanity check during multi-lens review (works as a Lens 3 / correctness exercise):

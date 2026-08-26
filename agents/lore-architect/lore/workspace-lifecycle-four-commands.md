@@ -28,7 +28,8 @@ there — and only fails from the outside, where nobody is looking.
 
 `lr-core workspace-scan` (`scripts/lr_core/workspace_scan.py`, a literate accelerator) emits git
 state, descriptors, children, memory-file state, shortcut inventory, the framework-managed path set
-with dirty classification, and findings **S1–S15**. Init observes with it, status renders it,
+with dirty classification, and findings **S1–S18** (v42 added S17, routing descriptions; v43 added
+S18, project-scope plugin settings). Init observes with it, status renders it,
 `/lr:check` #22–#24 render the subset they own, push takes its path set from it. No doc restates the
 rules; `docs/workspace-status.md` owns each finding's wording, per
 [script-emits-data-doc-owns-the-words.md](script-emits-data-doc-owns-the-words.md).
@@ -78,13 +79,28 @@ Both are local and cheap. Do not expect a scanner finding to carry it. Whether r
   governs only cloning and pulling. An undeclared clone can be committed into the workspace repo
   just as easily as a declared one.
 
+## What v42 and v43 added to this surface
+
+- **v42 — the surface runs on its own.** `lr-core preflight` gained a second leg that refreshes the
+  workspace at most once per 16h, delegating to `workspace-pull` under a process bound and a
+  filesystem lock. `workspace-init` also became the maintainer of the `AGENTS.md` **AI routing map**,
+  auditing repo and agent descriptions as one aligned set (finding S17), with canonical text staying
+  in `lore-repo.md` / `role.md` / the new optional `repo-context` block.
+- **v43 — the workspace configures the plugin for whoever clones it.** `workspace-init` Step 4 writes
+  committed `.claude/settings.json` and `.cursor/settings.json`; both joined `MANAGED_PATHS`, making
+  them **the first managed paths whose content is mostly not the framework's**. Finding S18 (info)
+  reports their absence. See
+  [project-scope-plugin-config-feature.md](project-scope-plugin-config-feature.md).
+
 ## See Also
 
 - [workspace-memory-file-contract.md](workspace-memory-file-contract.md) — the v3 payload this surface writes.
 - [workspace-meta-repo-pattern.md](workspace-meta-repo-pattern.md), [v25-workspace-pull-init-design.md](v25-workspace-pull-init-design.md) — the layer this completes.
 - [workspace-owned-default-ignore-lines.md](workspace-owned-default-ignore-lines.md) — the ignore lines, and the terminology v37 retired.
 - [literate-accelerator-pattern.md](literate-accelerator-pattern.md) — what the scanner is.
-- [workspace-auto-refresh-design.md](workspace-auto-refresh-design.md) — the v42-candidate design that
-  makes this surface run on its own at boot, and the first consumer of the child-dirty gap above.
+- [workspace-auto-refresh-design.md](workspace-auto-refresh-design.md) — the design, shipped in v42,
+  that makes this surface run on its own at boot, and the first consumer of the child-dirty gap above.
+- [project-scope-plugin-config-feature.md](project-scope-plugin-config-feature.md) — the v43 addition
+  to `MANAGED_PATHS` and finding S18.
 - [consistency-checks.md](consistency-checks.md) — `/lr:check` #22–24, the other renderer of these
   findings.

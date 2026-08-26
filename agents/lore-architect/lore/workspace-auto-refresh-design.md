@@ -1,14 +1,15 @@
 ---
 lore: 1
 type: topic
-summary: "Design (2026-08-23, unimplemented, v42 candidate) for an automatic 16h workspace refresh as a second leg of lr-core preflight — its load-bearing decisions and the two implementation traps recorded for whoever builds it."
+summary: "The automatic 16h workspace refresh shipped in v42 as a second leg of lr-core preflight — its load-bearing decisions and the two implementation traps found while designing it."
 parent: lore-context.md
 ---
 
-# Automatic Daily Workspace Refresh (design, v42 candidate)
+# Automatic Daily Workspace Refresh (designed 2026-08-23, shipped in v42)
 
 Full doc: `workdir/draft-workspace-auto-refresh.md` (committed `f09ed9a`, `lore-framework-dev`).
-**Design only as of 2026-08-23 — not implemented, targeted at v42, cache-affecting.**
+Designed 2026-08-23 and **shipped in v42** (2026-08-23, cache-affecting). The decisions below
+survived implementation; keep them as the record of *why* the leg looks the way it does.
 
 The gap it closes: `/lr:workspace-status` already diagnoses workspace drift and names each fix; what
 was missing is that *it never ran on its own*. This is

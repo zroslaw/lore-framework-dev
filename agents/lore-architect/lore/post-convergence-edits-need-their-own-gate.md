@@ -110,6 +110,21 @@ what the tag contains that no gate saw — instead of silently attributing the g
 tagged tree. v41's entry says the tagged tree is one prose-only commit beyond the gated one, and
 names which scenario reads that prose.
 
+## Recorded violation — I edited the tree while three reviewers read it (v43, 2026-08-25)
+
+With the lifecycle suite and TriLens both waived, v43's substitute gate was three independent
+subagent reviews of one **frozen commit**. I froze correctly, spawned three readers — and then began
+applying findings from the first report before the other two returned.
+
+The third reviewer opened its report by flagging uncommitted changes sitting on top of the commit
+under review, and then caught a term rename I had introduced mid-flight that had already drifted out
+of a doc. It found the drift; it should not have had to, and a reviewer spending its attention on my
+process instead of the artifact is attention the round paid for and did not get.
+
+**The right shape is to collect all reports, then apply.** Reviews are cheap to wait for; a
+stale-state report costs a full re-read. Freezing at spawn time is only half the rule — the state
+has to stay frozen until the last reviewer has reported.
+
 ## See Also
 
 - `execution-testing-catches-blind-ambiguity.md` — § pre-ship = pre-push, the discipline this sharpens.
@@ -121,3 +136,5 @@ names which scenario reads that prose.
   uninterpretable in this instance.
 - `verify-before-acting-on-suspected-bugs.md` — the sibling reflex on the diagnosis side.
 - `concurrent-session-committed-my-uncommitted-work.md` — why a dirty tree is doubly unsafe here.
+- [parallel-reviewer-fanout-pattern.md](parallel-reviewer-fanout-pattern.md) § Disjoint lenses — the
+  same v43 round, read for what the lens choice bought.

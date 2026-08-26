@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "The user's standing brevity feedback: ranked shortlist for options, plain paragraph plus one example for concepts, short answers to measurement questions — and structure is not brevity."
+parent: lore-context.md
+---
+
 # Feedback — "Too Many Words"
 
 Corrective feedback (2026-06-05): when listing concerns or options, default to a **ranked-shortlist** form (3–5 bullets, one line each, ending with a chooser question) — not an exhaustive 9-item enumeration with paragraph-length elaboration on each.
@@ -46,6 +53,26 @@ interruption.
   skills at once says the reply was wrong on all three axes simultaneously — sentence density, turn
   length, and me driving the direction. Re-assert all three and keep turns short for the rest of the
   session without being told again.
+
+## Structure is not brevity (2026-08-25)
+
+The user asked how I would update `INSTALL-CURSOR.md`. I answered with a section-by-section table,
+three sub-analyses, and two open decisions. The reply: *"in a few words, not in five books as you
+provided above."* The answer that satisfied it was five bullets and about forty words.
+
+**The failure was not disorganisation — it was well-organised length.** Tables, headers and ranked
+lists made the reply *navigable*, and I read that as making it *short*. It does not. For a reader
+working in a second language, a tidy wall is still a wall — and this is the specific trap, because
+every earlier lesson on this axis can be "obeyed" by adding structure while the word count stands.
+
+Practical rule: when asked *"how would you change X"*, lead with the shape of the change in one
+breath. The section-by-section plan is what I produce **after** they say yes, or when they ask for
+it.
+
+Second signal, same session: after `/lr:style` I opened a turn with a bare `Style set: ...` line and
+a question about a decision from two turns earlier, and got back a single `what?`. **After a mode
+change, re-establish where we are before asking anything** — the style confirmation reads as a
+non-sequitur on its own, and the user had been away from the thread.
 
 ## Why it fits the existing principle stack
 

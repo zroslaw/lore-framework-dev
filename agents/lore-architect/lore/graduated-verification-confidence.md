@@ -91,3 +91,6 @@ before drawing any conclusion, not just more candidate runs. See
 - `flaky-scenario-diagnosis-needs-ab-baseline.md` — the A/B-baseline technique addendum (2026-07-27):
   diagnosing intermittent failures needs a baseline sample, not just more candidate samples.
 - `macos-var-symlink-realpath-ambiguity.md` — the real bug the baseline technique surfaced.
+- [engine-bundle-reading-has-an-evidence-grade.md](engine-bundle-reading-has-an-evidence-grade.md) —
+  the same honesty applied to how a fact about an engine was obtained (ran it / read the code / read
+  the docs).

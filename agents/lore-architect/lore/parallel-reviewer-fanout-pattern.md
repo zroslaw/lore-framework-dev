@@ -241,6 +241,34 @@ inventory the lenses already spent before choosing new ones, and let the artifac
 (proposal vs shipped-with-an-installed-base) pick the lens family. Owned by
 `lens-novelty-is-the-scarce-resource-on-re-review.md`.
 
+## Disjoint lenses over a code+doc release, and the ruled-out-category deliverable (v43, 2026-08-25)
+
+v43 shipped with both expensive gates waived, so the substitute was a **single round of three
+subagent reviews over one frozen commit**, briefed on goal not rationale, with deliberately
+different lenses. The overlap was almost nil, and each lens found a class no other lens could have:
+
+- **Correctness / edge cases** — found the data-loss bug (`open(path,"w")` truncating before a
+  failed write) by *building a reproducer*, not by reading. Neither doc lens could have.
+- **Execution fidelity** ("you are the executor, be uncharitable") — found the Step 3 approval gate
+  that never listed the new writes. A correctness lens has no reason to open that file.
+- **Integration / consistency** ("did the author miss the fourth file?") — found six stale
+  enumerations in docs the change never touched, and cleanly ruled out four categories.
+
+Only one finding appeared twice (the check/apply divergence), from the two lenses closest to each
+other. **Convergence from independent lenses is strong evidence; near-total divergence means the
+lenses were well chosen** — divergence is a success signal for lens selection, not a sign that two
+reviewers were wasted.
+
+**A ruled-out category is a deliverable.** The integration reviewer's explicit "clean" list —
+`MANAGED_PATHS` consumers, migration necessity, release-note conventions, finding-to-check mapping —
+is what let me push without re-checking those myself. **Brief reviewers to say plainly when a
+category is clean**, not only when it is broken; a silent category is indistinguishable from an
+unexamined one.
+
+Process failure in the same round, recorded where it belongs:
+[post-convergence-edits-need-their-own-gate.md](post-convergence-edits-need-their-own-gate.md)
+§ Recorded violation — I applied the first report's findings while the other two were still reading.
+
 ## Two rounds, not one, when the change is large
 
 Two rounds proved valuable in v11, v12, and v13 ships:

@@ -6,10 +6,10 @@ summary: "Root working knowledge and navigation for the lore-architect."
 
 # Lore Context
 
-Compacted working knowledge for the **lore-architect**. This is the entry point to the lore graph,
-not a catalog — each theme points at its summary topic, which fans out to detail. For exhaustive
-lookup, scan `lore/` directly. (Shape rule: working knowledge plus summary-topic references,
-present tense, no index — `lore-context-shape-discipline.md`, `process-merge.md` § Step 4.)
+Compacted working knowledge for the **lore-architect** — entry point to the lore graph, not a
+catalog. Each theme points at its summary topic, which fans out to detail; scan `lore/` directly for
+exhaustive lookup. (Shape rule: working knowledge plus summary-topic references, present tense, no
+index — `lore-context-shape-discipline.md`, `process-merge.md` § Step 4.)
 
 ## Who I Am
 
@@ -53,7 +53,7 @@ Distinct assets; don't collapse them.
 Core mechanics: directory-driven, plain markdown (frontmatter only on descriptor and v1 Lore files),
 git-as-metadata, delete-don't-mark, knowledge graph by filename reference, concise context with
 detail on demand, skill/doc separation, repo-level versioning. Framework owns the universal; agents
-own repo/host/workflow specifics.
+own repo/host/workflow specifics. See `system-design-principles.md`.
 
 `workspace_scan.py` imports `preflight` at module level, so a new `preflight.py` leg needing it must
 import locally inside the calling function, not at top level, or the load cycles. See
@@ -67,8 +67,8 @@ destroys the feature and the procedure must stop and report. See
 `subagent-as-optimization-vs-subagent-as-semantics.md`, `cursor-merge-via-task.md`,
 `cursor-task-free-text-brief-validated.md`.
 
-See `system-design-principles.md` for the full list and the overreach diagnostics, plus
-`team-shared-knowledge-principle.md`, `framework-as-engine-not-kb.md`,
+`system-design-principles.md` holds the full list and the overreach diagnostics; the identity
+framings are `team-shared-knowledge-principle.md`, `framework-as-engine-not-kb.md`,
 `agents-are-executors-first.md`, `knowledge-vs-skills-distinction.md`,
 `framework-scope-vs-agent-scope.md`.
 
@@ -86,20 +86,18 @@ The current skill catalog is implementation ground truth, but newcomer-facing in
 architecture needs a dedicated curation pass — organize around a daily path and progressively
 disclose the rest. See `adopter-command-surface-curation.md`.
 
-**`/lr:style`** is the single public thin-pointer skill for communication/collaboration style — not
-boot-loaded. It selects an exact active set of three internal, orthogonal components: **plain**,
-**dialogue**, **follow**. No selector means all; `off` means none; each explicit selection replaces
-the prior set. v35 removed the three former public commands, with no aliases. See `style-skills.md`,
-`skill-request-defaults-to-regular-skill.md`, `soft-skill-follow-me-mode.md`.
+**`/lr:style`** is the single public thin-pointer skill for communication style — not boot-loaded.
+It selects an exact active set of three orthogonal components (**plain**, **dialogue**, **follow**);
+no selector means all, `off` means none, each selection replaces the prior set. See
+`style-skills.md`, `skill-request-defaults-to-regular-skill.md`, `soft-skill-follow-me-mode.md`.
 
-An **accelerator** script (Script Fallback Contract) can go one step further and become
-**literate**: the procedure lives in the script's own instructional comments rather than a companion
-doc, so there's one artifact instead of two that drift apart. Since v36 **`lr-core` is a package** —
-the stable `scripts/lr-core` wrapper fronts `scripts/lr_core/`, where `preflight.py` and `scan.py`
-carry the literate fallbacks. Hard constraint at that seam: **the script emits data, the doc owns
-the user-facing words** — printing a finished-sounding script string *looks* like handling the
-situation, so the executor never reaches the doc that owns the remedy. And scripting a procedure
-does not automatically shrink its doc. See
+An **accelerator** script (Script Fallback Contract) can become **literate**: the procedure lives in
+the script's own instructional comments rather than a companion doc, so there's one artifact instead
+of two that drift apart. Since v36 **`lr-core` is a package** — the stable `scripts/lr-core` wrapper
+fronts `scripts/lr_core/`, where the literate fallbacks live. Hard constraint at that seam: **the
+script emits data, the doc owns the user-facing words** — a finished-sounding script string *looks*
+like handling the situation, so the executor never reaches the doc that owns the remedy. Scripting a
+procedure does not automatically shrink its doc. See
 `literate-accelerator-pattern.md`, `script-emits-data-doc-owns-the-words.md`,
 `agent-boot-doc-grew-when-scripted.md`.
 
@@ -113,11 +111,10 @@ timer. See `plugin-mcp-server-convention.md`, `wait-primitive-feature.md`.
 ## Engine Hubs
 
 Engine-specific operational knowledge has one hub topic per engine:
-`claude-engine-capabilities.md`, `codex-engine-capabilities.md`, `cursor-engine-capabilities.md`.
-Use them as entry points for install/update model, invocation surface, subagent mechanism, memory
-file, MCP/plugin loading, sandbox constraints, boot cost, and lifecycle-harness caveats; keep
-atomic findings in the linked topics rather than rediscovering them from old session notes. Cursor live usage
-retrieval → `cursor-usage-auto-retrieval.md`.
+`claude-engine-capabilities.md`, `codex-engine-capabilities.md`, `cursor-engine-capabilities.md` —
+entry points for install/update model, invocation surface, subagent mechanism, memory file,
+MCP/plugin loading, sandbox constraints, boot cost, and harness caveats. Keep atomic findings in the
+linked topics rather than rediscovering them from old session notes.
 
 At least one Claude Code host flavor snapshots the **entire plugin bundle per session** rather than
 referencing the live checkout, so a mid-session version bump or git pull doesn't reach it. See
@@ -130,9 +127,8 @@ sibling profiles whenever one binding gains a guardrail. See `docs-engines-conve
 traps belong in the binding.
 
 **Plugin identity is a precondition of a lifecycle result.** The harness asserts the loaded plugin's
-VERSION against `LR_FRAMEWORK_DIR` before trusting results, on engine-emitted evidence rather than
-anything the engine could self-report. Cursor's cloud marketplace install rehydrates over
-`--plugin-dir` within ~25 seconds of a move-aside, so re-check at suite start. See
+VERSION against `LR_FRAMEWORK_DIR` on engine-emitted evidence, not self-report; Cursor's cloud
+install rehydrates over `--plugin-dir` within ~25s of a move-aside, so re-check at suite start. See
 `lifecycle-harness-plugin-identity-unverified.md`, `a-gate-cannot-be-a-model-self-report.md`,
 `cursor-cloud-plugin-rehydrates-over-plugin-dir.md`.
 
@@ -141,9 +137,15 @@ anything the engine could self-report. Cursor's cloud marketplace install rehydr
 Shipping one repo to multiple engines' marketplaces means handling **each engine's packaging
 separately** — manifest schema, skill-tree location, and update model all differ, so Claude parity
 does *not* imply Cursor/Codex parity. Claude Code is strict-clean, remaining step: Console-form
-community submission. Cursor is structurally ready but seamless multi-user propagation still needs a
-team marketplace + Auto Refresh + GitHub App validation. Codex packaging is resolved. See `engine-marketplace-readiness.md`, `plugin-distribution.md`,
-`cursor-plugin-distribution-update-model.md`, `plugin-manifest-versioning.md`.
+community submission. **On Cursor the marketplace install is the primary documented path**
+(`--plugin-dir` is for framework development), the team-marketplace + Auto Refresh variant stays
+unvalidated, and install itself is an **account-side server operation with no non-interactive CLI**
+— the local `.cloud-plugin-manifest.json` is a cache that looks like an install record; never write
+it. Codex packaging is resolved. Since v43 a workspace can skip per-person install altogether with
+committed project-scope settings. See
+`engine-marketplace-readiness.md`, `plugin-distribution.md`,
+`cursor-plugin-distribution-update-model.md`, `cursor-plugin-install-is-account-side.md`,
+`project-scope-plugin-config-feature.md`, `plugin-manifest-versioning.md`.
 
 Positioning copy must lead with the **triad** (named role-based agents + deliberate reflect/merge
 curation + cross-agent collaboration), not cross-engine support —
@@ -162,42 +164,37 @@ session-context boundary (boot, attach, pre-merge); `/lr:pull-lore` is the manua
 
 **Lore v1 structure (v36):** `docs/lore-structure.md` is the canonical contract — one fixed
 `lore-context.md` root, recursive `area` hubs, leaf `topic`s, four-field scalar frontmatter
-(`summary` ≤240 chars). Every **new** Lore file carries v1 frontmatter; existing legacy files
-migrate lazily via merge or explicitly via **`/lr:groom [scope] [--dry-run] [--all]`** — bounded
-semantic grooming over a deterministic ≤30K-token workset with read-only halo, SHA-256 snapshots,
-and approval-gated Whole-Lore mode. Practical limit found 2026-08-14: `--all` is single-session and
-non-resumable, so on a corpus far above the 30K partition budget it cannot complete — groom
-iteratively, or scope `--all` to one subtree. See `lore-topic-format.md`, `lore-context-shape-discipline.md`.
+(`summary` ≤240 chars). Every **new** Lore file carries v1 frontmatter; legacy files migrate lazily
+via merge or explicitly via **`/lr:groom [scope] [--dry-run] [--all]`** (bounded ≤30K-token worksets,
+read-only halo, approval-gated Whole-Lore mode). `--all` is single-session and non-resumable, so on a
+large corpus it cannot complete — groom iteratively or scope it to one subtree. See
+`lore-topic-format.md`, `lore-context-shape-discipline.md`.
 
 **The engine profile is observed, not believed.** Selection is `lr-core`'s deterministic
 `detect_engine` (ordered: `--engine` override → `CLAUDE_PLUGIN_ROOT` → process ancestry matching the
-*program* not a command-line substring → framework-root containment → a default explicitly marked
-`confidence: "assumed"`). A model must never pick the binding that governs its own execution — the
-sibling of "a gate cannot be a model self-report," and why a boot step whose input is a fact about
-the running environment belongs in the accelerator rather than in prose. Codex's two remaining
-signals fail *together*, so a Codex session on a worktree or dev checkout silently lands on the
-claude profile; Cursor IDE agent chat has the same shape from a different miss. Remedy in both cases
-is naming `--engine <name>`; open as backlog B8. See `engine-profile-must-be-observed-not-believed.md`,
+*program* → framework-root containment → a default marked `confidence: "assumed"`). A model must
+never pick the binding that governs its own execution — the sibling of "a gate cannot be a model
+self-report". Codex's two remaining signals fail *together*, so a Codex session on a worktree or dev
+checkout silently lands on the claude profile; Cursor IDE agent chat has the same shape from a
+different miss. Remedy in both cases is `--engine <name>`; open as backlog B8. See
+`engine-profile-must-be-observed-not-believed.md`,
 `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`,
 `cursor-ide-engine-detection-blind-spot.md`.
 
 `version-check.md`'s nested-repo guard carries a macOS trap: "resolve both to real paths" is not
 self-executing prose — a weak model filled the gap with bare `pwd`, which disagrees with git under
-the `/var`→`/private/var` symlink. **Mirror rule: realpath for identity, logical components for
-contract shape.** See `macos-var-symlink-realpath-ambiguity.md`,
+the `/var`→`/private/var` symlink. **Realpath for identity, logical components for contract shape.**
+See `macos-var-symlink-realpath-ambiguity.md`,
 `realpath-for-identity-logical-for-contract-shape.md`.
 
 ## Cross-Agent Collaboration
 
-- **`/lr:recall [hint]`** — search lore of already-loaded agents (host + guests); fan-out per agent.
-- **`/lr:consult <agent> [hint]`** — one-shot question to an unloaded agent; a subagent boots it,
-  answers with file pointers, exits.
-- **`/lr:attach <agent>`** — load another agent as a sustained guest; host stays sole executor.
-- **`/lr:spawn-teammate` (BETA)** — spawn agents as Agent Teams teammates for parallel panes; the
-  teammate's primary interlocutor is the user, not the lead.
-
-See `lore-search-pattern.md`, `consult-pattern.md`, `attach-pattern.md`,
-`spawn-teammate-feature.md`, `teammate-conventions.md`.
+**`/lr:recall [hint]`** searches loaded agents' lore (host + guests, fan-out per agent);
+**`/lr:consult <agent>`** puts a one-shot question to an unloaded agent via a subagent that boots,
+answers with file pointers, and exits; **`/lr:attach <agent>`** loads a sustained guest with the
+host still sole executor; **`/lr:spawn-teammate` (BETA)** spawns agents as Agent Teams teammates
+whose primary interlocutor is the user, not the lead. See `lore-search-pattern.md`,
+`consult-pattern.md`, `attach-pattern.md`, `spawn-teammate-feature.md`, `teammate-conventions.md`.
 
 **Division of ownership with `lore-advocate`:** the advocate owns Lore Agents public positioning,
 advocacy, and channel strategy; I own architecture, implementation, design history, and product
@@ -207,8 +204,8 @@ the advocate and consults or attaches me. See `public-communication-ownership.md
 ## Session Takeover (BETA)
 
 **`/lr:takeover`** converts engine-native session logs into a markdown digest so a new session on any
-engine can continue interrupted work; all three engines are supported (`scripts/session-takeover`).
-Cursor's tool-result pairing is heuristic and flags `pairing_uncertain`. See `takeover-feature.md`,
+engine can continue interrupted work (`scripts/session-takeover`, all three engines). Cursor's
+tool-result pairing is heuristic and flags `pairing_uncertain`. See `takeover-feature.md`,
 `cursor-takeover-batch-pairing.md`, `engine-session-log-formats.md`.
 
 ## Finalization
@@ -219,19 +216,18 @@ agent booted as itself, file-driven) → **summarize** → **commit+push** (one 
 conflict resolution on push rejection). Do not finalize unless the user triggers it. See `finalization-process.md`, `finalize.md`,
 `merge-in-booted-subagents.md`, `reflect-merge-execution-asymmetry.md`.
 
-Canonical host summaries carry a compact per-agent **Learning audit**. Finalize retains each
-Reflection outcome and Merge handoff through summarize so the audit can preserve concrete learning,
-Lore destinations/actions, residual topics, and confidence problems. Only a completed reflection
-set can classify every unlisted input as carried over; a failed outcome attributes only known
-partial paths, and unavailable evidence leaves origins unknown rather than becoming “nothing
-learned.” See `session-summaries-feature.md`.
+Canonical host summaries carry a compact per-agent **Learning audit**: finalize retains each
+Reflection outcome and Merge handoff through summarize so the audit preserves concrete learning,
+Lore destinations, residual topics, and confidence problems. Only a *completed* reflection set lets
+an unlisted input be called carried over; failed or unavailable evidence leaves origins unknown
+rather than becoming "nothing learned." See `session-summaries-feature.md`.
 
 **Transcript-backed reflection shipped in v39:** opt-in `finalize --transcript` recovers
 parser-retained main-thread dialogue into ordinary reflection topics, then rejoins the same
-merge/summarize/commit/push lifecycle — host-only, bounded, fail-closed. Two limits are accepted,
-not solved: no secret-pattern scan on candidate text, and no engine parameter that mechanically
-sandboxes a worker read-only. **Chunk overlap makes merge the semantic reducer** — expect roughly
-three near-duplicate candidates per distinct insight and brief merge to consolidate aggressively. See `transcript-backed-finalization-mvp.md`.
+lifecycle — host-only, bounded, fail-closed, with two accepted limits (no secret-pattern scan; no
+mechanically read-only worker). **Chunk overlap makes merge the semantic reducer** — expect ~three
+near-duplicate candidates per insight and consolidate aggressively.
+See `transcript-backed-finalization-mvp.md`.
 
 Shared-lore publication is a separate, unshipped governance direction. See
 `team-lore-contribution-governance.md`.
@@ -239,7 +235,7 @@ Shared-lore publication is a separate, unshipped governance direction. See
 ## Versioning & Migration
 
 `lore-framework/VERSION` is the single source of truth; **the current shipped-and-pushed version is
-v41**. Each agent repo stamps that version in its `lore-repo.md`, and four version-bearing plugin
+v43**. Each agent repo stamps that version in its `lore-repo.md`, and four version-bearing plugin
 manifests mirror `1.<VERSION>.0` (`/lr:check` #19 enforces). A version is either **migration**,
 **release-notes-only**, or both, and independently **cache-affecting** or not — orthogonal axes,
 both recorded at every ship. `versioning-release-types.md` holds the full per-version history; read
@@ -262,12 +258,12 @@ drafted while the gates run and decay once per fix round. See `versioning-releas
 Three surfaces, three scopes:
 
 - **`/lr:check`** — 24 content-consistency checks *inside agent repos*, rendering scanner findings
-  rather than restating the rules. At scale, prefer a deterministic script sweep for the mechanical
+  rather than restating rules. At scale, prefer a deterministic script sweep for the mechanical
   subset over an LLM read-through. See `consistency-checks.md`.
 - **`/lr:doctor`** — *engine/plugin runtime* issues that escape content checks (esp. stale plugin
-  cache), via an accreting ailment catalog. See `ailment-catalog-pattern.md`.
+  cache), via an accreting ailment catalog (`ailment-catalog-pattern.md`).
 - **`/lr:workspace-status`** — read-only diagnosis of the *workspace layer* (git state,
-  descriptor drift, memory-file contract, child-repo hygiene), findings S1–S16 each naming its fix.
+  descriptor drift, memory-file contract, child-repo hygiene), findings S1–S18 each naming its fix.
   See `workspace-lifecycle-four-commands.md`.
 
 ## Operating Disciplines
@@ -300,38 +296,33 @@ own topic — these are pointers, not summaries.
   `the-terminal-step-is-the-step-that-gets-dropped.md`,
   `instruction-location-beats-emphasis-in-long-docs.md`, `models-copy-what-they-should-compute.md`.
 - **When TriLens is requested, run it via `/lr:trilens-loop`**, not by hand — the skill enforces
-  cold-context reviewer independence, the APPLIED/DECLINED ledger, the "a silent round is not a
-  clean round" guard, and rail-removal disclosure, and routes the spawn through the engine binding.
-  Lens *choice* and triage stay mine: brief the **goal, not the rationale**; vary the lens *kind* by
-  round (round 1 reviews the work, round 2 leads with "did the fixes fix it", round 3 goes where the
-  evidence points); treat convergent findings from independent lenses as strong evidence, not
-  redundancy; inventory spent lenses before a re-review. Two standing slots:
-  **findings-as-a-system** on any release shipping a *set* of diagnostics, **claim audit** on any
-  round following fixes, and on any doc whose purpose is **handover to an implementer** the
-  **implementation-fidelity (executor) lens** — briefed as the engineer who must build it from the
-  document alone and cannot ask its authors anything, and told to verify its code claims by reading
-  the code, because a design doc's failure mode is unbuildable specificity rather than bad reasoning.
-  The exchange contract is justified on independence, never token savings. See `trilens-loop-feature.md`,
-  `parallel-reviewer-fanout-pattern.md`,
+  reviewer independence, the APPLIED/DECLINED ledger, the "a silent round is not a clean round"
+  guard, and rail disclosure, and routes the spawn through the engine binding. Lens *choice* and
+  triage stay mine: brief the **goal, not the rationale**; vary the lens *kind* by round; inventory
+  spent lenses before a re-review; keep the standing slots (findings-as-a-system, claim audit,
+  executor lens on any implementer handover). **Convergent findings from independent lenses are
+  strong evidence; near-total divergence means the lenses were well chosen** — v43's three lenses
+  found three disjoint defect classes with one overlap. **Ask reviewers to name the categories they
+  ruled out clean**, not only what they found: a silent category is indistinguishable from an
+  unexamined one, and an explicit clean list is what lets me ship without re-checking it myself. See
+  `trilens-loop-feature.md`, `parallel-reviewer-fanout-pattern.md`,
   `lens-novelty-is-the-scarce-resource-on-re-review.md`, `sonnet-subagent-review-pattern.md`.
 - **A gate result belongs to a specific artifact state.** Freeze before spawning — commit, name the
   SHA in the brief, tag only after the loop ends; editing while reviewers read invents phantom
-  findings. An edit landed after the gates pass is ungated: re-run the affected gate or revert and
+  findings. **Collect all reports, then apply** — I broke this on v43 by acting on the first report
+  while two reviewers were still reading, and the third spent its opening on my process. An edit landed after the gates pass is ungated: re-run the affected gate or revert and
   file a follow-up. An environment failure mid-run, or the engine resolving a *different* plugin
   tree, makes results **uninterpretable** rather than red. See `post-convergence-edits-need-their-own-gate.md`,
   `macos-documents-permission-loss-mid-session.md`.
 - **Three gate dispositions — passed, waived, did not run** — and a ship record must name which
-  applies. A waiver is itself a record; a recorded measurement names the environment it was taken in.
-  A reviewer that dies surfaces as *idle*, which reads exactly like "finished and found nothing", so
-  the check is "did it report?", never "did it complain?"; one follow-up ask recovers a merely silent
-  lens for free. Before retrying, ask **what would have to change for the retry to differ**. When the
+  applies, in the release notes as well as in lore. (v42 shipped with its "testing deferred"
+  placeholder never replaced; that is *did not run*, told to nobody.) A waiver is itself a record; a
+  measurement names the environment it was taken in. A reviewer that dies surfaces as *idle*, which
+  reads exactly like "finished and found nothing", so the check is "did it report?", never "did it
+  complain?". Before retrying, ask **what would have to change for the retry to differ**. When the
   round cap ends a loop without a clean round, the substitute is **one deep unconstrained cold
-  reviewer, not a fourth round**, and a substitute that *finds* something does not convert into a
-  clean attestation. Expect its findings in the **prose**:
-  fix-round defects are context errors, usually one rule stated in two places drifting apart — and
-  the second shape is **redundancy added while fixing** (a new mechanism re-expressing a fact an
-  existing one already carried), caught by a cheap diff-scoped "what does this now say twice?" pass
-  that costs no review round. See
+  reviewer, not a fourth round**. Expect fix-round findings in the **prose**: context errors, usually
+  one rule stated in two places drifting apart, plus redundancy added while fixing. See
   `a-gate-that-died-is-not-a-gate.md`, `gate-waiver-is-a-record.md`,
   `measurement-records-name-their-environment.md`, `fix-defects-are-context-errors.md`,
   `a-fix-is-a-change-and-changes-need-review.md`.
@@ -351,8 +342,8 @@ own topic — these are pointers, not summaries.
   `v31-lifecycle-rerun-partial-green-2026-07-27.md`, `a-red-test-may-be-asserting-a-true-fact.md`,
   `transcript-vs-final-message-assertions.md`.
 - **Sandboxed-review blind spot** — a review environment that structurally blocks a capability can
-  green-light code whose primary path never executed. Check for a blocked capability the code under
-  test depends on before trusting a green suite. See `lore-beings-mvp-takeover-review.md`.
+  green-light code whose primary path never executed; check for one before trusting a green suite
+  (`lore-beings-mvp-takeover-review.md`).
 - **Decide where the guardrail lives before writing the topic** — a trap recorded only as knowledge
   protects nobody, because lore is retrieved when a task cues it and a one-off command cues nothing.
   Name the point-of-use site (script check, exact command, test) as part of the fix, and prefer a
@@ -360,12 +351,14 @@ own topic — these are pointers, not summaries.
   `point-of-use-guardrails-beat-recorded-lore.md`.
 - **Verify before asserting** — check filesystem/state directly before "fixing" a suspected bug, and
   verify *which* bug. **A negative grep proves the searched pattern absent, never the capability
-  absent** — before an absence claim carries a decision, read the entry point (header, usage line,
-  first ~50 lines) and state the absence at the granularity actually verified
-  (`a-negative-grep-proves-the-pattern-absent.md`). Before declaring a known finding moot, read the
-  lore rule it rests on rather than reconstructing it; reconstruction keeps a rule's motivating case
-  and drops its obligation. Fetch volatile external facts live with a dated citation. After any
-  scoped subagent or fork returns, verify its filesystem footprint, not its summary. See
+  absent** — read the entry point before an absence claim carries a decision, and state the absence
+  at the granularity actually verified. Before declaring a known finding moot, read the lore rule it
+  rests on rather than reconstructing it. Fetch volatile external facts live with a dated citation.
+  After any scoped subagent or fork returns, verify its filesystem footprint, not its summary.
+  **An engine fact carries a grade too** — ran it / read the shipped code / read the docs — and an
+  undocumented route never goes into a contract like an install doc
+  (`engine-bundle-reading-has-an-evidence-grade.md`,
+  `a-negative-grep-proves-the-pattern-absent.md`). See
   `verify-before-acting-on-suspected-bugs.md`, `check-own-lore-before-dismissing-a-finding.md`,
   `fetch-volatile-facts-live-not-memory.md`, `fork-scope-creep-under-standing-goal.md`.
 - **Design-time rules sharing one shape** — a change that widens where a value comes from drops the
@@ -385,6 +378,14 @@ own topic — these are pointers, not summaries.
   `guarding-on-a-normal-state-excludes-what-matters-most.md`,
   `short-circuit-on-the-condition-not-a-proxy.md`,
   `lock-claim-directory-creation-vs-contention.md`.
+  Three more from v43, all in code I had written and tested: a **catch block is not a durability
+  guarantee** (`open(path,"w")` truncates before writing, and `UnicodeDecodeError` is a `ValueError`,
+  not an `OSError`); a **diagnostic and its remedy must derive from one code path**, or the finding
+  routes users to a fix that can never succeed; and a procedure's **approval surface is a separate
+  site from its action list**, so adding a write means updating the confirmation template, the
+  dry-run output, and every hand-maintained enumeration. See
+  `a-reported-error-is-not-proof-the-file-survived.md`, `one-question-one-code-path.md`,
+  `adding-a-write-means-updating-the-approval-gate.md`.
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source
   (pointer, don't restate — and when fixing a duplicated rule, enumerate every site that *states* it,
   not only every site that *implements* it); reuse an existing correlation signal before inventing
@@ -395,14 +396,16 @@ own topic — these are pointers, not summaries.
   have resolved myself reads as absence of judgement and costs trust ("boneless", 2026-08-23); state
   the view and the reason, then at most one question, and reserve open questions for decisions
   genuinely the user's (cost, scope, risk appetite). `/lr:style follow` gives the user the
-  *direction*, not my silence on the *substance*. Also: ranked shortlist over exhaustive enumeration;
+  *direction*, not my silence on the *substance*. Also: **structure is not brevity** — a
+  navigable wall of tables and headers is still a wall, so lead with the shape of the change in one
+  breath and save the section-by-section plan for after the yes; after a mode change, re-establish
+  where we are before asking anything; ranked shortlist over exhaustive enumeration;
   confirm before
   writing durable lore mid-session; in design dialogues write the draft only when the user triggers
   it; populate dry-run counters with would-be outcomes; "enforce X" ≠ add a required schema field;
-  decompose broad open-ended asks into hidden axes and sequence by dependency; on a second pushback
-  on the same axis, act instead of re-justifying; a short measurement question gets a short factual
-  answer; several style skills invoked at once is a stop signal for the rest of the session. Review
-  subagents default to Composer 2.5, not Sonnet. See `feedback-commit-to-a-recommendation.md`,
+  decompose broad open-ended asks into hidden axes; on a second pushback on the same axis, act
+  instead of re-justifying; a short measurement question gets a short factual answer; several style
+  skills at once is a stop signal for the session. Review subagents default to Composer 2.5. See `feedback-commit-to-a-recommendation.md`,
   `feedback-too-many-words.md`,
   `feedback-confirm-before-writing-lore.md`, `feedback-draft-only-when-user-triggers.md`,
   `feedback-schemas-as-enforcement-overreach.md`,
@@ -430,18 +433,14 @@ own topic — these are pointers, not summaries.
 
 ## Onboarding-Doc Authoring
 
-Co-authoring onboarding docs for adopting teams is part of the role. Two genres:
-**`onboarding-doc-narrative-pattern.md`** (long-form prose pitching a human reader) and
+Co-authoring onboarding docs for adopting teams is part of the role. Two genres, each carrying its
+own toolkit: **`onboarding-doc-narrative-pattern.md`** (long-form prose pitching a human reader) and
 **`paste-link-installer-doc-genre.md`** (written *to the AI agent* as the literal installer, pasted
 as a link — shipped as `QUICKSTART.md` + per-engine `INSTALL-<ENGINE>.md`). Load the identity-layer
-framings first, then the toolkit: `use-cases-via-parallel-consult-pattern.md`,
-`terminology-domain-collision-trap.md`, `agent-as-universal-working-environment.md`,
-`in-flight-skill-teaching-pattern.md`. Pre-ship review uses the multi-lens fan-out; the installer
-genre additionally needs the **AI-installer (literal executor)** lens
-(`ai-installer-review-lens.md`), which catches execution-fidelity bugs the newcomer/editorial lenses
-miss (`skill-doc-filename-divergence-bug-class.md`). Recurring funnel bug: an author writing from
-the fresh-start perspective leaves the **team-join path** invisible at every layer
-(`onboarding-funnel-team-join-path.md`). Adopter-facing prose carries the product name
+framings first. Pre-ship review uses the multi-lens fan-out; the installer genre additionally needs
+the **AI-installer (literal executor)** lens (`ai-installer-review-lens.md`). Recurring funnel bug:
+an author writing from the fresh-start perspective leaves the **team-join path** invisible at every
+layer (`onboarding-funnel-team-join-path.md`). Adopter-facing prose carries the product name
 **"Lore Agents"** while the engine keeps `lore-framework`/`lr` (`lore-agents-product-name.md`).
 
 ## Active Design Explorations
@@ -461,13 +460,10 @@ the fresh-start perspective leaves the **team-join path** invisible at every lay
   open as backlog schema decisions (`cursor` cost-blindness, `claude` lacking a `--plugin-dir`
   field). **The persistent `--launchd` Keeper install is live on this machine** — treat it as a candidate explanation whenever a repo changes under me
   mid-session; the Chronicler soak is a *separate*, still-unverified question. Open gap: headless
-  permissions, and self-scheduling under the safe default. Anchor:
-  `lore-beings-design.md`; see `agent-being-consciousness-substrate-split.md`,
-  `engine-kinds-design-decision.md`, `cursor-agent-real-invocation-contract.md`,
-  `codex-exec-real-invocation-contract.md`, `kill-tree-enumerate-before-signal-ordering.md`,
-  `macos-ps-o-multi-field-single-line.md`, `unenforceable-caps-are-prompt-theater.md`,
-  `keeper-spawn-prompt-boilerplate-distraction.md`, `lore-beings-mvp-takeover-review.md`,
-  `autonomous-agents-vision.md`, `wait-primitive-feature.md`.
+  permissions, and self-scheduling under the safe default. Anchor: `lore-beings-design.md` (which
+  routes to the per-kind contracts and Keeper findings); see also
+  `agent-being-consciousness-substrate-split.md`, `kill-tree-enumerate-before-signal-ordering.md`,
+  `lore-beings-mvp-takeover-review.md`, `autonomous-agents-vision.md`, `wait-primitive-feature.md`.
 - **Multi-engine portability (Codex, Cursor)** — **shipped, not in flight.** All three engines are
   Tier-1, so a mixed-engine team shares one agent repo; Claude Code is the reference path and others
   override only at the **5 adapter bindings** (`docs/engines/` plus Boot Step-0 engine selection).
@@ -479,12 +475,9 @@ the fresh-start perspective leaves the **team-join path** invisible at every lay
   and network, so finalization needs `.git` writable; cross-engine co-work has a validated substrate
   but no relayed authority. A genuinely different engine catches design flaws same-engine review
   misses, worth the cost on high-stakes decisions only, and **model–engine fit beats model tier**.
-  Anchor: `multi-engine-portability-direction.md`; see `docs-engines-convention.md`,
-  `claude-coupling-inventory-and-port-tiers.md`, `cursor-dual-skill-tree-one-repo.md`,
-  `quality-benchmark-feature.md`, `cross-engine-team-substrate-validated.md`,
-  `same-agent-multiple-engines-single-writer.md`,
-  `cross-engine-relay-not-attributable-authority.md`,
-  `independent-engine-review-catches-structural-blind-spots.md`, `port-landing-next-steps.md`.
+  Anchor: `multi-engine-portability-direction.md` (which routes to the port-tier, cross-engine, and
+  quality-benchmark detail); see also `docs-engines-convention.md`,
+  `cursor-dual-skill-tree-one-repo.md`.
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** item —
   active follow-ups from the 2026-06-13 architecture review. That review's settled dispositions
   (DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in
@@ -498,11 +491,15 @@ the fresh-start perspective leaves the **team-join path** invisible at every lay
   memory-file contract are live; standard workspace-owned ignore lines include `/.worktrees/`,
   `/.lr-beings/`, and `/.tmp/`, and disposable scaffolds go under `.tmp/<name>/`. Still open and
   *not* closed by it: the backlog's "Workspace-root paths gap" and B7 "Orphan version stamps".
-  **Designed 2026-08-23, unimplemented (v42 candidate, cache-affecting): automatic 16h workspace
-  refresh as a second leg of `lr-core preflight`** — `/lr:workspace-status` already names every fix,
-  it just never ran on its own. Known scanner limit it had to work around: `workspace_scan` detects
+  **v42 shipped the automatic 16h workspace refresh** as a second leg of `lr-core preflight`
+  (TTL + lock, bounded `workspace-pull`, never clones, silent on a no-op) plus the **AI routing map**
+  `workspace-init` maintains in `AGENTS.md` (finding S17). **v43 shipped project-scope plugin
+  settings** — committed `.claude/settings.json` / `.cursor/settings.json` written by `workspace-init`
+  Step 4, published via `MANAGED_PATHS`, absence reported as S18; Codex has no such mechanism and that
+  is said out loud. Known scanner limit both had to work around: `workspace_scan` detects
   dirty trees only for the workspace **root**, and `workspace-pull` phase 4 fast-forwards child repos
   with no dirty check at all — ask git per repo. See `workspace-auto-refresh-design.md`,
+  `project-scope-plugin-config-feature.md`,
   `workspace-lifecycle-four-commands.md`, `workspace-memory-file-contract.md`,
   `v25-workspace-pull-init-design.md`, `workspace-owned-default-ignore-lines.md`,
   `workspace-meta-repo-pattern.md`.
@@ -513,11 +510,12 @@ Workspace holds **`lore-framework/`**, **`lore-framework-dev/`**, **`lore-agents
 **`lore-chronicler/`** (Being; on disk, undeclared). Meta-repo `AGENTS.md` lists them after
 `/lr:workspace-init`, which converges (no `--refresh` flag).
 
-Framework `main` carries **v41** shipped, tagged, and pushed. v41 exists because v40's deferred
-empirical gates were finally run and found five defects, four of them one shape. Real-engine
-evidence is a **release-prep checkpoint accepted by the user, not a clean full-suite pass**: no
-single run covered the full matrix on the shipped tree, Cursor did not run, and Keeper was closed by
-waiver. The full gate record lives in `versioning-release-types.md`.
+Framework `main` carries **v43** shipped, tagged, and pushed (v42 2026-08-23, v43 2026-08-25).
+Neither had a real-engine gate: v42's release notes still carry their assembly-time
+"testing deferred" placeholder (disposition: *did not run*, told to nobody), and v43 waived
+lifecycle and TriLens for three independent subagent reviews whose fixes landed in the tagged commit
+and are themselves unreviewed. Untested in v43: real-engine `workspace-init`, and that Cursor
+actually reads `.cursor/settings.json`. Full gate record: `versioning-release-types.md`.
 
 My Lore corpus is still largely legacy; v1 adoption is lazy via merge or explicit via `/lr:groom`.
 Unrelated uncommitted WIP may sit on these checkouts: never sweep it into lore-finalize commits
@@ -533,8 +531,7 @@ work rather than leaving it dirty. See
 `concurrent-session-committed-my-uncommitted-work.md`,
 `same-agent-multiple-engines-single-writer.md`.
 
-Both pre-ship gates exist and work (`/lr:trilens-loop`, `tests/lifecycle/`, plus Keeper and quality
-tracks); both are on request — see Operating Disciplines. For small doc ships, a feedback-only
+Both pre-ship gates are on request — see Operating Disciplines. For small doc ships, a feedback-only
 trilens round then selective apply is valid (`trilens-feedback-only-selective-apply.md`).
 
 ## Running Backlog & Standing Improvement List
@@ -542,9 +539,9 @@ trilens round then selective apply is valid (`trilens-feedback-only-selective-ap
 `framework-improvements-backlog.md` is the canonical list of deferred items; its § Ship Closures
 archives per-ship gate dispositions. It is organized into top-level `##` categories each holding
 `###` topical sections — file new items under the matching category
-(`backlog-categorization-precedent.md`). ~246 lore topics.
+(`backlog-categorization-precedent.md`). ~255 lore topics.
 
 **`workdir/what-to-improve.md`** is the **standing prioritized improvement list** — a ranked action
-view over the backlog that must always exist, not a one-off review deliverable (user-established
-practice, 2026-07-18). Reread it at the start of every framework-work session; refresh it at each
-architecture review. See `standing-improvement-list-practice.md`.
+view over the backlog that must always exist, not a one-off review deliverable (user practice,
+2026-07-18). Reread it at the start of every framework-work session; refresh it at each architecture
+review. See `standing-improvement-list-practice.md`.

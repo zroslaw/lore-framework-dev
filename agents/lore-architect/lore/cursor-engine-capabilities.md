@@ -1,3 +1,10 @@
+---
+lore: 1
+type: area
+summary: "Hub for Cursor-specific plugin install/refresh, invocation, subagent, usage, boot-cost, and engine-detection operational facts."
+parent: lore-context.md
+---
+
 # Cursor Engine Capabilities
 
 Cursor is a shipped Tier-1 engine path for Lore Framework with a deliberately conservative profile.
@@ -6,10 +13,15 @@ validation and probe notes in the linked topics below.
 
 ## Operational shape
 
-- **Plugin loading** — verified path: local checkout via `cursor-agent --plugin-dir
-  /absolute/path/to/lore-framework`. Post-clone helper: `scripts/install-cursor-plugin` (v25).
-  Symlink under `~/.cursor/plugins/local/` is **opt-in** (`--symlink`) until D2 confirms IDE
-  loads without `--plugin-dir`; see `workdir/cursor-marketplace-probe-notes.md`.
+- **Plugin loading** — the **marketplace install is the primary path** since the 2026-08-25
+  `INSTALL-CURSOR.md` rewrite: `cursor-agent plugin marketplace add <git-url>`, then enable once per
+  *account* (the enable step is interactive and there is no CLI install — see
+  [cursor-plugin-install-is-account-side.md](cursor-plugin-install-is-account-side.md)).
+  `--plugin-dir /absolute/path/to/lore-framework` is demoted to **framework development**.
+  Post-clone helper: `scripts/install-cursor-plugin` (v25). A workspace can skip the per-person
+  install entirely with committed `.cursor/settings.json` (v43,
+  [project-scope-plugin-config-feature.md](project-scope-plugin-config-feature.md)) — its load
+  surface is established from Cursor's shipped code, not an end-to-end run.
 - **Plugin refresh** — `scripts/cursor-refresh-plugin` (git pull + VERSION diff + fresh-session
   reminder), then new `cursor-agent --plugin-dir` session; no hot-reload.
 - **Mid-session fallback** — when plugin skills are unavailable, file-driven execution via
@@ -56,6 +68,10 @@ This hub is the starting map for install, refresh, fallback, invocation, and con
 - `cursor-cli-and-harness-operational-notes.md`
 - `cursor-dual-skill-tree-one-repo.md`
 - `cursor-plugin-distribution-update-model.md` — install/update/auto-refresh model
+- [cursor-plugin-install-is-account-side.md](cursor-plugin-install-is-account-side.md) — no CLI
+  install; the `.cloud-plugin-manifest.json` trap; CLI-vs-UI marketplace naming
+- [project-scope-plugin-config-feature.md](project-scope-plugin-config-feature.md) — committed
+  `.cursor/settings.json` as the zero-install path for a cloned workspace
 - `engine-marketplace-readiness.md` — marketplace submission + manifest visibility
 - `docs-engines-convention.md`
 - `multi-engine-portability-direction.md`
