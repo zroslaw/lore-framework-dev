@@ -7,6 +7,11 @@ parent: lore-context.md
 
 **Pointer-not-restatement: when two doc sites mention the same grammar/rule/spec, one must be canonical and the other(s) must be pointer-only.** No inline restatement "for clarity" — that's the failure mode. Looks fixed today; drifts silently tomorrow when one site updates and the others don't.
 
+**Scope test first:** this discipline governs *the same words* at many sites. When the sites need
+*different words following one rule*, centralizing is the wrong move — see
+[per-site-authoring-is-not-duplication.md](per-site-authoring-is-not-duplication.md), which is where
+I over-applied this rule and was corrected.
+
 The negative form of `shared-procedure-doc-pattern.md`. That topic is the positive form (one doc carries the body, callers point at it); this is the discipline that prevents inline copies leaking back in once the pointer is established.
 
 The principle was operationalized concretely during v15's seven-round multi-lens review. Multiple rounds caught the same drift pattern; the rule that emerged is "pointer-only, no inline summary."
@@ -114,6 +119,11 @@ In framework code/docs, default to pointer-only. The bootstrap-recap exception i
 ## See Also
 
 - `shared-procedure-doc-pattern.md` — the positive form this discipline maintains.
+- [per-site-authoring-is-not-duplication.md](per-site-authoring-is-not-duplication.md) — the scope
+  test that decides whether this discipline applies before you apply it.
+- [step-number-cross-references-fail-silently.md](step-number-cross-references-fail-silently.md) —
+  a step number cited in another doc is a second statement of a doc's structure, drifting with
+  nothing watching.
 - `parallel-reviewer-fanout-pattern.md` — multi-round review surfaces the drift; the v15 7-round convergence is the worked example.
 - `naming-foundational-principles.md` — the meta-rule licensing this topic's promotion.
 - `framework-defined-role-pattern.md` — adjacent: same "central body, thin per-instance role.md" shape applied to roles.
