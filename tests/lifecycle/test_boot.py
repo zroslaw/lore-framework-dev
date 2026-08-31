@@ -21,6 +21,39 @@ from harness import (
 )
 
 
+# --- Step 0 announcement (v44 Skill Purpose Announcement convention) ---------
+#
+# Every skill opens with `## Step 0 — Announce` and must print its announcement
+# before doing any work. v44 shipped that convention to 33 sites with no gate at
+# either level: nothing in /lr:check verifies the block is present, and until
+# this test nothing anywhere verified an announcement was ever *emitted*.
+#
+# Anchors rather than the literal paragraph. Models restate the announcement
+# faithfully while normalising markdown emphasis and re-wrapping lines, so
+# pinning the exact string would fail on formatting instead of on the contract.
+# The 2026-08-31 run showed the inverse failure twice — a mandatory `Style set:`
+# line dropped, a `LENSES:` line emitted as `**LENSES:**` — which is the class of
+# defect this gate exists to catch.
+ANNOUNCE_ANCHORS = (
+    "first i pull its lore agent repo",
+    "read individual topics later",
+)
+
+
+def normalise_announcement(text):
+    """Lowercase and drop decoration that models and markdown add or remove at will.
+
+    Strips markdown emphasis, quoting and blockquote markers, then collapses all
+    whitespace, so a re-wrapped or un-bolded restatement still matches — and so the
+    doc's own blockquoted copy normalises to the same shape the engine speaks.
+    """
+    lines = [ln.lstrip().lstrip(">").strip() for ln in text.splitlines()]
+    text = " ".join(lines)
+    for ch in "*`'\"":
+        text = text.replace(ch, "")
+    return " ".join(text.lower().split())
+
+
 @unittest.skipIf(SKIP_REASON, SKIP_REASON)
 class BootScenarios(unittest.TestCase):
 
@@ -76,6 +109,46 @@ class BootScenarios(unittest.TestCase):
         self.assertIn(
             AGENT_NAME, r.text,
             f"error did not list the real available agent '{AGENT_NAME}':\n{r.text}",
+        )
+
+    def test_09_boot_announces_before_working(self):
+        """Step 0 is spoken: the announcement is printed, with the agent name filled in.
+
+        Its own scenario rather than an assertion folded into _assert_booted: the
+        announcement is a distinct contract from "the boot worked", and engines
+        differ on it, so a shared assertion would turn every boot scenario red for
+        one narrow gap and make triage worse.
+
+        Asserted against the transcript, not the final message: the announcement is
+        emitted before preflight — mid-run — and on Codex `text` holds only the last
+        message, so a compliant run would read as a violation. Same reasoning as
+        test_08's script-fallback notice.
+        """
+        doc = os.path.join(harness.FRAMEWORK_DIR, "docs", "agent-boot.md")
+        with open(doc, encoding="utf-8") as f:
+            doc_text = normalise_announcement(f.read())
+        # Guard against this test quietly going vacuous: if the announcement is
+        # reworded or removed, fail here rather than keep asserting anchors the
+        # procedure no longer asks anyone to say.
+        for anchor in ANNOUNCE_ANCHORS:
+            self.assertIn(
+                anchor, doc_text,
+                f"agent-boot.md no longer contains {anchor!r}; update the "
+                "announcement and ANNOUNCE_ANCHORS together",
+            )
+
+        r = self._boot()
+        self._assert_booted(r)
+        spoken = normalise_announcement(r.transcript)
+        for anchor in ANNOUNCE_ANCHORS:
+            self.assertIn(
+                anchor, spoken,
+                f"Step 0 announcement missing {anchor!r}:\n{r.transcript}",
+            )
+        # The placeholder must be resolved, not echoed through verbatim.
+        self.assertIn(
+            f"booting the agent {AGENT_NAME}", spoken,
+            f"announcement did not name the agent being booted:\n{r.transcript}",
         )
 
 

@@ -130,16 +130,30 @@ override verification; `engine|realpath|VERSION` verdict inheritance, which also
 them. See `lifecycle-harness-plugin-identity-unverified.md`,
 `a-gate-cannot-be-a-model-self-report.md`, `tests/test_lifecycle_plugin_identity.py`.
 
-### A9. Lifecycle runner reports false greens — OPEN, added 2026-08-31 (**top of tier A**)
-`tests/lifecycle/run_matrix.py` exits **0** when the suite refuses to run (`LR_LIFECYCLE` unset —
-it prints the refusal, prints the resolved plan, exits 0) *and* when module runs fail (a completed
-matrix summarised `5/27 module runs ok`, exit 0). This corrupts the reading of every gate that uses
-it, and any CI wiring on it today is a guaranteed false green. Identity-blocked engines also render
-as `failed 0.0s` per module, which reads as ~18 test failures when it is two engines that never
-started. **Do:** exit nonzero on refusal; exit nonzero on any failed module run; give
-identity-blocked engines their own status. Small and bounded, all in one file. Evidence: run of
-2026-08-31. Lore: `lifecycle-harness-exit-code-is-not-a-verdict.md`. Backlog ref: § Framework
-Upkeep § Lifecycle Harness Reliability.
+### A9. Lifecycle runner: identity-blocked engines render as failures — OPEN, corrected 2026-08-31
+**Corrected after verification — the original entry was wrong on two of its three claims, and
+acting on it would have "fixed" already-correct code.** Measured against `run_matrix.py` at
+`9f164e9` (unchanged since v36, so the 2026-08-31 observation ran exactly this code):
+
+- ~~refusal exits 0~~ — **false.** `LR_LIFECYCLE` unset returns **2**. Verified by running it.
+- ~~failed module runs exit 0~~ — **false.** `summarize()` returns `not failed`; `main()` returns
+  `0 if all_ok else 1`. A 9/18 run returned 1.
+- identity-blocked engines render as `failed 0.0s` — **true, and still open.** Two blocked engines
+  read as ~18 test failures when nothing ran. Confirmed again on 2026-08-31.
+
+**Root cause of the original false-green report: the invocation, not the runner.** Gate runs pipe
+the runner (`... 2>&1 | tail`), so `$?` is the *pipe's* last element. Reproduced: same command
+piped reports 0 while the runner returns 2. A backgrounded wrapper ending in `echo` does the same —
+a task notification said "exit code 0" for a run whose runner returned 1. `--dry-run` also exits 0
+and prints a plan that resembles the refusal output, giving a second way to misread the same run.
+
+**Do:** (a) give identity-blocked engines a status distinct from `failed`; (b) write the runner's
+exit code into `summary.json` so the verdict survives the pipe — the point-of-use guardrail, since
+triage reads the artifact, not the shell (`point-of-use-guardrails-beat-recorded-lore.md`);
+(c) close the empty-matrix edge, where zero configs makes `all_ok` true and exits 0. **Do not**
+"fix" the refusal or failed-module exit codes; they are correct.
+Lore: `lifecycle-harness-exit-code-is-not-a-verdict.md` (corrected in the same pass).
+Backlog ref: § Framework Upkeep § Lifecycle Harness Reliability.
 
 ### A10. `preflight --agent-dir` upward search has no test — OPEN, added 2026-08-31
 v44 replaced the `<workspace>` join with an upward search. I hand-verified it across five invocation
@@ -154,6 +168,32 @@ nothing and pollutes every triage. `test_08` additionally reads the wrong captur
 (`transcript-vs-final-message-assertions.md`). **Do:** restructure to per-step assertions, or mark
 them explicitly non-gating so a red is not mistaken for a regression. Lore:
 `triage-a-red-module-against-its-own-history.md`.
+
+### A12. v44's announcement convention has no gate at either level — IN PROGRESS, added 2026-08-31 (**top of tier A**)
+v44 shipped `## Step 0 — Announce` to 33 skills: required literal text a model must print before
+doing any work. Nothing verifies it. `/lr:check` has no item for the block's presence (v44's own
+Known Limits says so), and the lifecycle suite had **no runtime assertion anywhere** that an
+announcement is ever emitted — zero matches for `Announce`, `Booting the agent`, or `First I pull`
+across every test module.
+
+That gap sits on a failure mode now measured rather than assumed. The 2026-08-31 two-engine run
+produced three instances of *substance right, required literal output wrong*: `test_style` dropped
+the mandatory `Style set:` line 2 of 3 runs while correctly applying the style; `test_trilens_loop`
+emitted `**LENSES:**` for a prompt that said "print exactly these lines"; and a boot in this very
+session printed four status lines Step 2 says to suppress. `docs/style.md` already carries maximum
+emphasis on its confirmation — "mandatory", "the skill's only result you can check" — and lost
+anyway, which is `the-terminal-step-is-the-step-that-gets-dropped.md` reproducing under test.
+
+**Measured on real transcripts:** Claude/haiku announces on boot 3/3; **Codex/gpt-5.4-mini does not
+announce at all** on the boot path, 3/3. So the convention is already half-broken in the field and
+nothing was reporting it.
+
+**Do:** (a) `test_09_boot_announces_before_working` in `tests/lifecycle/test_boot.py` — shipped on
+`v45-announcement-gate`, red against `lr--v1.43.0` (no Step 0, no anchors) and green against v44;
+(b) decide what the Codex miss means — engine-profile guidance, or a doc-structure fix per
+`instruction-location-beats-emphasis-in-long-docs.md`, *not* more emphatic prose; (c) a `/lr:check`
+item for Step 0 presence across the 33 skills, closing the static half.
+Lore: `skill-announcement-convention.md`, `the-terminal-step-is-the-step-that-gets-dropped.md`.
 
 ### A6. `docs/engines/claude.md` ↔ `CLAUDE.md` case-collision on macOS — OPEN (low)
 Observed live 2026-07-18: on case-insensitive APFS, Claude Code auto-injects
@@ -301,12 +341,17 @@ surface.
    maintenance).
 5. **Continuous:** B6 (marketplace) whenever ready; B3/B4 data-gathering alongside.
 
-**v32 tier (added 2026-07-28):** A8 (`agent-boot.md` subtraction pass) — first item of the
-release *after* v31 ships, not folded into it.
+**v45 tier (re-ranked 2026-08-31, after the first identity-verified two-engine gate):**
+**A12 first** — v44's announcement convention has no gate at either level and the boot half of it
+is already failing on one engine. Then A9's surviving third (identity status + exit code in
+`summary.json`), then A11, since three flaky scenarios pollute every triage of the above. A10 is
+unblocked but no longer urgent: `test_33`, the failure that looked like an `--agent-dir` regression,
+was a stale v32 plugin and cleared under verified identity.
+B9 stays a design decision to settle. **B10 is closed** — Codex identity was never the marketplace
+source; a five-week-old v32 tree in `~/.codex/.tmp/marketplaces/` outranked the v44 cache. Moved
+aside 2026-08-31; identity green 5/5 since.
 
-**v44 tier (added 2026-08-31):** A9 first — it costs an hour and makes every later gate reading
-honest — then A10 with the v44 ship, then A11 before the next lifecycle run is used as evidence.
-B9 is a design decision to settle while v44 is still open; B10 is the user's call, not mine.
+**v32 tier (still open):** A8 (`agent-boot.md` subtraction pass).
 
 ## Provenance
 
