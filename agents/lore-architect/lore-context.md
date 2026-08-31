@@ -79,11 +79,10 @@ shared across call sites get a `docs/<procedure>.md`. See `slash-command-system.
 `skill-doc-pattern.md`, `shared-procedure-doc-pattern.md`, `single-canonical-source-discipline.md`,
 `cursor-dual-skill-tree-one-repo.md`.
 
-**Skill Purpose Announcement** — shipped in v44: every skill opens with `## Step 0 — Announce`
-carrying its own text, authored in that skill's own doc, in framework concepts rather than internals.
-Announcements are *onboarding material*, not status lines. The **rule** is shared, the **text** is
-not — run that scope test before reaching for single-canonical-source. **Nothing in `/lr:check`
-enforces Step 0**, so this 33-site convention has no mechanical guard against drift. See
+**Skill Purpose Announcement** — shipped in v44: every skill opens with `## Step 0 — Announce`,
+its text authored in that skill's own doc, in framework concepts not internals. Announcements are
+*onboarding material*, not status lines; the **rule** is shared, the **text** is not. **Nothing in
+`/lr:check` enforces Step 0** — 33 sites, no mechanical guard. See
 `skill-announcement-convention.md`, `per-site-authoring-is-not-duplication.md`.
 
 The current skill catalog is implementation ground truth, but newcomer-facing information
@@ -180,6 +179,13 @@ both cases is `--engine <name>`; open as backlog B8. See
 `engine-profile-must-be-observed-not-believed.md`,
 `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`,
 `cursor-ide-engine-detection-blind-spot.md`.
+
+**Two `<framework-root>`s can be live in one session** — three causes: Claude's plugin cache keeps
+several versions, a manual boot differs from slash-command dispatch, one host flavor snapshots the
+bundle per session. Never pick the highest version; the dispatched one is *observable* in the
+base-directory line a slash command prints, and booting off the wrong tree is invisible
+(`claude-plugin-cache-holds-multiple-versions.md`, `framework-root-self-location-validated.md`,
+`ephemeral-session-plugin-snapshot-topology.md`).
 
 `version-check.md`'s nested-repo guard carries a macOS trap: "resolve both to real paths" is not
 self-executing prose — a weak model filled the gap with bare `pwd`, which disagrees with git under
@@ -313,7 +319,12 @@ own topic — these are pointers, not summaries.
   `post-convergence-edits-need-their-own-gate.md`,
   `macos-documents-permission-loss-mid-session.md`.
 - **Three gate dispositions — passed, waived, did not run** — and a ship record must name which
-  applies, in the release notes as well as in lore. A waiver is itself a record; a measurement names
+  applies, **in the release notes before lore** — a lore-only record satisfies every discipline I
+  hold while the user's artifact stays empty (v44 had no Verification section, and an accuracy audit
+  passes cleanly over an absent one), so audit **presence first, then accuracy**. Sibling: a
+  **countable claim about the whole tree** ("all 33 skills do X") earns a check before the notes may
+  assert it — verified once by hand is verified for one commit
+  (`a-release-record-goes-stale-while-you-fix-it.md`, `consistency-checks.md`). A waiver is itself a record; a measurement names
   the environment it was taken in. A reviewer that dies surfaces as *idle*, which reads exactly like
   "finished and found nothing", so the check is "did it report?", never "did it complain?"; before
   retrying, ask **what would have to change for the retry to differ**. When the round cap ends a loop
@@ -411,8 +422,9 @@ own topic — these are pointers, not summaries.
   before writing durable lore mid-session; in design dialogues draft only when the user triggers it;
   populate dry-run counters with would-be outcomes; "enforce X" ≠ add a required schema field;
   decompose broad open-ended asks into hidden axes; on a second pushback on the same axis, act
-  instead of re-justifying; a short measurement question gets a short factual answer; several style
-  skills at once is a stop signal. Review subagents default to Composer 2.5. See
+  instead of re-justifying; a measurement question or a decision already made wants a short
+  verdict, not a briefing; several style skills at once is a stop signal, and a second signal next
+  turn means cut hard rather than compress. Review subagents default to Composer 2.5. See
   `feedback-commit-to-a-recommendation.md`, `feedback-too-many-words.md`,
   `feedback-confirm-before-writing-lore.md`, `feedback-draft-only-when-user-triggers.md`,
   `feedback-schemas-as-enforcement-overreach.md`,
@@ -523,12 +535,12 @@ Unrelated uncommitted WIP may sit on these checkouts: never sweep it into lore-f
 (`git add agents/` only), and stash around feature merges
 (`fold-feature-into-local-main-via-stash.md`).
 
-**This workspace really does run concurrent sessions, including non-human ones** (the live launchd
-Keeper). Another session's directory-wide `git add` can commit and push work I left uncommitted — no
-loss, but ungated work ships under an unrelated message and `git status` stops being a reliable
-inventory of my own changes. So: stage narrowly (`git add <path>`, never a directory), re-check
-`git status` and `git log` *before reporting* on my own change set, and branch deliberately-ungated
-work rather than leaving it dirty. See `concurrent-session-committed-my-uncommitted-work.md`,
+**This workspace runs concurrent sessions, including non-human ones** (the live launchd Keeper).
+Another session's directory-wide `git add` can commit and push work I left uncommitted — no loss,
+but ungated work ships under an unrelated message and `git status` stops being a reliable inventory
+of my changes. So: stage narrowly (`git add <path>`, never a directory), re-check `git status` and
+`git log` *before reporting* on my own change set, and branch deliberately-ungated work rather than
+leaving it dirty. See `concurrent-session-committed-my-uncommitted-work.md`,
 `same-agent-multiple-engines-single-writer.md`. For small doc ships, a feedback-only trilens round
 then selective apply is valid (`trilens-feedback-only-selective-apply.md`).
 

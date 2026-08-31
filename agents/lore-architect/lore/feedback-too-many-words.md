@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "The user's standing brevity feedback: ranked shortlist for options, plain paragraph plus one example for concepts, short answers to measurement questions — and structure is not brevity."
+summary: "The user's standing brevity feedback: ranked shortlist for options, plain paragraph plus one example for concepts, a verdict (not a briefing) for a decision already made — and structure is not brevity."
 parent: lore-context.md
 ---
 
@@ -73,6 +73,27 @@ Second signal, same session: after `/lr:style` I opened a turn with a bare `Styl
 a question about a decision from two turns earlier, and got back a single `what?`. **After a mode
 change, re-establish where we are before asking anything** — the style confirmation reads as a
 non-sequitur on its own, and the user had been away from the thread.
+
+## A decision already made wants a verdict, not a briefing (2026-08-31)
+
+The v44 ship session. The user asked, in substance, *"we're good enough, with a backlog — right?"*
+I answered three turns running with bolded section headers, categorised bullet lists (in-scope
+versus backlog), a caveat paragraph, and a closing offer. Then came `/lr:style` with no selector —
+**all three components at once** — and immediately after, in reply to the next answer, a two-word
+message: `, in short.`
+
+Two things sharpen the existing rules here:
+
+- **The trigger was not length alone, it was structure applied to a question that wanted a verdict.**
+  A yes/no question gets the yes or no in the first line. Qualifying detail follows only when it
+  changes the answer — and "here is the same answer, sorted into two categories" never does.
+- **Two signals in two turns means cut hard, not compress.** The style invocation did not land on
+  its own; the `, in short.` that followed says the reply after it was still wrong. At that point
+  the move is to strip to the answer, not to tighten the same structure.
+
+The multi-skill invocation as a stop signal is already recorded above, from 2026-07-27. This is its
+second clean instance in the same shape — measurement or verdict question in, essay out — which
+makes the pattern the reliable predictor on this axis, not the exception.
 
 ## Why it fits the existing principle stack
 

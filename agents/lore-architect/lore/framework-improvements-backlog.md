@@ -326,6 +326,23 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 - **Branch-naming convention check** — verify branches in worktrees follow the suggested `<agent-name>/<slug>` form. Very opinionated; probably never needed.
 - **Worktree lifecycle and Git-derived audit** — extend the placement convention with one-writer ownership, park/handoff rules, WIP commits instead of routine stashes, and retire-after-land cleanup. Report branch, last-commit age, clean/dirty status, and merged status; flag stale or unowned dirty trees without mandatory custom metadata. Do not introduce a wrapper command unless this convention and report prove insufficient. See `worktree-lifecycle-and-audit.md`.
 
+### Workspace Refresh State Root (found in use 2026-08-31)
+
+- **`workspace_refresh` resolves its state root from cwd, not the workspace.** Merge's Step 0 runs
+  `preflight --agent-dir … --fresh` with no `--workspace`, which defaults to the current directory;
+  run from `<repo>/agents/<agent>/reflections/` it created a second
+  `.tmp/lr-state/workspace-refresh` there, 31 minutes after the legitimate workspace-root one.
+  Three effects: litter wherever cwd lands; **the 16h TTL is defeated** (a look-up under a different
+  root finds no state and re-refreshes); and it **escapes the gitignore**, because the
+  workspace-owned line is the anchored `/.tmp/` and a nested `.tmp/` inside a lore agent repo is not
+  matched — so it shows untracked and is exactly what a directory-wide `git add` sweeps up.
+  The leg already resolves a session inside `.worktrees/` back to the workspace root; that upward
+  resolution is not general. **Fix in the resolver, not the call sites** — search upward for the
+  workspace marker the way `preflight --agent-dir` searches upward for `role.md`, and refuse to
+  write state when no workspace root is found. Adding `--workspace` to each caller is the
+  wording-not-structure move. See `workspace-auto-refresh-design.md` § Bug found in use,
+  `workspace-owned-default-ignore-lines.md`, `short-circuit-on-the-condition-not-a-proxy.md`.
+
 ### Workspace Topology
 
 - **Discovery gap for nested agent repos** — workspace discovery scans direct subdirectories of cwd only; nested agent repos are invisible to `/lr:list-*`, `/lr:check`, `/lr:recall`, `/lr:workspace-sync`, `/lr:spawn-teammate`, `/lr:boot`. Currently `lore-framework-dev/` is nested inside `lore-framework/` as a temporary placement, reachable only via the registered `/lr-lore-architect-agent` shortcut. User will extract to a workspace-root sibling on its own GitHub repo. Tracked here for the eventual move; deeper question of whether discovery should walk one level (or accept a config-file hint) is open if nested layouts become a recurring pattern. See `agent-discovery-nesting-constraint.md`, `plugin-vs-agent-repo-separation.md`.

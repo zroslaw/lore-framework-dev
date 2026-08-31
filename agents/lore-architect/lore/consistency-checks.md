@@ -57,6 +57,38 @@
 
 **Execution-reliability gap (2026-07-18):** checks like #9–10 are specified as procedures for an LLM to execute directly, but at scale an LLM read-through under-extracts — a deterministic script-based sweep of this agent's own 147-topic graph found 14 unresolved references that a prior clean `/lr:check` run had missed. The gap isn't the check's definition, it's the execution method: mechanical existence/version/glob checks (roughly #2–3, #9–11, #13–14, #19–21) are more reliably run by a script than read by an LLM at this scale; reserve LLM judgment for the genuinely semantic checks (#15–16). See `deterministic-sweep-catches-check-blind-spots.md`, `framework-improvements-backlog.md`.
 
+## When a ship's claim earns a check (v44, 2026-08-31)
+
+Before tagging v44 I ran four mechanical checks by hand, in bash, invented at push time:
+
+- every one of the 33 skills carries `## Step 0 — Announce` — **the release's headline claim**;
+- every `migrations/*.md` declares a `## Write Paths` section (check #20 exists; I re-ran it as a grep);
+- `scripts/sync-cursor-skills` produces no drift (check #21 exists; the run **rewrote five mirror
+  files** before reporting clean, so the hand-run step was load-bearing for the shipped tree);
+- `VERSION` agrees with all four manifests (check #19 exists).
+
+Three of the four already had checks and I still hand-rolled them; the fourth — the one the release
+notes actually lead with — has none.
+
+**The rule this produces: when a ship makes a countable claim about the whole tree ("all 33 skills
+do X"), that claim needs a check before the release notes are allowed to assert it.** An assertion
+over 33 sites verified once by hand is verified for exactly one commit. This is
+`point-of-use-guardrails-beat-recorded-lore.md` applied to my own ship procedure — the known-gap
+note living in `skill-announcement-convention.md` protects nobody, because writing release notes
+does not cue reading that topic.
+
+**Two candidate checks from this:**
+
+- **Step 0 presence** — assert every `skills/<name>/` resolves to a doc (or its own `SKILL.md`)
+  containing `## Step 0 — Announce`. Must handle the three shapes v44 established: `list-agents`
+  and `list-repos` carry it in `SKILL.md`, the two `df-*` skills live under `df/` rather than
+  `docs/`, and `register-repo.md` backs four skills.
+- **Release-notes verification-section presence** — assert `release-notes/<VERSION>.md` contains a
+  Verification section. v42 shipped an unreplaced placeholder and v44 nearly shipped with no
+  section at all; see
+  [a-release-record-goes-stale-while-you-fix-it.md](a-release-record-goes-stale-while-you-fix-it.md)
+  § Presence before accuracy.
+
 Key principle: git history is the metadata layer for temporal checks — no embedded timestamps in files.
 
 ## See Also
@@ -68,3 +100,5 @@ Key principle: git history is the metadata layer for temporal checks — no embe
 - `framework-improvements-backlog.md` — check #19 graceful-skip-on-missing-`marketplace.json` follow-up
 - `dirty-tree-gates-write-vs-read-distinction.md` — the v15 write-set discipline check #20 enforces
 - `deterministic-sweep-catches-check-blind-spots.md` — the 2026-07-18 script-based sweep that found the execution-reliability gap firsthand
+- [a-release-record-goes-stale-while-you-fix-it.md](a-release-record-goes-stale-while-you-fix-it.md) — the release-notes presence gap one of the candidate checks above would close
+- [skill-announcement-convention.md](skill-announcement-convention.md) — the 33-site v44 convention with no mechanical guard

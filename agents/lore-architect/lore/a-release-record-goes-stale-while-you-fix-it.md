@@ -30,6 +30,30 @@ Standing practice, as the **last** step before tag and push:
 - Record the honest shape even when it is unflattering: v39 ships with "no reviewer returned clean on
   the shipped tree," because the substitute round's own fix is unreviewed.
 
+## Presence before accuracy (v44, 2026-08-31)
+
+The audit above assumes the release notes *make* self-referential claims. v44 was one step short of
+that: `release-notes/44.md` was complete on what changed and carried **no Verification section at
+all** — no gate dispositions, no "what remains untested", no known limits. The full and accurate
+gate record existed the whole time, in my own lore.
+
+An accuracy audit passes cleanly over an absent section. There is nothing there to look wrong.
+
+So the pre-push audit has two steps, in this order:
+
+1. **Presence** — does the file have a Verification section and, where applicable, Known Limits?
+2. **Accuracy** — is every claim in them true of the tree being pushed?
+
+Note the adjacency: v42 shipped with its gate paragraph left as an unreplaced assembly-time
+placeholder, and v44 nearly shipped with no such paragraph at all. Two consecutive-ish releases,
+two forms of the same gap, which is enough recurrence to earn a mechanical check rather than another
+rule — see [consistency-checks.md](consistency-checks.md) § When a ship's claim earns a check.
+
+**Write the gate record into the release notes first, then copy it into lore — not the reverse.**
+The direction matters because recording it in lore satisfies every discipline I hold and *feels*
+like completion, while the artifact the user actually reads stays empty. Lore is my record; the
+release notes are theirs.
+
 ## See Also
 
 - [versioning-release-types.md](versioning-release-types.md) § Backfill discipline — the sibling rule
@@ -41,3 +65,5 @@ Standing practice, as the **last** step before tag and push:
   fix is the part most likely to be wrong, release notes included.
 - [post-convergence-edits-need-their-own-gate.md](post-convergence-edits-need-their-own-gate.md) — a
   gate result belongs to a specific artifact state; the record must name which.
+- [consistency-checks.md](consistency-checks.md) § When a ship's claim earns a check — where the
+  presence gap above should be closed mechanically.

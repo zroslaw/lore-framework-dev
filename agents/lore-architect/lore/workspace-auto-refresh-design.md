@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "The automatic 16h workspace refresh shipped in v42 as a second leg of lr-core preflight — its load-bearing decisions and the two implementation traps found while designing it."
+summary: "The automatic 16h workspace refresh shipped in v42 as a second leg of lr-core preflight — its load-bearing decisions, the two design-time traps, and the shipped bug where its state root follows cwd instead of the workspace."
 parent: lore-context.md
 ---
 
@@ -79,3 +79,43 @@ A workspace cleanup command. `/lr:workspace-status` already diagnoses and names 
 - [freshness-contracts-at-session-boundaries.md](freshness-contracts-at-session-boundaries.md),
   [auto-pull-mechanism.md](auto-pull-mechanism.md) — the agent-repo-level precedent.
 - [framework-improvements-backlog.md](framework-improvements-backlog.md) § Workspace & Environment.
+
+## Bug found in use: state root follows cwd, not the workspace (2026-08-31)
+
+Observed during a finalization, not designed for. Merge's Step 0 specifies:
+
+```
+python3 "<framework-root>/scripts/lr-core" preflight --agent-dir "<agent-dir>" --fresh --no-teammate-check
+```
+
+No `--workspace`, so it defaults to the current directory — and my cwd was
+`<repo>/agents/lore-architect/reflections/`, where I had just written the reflection topics. The
+refresh leg then created **`reflections/.tmp/lr-state/workspace-refresh`**, a second state file
+inside an agent's own directory, 31 minutes after the legitimate one at the workspace root.
+
+Three consequences, in increasing severity:
+
+1. **Litter.** A `.tmp/lr-state/` tree appears wherever a session's cwd happens to be.
+2. **The TTL is defeated.** The 08:01 refresh should have suppressed the 08:32 one under the 16h
+   window. It did not, because the second look-up used a different root and found no state. A TTL
+   keyed to a path that moves is not a TTL.
+3. **It escapes the gitignore.** The workspace-owned line is `/.tmp/` — **anchored to the workspace
+   root**. A nested `.tmp/` inside a lore agent repo is not matched, so it shows as untracked and is
+   exactly the kind of thing a directory-wide `git add` sweeps into a commit
+   ([concurrent-session-committed-my-uncommitted-work.md](concurrent-session-committed-my-uncommitted-work.md)).
+
+The design already resolves a session started inside `.worktrees/` back to the real workspace root.
+That upward resolution is **not general**: from an arbitrary subdirectory it does not walk up to the
+workspace root, so the worktree case reads as a special case rather than the rule.
+
+**The fix belongs in the resolver, not the procedure.** Telling every call site to pass
+`--workspace` is the wording-not-structure move that
+[the-terminal-step-is-the-step-that-gets-dropped.md](the-terminal-step-is-the-step-that-gets-dropped.md)
+warns about — `workspace_refresh` should resolve its state root by searching upward for the
+workspace marker, the way `preflight --agent-dir` already searches upward for `role.md`, and refuse
+to write state at all when no workspace root is found. Filed for the backlog.
+
+Two smaller notes worth keeping: the anchored-gitignore gap is its own hazard independent of this
+bug (`workspace-owned-default-ignore-lines.md`), and this is a second instance of the general lesson
+that **a path-derived default is a proxy that fails exactly where the user's cwd is legitimate but
+unusual** ([short-circuit-on-the-condition-not-a-proxy.md](short-circuit-on-the-condition-not-a-proxy.md)).
