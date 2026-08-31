@@ -60,6 +60,9 @@ evidence of *each*. The failure being fixed recurs one level up, inside the fix 
 
 ## See Also
 
+- [create-agent-registers-what-it-creates.md](create-agent-registers-what-it-creates.md) — a
+  structural instance of this shape: `/lr:create-agent` merely *offered* registration, so agents
+  shipped invisible to the workspace; v44's draft moves publication inside the producing procedure.
 - [instruction-location-beats-emphasis-in-long-docs.md](instruction-location-beats-emphasis-in-long-docs.md)
   — the sibling structural fix from the same battery: when emphasis fails, move the obligation to
   where the reader demonstrably is.

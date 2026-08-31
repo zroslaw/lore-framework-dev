@@ -47,6 +47,13 @@ git -C lore-framework worktree remove <path> --force
   doc still says what its author wrote.
 - `a-red-test-may-be-asserting-a-true-fact.md` — the mirror case on the other side: before turning a
   red test green, establish which side is wrong.
+- `a-change-set-is-wider-than-its-diff.md` — the same instrument applied to a *repaired* assertion.
+  v44's `test_22_register_agent` pinned the retired absolute-path contract; the repair asserted both
+  directions (relative present, absolute absent) and was then proved green against v44 and red
+  against v43. A stale test found by a gate is the cheapest announcement that a contract change had
+  sites outside its diff.
+- `triage-a-red-module-against-its-own-history.md` — the same `LR_FRAMEWORK_DIR` A/B pointed at a
+  failure rather than at a new assertion, to settle "is this red mine?"
 - `point-of-use-guardrails-beat-recorded-lore.md` — this belongs in the test-writing step, not only
   in lore.
 - `tooling-cwd-safety.md` — the `git -C` relative-path framing gotcha in full.

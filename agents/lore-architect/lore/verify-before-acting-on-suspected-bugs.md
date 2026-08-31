@@ -121,6 +121,10 @@ reshaped until the test goes green.** See `a-red-test-may-be-asserting-a-true-fa
 
 ## See Also
 
+- `triage-a-red-module-against-its-own-history.md` — the cheapest form of this reflex on a red
+  lifecycle run: read the module's own verdict history in `results/*/summary.json` before reading
+  transcripts, let alone before editing code.
+
 - `a-red-test-may-be-asserting-a-true-fact.md` — this rule applied to test failures: establish which
   side is wrong before turning anything green, and give danger-guarding assertions the strongest
   presumption of correctness.

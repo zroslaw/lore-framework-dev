@@ -113,3 +113,12 @@ the real execution order — renumber to match the code path, not the easiest pl
 `workspace_scan.py` (which itself imports `preflight` at module level) must import it locally inside
 the calling function, or the module graph cycles at load time
 (`deferred-import-breaks-lr-core-preflight-cycle.md`).
+
+**A stale comment here is a stale implementation (v44, 2026-08-31).** Changing `preflight.py`'s
+`--agent-dir` resolution from a `<workspace>` join to an upward search, I left the behaviour
+described three ways in the old terms: the helper's docstring, the *caller's* inline comment above
+it, and `cmd_preflight`'s step text plus `agent-boot.md` and `conventions.md`. Under the Script
+Fallback Contract those words *are* the manual procedure, so the stale version would have walked a
+hand-executing model into accepting the first `role.md`-only decoy — the exact mis-boot the fix
+existed to prevent. Treat the code, its docstring, the caller's comment, the procedure doc and the
+placeholder table as one change set: `a-change-set-is-wider-than-its-diff.md`.

@@ -224,6 +224,13 @@ per-engine model: Claude Code -> `haiku`, Codex -> `gpt-5.4-mini`, Cursor -> `co
 The multi-step scenarios like attach, finalize end-to-end, and the dirty-tree-gate walk cost the
 most. Free layer-1/2 tests (script tests, lint checks) remain ungated and pass in ~4s.
 
+**Run the free deterministic suite first, and know how to invoke it.** `python3 -m unittest discover
+-s tests` fails outright with `Start directory is not importable`; run each module individually as
+`tests/README.md` shows. `test_lrb.py` writes progress to **stdout** while unittest reports to
+**stderr**, so a `tail` of combined output shows no result — capture stderr separately or the module
+looks broken. 540 tests across 15 modules run in a couple of minutes at zero cost, which is why they
+precede everything here in the gate order (`role.md` § Lore-Curation Disciplines).
+
 ## Release Gate Evidence States
 
 Keep "safe to commit" and "release-green" separate in status reports. A **release-prep
@@ -282,6 +289,19 @@ reachable from the repo root, not only from deep test directories: root `README.
   stream-json `system`/`init` event — until then every correct Claude run was reported as a mismatch
   and the whole shard refused to start. See `lifecycle-harness-plugin-identity-unverified.md`,
   `a-gate-cannot-be-a-model-self-report.md`.
+- **The runner's exit code is a false green (2026-08-31)** — `run_matrix.py` exits 0 both when the
+  suite refuses to run (`LR_LIFECYCLE` unset) and when module runs fail. Read the summary block and
+  the per-module stderr, never the exit code, and do not wire this runner into CI until it is fixed.
+  See `lifecycle-harness-exit-code-is-not-a-verdict.md`.
+- **On this machine a worktree gate run is Claude-only (2026-08-31)** — the identity gate refuses
+  Codex (marketplace source points at the main checkout) and Cursor (installed v42 tree outranks
+  `--plugin-dir`) before any test runs. Those engines are *did not run*; clearing them is a user
+  decision about the local install. See `lifecycle-harness-plugin-identity-unverified.md`.
+- **Triage a red module against its own result history first** — `results/*/summary.json` across
+  prior runs separates pre-existing flakes from real regressions in seconds, before any transcript
+  reading. `test_05`/`test_08`/`test_12` are structurally flaky: each asserts the end state of a
+  long model-driven chain and fails wherever the model stopped. See
+  `triage-a-red-module-against-its-own-history.md`.
 - **Parallelize the suite** — scenarios are fixture-isolated; today they run serially via
   `unittest discover` (~15–45 min/engine). Future: `LR_LIFECYCLE_JOBS`, parallel by test file, or
   parallel by engine in separate terminals; cap concurrency for API limits. See
@@ -330,6 +350,9 @@ The harness was designed as Phase 0.5 groundwork for the Codex/Cursor ports, but
 - `post-convergence-edits-need-their-own-gate.md` — a green run certifies only the artifact state it ran against.
 - `macos-documents-permission-loss-mid-session.md` — the environment ailment that renders a run's verdict uninterpretable.
 - `lifecycle-harness-plugin-identity-unverified.md` — the harness never verifies which plugin actually loaded on Codex/Cursor, so an installed plugin can silently substitute a different artifact for the one under test.
+- `lifecycle-harness-exit-code-is-not-a-verdict.md` — the runner's own false greens: exit 0 on
+  refusal and on failed module runs.
+- `triage-a-red-module-against-its-own-history.md` — the cheapest triage instrument for a red run.
 - `a-gate-cannot-be-a-model-self-report.md` — why a gate implemented as an engine-side prompt is
   not a gate; the rule the A7 Cursor arm broke.
 - `transcript-vs-final-message-assertions.md` — mid-run vs end-state assertion surfaces, and the

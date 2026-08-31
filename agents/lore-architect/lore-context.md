@@ -196,16 +196,15 @@ still sole executor; **`/lr:spawn-teammate` (BETA)** spawns agents as Agent Team
 primary interlocutor is the user, not the lead. See `lore-search-pattern.md`,
 `consult-pattern.md`, `attach-pattern.md`, `spawn-teammate-feature.md`, `teammate-conventions.md`.
 
-**Division of ownership with `lore-advocate`:** the advocate owns Lore Agents public positioning,
-advocacy, and channel strategy; I own architecture, implementation, design history, and product
-truth, and supply or verify the technical facts its copy rests on. Public-outreach work leads with
-the advocate and consults or attaches me. See `public-communication-ownership.md`.
+**Division of ownership with `lore-advocate`:** the advocate owns public positioning, advocacy, and
+channel strategy and leads outreach work; I own architecture, implementation, design history, and
+product truth, and verify the technical facts its copy rests on. See
+`public-communication-ownership.md`.
 
 ## Session Takeover (BETA)
 
 **`/lr:takeover`** converts engine-native session logs into a markdown digest so a new session on any
-engine can continue interrupted work (`scripts/session-takeover`). Cursor's tool-result pairing is
-heuristic and flags `pairing_uncertain`. See `takeover-feature.md`,
+engine can continue interrupted work (`scripts/session-takeover`). See `takeover-feature.md`,
 `cursor-takeover-batch-pairing.md`, `engine-session-log-formats.md`.
 
 ## Finalization
@@ -216,17 +215,15 @@ agent booted as itself, file-driven) → **summarize** → **commit+push** (one 
 conflict resolution on push rejection). Do not finalize unless the user triggers it. See `finalization-process.md`, `finalize.md`,
 `merge-in-booted-subagents.md`, `reflect-merge-execution-asymmetry.md`.
 
-Canonical host summaries carry a compact per-agent **Learning audit**: finalize retains each
-Reflection outcome and Merge handoff through summarize, preserving concrete learning, Lore
-destinations, residual topics, and confidence problems. Only a *completed* reflection set lets an
-unlisted input be called carried over; failed or unavailable evidence leaves origins unknown rather
-than becoming "nothing learned." See `session-summaries-feature.md`.
+Canonical host summaries carry a compact per-agent **Learning audit** built from the retained
+Reflection outcomes and Merge handoffs. Only a *completed* reflection set lets an unlisted input be
+called carried over; failed or unavailable evidence leaves origins unknown rather than becoming
+"nothing learned." See `session-summaries-feature.md`.
 
-**Transcript-backed reflection:** opt-in `finalize --transcript` recovers parser-retained main-thread
-dialogue into ordinary reflection topics, then rejoins the same lifecycle — host-only, bounded,
-fail-closed, with two accepted limits (no secret-pattern scan; no mechanically read-only worker).
-**Chunk overlap makes merge the semantic reducer** — expect ~three near-duplicate candidates per
-insight and consolidate aggressively. See `transcript-backed-finalization-mvp.md`.
+**Transcript-backed reflection:** opt-in `finalize --transcript` recovers main-thread dialogue into
+ordinary reflection topics, then rejoins the same lifecycle. **Chunk overlap makes merge the semantic
+reducer** — expect ~three near-duplicate candidates per insight and consolidate aggressively. Design,
+bounds and accepted limits: `transcript-backed-finalization-mvp.md`.
 
 Shared-lore publication is a separate, unshipped governance direction. See
 `team-lore-contribution-governance.md`.
@@ -278,14 +275,16 @@ own topic — these are pointers, not summaries.
   its own topic. Full curation disciplines: `role.md`.
 - **Both expensive pre-ship gates are on request, not default (user decision 2026-08-22).** The
   lifecycle suite and `/lr:trilens-loop` run only when the user asks; deterministic tests,
-  `/lr:check`, and dogfooding stay default. **What did not change: the disposition record** — every
-  ship names each gate `passed`, `waived`, or `did not run` (now the default) out loud, and after an
-  ungated ship says plainly what remains **untested**. Default-off is a cost decision, not a claim
-  the gates are unnecessary — v40 is the standing counter-example. See
-  `feedback-pre-ship-gates-on-request.md`, `gate-waiver-is-a-record.md`.
-- **When the empirical leg does run, its order is fixed: lifecycle suite → dogfood the change onto
-  this workspace → TriLens over whatever those disturbed.** TriLens comes *after* dogfooding, which
-  produces the evidence the reviewers read. Running a procedure once finds in seconds what nine
+  `/lr:check`, and dogfooding stay default. **The disposition record did not change** (see the three
+  dispositions below), and after an ungated ship say plainly what remains **untested**. Default-off
+  is a cost decision, not a claim the gates are unnecessary — v40 is the standing counter-example.
+  See `feedback-pre-ship-gates-on-request.md`, `gate-waiver-is-a-record.md`.
+- **Gate order is cheapest-first: deterministic tests → `/lr:check` → dogfood the change onto this
+  workspace → (on request) lifecycle suite → (on request) TriLens.** An *order*, not just a policy
+  about defaults — 540 stdlib tests run in minutes at zero cost and catch what the ~30-minute paid
+  suite would find later (`unittest discover` fails here; run modules individually per
+  `tests/README.md`). TriLens comes *after* dogfooding, which produces the evidence the reviewers
+  read. Running a procedure once finds in seconds what nine
   reading lenses may not find at all, and the fidelity axis is **engine, not just model tier**
   (cheapest practical tier: Claude → haiku, Codex → gpt-5.4-mini, Cursor → composer-2.5). See
   `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`,
@@ -337,7 +336,12 @@ own topic — these are pointers, not summaries.
   `a-gate-cannot-be-a-model-self-report.md`,
   `prove-a-new-test-red-against-the-previous-tag.md`.
 - **A failure list is a hypothesis until someone reads the transcripts.** An assertion message names
-  what was observed, never why; re-triage a red run from stored logs before planning fixes. At the
+  what was observed, never why; re-triage a red run from stored logs before fixes — cheapest first,
+  the module's own verdict history in `results/*/summary.json`, which on v44 sorted three flakes from
+  one real regression in seconds. **Never read the lifecycle runner's exit code**: it is 0 both on
+  refusal and on failed module runs, and an identity-blocked engine renders as `failed 0.0s` when it
+  is *did not run* (`triage-a-red-module-against-its-own-history.md`,
+  `lifecycle-harness-exit-code-is-not-a-verdict.md`). At the
   single-test level, **a red test may be asserting something true about the machine** — establish
   which side is wrong before turning it green, and give danger-guarding assertions the strongest
   presumption of correctness. See `v31-lifecycle-rerun-partial-green-2026-07-27.md`,
@@ -386,8 +390,10 @@ own topic — these are pointers, not summaries.
   `a-reported-error-is-not-proof-the-file-survived.md`, `one-question-one-code-path.md`,
   `adding-a-write-means-updating-the-approval-gate.md`.
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source
-  (pointer, don't restate — and when fixing a duplicated rule, enumerate every site that *states* it,
-  not only every site that *implements* it; but run the scope test first — different words following
+  (pointer, don't restate — and when fixing or *changing* a rule, enumerate every site that *states*
+  it, not only every site that *implements* it, including the **tests that pin the old contract** and
+  the docstrings/caller comments a literate accelerator makes executable,
+  `a-change-set-is-wider-than-its-diff.md`; but run the scope test first — different words following
   one rule belong at the point of use, `per-site-authoring-is-not-duplication.md`); **cite a
   procedure section by name, never by step number** — a renumbered heading breaks every citation
   silently and the stale reference still reads plausibly
@@ -471,22 +477,22 @@ perspective leaves the **team-join path** invisible at every layer
   `lore-beings-mvp-takeover-review.md`, `autonomous-agents-vision.md`, `wait-primitive-feature.md`.
 - **Multi-engine portability (Codex, Cursor)** — **shipped, not in flight.** All three engines are
   Tier-1 on one shared agent repo; Claude Code is the reference path and others override only at the
-  **5 adapter bindings** (`docs/engines/`). The port was packaging, not redesign — the knowledge
-  substrate was already engine-agnostic. Both other engines have native in-session subagents, and one
-  repo carries both skill namespaces (synced by `scripts/sync-cursor-skills` — **python3 despite the
-  missing extension** — checked by `/lr:check` #21). Standing facts: **trust rollout/tool-call logs,
-  not model self-report** when validating an engine path; Codex's default sandbox blocks `.git`
-  writes and network, so finalization needs `.git` writable; a genuinely different engine catches
-  design flaws same-engine review misses, worth the cost on high-stakes decisions only, and
-  **model–engine fit beats model tier**. Anchor: `multi-engine-portability-direction.md`; see also
-  `docs-engines-convention.md`, `cursor-dual-skill-tree-one-repo.md`.
+  **5 adapter bindings** (`docs/engines/`). One repo carries both skill namespaces (synced by
+  `scripts/sync-cursor-skills` — **python3 despite the missing extension** — checked by `/lr:check`
+  #21). Standing facts: **trust rollout/tool-call logs, not model self-report** when validating an
+  engine path; Codex's default sandbox blocks `.git` writes and network, so finalization needs `.git`
+  writable; a genuinely different engine catches design flaws same-engine review misses, worth the
+  cost on high-stakes decisions only, and **model–engine fit beats model tier**. Anchor:
+  `multi-engine-portability-direction.md`; see also `docs-engines-convention.md`,
+  `cursor-dual-skill-tree-one-repo.md`.
 - **v44 — skill purpose announcements (DRAFT, unshipped, do not touch).** Uncommitted in the
-  worktree `.worktrees/lore-framework/v44-skill-announcements` on branch `v44-skill-announcements`;
-  the user intends to extend it in a later session. It carries two things beyond the announcement
-  convention itself: the committed-paths-must-be-relative fix (with the `<agent-dir-rel>`
-  placeholder) and the `agent-boot.md` Step 0 rename. **Not in `versioning-release-types.md`** —
-  that topic is shipped-release history and a draft entry there would read as released. See
-  `skill-announcement-convention.md`, `committed-artifacts-carry-relative-paths.md`.
+  worktree `.worktrees/lore-framework/v44-skill-announcements`; the user intends to extend it later.
+  It also carries the committed-paths-must-be-relative contract, `preflight --agent-dir`'s upward
+  search, `/lr:create-agent` registering what it creates, and three migration fixes. **Not in
+  `versioning-release-types.md`** — that topic is shipped-release history and a draft entry there
+  would read as released. Gate record, fixed items and the five open ones:
+  `skill-announcement-convention.md`; see also `create-agent-registers-what-it-creates.md`,
+  `committed-artifacts-carry-relative-paths.md`.
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** item —
   active follow-ups from the 2026-06-13 architecture review. That review's settled dispositions
   (DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in
@@ -515,11 +521,9 @@ Workspace holds **`lore-framework/`**, **`lore-framework-dev/`**, **`lore-agents
 **`lore-chronicler/`** (Being; on disk, undeclared); meta-repo `AGENTS.md` lists them after
 `/lr:workspace-init`, which converges (no `--refresh` flag).
 
-The two most recent ships were **v42** (2026-08-23) and **v43** (2026-08-25) — confirm what `main`
-carries now from the repo, per § Versioning. **Neither had a real-engine gate**, and in both the
-fixes that landed are themselves unreviewed: v42's notes never replaced their "testing deferred"
-placeholder (*did not run*, told to nobody), and v43 substituted three subagent reviews for a waived
-lifecycle and TriLens. Per-ship dispositions and what stays untested: `versioning-release-types.md`.
+**Recent ships have gone out without a real-engine gate**, so the fixes they landed are themselves
+unreviewed; per-ship dispositions and what stays untested live in `versioning-release-types.md`
+(establish the current version from the repo, per § Versioning).
 
 My Lore corpus is still largely legacy; v1 adoption is lazy via merge or explicit via `/lr:groom`.
 Unrelated uncommitted WIP may sit on these checkouts: never sweep it into lore-finalize commits
@@ -537,10 +541,10 @@ then selective apply is valid (`trilens-feedback-only-selective-apply.md`).
 
 ## Running Backlog & Standing Improvement List
 
-`framework-improvements-backlog.md` is the canonical store of deferred items, organized into `##`
-categories holding `###` topical sections — file new items under the matching category
+`framework-improvements-backlog.md` is the canonical store of deferred items in `##` categories of
+`###` sections — file new items under the matching category
 (`backlog-categorization-precedent.md`); its § Ship Closures archives per-ship gate dispositions.
 **`workdir/what-to-improve.md`** is the **standing prioritized improvement list** — a ranked action
-view over that backlog which must always exist, not a one-off review deliverable (user practice,
-2026-07-18). Reread it at the start of every framework-work session; refresh it at each architecture
-review. See `standing-improvement-list-practice.md`.
+view over that backlog which must always exist (user practice, 2026-07-18). Reread it at the start of
+every framework-work session; refresh it at each architecture review.
+See `standing-improvement-list-practice.md`.

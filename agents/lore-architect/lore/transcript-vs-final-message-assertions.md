@@ -95,6 +95,9 @@ written assertion into different tests, and the weakest capture silently sets th
 ## See Also
 
 - `lifecycle-testing-harness.md` — the harness this lives in; § Assertion style.
+- `triage-a-red-module-against-its-own-history.md` — `test_08` is also structurally flaky (it
+  asserts the end state of a long model-driven chain), so a red there needs both fixes: the right
+  capture surface *and* a restructured assertion.
 - `codex-exec-real-invocation-contract.md` — the Codex JSONL stream contract this reads.
 - `fetch-volatile-facts-live-not-memory.md` — why the schema was probed live.
 - `v31-lifecycle-rerun-partial-green-2026-07-27.md` — the run whose triage this corrected.

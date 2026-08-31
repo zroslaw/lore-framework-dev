@@ -60,4 +60,26 @@ fixes also introduce *redundancy* — a new mechanism re-expressing a fact an ex
 carried — which a cheap diff-scoped "what does this now say twice?" pass catches without spending a
 review round. Read that one for what to *do*; this one is the case record it rests on.
 
+**Fourth occurrence, and the sharpest statement of it (v44, 2026-08-31).** Four `/code-review`
+rounds over one change set found 14 → 13 → 12 → 5 findings, and from round 2 onward the dominant
+shape was **not** defects in the original work but *one fix invalidating a sibling fix*:
+
+- A cascade rule added to `conventions.md` ("a doc read as a sub-procedure prints no Step 0") made
+  the guard I had just written into `process-merge.md` wrong, and made a `create-agent.md` Step 0
+  variant unreachable.
+- A `~/.codex/skills/` exemption added to `check.md` contradicted the generic absolute-path rule
+  sitting 25 lines above it.
+- Updating migration 37's Step 1 to the relative path form left Steps 2, 3.1 and 3.2 on the absolute
+  form — either reading fails, and the relocation silently never completes.
+
+So the operational rule is an enumeration rule, not a re-reading rule: **after applying a batch of
+fixes, re-read every site that *states* the rule you just changed, not only the site you edited.**
+That extends [single-canonical-source-discipline.md](single-canonical-source-discipline.md) —
+statements of a rule are part of its change set just as much as implementations
+([a-change-set-is-wider-than-its-diff.md](a-change-set-is-wider-than-its-diff.md)).
+
+Severity declined monotonically across the four rounds (1 boot-breaking bug → 3 highs → 1 high → 0
+runtime bugs). **That decline is the signal to stop reviewing and switch evidence type** — a fifth
+round of the same lens buys less than one run of the thing.
+
 See also [versioning-release-types.md](versioning-release-types.md) for v37's gate record.

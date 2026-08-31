@@ -130,6 +130,31 @@ override verification; `engine|realpath|VERSION` verdict inheritance, which also
 them. See `lifecycle-harness-plugin-identity-unverified.md`,
 `a-gate-cannot-be-a-model-self-report.md`, `tests/test_lifecycle_plugin_identity.py`.
 
+### A9. Lifecycle runner reports false greens — OPEN, added 2026-08-31 (**top of tier A**)
+`tests/lifecycle/run_matrix.py` exits **0** when the suite refuses to run (`LR_LIFECYCLE` unset —
+it prints the refusal, prints the resolved plan, exits 0) *and* when module runs fail (a completed
+matrix summarised `5/27 module runs ok`, exit 0). This corrupts the reading of every gate that uses
+it, and any CI wiring on it today is a guaranteed false green. Identity-blocked engines also render
+as `failed 0.0s` per module, which reads as ~18 test failures when it is two engines that never
+started. **Do:** exit nonzero on refusal; exit nonzero on any failed module run; give
+identity-blocked engines their own status. Small and bounded, all in one file. Evidence: run of
+2026-08-31. Lore: `lifecycle-harness-exit-code-is-not-a-verdict.md`. Backlog ref: § Framework
+Upkeep § Lifecycle Harness Reliability.
+
+### A10. `preflight --agent-dir` upward search has no test — OPEN, added 2026-08-31
+v44 replaced the `<workspace>` join with an upward search. I hand-verified it across five invocation
+shapes; that is not a gate, and the change is on the boot hot path. **Do:** add a deterministic test
+and prove it red against v43 (`prove-a-new-test-red-against-the-previous-tag.md`). Ships with v44.
+
+### A11. Three lifecycle scenarios are structurally flaky — OPEN, added 2026-08-31
+`test_05`, `test_08`, `test_12` each assert the end state of a long model-driven chain and fail at
+whatever step the model stopped at; `test_05` failed at three different assertions across three runs
+(the exact distribution its own source comment documents). A test that moves between runs certifies
+nothing and pollutes every triage. `test_08` additionally reads the wrong capture surface
+(`transcript-vs-final-message-assertions.md`). **Do:** restructure to per-step assertions, or mark
+them explicitly non-gating so a red is not mistaken for a regression. Lore:
+`triage-a-red-module-against-its-own-history.md`.
+
 ### A6. `docs/engines/claude.md` ↔ `CLAUDE.md` case-collision on macOS — OPEN (low)
 Observed live 2026-07-18: on case-insensitive APFS, Claude Code auto-injects
 `docs/engines/claude.md` as *directory memory* whenever any file under `docs/engines/` is
@@ -203,6 +228,24 @@ passing `--engine cursor`, profile doc of the assumed path, and/or prefer
 plugin-cache framework-root on Cursor. Backlog ref: § Boot Step-0 Engine Detection
 Ordering (2026-07-29 bullet).
 
+### B9. `being.md` vs `create-agent.md` — who decides registration — OPEN, added 2026-08-31
+v44 makes `/lr:create-agent` register the agent it creates (an unregistered agent is invisible to
+the workspace and lands straight in `workspace-status` S11 — the framework's own skill producing the
+state its own diagnostic reports). `docs/being.md` keeps its opt-out, which the user has twice
+declined to change, so the coupling now rests on a cross-doc inference and the two docs disagree
+about *who decides* (step 8 forbids asking; `being.md` says "unless the user asks"). **Do:** settle
+the decision owner in one place when v44 resumes. Lore:
+`create-agent-registers-what-it-creates.md`.
+
+### B10. Cross-engine lifecycle coverage is blocked by local installs — USER DECISION, added 2026-08-31
+On this machine a worktree-based gate run passes plugin identity on **Claude only**: Codex's
+marketplace source in `~/.codex/config.toml` points at the main checkout, and an installed Cursor
+v42 tree can outrank `--plugin-dir`. So a default gate run is Claude-only and every ship gated that
+way must record Codex and Cursor as *did not run*. **Do (only if cross-engine evidence is wanted):**
+repoint Codex's marketplace source at the worktree, move `~/.cursor/plugins` aside, re-verify
+identity **after** the move, then re-run. Not to be done silently mid-gate. Lore:
+`lifecycle-harness-plugin-identity-unverified.md`.
+
 ---
 
 ## C. New feature directions — what would make Lore Agents sexier
@@ -260,6 +303,10 @@ surface.
 
 **v32 tier (added 2026-07-28):** A8 (`agent-boot.md` subtraction pass) — first item of the
 release *after* v31 ships, not folded into it.
+
+**v44 tier (added 2026-08-31):** A9 first — it costs an hour and makes every later gate reading
+honest — then A10 with the v44 ship, then A11 before the next lifecycle run is used as evidence.
+B9 is a design decision to settle while v44 is still open; B10 is the user's call, not mine.
 
 ## Provenance
 

@@ -165,9 +165,31 @@ found only on 2026-07-28 by reading the stored logs. See
 `v31-lifecycle-rerun-partial-green-2026-07-27.md` for the corrected triage; do not trust the
 original six-item failure list from that run.
 
+## Standing consequence on this machine: a worktree gate run is Claude-only (2026-08-31)
+
+With the gate working as designed and `LR_FRAMEWORK_DIR` pointed at a worktree, only **Claude**
+passes identity — `--plugin-dir` wins outright. Both other engines refuse before any test runs:
+
+- **Codex** — the marketplace source in `~/.codex/config.toml` points at `<workspace>/lore-framework`
+  (the main checkout), which would outrank the tree under test.
+- **Cursor** — an installed v42 tree under
+  `~/.cursor/plugins/marketplaces/github.com/zroslaw/lore-framework/<hash>` can outrank
+  `--plugin-dir`; the harness names the move-aside command and warns that a cloud plugin rehydrates
+  within seconds (`cursor-cloud-plugin-rehydrates-over-plugin-dir.md`).
+
+So **a default worktree-based gate run is Claude-only**, and any ship gated that way must record
+Codex and Cursor as *did not run* — never as red, whatever the summary table shows
+(`lifecycle-harness-exit-code-is-not-a-verdict.md`, `gate-waiver-is-a-record.md`).
+
+Clearing them requires changing the local install — repoint Codex's marketplace source at the
+worktree, move `~/.cursor/plugins` aside, re-verify identity **after** the move, then re-run. That
+is a **user decision**, not something to do silently mid-gate.
+
 ## See Also
 
 - `lifecycle-testing-harness.md` — the harness this gap lives in.
+- `lifecycle-harness-exit-code-is-not-a-verdict.md` — why an identity refusal renders as `failed
+  0.0s` per module and must still be reported as "did not run".
 - `a-gate-cannot-be-a-model-self-report.md` — the principle the Cursor arm violated; the general
   rule this instance produced.
 - `cursor-cloud-plugin-rehydrates-over-plugin-dir.md` — Cursor-specific rehydration over `--plugin-dir`.

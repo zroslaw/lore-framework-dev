@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "The v44 Skill Purpose Announcement convention (drafted, unshipped): every skill opens with a Step 0 announcement authored in its own doc, written as onboarding material in framework vocabulary."
+summary: "The v44 Skill Purpose Announcement convention (drafted, unshipped) and the v44 worktree ship state: Step 0 announcements authored per skill as onboarding material, plus v44 gate dispositions and open items."
 parent: lore-context.md
 ---
 
@@ -59,6 +59,48 @@ skills, so its Step 0 branches on the invoked operation. Editing a Cursor mirror
 bash**, despite carrying no extension.
 
 The convention text lives in `conventions.md` § Skill Purpose Announcement.
+
+## v44 worktree state (as of 2026-08-31)
+
+The worktree now carries more than the announcement convention: the committed-paths-must-be-relative
+contract change (with the `<agent-dir-rel>` placeholder), `preflight --agent-dir`'s upward search,
+`/lr:create-agent` registering what it creates
+([create-agent-registers-what-it-creates.md](create-agent-registers-what-it-creates.md)), and three
+migration fixes. **Nothing is committed or tagged**; `lore-framework` main is clean at `afd2888`
+(v43). No `VERSION` bump and no release-notes claim beyond editing the existing
+`release-notes/44.md`, so the version-history backfill discipline does not apply yet.
+
+**Gate record** (dispositions named explicitly, per
+[gate-waiver-is-a-record.md](gate-waiver-is-a-record.md)):
+
+- Deterministic tests — **passed**: 540 tests across 15 modules against the v44 tree.
+- `/lr:check` — **passed**, after fixing the one error it found.
+- Lifecycle, **Claude** — 8 of 9 modules pass; the one v44-caused failure is fixed and re-verified,
+  and the three remaining reds are pre-existing flakes with failing history on the old checkout
+  ([triage-a-red-module-against-its-own-history.md](triage-a-red-module-against-its-own-history.md)).
+- Lifecycle, **Codex and Cursor** — **did not run** (plugin-identity refusal).
+- `/code-review` — four rounds, converged; **round 4's own fixes are unreviewed**.
+
+**Fixed here, worth not re-deriving:**
+
+- `migrations/44.md` had no `## Write Paths` section. `/lr:check` #20 calls this an error because
+  `version-check.md`'s boot-time upgrade gate then falls back to the blanket-dirty rule for any range
+  containing v44 — every user with any unrelated dirty file blocked from upgrading.
+- `migrations/33.md` and `check.md` #18 formed a **loop**: the check flagged an absolute target and
+  named migration 33 as the remedy, while migration 33 wrote an absolute target.
+- `migrations/33`, `37` and `44` defined `<workspace>` as the session cwd while needing the workspace
+  root.
+
+**Still open** (also carried in `framework-improvements-backlog.md` and `workdir/what-to-improve.md`,
+which are the working lists — this is the ship-state record):
+
+1. No test covers `preflight --agent-dir`'s upward search; hand-verified across five invocation
+   shapes, which is not a gate.
+2. `run_matrix.py` exits 0 on refusal and on failed module runs
+   ([lifecycle-harness-exit-code-is-not-a-verdict.md](lifecycle-harness-exit-code-is-not-a-verdict.md)).
+3. `test_05` / `test_08` / `test_12` are structurally flaky.
+4. `being.md` and `create-agent.md` step 8 disagree about who decides registration for beings.
+5. Codex/Cursor gate coverage needs local install changes — a user decision.
 
 ## Known gap
 

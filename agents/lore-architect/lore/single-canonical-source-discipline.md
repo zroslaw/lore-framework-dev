@@ -32,6 +32,15 @@ The pattern across all three: *establishing a canonical site is necessary but no
 
 > When two doc sites mention the same grammar/rule/spec, **one** must be declared canonical and the other(s) must be pointer-only. "Pointer-AND-restatement" is the failure mode — it looks fixed but the restatement still drifts. Resist the temptation to "leave the inline summary for clarity"; the cost is silent drift.
 
+**Corollary for change sets (v44, 2026-08-31).** When you *change* a rule, its change set is every
+site that **states** it, not only every site that **implements** it. Three of v44's four
+`/code-review` rounds were dominated by fixes colliding with sibling fixes across exactly those
+statement sites — a new cascade rule in `conventions.md` invalidating a guard just written into
+`process-merge.md`, an exemption in `check.md` contradicting the generic rule 25 lines above it, a
+migration updated at Step 1 and left on the old form at Steps 2/3.1/3.2. See
+[a-fix-is-a-change-and-changes-need-review.md](a-fix-is-a-change-and-changes-need-review.md) and
+[a-change-set-is-wider-than-its-diff.md](a-change-set-is-wider-than-its-diff.md).
+
 ## Fixing a duplicated rule in code can recreate it in prose (v38, 2026-08-11)
 
 v38 existed to fix exactly this defect in code: one rule implemented twice — `derive_dirname` in the

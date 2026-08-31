@@ -80,6 +80,9 @@ example.
 - [gate-waiver-is-a-record.md](gate-waiver-is-a-record.md) — the second disposition; same discipline.
 - [post-convergence-edits-need-their-own-gate.md](post-convergence-edits-need-their-own-gate.md) — a gate result belongs to a specific artifact state.
 - [trilens-loop-feature.md](trilens-loop-feature.md) — the loop and its stopping rules.
+- [lifecycle-harness-exit-code-is-not-a-verdict.md](lifecycle-harness-exit-code-is-not-a-verdict.md)
+  — the same confusion inside a gate's own runner: it checks "did it report?" and never "did the
+  command succeed?", so a refusal and 22 failed module runs both exit 0.
 - [graduated-verification-confidence.md](graduated-verification-confidence.md) — "did not run" is a confidence level, not a boolean.
 - [parallel-reviewer-fanout-pattern.md](parallel-reviewer-fanout-pattern.md) § Graceful degradation — a stalled reviewer's partial return is still additive evidence.
 - [execution-testing-catches-blind-ambiguity.md](execution-testing-catches-blind-ambiguity.md) § Order the legs — the gate that was never launched, and saying so in the record.
