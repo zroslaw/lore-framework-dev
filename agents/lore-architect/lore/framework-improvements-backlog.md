@@ -59,6 +59,21 @@ New module/mode for development & SDLC automation; first feature is bug-finding 
 
 ### Finalization / Autopush
 
+- **Finalize Phase 4 stages the whole `agents/` tree (found in use 2026-08-31, ships in v44).**
+  `finalize.md` Phase 4 Step 1 is `git -C <repo> add agents/`, justified as scoping away
+  "incidental untracked files elsewhere" — true only for a single-agent repo. In
+  `lore-framework-dev`, which holds `lore-architect` and `lore-advocate`, it staged another agent's
+  untracked `workdir/` draft into a `Finalize session <uuid>` commit; caught at `git diff --cached`
+  and unstaged by hand. **No concurrent session is needed** — any repo with more than one agent is
+  exposed on every finalize, which makes this likelier to fire than the concurrency hazard already
+  recorded, and invisible afterwards. `resolve-conflicts.md` already uses the correct per-agent form
+  (`add agents/<your-name>/`), so the two procedures have simply drifted. Fix: narrow Phase 4 to the
+  active agents' own subtrees, which the phase already enumerates for its per-repo commit loop. A
+  paired guard worth considering: have Phase 4 read back `git diff --cached` and refuse paths outside
+  the active agents. See `concurrent-session-committed-my-uncommitted-work.md` § Confirmed in the
+  other direction, `single-canonical-source-discipline.md`.
+
+
 - **Codex lifecycle-fidelity hardening** — the first real Codex session exposed
   lossy-compaction state loss, interrupted finalize, inline merge, dependency
   races, inconsistent network escalation, and test blind spots. Prioritize

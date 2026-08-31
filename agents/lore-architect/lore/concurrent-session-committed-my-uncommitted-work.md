@@ -30,6 +30,44 @@ to sweep it up.
   live.** The finalize procedure's `git add agents/` is exactly the wide form, and it is the one
   most likely to be running concurrently.
 
+## Confirmed in the other direction, with no concurrency at all (2026-08-31)
+
+The rule above predicted this from the outside in. It then happened from the inside out, during my
+own finalization, and the variant is worse than the one recorded.
+
+Finalize Phase 4 Step 1 is `git -C <repo> add agents/`, justified in the doc as *"scoped to the
+agent tree so incidental untracked files elsewhere are not swept in."* That justification holds only
+for a repo with one agent. `lore-framework-dev` holds **`lore-architect` and `lore-advocate`**, so
+the command staged `agents/lore-advocate/workdir/agoda-internal-announcement.md` — another agent's
+untracked draft — into a commit titled `Finalize session 463ddfa1`. I caught it at
+`git diff --cached` and unstaged it before committing.
+
+**No second session was required.** The recorded failure needs a concurrent writer; this one needs
+only a repo with more than one agent, which is the normal shape. Every finalize in a multi-agent
+repo is exposed, every time. That makes it the more likely of the two to fire, and it is invisible
+after the fact: the sweep looks identical to the agent having authored the file.
+
+### The framework already knows the right shape
+
+`resolve-conflicts.md` stages `git -C <repo> add agents/<your-name>/` — per-agent, correct.
+`finalize.md` Phase 4 stages `agents/`. Two procedures in the same framework, same operation, one
+right and one wrong, and the wrong one is the one that runs on every finalize. This is
+`single-canonical-source-discipline.md` failing at the *implementation* sites rather than the prose
+sites: nothing states a wrong rule, the two just drifted.
+
+The fix is to narrow `finalize.md` Phase 4 to the active agents' own subtrees
+(`agents/<agent-name>/` per active agent, which the phase already enumerates for its per-repo commit
+loop). It ships wide in v44. Filed in `framework-improvements-backlog.md`.
+
+### Standing rule, sharpened
+
+**Read `git diff --cached` before every finalize commit, not `git status`.** The staged set is the
+thing being committed and the only place the sweep is visible; `git status --porcelain` shows the
+same file as `A ` whether it is mine or not. This is the concrete point-of-use guard the earlier
+"prefer narrowly scoped `git add <path>`" rule was missing
+(`point-of-use-guardrails-beat-recorded-lore.md`) — that rule cannot fire when the procedure I am
+following is itself the thing issuing the wide command.
+
 ## The other session need not be a human
 
 Since a persistent `--launchd` Keeper is now live on this machine
@@ -49,6 +87,8 @@ explanation alongside a human-run parallel session** — do not assume concurren
 - `parallel-edit-git-add-race-conflict-resolve.md` — the intra-session version of a `git add` racing
   content that is not ready.
 - `finalization-process.md`, `push-conflict-resolution.md` — the finalize commit scope this rule
-  points at.
+  points at; `resolve-conflicts.md` carries the correct per-agent staging form that `finalize.md`
+  Phase 4 does not.
+- `single-canonical-source-discipline.md` — the drift between those two procedures.
 - `a-red-test-may-be-asserting-a-true-fact.md` — the other environment-truth surprise from the same
   day.
