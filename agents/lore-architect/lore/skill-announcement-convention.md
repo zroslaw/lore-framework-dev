@@ -1,21 +1,19 @@
 ---
 lore: 1
 type: topic
-summary: "The v44 Skill Purpose Announcement convention (drafted, unshipped) and the v44 worktree ship state: Step 0 announcements authored per skill as onboarding material, plus v44 gate dispositions and open items."
+summary: "The Skill Purpose Announcement convention shipped in v44: Step 0 announcements authored per skill as onboarding material, plus the v44 ship record, gate dispositions and open items."
 parent: lore-context.md
 ---
 
-# Skill Purpose Announcement convention (v44 draft)
+# Skill Purpose Announcement convention (v44)
 
 Every skill prints a short user-facing announcement before its first procedural step, in a
 `## Step 0 — Announce` section holding one instruction line and the announcement itself as a
 blockquote.
 
-**Status: drafted, not shipped.** The work lives uncommitted in the worktree
-`.worktrees/lore-framework/v44-skill-announcements` on branch `v44-skill-announcements`. The user
-intends to extend it in a later session, so v44 has **no** entry in
-[versioning-release-types.md](versioning-release-types.md) — that topic is a shipped-release history,
-and adding a draft to it would make an unshipped version look released.
+**Status: shipped 2026-08-31** as tag `lr--v1.44.0`, merge commit `26a9dac` on `lore-framework`
+main (feature commit `c56eb60`). The v44 entry is in
+[versioning-release-types.md](versioning-release-types.md), which carries the full gate record.
 
 ## Origin
 
@@ -60,15 +58,21 @@ bash**, despite carrying no extension.
 
 The convention text lives in `conventions.md` § Skill Purpose Announcement.
 
-## v44 worktree state (as of 2026-08-31)
+## v44 ship record (2026-08-31)
 
-The worktree now carries more than the announcement convention: the committed-paths-must-be-relative
-contract change (with the `<agent-dir-rel>` placeholder), `preflight --agent-dir`'s upward search,
+v44 shipped more than the announcement convention: the committed-paths-must-be-relative contract
+change (with the `<agent-dir-rel>` placeholder), `preflight --agent-dir`'s upward search,
 `/lr:create-agent` registering what it creates
 ([create-agent-registers-what-it-creates.md](create-agent-registers-what-it-creates.md)), and three
-migration fixes. **Nothing is committed or tagged**; `lore-framework` main is clean at `afd2888`
-(v43). No `VERSION` bump and no release-notes claim beyond editing the existing
-`release-notes/44.md`, so the version-history backfill discipline does not apply yet.
+migration fixes. It is a **both** release — `migrations/44.md` plus `release-notes/44.md` — and
+cache-affecting, since every skill's procedure changed.
+
+The release notes were **incomplete at ship time**: they carried no Verification section at all, so
+the gate dispositions and the known bug were written into them as the last pre-push step
+([a-release-record-goes-stale-while-you-fix-it.md](a-release-record-goes-stale-while-you-fix-it.md)).
+The `540 tests / 15 modules` figure was **re-measured against the shipped tree** rather than copied
+forward from this topic's earlier draft record — the same discipline, applied to a number that
+happened to still be right.
 
 **Gate record** (dispositions named explicitly, per
 [gate-waiver-is-a-record.md](gate-waiver-is-a-record.md)):
@@ -80,6 +84,9 @@ migration fixes. **Nothing is committed or tagged**; `lore-framework` main is cl
   ([triage-a-red-module-against-its-own-history.md](triage-a-red-module-against-its-own-history.md)).
 - Lifecycle, **Codex and Cursor** — **did not run** (plugin-identity refusal).
 - `/code-review` — four rounds, converged; **round 4's own fixes are unreviewed**.
+- Mechanical ship checks, re-run at push time — **passed**: 33/33 skills carry Step 0, every
+  migration declares `## Write Paths`, `scripts/sync-cursor-skills` produced no drift, and VERSION
+  plus all four manifests agree at 44 / `1.44.0`.
 
 **Fixed here, worth not re-deriving:**
 
@@ -100,6 +107,10 @@ which are the working lists — this is the ship-state record):
    ([lifecycle-harness-exit-code-is-not-a-verdict.md](lifecycle-harness-exit-code-is-not-a-verdict.md)).
 3. `test_05` / `test_08` / `test_12` are structurally flaky.
 4. `being.md` and `create-agent.md` step 8 disagree about who decides registration for beings.
+   **Shipped knowingly as a known bug** (user decision, 2026-08-31) and recorded in
+   `release-notes/44.md` § Known Limits rather than fixed before the tag — Beings are BETA, so the
+   blast radius is bounded. A contradiction between two docs is not caught by any check; it will
+   resurface as whichever doc the executor happens to page.
 5. Codex/Cursor gate coverage needs local install changes — a user decision.
 
 ## Known gap

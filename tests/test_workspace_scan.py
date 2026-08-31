@@ -20,6 +20,7 @@ Run:  python3 tests/test_workspace_scan.py -v
 """
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -186,6 +187,48 @@ class TestShortcutInventory(unittest.TestCase):
         write(os.path.join(self.workspace, ".claude", "commands",
                            "lr-broken-agent.md"), "not a bootstrap\n")
         self.assertEqual(ws.shortcut_targets(self.workspace), set())
+
+    def test_relative_target_resolves_against_the_workspace(self):
+        """v44: committed shortcuts name the agent dir relative to the workspace.
+
+        This is what makes a shortcut survive being cloned. Before v44 the
+        embedded path was absolute, so it encoded the machine that wrote it and
+        S11 reported every agent in a cloned workspace as unregistered.
+        """
+        write(os.path.join(self.workspace, ".claude", "commands",
+                           "lr-alpha-agent.md"),
+              BOOT_LINE % ("alpha", "repo/agents/alpha/"))
+        self.assertEqual(
+            ws.shortcut_targets(self.workspace),
+            {os.path.realpath(os.path.join(self.workspace, "repo/agents/alpha"))})
+
+    def test_absolute_target_still_resolves(self):
+        """A v43 shortcut must keep reporting correctly mid-migration."""
+        write(os.path.join(self.workspace, ".claude", "commands",
+                           "lr-alpha-agent.md"), BOOT_LINE % ("alpha", "/x/alpha/"))
+        self.assertEqual(ws.shortcut_targets(self.workspace),
+                         {os.path.realpath("/x/alpha")})
+
+    def test_relative_target_in_the_home_location_is_skipped(self):
+        """`~/.codex/skills` is user-global, so a relative path there means nothing.
+
+        Joining it onto whichever workspace happens to be open would claim
+        registration for an agent the shortcut may never have named.
+        """
+        write_codex_shortcut(os.path.join(self.home, ".codex", "skills"),
+                             "delta", "repo/agents/delta/")
+        self.assertEqual(ws.shortcut_targets(self.workspace), set())
+
+    def test_relative_target_survives_a_relocated_workspace(self):
+        """The point of the change: same committed bytes, different checkout path."""
+        write(os.path.join(self.workspace, ".claude", "commands",
+                           "lr-alpha-agent.md"),
+              BOOT_LINE % ("alpha", "repo/agents/alpha/"))
+        moved = os.path.join(self.tmp, "cloned-elsewhere")
+        shutil.copytree(self.workspace, moved)
+        self.assertEqual(
+            ws.shortcut_targets(moved),
+            {os.path.realpath(os.path.join(moved, "repo/agents/alpha"))})
 
 
 class TestS15LegacyCodexShortcuts(unittest.TestCase):

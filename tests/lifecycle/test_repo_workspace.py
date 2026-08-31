@@ -269,7 +269,16 @@ class RepoWorkspaceScenarios(unittest.TestCase):
             content = f.read()
         self.assertIn("boot as agent", content)
         self.assertIn("from", content)
-        self.assertIn(os.path.join(fx.repo, "agents", AGENT_NAME), content)
+        # v44: the shortcut names the agent directory relative to the workspace
+        # root, never absolutely — an absolute path in a committed artifact is
+        # true on one machine only (lore-framework/docs/conventions.md
+        # § Committed Artifacts Carry Relative Paths). Assert the relative form
+        # and assert the absolute one is absent, so a regression to the old
+        # template fails here rather than silently passing a substring check.
+        rel_agent_dir = os.path.relpath(
+            os.path.join(fx.repo, "agents", AGENT_NAME), fx.workspace)
+        self.assertIn(rel_agent_dir, content)
+        self.assertNotIn(os.path.join(fx.repo, "agents", AGENT_NAME), content)
         self.assertNotIn("plugins/cache/", content)
         self.assertNotIn("/docs/agent-boot.md", content)
         if harness.ENGINE == "cursor":

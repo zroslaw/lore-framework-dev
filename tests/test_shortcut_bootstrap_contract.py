@@ -44,7 +44,46 @@ class ShortcutBootstrapContractTests(unittest.TestCase):
             content = read(path)
             self.assertIn("## Registered shortcut bootstrap", content, path)
             self.assertIn(skill_name, content, path)
-            self.assertIn("boot as agent `<agent-name>` from `<agent-dir>`", content, path)
+            self.assertIn(
+                "boot as agent `<agent-name>` from `<agent-dir-rel>`", content, path)
+
+    def test_bootstrap_emits_a_relative_agent_dir(self):
+        """A generated shortcut is committed, so its agent path must be relative.
+
+        An absolute `<agent-dir>` is true only on the machine that generated it.
+        A teammate cloning the workspace gets a shortcut pointing at a directory
+        they do not have, and `workspace-status` — which matches shortcuts by
+        their embedded target — reports every such agent as unregistered while
+        the shortcut sits in git. See `conventions.md` § Committed Artifacts
+        Carry Relative Paths, and `migrations/44.md`.
+
+        Asserting the negative matters as much as the positive here: a profile
+        that gained the relative form while leaving the absolute one in an
+        adjacent example would satisfy the positive assertion alone.
+        """
+        for path in ("docs/engines/claude.md", "docs/engines/cursor.md",
+                     "docs/engines/codex.md"):
+            content = read(path)
+            marker = "## Registered shortcut bootstrap"
+            section = content.split(marker, 1)[1]
+            fence_start = section.index("```markdown") + len("```markdown\n")
+            body = section[fence_start:section.index("```", fence_start)]
+            self.assertIn("<agent-dir-rel>", body, path)
+            self.assertNotIn("from `<agent-dir>`", body, path)
+
+    def test_check_flags_an_absolute_from_target(self):
+        """The rule has to be enforceable where a user runs it, not only in the generator."""
+        check = read("docs/check.md")
+        section = check.split("## 18. Legacy registered shortcut formats", 1)[1]
+        section = section.split("\n## ", 1)[0]
+        self.assertIn("absolute path", section)
+        self.assertIn("Migration 44", section)
+
+    def test_conventions_owns_the_relative_path_rule(self):
+        """The rule is stated once, where both the profiles and check.md point."""
+        conventions = read("docs/conventions.md")
+        self.assertIn("## Committed Artifacts Carry Relative Paths", conventions)
+        self.assertIn("<agent-dir-rel>", conventions)
 
     def test_bootstrap_body_is_a_single_line(self):
         """A generated shortcut is one line, so the template must be one line.

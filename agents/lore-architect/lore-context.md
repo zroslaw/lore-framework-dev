@@ -79,12 +79,12 @@ shared across call sites get a `docs/<procedure>.md`. See `slash-command-system.
 `skill-doc-pattern.md`, `shared-procedure-doc-pattern.md`, `single-canonical-source-discipline.md`,
 `cursor-dual-skill-tree-one-repo.md`.
 
-**Skill Purpose Announcement** — v44, drafted and **unshipped**: every skill opens with
-`## Step 0 — Announce` carrying its own text, authored in that skill's own doc, in framework concepts
-rather than internals. Announcements are *onboarding material*, not status lines. The **rule** is
-shared, the **text** is not — run that scope test before reaching for single-canonical-source, and
-note nothing in `/lr:check` enforces Step 0 yet. See `skill-announcement-convention.md`,
-`per-site-authoring-is-not-duplication.md`.
+**Skill Purpose Announcement** — shipped in v44: every skill opens with `## Step 0 — Announce`
+carrying its own text, authored in that skill's own doc, in framework concepts rather than internals.
+Announcements are *onboarding material*, not status lines. The **rule** is shared, the **text** is
+not — run that scope test before reaching for single-canonical-source. **Nothing in `/lr:check`
+enforces Step 0**, so this 33-site convention has no mechanical guard against drift. See
+`skill-announcement-convention.md`, `per-site-authoring-is-not-duplication.md`.
 
 The current skill catalog is implementation ground truth, but newcomer-facing information
 architecture needs a dedicated curation pass — organize around a daily path and progressively
@@ -233,7 +233,7 @@ Shared-lore publication is a separate, unshipped governance direction. See
 `lore-framework/VERSION` is the single source of truth — **establish the current version from the
 repo at the start of any framework-work session, never from this file**: `cat VERSION`,
 `git log --oneline -5`, `git tag --list 'lr--v1.4*'`, then confirm the tag is at HEAD. Last known
-here: **v43** (`lr--v1.43.0`) — *last known*, not *current*. A fast-moving scalar in a slow-moving
+here: **v44** (`lr--v1.44.0`) — *last known*, not *current*. A fast-moving scalar in a slow-moving
 summary is a stale read waiting to happen, and a summary can be stale on disk *or* stale in a loaded
 context (`lore-context-shape-discipline.md`). Each agent repo stamps the version in its
 `lore-repo.md`, and four version-bearing plugin manifests mirror `1.<VERSION>.0` (`/lr:check` #19).
@@ -485,14 +485,7 @@ perspective leaves the **team-join path** invisible at every layer
   cost on high-stakes decisions only, and **model–engine fit beats model tier**. Anchor:
   `multi-engine-portability-direction.md`; see also `docs-engines-convention.md`,
   `cursor-dual-skill-tree-one-repo.md`.
-- **v44 — skill purpose announcements (DRAFT, unshipped, do not touch).** Uncommitted in the
-  worktree `.worktrees/lore-framework/v44-skill-announcements`; the user intends to extend it later.
-  It also carries the committed-paths-must-be-relative contract, `preflight --agent-dir`'s upward
-  search, `/lr:create-agent` registering what it creates, and three migration fixes. **Not in
-  `versioning-release-types.md`** — that topic is shipped-release history and a draft entry there
-  would read as released. Gate record, fixed items and the five open ones:
-  `skill-announcement-convention.md`; see also `create-agent-registers-what-it-creates.md`,
-  `committed-artifacts-carry-relative-paths.md`.
+
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** item —
   active follow-ups from the 2026-06-13 architecture review. That review's settled dispositions
   (DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in
