@@ -1,50 +1,56 @@
 ---
 lore: 1
 type: topic
-summary: "run_matrix.py exits 0 when the suite refuses to run and when module runs fail, so its exit code is a false green — read the summary block and per-module stderr, and render identity-blocked engines as 'did not run', never red."
+summary: "Corrected: run_matrix.py's exit code IS trustworthy (2 on refusal, 1 on failed modules) — the false green came from piping it; only the identity-blocked-renders-as-failed defect is real."
 parent: lore-context.md
 ---
 
-# The Lifecycle Harness's Exit Code Is Not a Verdict
+# The Lifecycle Harness's Exit Code — Corrected
 
-Found by running the suite on 2026-08-31. Two false-green shapes live in
-`tests/lifecycle/run_matrix.py`:
+**This topic previously said the opposite, and was wrong.** It claimed `run_matrix.py` exits 0 on
+refusal and on failed module runs. Verified against the code and by running it, 2026-08-31:
 
-1. **Refusal exits 0.** Without `LR_LIFECYCLE=1` the runner prints
-   `refusing to run: set LR_LIFECYCLE=1 to enable this suite`, prints the resolved plan, and
-   **exits 0**. Trusting the exit code reports a passing gate that executed nothing.
-2. **Failed module runs exit 0.** A completed matrix summarised `5/27 module runs ok` and still
-   exited 0.
+| Claim | Verdict |
+|---|---|
+| Refusal exits 0 | **False.** `LR_LIFECYCLE` unset returns **2**. |
+| Failed module runs exit 0 | **False.** `summarize()` returns `not failed`; `main()` returns `0 if all_ok else 1`. A 9/18 run returned 1. |
+| Identity-blocked engines render as `failed 0.0s` | **True, still open.** |
 
-Both are [a-gate-that-died-is-not-a-gate.md](a-gate-that-died-is-not-a-gate.md) inside the harness
-itself: the runner checks *did it report?*, never *did the command succeed?* — the same confusion,
-one layer down from the reviewer who surfaces as idle.
+`run_matrix.py` was unchanged since v36 (`9f164e9`), so the original observation ran exactly this
+code. Nothing was fixed in between; it was never broken.
 
-**Operational rule until this is fixed: never read the exit code. Read the summary block and the
-per-module stderr.** Any CI wiring on this runner today is a guaranteed false green, and that
-matters most for the one consumer that cannot read prose.
+## The false green was in the invocation
 
-## Identity-blocked engines are "did not run", not red
+    python3 run_matrix.py ... 2>&1 | tail -1     # $? is tail's — always 0
 
-Plugin-identity refusals render in the summary table as `failed  0.0s` per module. On a run where
-two engines are blocked that reads as 18 test failures when it is actually **two engines that never
-started**. Report them as *did not run* in any ship record
-([gate-waiver-is-a-record.md](gate-waiver-is-a-record.md)) — the disposition, not the table cell, is
-what the record owes. See
-[lifecycle-harness-plugin-identity-unverified.md](lifecycle-harness-plugin-identity-unverified.md)
-for why the engines refuse.
+Two more shapes of the same thing, same day: a backgrounded wrapper ending in `echo` reported
+"exit code 0" for a run whose runner returned 1, and `--dry-run` exits 0 while printing a resolved
+plan that resembles the refusal output.
 
-## Fix candidates
+**Operational rule (replacing the old one):** *read* the exit code — it is a real verdict — but
+capture it unpiped: `rc=$?` on its own line, or `${PIPESTATUS[0]}`. The previous rule, "never read
+the exit code," was wrong in the dangerous direction: it trained us to discard a working signal and
+rely on prose instead.
 
-Small, bounded, and all in `run_matrix.py`: exit nonzero on refusal; exit nonzero when any module
-run failed; give identity-blocked engines their own status distinct from `failed`. Tracked in
-[framework-improvements-backlog.md](framework-improvements-backlog.md) and
-`workdir/what-to-improve.md`.
+## What is still broken
+
+Plugin-identity refusals render in the summary table as `failed 0.0s` per module, so two blocked
+engines read as ~18 test failures when it is two engines that never started. Report them as *did
+not run* ([gate-waiver-is-a-record.md](gate-waiver-is-a-record.md)). Duration is the tell —
+see [run-duration-is-the-first-triage-signal.md](run-duration-is-the-first-triage-signal.md).
+An empty matrix is a related edge: zero configs makes `all_ok` true and exits 0.
+
+## The lesson that outlives the bug
+
+This item sat at the **top of the ranked improvement list** with a costed plan. Executing it as
+written would have "fixed" correct code. A backlog entry is a hypothesis, not evidence — verify the
+claim against the code before acting on it
+([verify-before-acting-on-suspected-bugs.md](verify-before-acting-on-suspected-bugs.md)). The same
+discipline that applies to a red test applies to my own notes
+([a-red-test-may-be-asserting-a-true-fact.md](a-red-test-may-be-asserting-a-true-fact.md)).
 
 ## See Also
 
 - [lifecycle-testing-harness.md](lifecycle-testing-harness.md) — the harness this runner drives.
-- [a-gate-cannot-be-a-model-self-report.md](a-gate-cannot-be-a-model-self-report.md) — sibling: ask
-  what evidence a gate's verdict actually rests on.
-- [triage-a-red-module-against-its-own-history.md](triage-a-red-module-against-its-own-history.md) —
-  what to do with the reds the summary block does show.
+- [lifecycle-harness-plugin-identity-unverified.md](lifecycle-harness-plugin-identity-unverified.md) — why engines refuse.
+- [triage-a-red-module-against-its-own-history.md](triage-a-red-module-against-its-own-history.md).

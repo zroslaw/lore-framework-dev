@@ -82,8 +82,13 @@ shared across call sites get a `docs/<procedure>.md`. See `slash-command-system.
 **Skill Purpose Announcement** — shipped in v44: every skill opens with `## Step 0 — Announce`,
 its text authored in that skill's own doc, in framework concepts not internals. Announcements are
 *onboarding material*, not status lines; the **rule** is shared, the **text** is not. **Nothing in
-`/lr:check` enforces Step 0** — 33 sites, no mechanical guard. See
-`skill-announcement-convention.md`, `per-site-authoring-is-not-duplication.md`.
+`/lr:check` enforces Step 0** — 33 sites, no mechanical guard — and until v45 nothing asserted an
+announcement was ever *emitted*: measured, Claude announces on boot 3/3 and **Codex does not at all**
+(`test_09_boot_announces_before_working`). Its conditional sibling, drafted in v45, is the
+**Operation Notice**: fired only when a procedure does something consequential the user did not ask
+for (boot migrating a repo, the workspace auto-refresh), and **silent on a no-op by design**. See
+`skill-announcement-convention.md`, `operation-notice-convention.md`,
+`required-literal-output-is-what-models-drop.md`, `per-site-authoring-is-not-duplication.md`.
 
 The current skill catalog is implementation ground truth, but newcomer-facing information
 architecture needs a dedicated curation pass — organize around a daily path and progressively
@@ -130,7 +135,10 @@ sibling profiles whenever one binding gains a guardrail (`docs-engines-conventio
 VERSION against `LR_FRAMEWORK_DIR` on engine-emitted evidence, not self-report; Cursor's cloud
 install rehydrates over `--plugin-dir` within ~25s of a move-aside, so re-check at suite start
 (`lifecycle-harness-plugin-identity-unverified.md`,
-`cursor-cloud-plugin-rehydrates-over-plugin-dir.md`).
+`cursor-cloud-plugin-rehydrates-over-plugin-dir.md`). On Codex the tree that wins can be a stale
+**`~/.codex/.tmp/marketplaces/`** copy the precheck never enumerates, and identity is probed *once
+per suite* then inherited, so one flap makes the whole arm uninterpretable — B10 closed this way
+(`codex-stale-tmp-marketplace-outranks-cache.md`).
 
 ## Marketplace & Distribution
 
@@ -295,7 +303,11 @@ own topic — these are pointers, not summaries.
   (cheapest practical tier: Claude → haiku, Codex → gpt-5.4-mini, Cursor → composer-2.5). See
   `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`,
   `haiku-ambiguity-detector.md`.
-- **When a procedure doesn't execute, change structure — not wording.** Three shapes, all immune to
+- **When a procedure doesn't execute, change structure — not wording.** The sharpest measured case:
+  **required literal output is the first thing an executor drops** — three instances in one day
+  across two engines, substance right and the mandated line missing, decorated, or suppressed-rule
+  ignored, against prose already at maximum emphasis
+  (`required-literal-output-is-what-models-drop.md`). Three shapes, all immune to
   more emphatic prose: the **terminal step** that publishes an outcome is the one silently dropped
   (fix: an observable postcondition where the artifact is assembled); once a doc is long enough to be
   **paged**, an obligation's location decides whether it runs; and anything the model can **copy
@@ -349,9 +361,11 @@ own topic — these are pointers, not summaries.
 - **A failure list is a hypothesis until someone reads the transcripts.** An assertion message names
   what was observed, never why; re-triage a red run from stored logs before fixes — cheapest first,
   the module's own verdict history in `results/*/summary.json`, which on v44 sorted three flakes from
-  one real regression in seconds. **Never read the lifecycle runner's exit code**: it is 0 both on
-  refusal and on failed module runs, and an identity-blocked engine renders as `failed 0.0s` when it
-  is *did not run* (`triage-a-red-module-against-its-own-history.md`,
+  one real regression in seconds. The runner's exit code **is** a verdict —
+  2 on refusal, 1 on any failed module — but capture it **unpiped**, since piping it (or wrapping it
+  in a command ending in `echo`) reports the pipeline's status and manufactures a false green; an
+  identity-blocked engine still renders as `failed 0.0s` when it is *did not run*, and **durations
+  triage faster than assertions** (seconds where minutes are normal = the engine never ran) (`triage-a-red-module-against-its-own-history.md`,
   `lifecycle-harness-exit-code-is-not-a-verdict.md`). At the
   single-test level, **a red test may be asserting something true about the machine** — establish
   which side is wrong before turning it green, and give danger-guarding assertions the strongest

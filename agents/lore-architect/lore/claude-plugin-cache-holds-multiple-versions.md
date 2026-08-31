@@ -64,6 +64,23 @@ the executor to guess from a `find`. Point-of-use beats recorded lore
 (`point-of-use-guardrails-beat-recorded-lore.md`) — this topic protects nobody at the moment a
 shortcut fires.
 
+## Confirmed instance: boot and skill dispatch disagreed (2026-08-31)
+
+Boot resolved `<framework-root>` to **1.44.0** (via `installed_plugins.json`, confirmed by a v44/v44
+version match). Hours later in the same session `/lr:finalize` printed
+`Base directory ... /lr/1.42.0/skills/finalize` — the slash command dispatched from an **older tree
+in the same session**, most likely the per-session bundle snapshot.
+
+This was not cosmetic. `finalize.md`, `process-reflection.md`, `process-merge.md` and
+`summarize.md` **all differ** between 1.42.0 and 1.44.0, so finalizing a v44-stamped repo off the
+1.42.0 tree would have written lore in an outdated shape, invisibly.
+
+**Operational:** when a skill prints a base directory, compare it against the root boot resolved.
+If they differ, `diff -q` the docs that skill actually orchestrates before choosing — identical
+files make the fork moot, differing ones make it a correctness decision. Prefer the tree matching
+the installed version *and* the repo's own stamp, and say out loud which one was used. Boot cannot
+catch this on its own: it resolves its root once, and nothing re-checks at dispatch time.
+
 ## See Also
 
 - [framework-root-self-location-validated.md](framework-root-self-location-validated.md) §
