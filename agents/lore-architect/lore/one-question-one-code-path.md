@@ -41,4 +41,7 @@ remedies, and only one of them is the skill.
   and its § *Fixing a duplicated rule in code can recreate it in prose*.
 - [a-reported-error-is-not-proof-the-file-survived.md](a-reported-error-is-not-proof-the-file-survived.md)
 - [short-circuit-on-the-condition-not-a-proxy.md](short-circuit-on-the-condition-not-a-proxy.md)
+- [a-displayed-attribute-can-have-more-than-one-source.md](a-displayed-attribute-can-have-more-than-one-source.md)
+  — the inverse: a *rendered display* may legitimately have several sources, and assuming it has one
+  is the mirror-image error.
 - [project-scope-plugin-config-feature.md](project-scope-plugin-config-feature.md)

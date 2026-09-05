@@ -68,3 +68,7 @@ Two later applications of the same reflex, both from 2026-07-28:
   rather than merely correct.
 - `a-gate-cannot-be-a-model-self-report.md` — a gate whose evidence lives in the wrong medium; same
   family of "the safeguard was not where the failure happens".
+- `keeper-login-item-name-and-icon.md` — a fix applied by hand to live machine state is reverted by
+  the next `lrb install`; the guardrail has to live in `cmd_install`.
+- `live-system-state-validate-on-a-copy-first.md` — sibling axis: rank probes by what they cost the
+  *user*, not only the machine.

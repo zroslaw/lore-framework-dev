@@ -1,3 +1,10 @@
+---
+lore: 1
+type: area
+summary: "Anchor for the Lore Beings direction — settled MVP design, the live launchd Keeper install on this machine, naming and budget decisions, and routes to the per-kind engine contracts and Keeper findings."
+parent: lore-context.md
+---
+
 # Lore Beings — Settled Design (Anchor)
 
 The autonomous-agents direction's beings shape has a **settled design** as of 2026-07-19, agreed in a full dialogue-mode session with the user, then reworked the same day by a user-directed **MVP simplification pass** (directive: keep the initial design as simple as possible; introduce nothing the MVP doesn't exercise — see `feedback-mvp-minimalism.md`). The complete design lives in **`workdir/draft-lore-beings.md`** (which supersedes and replaced the same-day `draft-agent-beings.md`). **Status (2026-07-20): released as v28 (BETA), release-committed but not yet pushed.** MVP built (`lore-framework/scripts/lrb.py`, `docs/beings.md`, `lore-framework-dev/tests/test_lrb.py`, the Chronicler at `lore-chronicler/`), real-engine-validated across two engine kinds, independently reviewed and hardened across four review passes — see the draft's **§16 "Build & hardening notes"** for the Claude Code build+review pass, `lore-beings-mvp-takeover-review.md` for the Codex third-review takeover (worktree checkpoint, now merged to main), and `engine-kinds-design-decision.md` + `macos-ps-o-multi-field-single-line.md` for the fourth-pass real-macOS findings that landed in the v28 release commit. Both source worktrees (`.worktrees/lore-framework/lore-beings-mvp`, `.worktrees/lore-framework-dev/lore-beings-mvp`) are merged into main and eligible for deletion once the push lands. **Remaining gate: the full framework lifecycle suite (`LR_LIFECYCLE=1`) is still owed before push** — this session ran the unit suite (135 tests) plus targeted real-engine e2e smoke, which is real signal but not the same gate; next session should either run the full suite and push, or explicitly note a partial-gate ship if the user chooses. **Keeper-specific real-engine lifecycle coverage now exists** (2026-07-20): `tests/lifecycle/keeper_harness.py` + `test_lrb_lifecycle.py`, 8 scenarios gated behind a *separate* higher-blast-radius flag `LR_LIFECYCLE_KEEPER=1`, verified claude 6/6 + codex 1/1 + cursor 1/1 — see `lifecycle-testing-harness.md` § Keeper coverage.
@@ -14,6 +21,8 @@ The persistent `--launchd` Keeper install is **done and running**, not pending. 
 Found incidentally — it is why `test_lrb.py::test_install_is_sandboxed_and_idempotent` fails on this machine, and that red test is correctly reporting a true fact about the environment rather than rotting (`a-red-test-may-be-asserting-a-true-fact.md`).
 
 **Standing implication:** a Keeper daemon may spawn engine sessions here without a human starting them. When a repo changes under you mid-session, the Keeper is a candidate explanation alongside a human-run parallel session — see `concurrent-session-committed-my-uncommitted-work.md`.
+
+**How that install presents to the user (2026-09-05):** the login item reads `python3.14` with a blank icon, because `cmd_install` writes `ProgramArguments[0] = sys.executable`. Name and icon come from two unrelated sources and need separate fixes; the mechanism, the rejected alternatives, and the Apple-Silicon blocker are in `keeper-login-item-name-and-icon.md`, and the upstream action item is `framework-improvements-backlog.md` § Autonomous Agents / Lore Beings (ranked as B11). Anything fixed by hand here is reverted by the next `lrb install`.
 
 This topic is the anchor: the settled decisions at a glance, with the draft as the single detailed source. Don't restate draft detail here — extend the draft, then refresh this summary.
 
@@ -65,6 +74,7 @@ This topic is the anchor: the settled decisions at a glance, with the draft as t
 - `engine-kinds-design-decision.md` — the per-engine `kind` dispatch that shipped the `codex` engine kind in v28
 - `codex-exec-real-invocation-contract.md` — the empirical `codex exec` contract behind the codex engine kind
 - `macos-ps-o-multi-field-single-line.md` — the fourth-review-pass real-macOS bug, and the sandbox-blind-spot lesson it taught
+- `keeper-login-item-name-and-icon.md` — why the Keeper's macOS login item shows an interpreter name and a blank icon, and the only mechanism that fixes the icon for a daemon
 - `versioning-release-types.md` — the v28 history entry (release-committed, not yet pushed)
 - `agent-being-consciousness-substrate-split.md` — the governing named principle
 - `unenforceable-caps-are-prompt-theater.md` — the enforceability sharpening

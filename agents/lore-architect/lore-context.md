@@ -302,7 +302,9 @@ own topic — these are pointers, not summaries.
   reading lenses may not find at all, and the fidelity axis is **engine, not just model tier**
   (cheapest practical tier: Claude → haiku, Codex → gpt-5.4-mini, Cursor → composer-2.5). See
   `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`,
-  `haiku-ambiguity-detector.md`.
+  `haiku-ambiguity-detector.md`. **Cheapest-first prices compute, never the user** — a free
+  probe against live OS state can charge the human six password prompts; rank by user cost and
+  validate on a copy (`live-system-state-validate-on-a-copy-first.md`).
 - **When a procedure doesn't execute, change structure — not wording.** The sharpest measured case:
   **required literal output is the first thing an executor drops** — three instances in one day
   across two engines, substance right and the mandated line missing, decorated, or suppressed-rule
@@ -387,7 +389,9 @@ own topic — these are pointers, not summaries.
   returns, verify its filesystem footprint, not its summary. **An engine fact carries a grade too** —
   ran it / read the shipped code / read the docs — and an undocumented route never goes into a
   contract like an install doc (`engine-bundle-reading-has-an-evidence-grade.md`,
-  `a-negative-grep-proves-the-pattern-absent.md`). See
+  `a-negative-grep-proves-the-pattern-absent.md`). **One rendered artifact can have several independent
+  sources** — confirm each attribute's source separately, and probe a known-good comparable
+  (`a-displayed-attribute-can-have-more-than-one-source.md`). See
   `verify-before-acting-on-suspected-bugs.md`, `check-own-lore-before-dismissing-a-finding.md`,
   `fetch-volatile-facts-live-not-memory.md`, `fork-scope-creep-under-standing-goal.md`.
 - **Design-time rules sharing one shape** — a change that widens where a value comes from drops the
@@ -497,7 +501,8 @@ perspective leaves the **team-join path** invisible at every layer
   `LR_LIFECYCLE_KEEPER=1`. **The persistent `--launchd` Keeper install is live on this machine** —
   a candidate explanation whenever a repo changes under me mid-session; the Chronicler soak is a
   *separate*, still-unverified question. Open gaps: headless permissions, self-scheduling under the
-  safe default, and two per-kind contract decisions in the backlog. Anchor: `lore-beings-design.md`
+  safe default, two per-kind contract decisions in the backlog, and the login item that reads
+  `python3.14` with a blank icon (B11, `keeper-login-item-name-and-icon.md`). Anchor: `lore-beings-design.md`
   (routes to the per-kind contracts and Keeper findings); see also
   `agent-being-consciousness-substrate-split.md`, `kill-tree-enumerate-before-signal-ordering.md`,
   `lore-beings-mvp-takeover-review.md`, `autonomous-agents-vision.md`, `wait-primitive-feature.md`.

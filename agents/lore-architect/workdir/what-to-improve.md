@@ -246,6 +246,15 @@ repoint Codex's marketplace source at the worktree, move `~/.cursor/plugins` asi
 identity **after** the move, then re-run. Not to be done silently mid-gate. Lore:
 `lifecycle-harness-plugin-identity-unverified.md`.
 
+### B11. Keeper login item reads as `python3.14` with a blank icon — OPEN, added 2026-09-05
+Every macOS Lore Beings user sees their Keeper in **Login Items & Extensions → App Background
+Activity** as a bare interpreter name with a blank icon, because `lrb install` writes
+`ProgramArguments[0] = sys.executable` (`lrb.py:1511`). **Do:** ship a small named + iconed wrapper
+from `lrb install`. Cheap, purely cosmetic, and the first thing a prospective adopter sees of the
+daemon they just let run at login. Blocker: the working mechanism is verified on Intel only and
+must be re-tested on Apple Silicon. Mechanism and constraints:
+`keeper-login-item-name-and-icon.md`; action item: backlog § Autonomous Agents / Lore Beings.
+
 ---
 
 ## C. New feature directions — what would make Lore Agents sexier

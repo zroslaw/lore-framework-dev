@@ -145,3 +145,7 @@ reshaped until the test goes green.** See `a-red-test-may-be-asserting-a-true-fa
 - `hot-path-latency-can-expose-latent-test-timing-races.md` — the same "confirm which cause, not just whether it's broken" discipline applied to a test-failure diagnosis (stash-and-rerun A/B, not assuming new code is wrong)
 - `workflow-primitive-operational-notes.md` — the size-vs-coercion misdiagnosis this session's "which bug" lesson came from
 - `lore-context-shape-discipline.md` — the v17 fix that followed from diagnosing the *drift* mechanism (not the mislabeled "denormalized index"); the architectural-critique instance above
+- `live-system-state-validate-on-a-copy-first.md` — the case where *diagnosis itself* was expensive,
+  because each probe against live OS state charged the user a password prompt
+- `a-displayed-attribute-can-have-more-than-one-source.md` — verifying *which* source is broken when
+  one rendered artifact is fed by several
