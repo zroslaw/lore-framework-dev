@@ -1,4 +1,15 @@
-`/lr:check` runs 23 consistency checks. Defined in `<framework-root>/docs/check.md`.
+---
+lore: 1
+type: topic
+summary: "Historical consistency-check catalog and rationale, with routing to the unreleased v45 unified health front door."
+parent: lore-context.md
+---
+
+# Consistency Checks
+
+The numbered catalog below records the pre-v45 design, not the candidate implementation. For the unreleased replacement and its mechanical/AI boundary, read [Unified Check Front Door](unified-check-front-door.md).
+
+The historical `/lr:check` catalog describes 23 consistency checks. Defined in `<framework-root>/docs/check.md`.
 
 > **Naming note (a v14 near-miss — see `verify-before-acting-on-suspected-bugs.md`):** the plugin catalog doc is **`docs/check.md`**, NOT `consistency-checks.md`. `consistency-checks.md` is *this lore topic's* name only. `skills/check/SKILL.md` correctly points at `docs/check.md`. Don't "fix" the skill to repoint it — verify on disk first.
 

@@ -83,3 +83,7 @@ rule that a decision relayed from one session's user isn't authority for another
   coordination (distinct from multi-guest `/lr:attach`, which is single-executor already)
 - `cross-engine-relay-not-attributable-authority.md` — don't relay another session's user decision
   as settled authority for this session's finalize
+
+## Preservation without release (v45 session)
+
+A user can authorize finalization to preserve knowledge and development-branch commits while excluding shipping. Honor that scope: keep the chosen framework worktree and paired dev branch isolated, and do not infer permission to merge to main, tag, install, or publish a release. Concurrent main-checkout artifacts are outside that finalization. Preserve evidence with its actual artifact state and the user's chosen review scope; lifecycle or quality suites do not become mandatory merely because finalization is running. See [Unified Check Front Door](unified-check-front-door.md) for the current candidate's continuation record.

@@ -35,3 +35,7 @@ A rename changes *names*; a restructure changes *facts*. Names are greppable; fa
 - `df-per-repo-backbone.md` — the DF rename/restructure whose sweep produced this lesson.
 - `deterministic-sweep-catches-check-blind-spots.md` — sibling lesson, opposite direction: LLM-alone misses mechanical existence rot at scale, where this topic shows grep-alone misses semantic drift.
 - `a-negative-grep-proves-the-pattern-absent.md` — the other half of grep's limit: an *empty* result proves the searched pattern absent, never the capability absent. This topic covers the clean-sweep case; that one covers the absence-claim case.
+
+## Bounded replacements protect unrelated references (v45 review)
+
+A broad check-ID replacement changed an unrelated GitHub issue `#18115` into `R12115`. Syntax and link-existence checks could not detect that corrupted non-link reference. Bound replacements to the intended identifier and its context, then inspect every changed hunk for meaning as well as old-token absence. This was caught during the 2026-09-08 implementation review.

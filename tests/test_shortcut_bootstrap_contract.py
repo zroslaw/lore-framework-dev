@@ -2,6 +2,9 @@
 """Static contract tests for version-independent registered boot shortcuts."""
 
 import os
+import sys
+import tempfile
+from pathlib import Path
 import unittest
 
 
@@ -71,13 +74,28 @@ class ShortcutBootstrapContractTests(unittest.TestCase):
             self.assertIn("<agent-dir-rel>", body, path)
             self.assertNotIn("from `<agent-dir>`", body, path)
 
+    def check_shortcut_body(self, transform):
+        sys.path.insert(0, os.path.join(FRAMEWORK_DIR, "scripts"))
+        from lr_core.repo_scan import bootstrap_template, check_shortcuts
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            agent = root / "repo/agents/test"
+            agent.mkdir(parents=True)
+            (agent / "role.md").write_text("# Test\n")
+            body = bootstrap_template(FRAMEWORK_DIR, "codex").replace(
+                "<agent-name>", "test").replace("<agent-dir-rel>", "repo/agents/test")
+            path = root / ".codex/skills/lr-test-agent/SKILL.md"
+            path.parent.mkdir(parents=True)
+            path.write_text("---\nname: lr-test-agent\ndescription: Test\n---\n\n" +
+                            transform(body, str(agent)) + "\n")
+            findings, warnings = [], []
+            check_shortcuts(str(root), FRAMEWORK_DIR, findings, warnings)
+            return findings
+
     def test_check_flags_an_absolute_from_target(self):
-        """The rule has to be enforceable where a user runs it, not only in the generator."""
-        check = read("docs/check.md")
-        section = check.split("## 18. Legacy registered shortcut formats", 1)[1]
-        section = section.split("\n## ", 1)[0]
-        self.assertIn("absolute path", section)
-        self.assertIn("Migration 44", section)
+        rows = self.check_shortcut_body(lambda body, target: body.replace("repo/agents/test", target))
+        self.assertTrue(any(row["id"] == "R12" and
+                            "absolute_workspace_target" in row["data"]["reasons"] for row in rows))
 
     def test_conventions_owns_the_relative_path_rule(self):
         """The rule is stated once, where both the profiles and check.md point."""
@@ -106,25 +124,15 @@ class ShortcutBootstrapContractTests(unittest.TestCase):
                 f"{path}: bootstrap body must be a single unwrapped line")
 
     def test_check_flags_a_wrapped_bootstrap(self):
-        """A shortcut can be correct in content and wrong in shape.
+        rows = self.check_shortcut_body(lambda body, _: body.replace("then read", "then\nread"))
+        self.assertTrue(any(row["id"] == "R12" for row in rows))
 
-        `/lr:check` is what a user runs against their own workspace, so the
-        single-line rule has to be enforceable there and not only in the
-        generator's own docs.
-        """
-        check = read("docs/check.md")
-        section = check.split("## 18. Legacy registered shortcut formats", 1)[1]
-        section = section.split("\n## ", 1)[0]
-        self.assertIn("more than one line", section)
-
-    def test_doctor_and_check_reject_stale_cache_pins(self):
-        doctor = read("docs/doctor.md")
-        ailment = read("docs/doctor-stale-shortcut-bootstrap.md")
-        check = read("docs/check.md")
-        self.assertIn("doctor-stale-shortcut-bootstrap", doctor)
-        self.assertIn("plugins/cache/", ailment)
-        self.assertIn("plugins/cache/", check)
-        self.assertIn("absolute `agent-boot.md` path", check)
+    def test_check_rejects_stale_cache_pins(self):
+        rows = self.check_shortcut_body(lambda body, _: body.replace(
+            "its `docs/agent-boot.md`", "`/tmp/plugins/cache/lr/docs/agent-boot.md`"))
+        self.assertTrue(any(row["id"] == "R12" for row in rows))
+        self.assertIn("fix-stale-shortcut-bootstrap.md", read("docs/findings-catalog.md"))
+        self.assertIn("plugins/cache/", read("docs/fix-stale-shortcut-bootstrap.md"))
 
 
 if __name__ == "__main__":

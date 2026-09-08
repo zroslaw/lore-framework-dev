@@ -25,14 +25,15 @@ resolution was to name a distinct category rather than overload the existing one
 line, and then they skip it the once it mattered — the same reasoning `agent-boot.md` already gives
 for staying silent on a quiet `workspace_refresh`. Report the *action*, never the *check*.
 
-Sites: `version-check.md` Step 0 (the `R < F` path only), `agent-boot.md` Step 2's
-`workspace_refresh` handling, and `attach.md`'s Step 3 subagent — which must print the notice into
-its **returned report**, since a subagent's own output goes to a context nobody reads.
+Sites include version-check on the upgrade path and boot workspace-refresh handling. For attach,
+the **host emits the notice before dispatching the worker**. The earlier draft put it in the
+worker's returned report; that cannot notify the user before the worker acts. Corrected during
+the v45 implementation review.
 
-**Accuracy trap caught in review:** the first draft said the upgrade "writes files and commits
-them". Step 4 also **pushes**. A notice whose entire job is disclosing what happens to the user's
-files must name the most consequential part — verify the procedure you are describing rather than
-describing it from memory
+**Accuracy traps caught in review:** name potential publication, but do not promise writes,
+commits, or pushes before safety checks decide whether they can proceed. The notice describes
+the safety checks and conditional publication. The first draft omitted push; a later unconditional
+promise was also inaccurate. Verify the procedure being described
 ([verify-before-acting-on-suspected-bugs.md](verify-before-acting-on-suspected-bugs.md)).
 
 ## See Also

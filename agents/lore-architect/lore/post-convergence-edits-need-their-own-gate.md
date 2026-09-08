@@ -23,10 +23,16 @@ attribute the failure to my edit versus known weak-tier model variance without a
 
 ## The rule
 
-Two acceptable dispositions, no third:
+When a requested gate must certify the final artifact, two dispositions preserve that claim:
 
 1. **Re-run the affected gate** on the edited artifact.
 2. **Revert the edit** back to the gated state and file the finding as follow-up.
+
+A user may instead authorize preservation or release with explicit unverified scope; record that
+disposition without rerunning an excluded suite. The v45 session requests careful implementation
+review and branch preservation, with lifecycle and quality evaluation excluded. Deterministic
+tests, design review, implementation TriLens, and real-engine execution remain distinct evidence.
+See [Unified Check Front Door](unified-check-front-door.md).
 
 What is *not* acceptable is reporting "converged and green" for an artifact that is neither, because
 the last edits came after both. When I hit this I did say the edits were unverified and offered the

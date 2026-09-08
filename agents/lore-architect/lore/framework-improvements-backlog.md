@@ -257,6 +257,28 @@ See `spawn-teammate-feature.md` for full beta graduation question list.
 
 ## Workspace & Environment
 
+### Shared workspace skills in `.agents/skills` — postponed (2026-09-08)
+
+User decision: revisit later; exclude from the current `lr:check` implementation scope.
+A colleague reported that Pi and OMP did not discover the current workspace skills and
+suggested `<workspace>/.agents/skills/<name>/SKILL.md` as a shared location. Consider making
+it canonical for workspace agent shortcuts, replacing redundant Codex/Cursor copies after
+verification rather than maintaining another duplicate tree.
+
+Documentation checked on 2026-09-08 lists this location for
+[Codex](https://learn.chatgpt.com/docs/build-skills),
+[Cursor](https://prod.cursor.com/docs/skills),
+[Pi](https://pi.dev/docs/latest/skills), and
+[OMP](https://github.com/can1357/oh-my-pi/blob/main/docs/skills.md).
+This is documentation evidence, not a live cross-engine boot test. Recheck supported versions
+when resuming. Keep skills one directory below the skills root for OMP compatibility.
+
+Discovery alone is insufficient: generated shortcuts currently depend on an installed
+`lr:boot` skill. Pi/OMP also need framework access and appropriate engine execution bindings.
+Verify discovery and actual boot before retiring old copies; account for duplicate names,
+repo-root discovery boundaries, migration, and the registration/check/publish paths.
+Shared workspace shortcuts do not replace engine-specific plugin packaging.
+
 ### Workspace Lifecycle Redesign (designed 2026-08-09, not yet implemented)
 
 - **Full producer/publish-half design for the workspace layer.** v25 shipped a consumer-only
@@ -407,6 +429,21 @@ Cross-engine plugin-marketplace readiness. Anchor topics: `engine-marketplace-re
 - **Bring the v15 collision-check gate to `/lr:update`.** Currently `/lr:update` is interactive-by-design and writes through dirty files unconditionally. Bringing the `dirty ∩ write-set` gate to it would make the principle universal across automatic and user-invoked write paths. Trade-off: `/lr:update` is interactive so the friction trade is different (the user is already at the keyboard), but a same-shape gate would still prevent accidental overwrites. See `dirty-tree-gates-write-vs-read-distinction.md`.
 - **A3-arch deferred to v16.** The architecture-lens finding from a late v15 review round, deferred so v15 could ship. Carry forward to v16 design discussions; the specific finding is in the v15 review notes (round-by-round summary in `parallel-reviewer-fanout-pattern.md` § v15 operational lessons).
 - **Workspace-root paths gap (documented, not fixed).** The boot-time gate is per-repo and cannot see workspace-root files (`.claude/commands/lr-*-agent.md`). v15 documents this in `conventions.md` § Known gap; protection there is the in-migration three-way merge, not the gate. Fix would require a workspace-aware gate layer; defer until a real bug surfaces. **Touched, not resolved, by the 2026-08-09 workspace-lifecycle redesign** (§ Workspace & Environment above) — its `push` command publishes workspace-root files under user confirmation, but that is a publication path, not a write-time gate; the gap itself is still open.
+
+### Ailment-doc Diagnosis sections after the `/lr:check` front door (2026-09-08)
+
+The three ailment docs, renamed from `doctor-*.md` to `fix-*.md` in the v45 candidate, carry a **Diagnosis** section — hand-run commands that let a
+person confirm the problem is real — from a workflow where the user described a symptom and the
+agent matched it. The `/lr:check` front-door design ([approved design](../workdir/draft-lr-check-front-door.md)) turns
+two of those ailments into computed findings (P2, P4), which makes those manual steps largely
+vestigial: the script hands over the fact directly.
+
+**User decision 2026-09-08: keep them for now**, and revisit once `/lr:check` has accumulated its
+full functionality — the volume of what the front door now carries is the reason to look again, not
+the ailment docs themselves. The one case that still needs a hand-run confirmation is the bootstrap
+trap: a session on a stale cache is running the *old* `check.md` and cannot reach P2 at all, so a
+manual path has to survive somewhere. Whether that lives in the fix docs or in `INSTALL-<ENGINE>.md`
+is the open half.
 
 ### Ailment Catalog (`/lr:doctor`, v12)
 

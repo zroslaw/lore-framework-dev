@@ -675,7 +675,7 @@ class LoreV1DistributionTest(unittest.TestCase):
         self.assertIn("Step 3 generates the Lore", version_check)
         self.assertIn("lazy-migration candidate", self.read("docs/process-merge.md"))
         self.assertIn("Start With the Lore Map", self.read("docs/lore-search.md"))
-        self.assertIn("lore-map --agent-dir", self.read("docs/check.md"))
+        self.assertIn("lr-core\" check --workspace", self.read("docs/check.md"))
 
     def test_codex_spawn_guidance_matches_portable_tool_schema(self):
         paths = (

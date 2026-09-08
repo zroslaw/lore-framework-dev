@@ -44,6 +44,11 @@ LR_FRAMEWORK_DIR=<workspace>/.worktrees/lore-framework/<slug> python3 -m unittes
 
 ## Suites
 
+- **`test_lr_core_check.py`** — unified installation states, plugin inventory/probe,
+  mechanical repo/shortcut checks, and per-repo freshness including successful and failed pulls.
+  Run with `LR_FRAMEWORK_DIR` pointing at the v45 framework worktree.
+
+
 - **`test_wait.py`**
   - `TestUnit` — pure helpers of `scripts/wait-server.py`: inbox resolution, match ordering by
     arrival time, the by-name prefix boundary (`deploy` ≠ `deployment`), `consume`→`processed/`,

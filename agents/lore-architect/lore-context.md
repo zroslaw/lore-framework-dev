@@ -109,12 +109,9 @@ procedure does not automatically shrink its doc. See
 `literate-accelerator-pattern.md`, `script-emits-data-doc-owns-the-words.md`,
 `agent-boot-doc-grew-when-scripted.md`.
 
-The plugin can also **bundle an MCP server** (root `.mcp.json`): **`lr-wait`** is the first, and the
-framework's first `python3` dependency (stdlib-only — the sole sanctioned exception to bash-on-BSD,
-for protocol-speaking components). Practical limit: on Claude Code a single MCP call dies at the
-engine's ~30-minute idle timeout, and the abort leaves `lr-wait`'s single-request lock stuck `busy`
-for the session — chunk waits at ≤29 min, or use a backgrounded shell timer. See
-`plugin-mcp-server-convention.md`, `wait-primitive-feature.md`.
+Bundled MCP servers use root `.mcp.json`. The first, `lr-wait`, uses stdlib Python; Claude's
+~30-minute MCP idle timeout can leave its request lock stuck, so chunk waits below that ceiling.
+Details and recovery options: `plugin-mcp-server-convention.md`, `wait-primitive-feature.md`.
 
 ## Engine Hubs
 
@@ -239,6 +236,8 @@ ordinary reflection topics, then rejoins the same lifecycle. **Chunk overlap mak
 reducer** — expect ~three near-duplicate candidates per insight and consolidate aggressively. Design,
 bounds and accepted limits: `transcript-backed-finalization-mvp.md`.
 
+User-scoped finalization can preserve development branches without shipping. Keep the selected worktrees isolated and retain actual test/review dispositions; preservation does not authorize main merge, tagging, installation, or release publication.
+
 Shared-lore publication is a separate, unshipped governance direction. See
 `team-lore-contribution-governance.md`.
 
@@ -268,16 +267,11 @@ release notes' claims about themselves last**, since they decay once per fix rou
 
 ## Consistency & Diagnostics
 
-Three surfaces, three scopes:
+**The v45 candidate unifies plugin, repo, and workspace health under `/lr:check`; it remains unreleased.** Mechanical validation always runs; `--full` requests AI summary review. The check performs no repairs or repo fetches, and freshness reports recorded successful-pull evidence. Read [Unified Check Front Door](lore/unified-check-front-door.md) for boundaries and continuation evidence. Shared `.agents/skills` adoption and manual Diagnosis cleanup remain explicitly postponed in the backlog.
 
-- **`/lr:check`** — content-consistency checks *inside agent repos*, rendering scanner findings
-  rather than restating rules; at scale prefer a deterministic script sweep over an LLM read-through
-  (`consistency-checks.md`).
-- **`/lr:doctor`** — *engine/plugin runtime* issues that escape content checks (esp. stale plugin
-  cache), via an accreting ailment catalog (`ailment-catalog-pattern.md`).
-- **`/lr:workspace-status`** — read-only diagnosis of the *workspace layer* (git state, descriptor
-  drift, memory-file contract, child-repo hygiene), findings S1–S18 each naming its fix
-  (`workspace-lifecycle-four-commands.md`).
+Shipped v44 separates repo consistency (`consistency-checks.md`), plugin/runtime ailments
+(`ailment-catalog-pattern.md`), and read-only workspace diagnosis
+(`workspace-lifecycle-four-commands.md`). Consult the installed version before choosing commands.
 
 ## Operating Disciplines
 
@@ -394,29 +388,11 @@ own topic — these are pointers, not summaries.
   (`a-displayed-attribute-can-have-more-than-one-source.md`). See
   `verify-before-acting-on-suspected-bugs.md`, `check-own-lore-before-dismissing-a-finding.md`,
   `fetch-volatile-facts-live-not-memory.md`, `fork-scope-creep-under-standing-goal.md`.
-- **Design-time rules sharing one shape** — a change that widens where a value comes from drops the
-  old source's validation, so re-attach it at the sink; a verdict with a per-item payload needs a
-  per-item trigger; a self-documenting delimiter collides with its own documentation; whitespace
-  becomes semantics once a check compares bytes; removing an unsound signal requires replacing its
-  accidental coverage; a guard keyed on a state **normal** for heavy users opts them out silently
-  (prefer reporting over guarding); a proxy condition fails exactly where a user acts deliberately
-  (write the real condition in words first); a lock-claim must return a **tri-state result, not a
-  bool**. See
-  `widening-a-source-drops-its-validation.md`,
-  `name-keyed-global-registry-cannot-answer-per-scope.md`,
-  `self-documenting-payload-vs-heading-delimiters.md`,
-  `template-whitespace-is-contract-under-byte-exact-idempotency.md`,
-  `removing-an-unsound-signal-needs-its-accidental-coverage-replaced.md`,
-  `guarding-on-a-normal-state-excludes-what-matters-most.md`,
-  `short-circuit-on-the-condition-not-a-proxy.md`,
-  `lock-claim-directory-creation-vs-contention.md`.
-  Three more, all in code I had written and tested: a **catch block is not a durability guarantee**
-  (`open(path,"w")` truncates before writing; `UnicodeDecodeError` is a `ValueError`, not an
-  `OSError`); a **diagnostic and its remedy must derive from one code path**, or the finding routes
-  users to a fix that can never succeed; and a procedure's **approval surface is a separate site from
-  its action list**, so adding a write means updating the confirmation template, the dry-run output,
-  and every hand-maintained enumeration. See
-  `a-reported-error-is-not-proof-the-file-survived.md`, `one-question-one-code-path.md`,
+- **Design-time checks:** preserve validation when widening sources; derive diagnostics and remedies
+  from the same predicate; use tri-state lock claims; make file durability structural; update the
+  approval surface when adding writes. The underlying patterns route through
+  `system-design-principles.md`, `one-question-one-code-path.md`,
+  `a-reported-error-is-not-proof-the-file-survived.md`, and
   `adding-a-write-means-updating-the-approval-gate.md`.
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source
   (pointer, don't restate — and when fixing or *changing* a rule, enumerate every site that *states*
@@ -430,24 +406,13 @@ own topic — these are pointers, not summaries.
   new plumbing; don't defer completable bounded sweeps; graduated verification. See `naming-foundational-principles.md`,
   `single-canonical-source-discipline.md`, `reuse-existing-correlation-signal.md`,
   `feedback-don-t-defer-completable-scope.md`, `graduated-verification-confidence.md`.
-- **User-feedback working style:** **commit to a recommendation** — a balanced menu of options I could
-  have resolved myself reads as absence of judgement and costs trust ("boneless", 2026-08-23); state
-  the view and the reason, then at most one question, reserving open questions for decisions
-  genuinely the user's (cost, scope, risk appetite). `/lr:style follow` gives the user the
-  *direction*, not my silence on the *substance*. **Structure is not brevity** — lead with the shape
-  of the change in one breath, save the section-by-section plan for after the yes. Also: ranked
-  shortlist over exhaustive enumeration; re-establish where we are after a mode change; confirm
-  before writing durable lore mid-session; in design dialogues draft only when the user triggers it;
-  populate dry-run counters with would-be outcomes; "enforce X" ≠ add a required schema field;
-  decompose broad open-ended asks into hidden axes; on a second pushback on the same axis, act
-  instead of re-justifying; a measurement question or a decision already made wants a short
-  verdict, not a briefing; several style skills at once is a stop signal, and a second signal next
-  turn means cut hard rather than compress. Review subagents default to Composer 2.5. See
+- **User-feedback working style:** state a recommendation and its reason before asking a decision
+  the user must own. Structure is not brevity; use a short verdict for a measurement or a settled
+  decision. Confirm before durable mid-session lore writes, draft designs only when asked, and act
+  promptly after repeated pushback. Review-subagent preference is Composer 2.5. Route through
   `feedback-commit-to-a-recommendation.md`, `feedback-too-many-words.md`,
   `feedback-confirm-before-writing-lore.md`, `feedback-draft-only-when-user-triggers.md`,
-  `feedback-schemas-as-enforcement-overreach.md`,
-  `feedback-layered-decomposition-for-open-ended-asks.md`, `feedback-mvp-minimalism.md`,
-  `feedback-comply-promptly-after-repeated-pushback.md`,
+  `feedback-comply-promptly-after-repeated-pushback.md`, and
   `feedback-composer-25-subagent-reviews.md`.
 
 ## Key Constraints
