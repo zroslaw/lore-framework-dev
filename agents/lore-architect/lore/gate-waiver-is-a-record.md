@@ -21,6 +21,12 @@ in the reader's favor of "passed". Write "closed by waiver, not by execution", n
 and when, and keep the waiver in the per-version record so later re-triage knows that version's
 coverage honestly.
 
+**A second instance (v45, 2026-09-09):** the user waived both real-engine lifecycle and TriLens on
+cost. The waiver went into the ship record — and so did the
+[blast-radius audit](blast-radius-audit-when-a-gate-is-waived.md) run in their place, plus a plain
+statement of what the audit does *not* cover. **Record the substitute alongside the waiver**, or the
+next reader sees only "did not run" and cannot tell whether anyone looked.
+
 This composes with the artifact-state rule: a waiver, like a gate result, belongs to a specific
 ship — it does not carry forward to the next version's gates.
 
@@ -30,3 +36,4 @@ ship — it does not carry forward to the next version's gates.
 - [post-convergence-edits-need-their-own-gate.md](post-convergence-edits-need-their-own-gate.md) — gate results (and waivers) belong to a specific artifact state.
 - [graduated-verification-confidence.md](graduated-verification-confidence.md) — "closed by waiver" is a confidence level, not a boolean pass.
 - [trilens-loop-feature.md](trilens-loop-feature.md) — § When the round cap bites: the sibling practice fact from the same ship.
+- [blast-radius-audit-when-a-gate-is-waived.md](blast-radius-audit-when-a-gate-is-waived.md) — the cheap structured substitute to run and record when a gate is waived.

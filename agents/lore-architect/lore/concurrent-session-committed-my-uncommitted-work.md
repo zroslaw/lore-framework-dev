@@ -92,3 +92,8 @@ explanation alongside a human-run parallel session** — do not assume concurren
 - `single-canonical-source-discipline.md` — the drift between those two procedures.
 - `a-red-test-may-be-asserting-a-true-fact.md` — the other environment-truth surprise from the same
   day.
+- `prove-superseded-before-discarding-colliding-wip.md` — the corollary at merge time: colliding
+  dirty state may not be yours, so compute whether the incoming version contains it before
+  discarding.
+- `a-release-review-starts-with-git-status.md` — check every repo's dirty state before reviewing or
+  reporting on a change set.

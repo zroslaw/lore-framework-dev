@@ -144,3 +144,6 @@ has to stay frozen until the last reviewer has reported.
 - `concurrent-session-committed-my-uncommitted-work.md` — why a dirty tree is doubly unsafe here.
 - [parallel-reviewer-fanout-pattern.md](parallel-reviewer-fanout-pattern.md) § Disjoint lenses — the
   same v43 round, read for what the lens choice bought.
+- [a-release-review-starts-with-git-status.md](a-release-review-starts-with-git-status.md) — the
+  cheapest detector for this rule: a dirty tree means the artifact the gate certified is not the
+  one under review.

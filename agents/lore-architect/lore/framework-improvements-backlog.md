@@ -445,12 +445,62 @@ trap: a session on a stale cache is running the *old* `check.md` and cannot reac
 manual path has to survive somewhere. Whether that lives in the fix docs or in `INSTALL-<ENGINE>.md`
 is the open half.
 
-### Ailment Catalog (`/lr:doctor`, v12)
+### Unified Check Front Door (`/lr:check`, shipped v45, 2026-09-09)
+
+Design findings the v45 review produced that shipped knowingly. Four others were fixed before the
+ship; these are the residue. See `unified-check-front-door.md`.
+
+- **The default report drowns in one info category.** On this workspace: 997 repo findings, 965 of
+  them `R6 reference_cautions` from legacy unresolved references. `check.md` says "keep the default
+  report short" while `summary` hands the renderer a headline of 997 that buries 1 error and 7
+  warnings. **Do:** collapse per-agent reference cautions to one row, or exclude them from the
+  default summary the way `collapsed` rows already are.
+- **`check` is scanner-first where `doctor` was symptom-first.** The `fix-*.md` docs are now
+  reachable only through a finding row or an install guide. A symptom with no mechanical finding has
+  no route, and `check.md` accepts a free-text symptom without ever saying to consult the fix set
+  when nothing fired. **Do:** a short symptom-routing list in `findings-catalog.md` closes it. See
+  `ailment-catalog-pattern.md`.
+- **Diagnosis lost its literate fallback.** `conventions.md` now files `check` under *Implementation*
+  ("the script is the specification"), and `check.md` says "not a literate fallback". When `lr-core`
+  cannot run — heavily overlapping with the situations people run a health check in — there is no
+  hand-executable diagnosis path, where v44 had two. **Do:** decide deliberately whether that is
+  acceptable or whether the workspace layer keeps its literate route. See
+  `literate-accelerator-pattern.md`, `script-emits-data-doc-owns-the-words.md`.
+- **Minor, same ship:** `R13` compares a git commit time against a filesystem mtime (not versioned,
+  fires for about half the agents); the "Check your Lore installation" block is pasted verbatim into
+  four docs and names all three engines inside engine-specific guides
+  (`per-site-authoring-is-not-duplication.md` — run the scope test); `release-notes/37.md` still
+  links the deleted `docs/doctor.md`.
+
+### Operation Notice Convention (shipped v45, 2026-09-09)
+
+See `operation-notice-convention.md`.
+
+- **The convention contradicts its own first application.** `conventions.md` says a notice "fires
+  only when the operation actually runs. Silence on a no-op is the point." `version-check.md` Step 0
+  fires *before* the collision gate, so it can announce a write-commit-push that then defers with
+  zero writes. **Firing before the write is the correct behavior; the rule's wording is what is
+  wrong. Do:** reword the convention. General form worth naming as its own topic if it recurs: when
+  a convention and its first implementation land in the same change, audit the implementation
+  against the rule's *literal words* — the author reads the rule as they meant it, not as they
+  wrote it.
+- **The convention is applied on one call path of two.** `attach.md` and `process-merge.md` both run
+  full `preflight`, which runs the workspace-refresh leg — neither passes `--no-pull` nor
+  `--no-workspace-refresh`, and neither renders `data.workspace_refresh` at all. So attach and merge
+  can still fast-forward every repo in the workspace silently, which is one of the two cases the
+  convention names; only `agent-boot.md` renders it. **Do:** render the notice on all three paths.
+  Instance of `a-change-set-is-wider-than-its-diff.md` — naming two example cases obliges you to
+  check every *call path* of both, not the one doc you happened to be editing.
+
+### Ailment Catalog (was `/lr:doctor`, v12; skill removed v45)
+
+**v45 removed `/lr:doctor`.** The catalog survives as `docs/fix-*.md`, reached from `/lr:check` finding rows and the install guides; items below predate that and are re-read in that light.
+
 
 - **Accretion candidates** — additional ailments to capture when real-world cases surface: workspace-sync conflict shapes, common merge-conflict reconciliation recipes, onboarding-doc anti-patterns (terminology/framing traps), agent boot failures from missing `lore-repo.md`/`role.md` files, registered command desynced from agent name. Add as cases distill from real usage; do not pre-populate. See `ailment-catalog-pattern.md`.
-- **`doctor-macos-tcc-permission-loss` — ready to author (2026-07-25).** Mid-session revocation of macOS TCC access to `~/Documents` makes every read under the workspace fail with `Operation not permitted` while `~` stays readable. Distinctive signature, one-line probe to confirm, one-line user fix (re-grant in System Settings, fresh session), agent-unrepairable — and it silently corrupts any lifecycle run spanning the transition. Clears the universality gate: any macOS user whose workspace lives under a TCC-protected directory. Diagnosis, misdiagnoses to skip, and blast radius are already written up in `macos-documents-permission-loss-mid-session.md`; the remaining work is the catalog member doc + registration in `docs/doctor.md`.
+- **`doctor-macos-tcc-permission-loss` — ready to author (2026-07-25).** Mid-session revocation of macOS TCC access to `~/Documents` makes every read under the workspace fail with `Operation not permitted` while `~` stays readable. Distinctive signature, one-line probe to confirm, one-line user fix (re-grant in System Settings, fresh session), agent-unrepairable — and it silently corrupts any lifecycle run spanning the transition. Clears the universality gate: any macOS user whose workspace lives under a TCC-protected directory. Diagnosis, misdiagnoses to skip, and blast radius are already written up in `macos-documents-permission-loss-mid-session.md`; the remaining work is the catalog member doc (now `fix-macos-tcc-permission-loss.md`) + registration in `docs/findings-catalog.md`.
 - **Ailment-discovery hook in finalization** — when a session diagnoses an issue not yet in the catalog, the finalize flow should prompt: "Was this an ailment? Add a `doctor-<slug>.md` topic?" Lightweight discipline cue. Trigger: after enough sessions where catalog gaps were noticed only after the fact.
-- **`/lr:check` cross-reference to `/lr:doctor`** — already added in v12 (one-line cross-ref in `check.md` and `update.md`). If users discover further gaps where `/lr:check` reports clean but a runtime issue persists, that's the signal to add a new ailment.
+- ~~**`/lr:check` cross-reference to `/lr:doctor`**~~ — moot since v45: `check` *is* the front door. If users discover gaps where `/lr:check` reports clean but a runtime issue persists, that's still the signal to add a new `fix-*.md` case.
 
 ### Lifecycle Harness Reliability (found 2026-08-31, running the v44 gate)
 
@@ -471,7 +521,7 @@ is the open half.
   `ephemeral-session-plugin-snapshot-topology.md`, `claude-engine-capabilities.md` § Operational
   shape, `point-of-use-guardrails-beat-recorded-lore.md`.
 - ~~**README skills table sync**~~ — done in v11. Table now lists all skills, grouped by purpose (workspace setup / working with agents / session lifecycle / authoring / maintenance), with `/lr:finalize` description corrected to the four-phase form. Quick Start was also restructured to lead with the team-joining path.
-- **README skill table refresh for v12** — verify `/lr:doctor` is added to the skills table (Maintenance group is the natural home). Trigger: next time the README is touched, or sooner if asked.
+- **README skill table refresh** — the table must reflect 31 skills after v45 removed `doctor` and `workspace-status`, with `/lr:check` described as the single health front door. Trigger: next time the README is touched, or sooner if asked.
 - **Adopter command-surface curation** — inventory every skill and classify it as daily workflow, collaboration, maintenance, setup, advanced module, or style. Decide retain/rename/combine/progressively disclose/retire, so a newcomer sees load → work/recall → collaborate → finalize → diagnose/refresh without learning the full catalog. Not a raw command-count reduction exercise. See `adopter-command-surface-curation.md`.
 - **`trilens-loop.md` "a silent round is not a clean round" is not binding at the weakest Codex tier (2026-07-25).** Shipped as-is in v30: codex/gpt-5.4-mini intermittently returns `FINDINGS: none` on lifecycle scenario 28 over a file with two planted defects — declaring a silent round clean instead of following the retry-then-report rule. 1 failure in 2 repeat runs with an unchanged doc, so it reads as weak-model variance rather than a procedure defect, and the same doc passes on the other two engines and on codex's other scenario. The rule is correct but under-specified for that tier. Candidate fixes: make the retry step an unconditional numbered action rather than a conditional rule, or have the host assert receipt per reviewer before scoring the round. See `trilens-loop-feature.md`, `haiku-ambiguity-detector.md`, `execution-testing-catches-blind-ambiguity.md`.
 - **Markdown-renderer compatibility for HTML-comment markers** — `/lr:init` uses `<!-- lr:init:start -->` markers. Some renderers strip HTML comments. If any user's tooling bites on this, switch to visible sentinel headings. No action until observed.

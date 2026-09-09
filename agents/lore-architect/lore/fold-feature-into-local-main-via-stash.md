@@ -17,3 +17,8 @@ When local `main` already carries unrelated uncommitted WIP, merge a finished fe
 Do not commit or push the unrelated WIP as part of folding the feature. Do not merge into the feature worktree — keep the top-level checkout on the default branch (workspace invariant).
 
 Used when folding `lore-architect/workspace-scratch-ignores` into local `main` while v33 follow-up edits were still dirty on `lore-framework` / `lore-framework-dev`.
+
+**When the WIP collides with the incoming branch, stashing is not enough** — and blind `git stash`
+is itself unsafe here, because the stash stack is shared across worktrees and another session can
+pop it. Prove supersession first:
+[prove-superseded-before-discarding-colliding-wip.md](prove-superseded-before-discarding-colliding-wip.md).

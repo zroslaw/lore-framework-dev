@@ -50,6 +50,9 @@ the framework's vocabulary without a separate tutorial.
 
 ## Shape facts worth keeping
 
+**Count note:** every number below is the v44 state. **v45 removed `doctor` and `workspace-status`, so the convention now covers 31 skills** — re-count before quoting it in release notes
+([consistency-checks.md](consistency-checks.md) § When a ship's claim earns a check).
+
 33 skills, but not 33 docs. `list-agents` and `list-repos` have no companion doc and carry Step 0 in
 `SKILL.md`; the two `df-*` skills live under `df/`, not `docs/`; and `register-repo.md` backs **four**
 skills, so its Step 0 branches on the invoked operation. Editing a Cursor mirror's source

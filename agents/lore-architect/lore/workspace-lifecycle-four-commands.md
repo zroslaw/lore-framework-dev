@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "The v37 workspace command surface — init (converges), pull, push, status — all four reading one deterministic scanner."
+summary: "The workspace command surface — init (converges), pull, push, and diagnosis — all reading one deterministic scanner; v45 folded the status half into /lr:check."
 parent: lore-context.md
 ---
 
@@ -11,6 +11,7 @@ parent: lore-context.md
     workspace-pull    consume  — pull the workspace repo, clone declared repos, pull top-level repos
     workspace-push    publish  — commit and push the framework-managed workspace files
     workspace-status  diagnose — read-only; every finding names the command that fixes it
+                                (v45: absorbed into `/lr:check`; the skill no longer exists)
 
 ## The gap this closed
 
@@ -30,9 +31,15 @@ there — and only fails from the outside, where nobody is looking.
 state, descriptors, children, memory-file state, shortcut inventory, the framework-managed path set
 with dirty classification, and findings **S1–S18** (v42 added S17, routing descriptions; v43 added
 S18, project-scope plugin settings). Init observes with it, status renders it,
-`/lr:check` #22–#24 render the subset they own, push takes its path set from it. No doc restates the
-rules; `docs/workspace-status.md` owns each finding's wording, per
+`/lr:check` renders them, push takes its path set from it. No doc restates the
+rules; the shared finding catalog owns each finding's wording, per
 [script-emits-data-doc-owns-the-words.md](script-emits-data-doc-owns-the-words.md).
+
+**v45 changed the surface, not the scanner.** `/lr:workspace-status` was removed and its
+diagnosis became the workspace layer of `/lr:check`; `docs/workspace-status.md` became the shared
+`docs/findings-catalog.md`, now serving every layer and every caller. Findings gained a new S19
+(per-repo pull freshness) and S10 `stale_command_list`. Init, pull and push are unchanged. See
+[unified-check-front-door.md](unified-check-front-door.md).
 
 **Init converges** — no `--refresh` / `--reconfigure`. Converge is defined precisely as *drive the
 scanner's findings to zero*, which is exactly what keeps init and status from drifting apart. A
@@ -102,5 +109,6 @@ Both are local and cheap. Do not expect a scanner finding to carry it. Whether r
   that makes this surface run on its own at boot, and the first consumer of the child-dirty gap above.
 - [project-scope-plugin-config-feature.md](project-scope-plugin-config-feature.md) — the v43 addition
   to `MANAGED_PATHS` and finding S18.
-- [consistency-checks.md](consistency-checks.md) — `/lr:check` #22–24, the other renderer of these
-  findings.
+- [consistency-checks.md](consistency-checks.md) — the pre-v45 numbered catalog that used to render
+  these findings as #22–24.
+- [unified-check-front-door.md](unified-check-front-door.md) — where the diagnosis half went in v45.

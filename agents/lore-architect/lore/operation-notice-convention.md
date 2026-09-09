@@ -1,14 +1,14 @@
 ---
 lore: 1
 type: topic
-summary: "v45 draft: a conditional notice fired when a procedure does something consequential the user did not ask for — distinct from a Step 0 announcement, and silent on no-ops by design."
+summary: "Shipped v45: a conditional notice fired when a procedure does something consequential the user did not ask for — distinct from a Step 0 announcement, and silent on no-ops by design."
 parent: lore-context.md
 ---
 
 # Operation Notice
 
-Drafted in v45 (`v45-boot-announcements`), after the user asked why boot silently migrates a lore
-repo or fast-forwards the workspace.
+**Shipped in v45**, after the user asked why boot silently migrates a lore repo or fast-forwards
+the workspace.
 
 Both are **sub-procedures**, and `conventions.md` § Skill Purpose Announcement says *one
 announcement per user invocation* — a doc read as a sub-procedure does not print its own Step 0, so
@@ -36,7 +36,29 @@ the safety checks and conditional publication. The first draft omitted push; a l
 promise was also inaccurate. Verify the procedure being described
 ([verify-before-acting-on-suspected-bugs.md](verify-before-acting-on-suspected-bugs.md)).
 
+## Two open findings, shipped knowingly
+
+Filed in [the backlog](framework-improvements-backlog.md) § Framework Upkeep, Distribution & Docs:
+
+- **The rule contradicts its own first application.** `conventions.md` says a notice "fires only
+  when the operation actually runs. Silence on a no-op is the point." But `version-check.md` Step 0
+  fires *before* the collision gate, so it can announce a write-commit-push that then defers with
+  zero writes. **Firing before the write is the correct behavior; the rule's wording is what is
+  wrong.** General form worth naming if it recurs: when a convention and its first implementation
+  land in the same change, audit the implementation against the rule's *literal words* — the author
+  reads the rule as they meant it, not as they wrote it.
+- **The convention is applied on one call path of two.** `attach.md` and `process-merge.md` both run
+  full `preflight`, which runs the workspace-refresh leg; neither passes `--no-pull` nor
+  `--no-workspace-refresh`, and neither renders `data.workspace_refresh` at all. So attach and merge
+  can still fast-forward every repo in the workspace silently — one of the two cases the convention
+  exists to cover. Only `agent-boot.md` renders it. An instance of
+  [a-change-set-is-wider-than-its-diff.md](a-change-set-is-wider-than-its-diff.md): naming two
+  example cases obliges you to check every *call path* of both, not the one doc you happened to be
+  editing.
+
 ## See Also
 
 - [skill-announcement-convention.md](skill-announcement-convention.md)
 - [required-literal-output-is-what-models-drop.md](required-literal-output-is-what-models-drop.md)
+- [unified-check-front-door.md](unified-check-front-door.md) — the other half of the v45 ship.
+- [a-change-set-is-wider-than-its-diff.md](a-change-set-is-wider-than-its-diff.md)

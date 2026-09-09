@@ -1,3 +1,20 @@
+---
+lore: 1
+type: topic
+summary: "The thin-skill-over-open-ended-named-case-catalog pattern that landed with /lr:doctor in v12; the pattern survives v45's removal of the skill as the fix-*.md docs."
+parent: lore-context.md
+---
+
+# Ailment Catalog Pattern
+
+**Status (v45, 2026-09-09): `/lr:doctor` no longer exists.** `/lr:check` absorbed it, the three
+`doctor-*.md` member docs were renamed `fix-*.md`, and two of the ailments became computed findings
+(P2, P4). **The pattern below is still live** — the members survive as a named case catalog reached
+from finding rows and the install guides — but the symptom-first *matching procedure* it describes
+lost its front door, which is one of the v45 open findings in
+[the backlog](framework-improvements-backlog.md). Read the rest of this topic as the pattern, and
+[unified-check-front-door.md](unified-check-front-door.md) for what routes to it now.
+
 **An orchestration pattern where a thin skill routes user-described cases against an open-ended catalog of named ailments, each with its own atomic topic and remedy.** Landed with `/lr:doctor` in v12.
 
 A skill-doc-pattern variant — refines `skill-doc-pattern.md` along the case-decomposition axis (open-ended, additive) rather than the phase-decomposition axis (sequential, fixed) used by `/lr:finalize` since v8.

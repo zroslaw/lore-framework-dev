@@ -1,13 +1,13 @@
 ---
 lore: 1
 type: topic
-summary: "Historical consistency-check catalog and rationale, with routing to the unreleased v45 unified health front door."
+summary: "Historical pre-v45 consistency-check catalog and rationale, superseded by the shipped unified health front door."
 parent: lore-context.md
 ---
 
 # Consistency Checks
 
-The numbered catalog below records the pre-v45 design, not the candidate implementation. For the unreleased replacement and its mechanical/AI boundary, read [Unified Check Front Door](unified-check-front-door.md).
+**Historical.** The numbered catalog below records the pre-v45 design. **v45 replaced it**: the hand-numbered checks became script findings under stable `P` / `R` / `S` prefixes, and `/lr:check` absorbed `/lr:doctor` and `/lr:workspace-status`. For the shipped shape and its mechanical/AI boundary, read [Unified Check Front Door](unified-check-front-door.md). Keep this topic for the *rationale* behind individual checks and for the ship-claim rule below, not as a description of the current command.
 
 The historical `/lr:check` catalog describes 23 consistency checks. Defined in `<framework-root>/docs/check.md`.
 
