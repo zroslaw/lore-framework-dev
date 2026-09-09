@@ -358,12 +358,104 @@ class CheckTests(unittest.TestCase):
     def test_new_agent_missing_context_is_informational(self):
         agent = self.agent()
         (agent / 'lore-context.md').unlink()
-        data, _ = self.check(scope='repos')
+        data, warnings = self.check(scope='repos')
+        self.assertEqual(warnings, [])
+        self.assertTrue(data['complete'])
+        coverage = data['repos'][0]['coverage'][agent.name]
+        self.assertEqual(coverage['files']['total'], 0)
+        self.assertEqual(coverage['status'], 'empty')
         rows = [f for f in data['findings'] if f['id'] == 'R5']
         self.assertEqual([(f['severity'], f['data']['reason']) for f in rows],
                          [('info', 'optional_context_absent')])
         self.assertTrue(all(f['severity'] == 'info' for f in data['findings']
                             if f['data'].get('issue') == 'missing_context'))
+
+    def test_documented_single_repo_pull_clears_freshness_only_on_success(self):
+        repo = self.repo()
+        git(repo, 'add', '.')
+        git(repo, 'commit', '-qm', 'Initial')
+        remote = self.root / 'remote.git'
+        remote.mkdir()
+        git(remote, 'init', '--bare', '-q')
+        git(repo, 'remote', 'add', 'origin', str(remote))
+        git(repo, 'push', '-qu', 'origin', 'HEAD')
+        catalog = (FRAMEWORK / 'docs/findings-catalog.md').read_text()
+        section = catalog.split('## Single-repo freshness repair', 1)[1]
+        command = section.split('```sh\n', 1)[1].split('```', 1)[0]
+        command = command.replace('<repo>', str(repo)).replace('<framework-root>', str(FRAMEWORK))
+        self.assertIsNone(read_stamp(str(repo)))
+        result = subprocess.run(['bash', '-c', command], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data, _ = self.check(scope='workspace')
+        self.assertEqual(data['freshness'][0]['status'], 'recent')
+        self.assertFalse(any(f['id'] == 'S19' for f in data['findings']))
+        stamp = read_stamp(str(repo))
+        git(repo, 'remote', 'set-url', 'origin', str(self.root / 'missing.git'))
+        result = subprocess.run(['bash', '-c', command], capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(read_stamp(str(repo)), stamp)
+
+    def test_dangling_shortcuts_without_remaining_repos(self):
+        agent = self.agent()
+        shortcuts = [self.shortcut(agent, engine) for engine in ('claude', 'codex', 'cursor')]
+        shutil.rmtree(agent.parents[1])
+        for scope in ('all', 'repos'):
+            with self.subTest(scope=scope):
+                data, warnings = self.check(scope=scope)
+                self.assertEqual(data['state'], 1)
+                self.assertEqual(data['repos'], [])
+                broken = [f for f in data['findings'] if f['id'] == 'R11']
+                self.assertEqual({f['data']['path'] for f in broken}, {str(p) for p in shortcuts})
+                self.assertTrue(all(f['severity'] == 'error' for f in broken))
+                self.assertEqual(warnings, [])
+        data, _ = self.check(scope='plugin')
+        self.assertFalse(any(f['id'].startswith('R') for f in data['findings']))
+
+    def test_unreadable_role_reports_incomplete_metadata_check(self):
+        agent = self.agent()
+        role = str(agent / 'role.md')
+        from lr_core.common import read_text
+        def read_with_denied_role(path):
+            return None if path == role else read_text(path)
+        # Inject a read failure so the regression also runs under privileged users.
+        with patch('lr_core.repo_scan.read_text', side_effect=read_with_denied_role):
+            data, warnings = self.check(scope='repos')
+        errors = [f for f in data['findings'] if f['id'] == 'R4'
+                  and f['data'].get('reason') == 'unreadable_role']
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0]['severity'], 'error')
+        self.assertFalse(data['complete'])
+        self.assertTrue(any(role in warning for warning in warnings))
+        self.assertFalse(any(f['id'] == 'R5' for f in data['findings']))
+
+    def memory_payload(self, *skills):
+        put(self.ws / 'lore-workspace.md', '---\ndescription: Workspace\n---\n')
+        rows = ''.join('| `%s` | What it does |\n' % s for s in skills)
+        put(self.ws / 'AGENTS.md',
+            '# Workspace\n\n## Lore Framework\n\n| Skill | What it does |\n|---|---|\n'
+            + rows + '\n## Repositories\n\n## Agents\n')
+        put(self.ws / 'CLAUDE.md', '@AGENTS.md\n')
+
+    def test_routing_map_naming_a_removed_skill_is_reported(self):
+        self.agent()
+        self.memory_payload('boot <agent>', 'check', 'workspace-status')
+        rows = [f for f in self.check(scope='workspace')[0]['findings'] if f['id'] == 'S10']
+        self.assertEqual(len(rows), 1)
+        self.assertIn('stale_command_list', rows[0]['data']['violations'])
+        # Only the removed one, and the heading counts stay clean beside it.
+        self.assertEqual(rows[0]['data']['unknown_skills'], ['workspace-status'])
+        self.assertFalse([v for v in rows[0]['data']['violations'] if v.startswith('section_')])
+
+    def test_current_routing_map_and_unreadable_framework_are_distinguished(self):
+        self.agent()
+        self.memory_payload('boot <agent>', 'check', 'workspace-init')
+        self.assertFalse(any(f['id'] == 'S10' for f in self.check(scope='workspace')[0]['findings']))
+        # No skills/ tree is absent evidence, never a clean routing map.
+        data, _ = run_check(str(self.ws), str(self.root / 'no-framework'), 'codex', True,
+                            scope='workspace')
+        self.assertIsNone(data['workspace']['memory']['agents_md']['unknown_skills'])
+        self.assertFalse(any('stale_command_list' in f['data']['violations']
+                             for f in data['findings'] if f['id'] == 'S10'))
 
     def test_unknown_framework_version_does_not_invent_repo_skew(self):
         self.agent()
