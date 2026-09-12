@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: context
-summary: "Core positioning, operating stance, and strategic navigation for Lore Agents advocacy."
+summary: "Core positioning, market evidence, operating stance, and strategic navigation for Lore Agents advocacy."
 ---
 
 # Lore Context
@@ -10,8 +10,14 @@ Lore Agents is presented first as a practical product for people who rely on AI 
 
 Learning is deliberately curated, not automatic: reflection and merge turn decisions, feedback, domain knowledge, and operational wisdom into durable expertise; recall, consultation, attachment, and collaboration make that expertise useful across an agent team. Git-backed Markdown, portability, cross-engine support, and team sharing support this story. Use cases extend beyond software engineering to personal domains, research and evaluation, long-running projects, integrations, and shared expertise.
 
+Positioning is now checked against measured market evidence rather than intuition. The current tagline "Named AI specialists that learn and grow with you" is contested in every component and awaits a deliberate re-cut; the git-backed-Markdown substrate is no longer ours to claim and re-cuts as review and distribution — expertise you clone and correct in a pull request. The strongest verified claim is that 0 of 981 agent definitions across the three largest subagent collections use any memory field: about a thousand named specialists, none of which remember anything. Frame benefits as workflow and continuity, not accuracy. "Lore" is already taken twice in this category, and that naming decision is open and cheapest to make now.
+
+Growth comes from reducing install friction where the market already lives and from becoming a dependency inside other people's frameworks; no content channel moved either studied project's curve. Content carries the message, not the growth. Measure adoption with install and download curves — GitHub stars are a lagging attention metric that misled in three directions in a single sweep.
+
 The public voice leads with the pain, working model, benefit, demonstrations, and real use; machinery follows. Copy is concise, visually clear, and logically explicit. Positioning develops through small, explicitly compared variants, and only the selected direction is implemented. Agent-design philosophy deepens the story without displacing the product. Claims stay current and evidence-backed; facts, hypotheses, and experiments remain distinct. Lore Architect owns architecture and implementation truth and is consulted when a public claim depends on product behavior or design history.
 
-The maintainer has limited communication time, so advocacy preserves the larger roadmap while choosing the smallest useful next action and adapting one strong source artifact across suitable channels. The immediate path is GitHub destination first, one public-safe demonstration, an internal Agoda developer-channel message, then a LinkedIn adaptation and learning from reactions.
+The maintainer has limited communication time, so advocacy preserves the larger roadmap while choosing the smallest useful next action and adapting one strong source artifact across suitable channels. The immediate content path is GitHub destination first, one public-safe demonstration, an internal Agoda developer-channel message, then a LinkedIn adaptation and learning from reactions — run alongside plugin-directory presence and framework integrations, which outrank any content step. The first public article opens with a real breakdown and a concrete example; the approach arrives fourth, as the payoff. Internal Agoda framing is the exception where concept-first works.
 
-Open [core positioning](lore/core-positioning.md) for messaging and audience choices, [initial rollout](lore/initial-rollout.md) for the first campaign and Agoda safety boundary, [channel strategy](lore/channel-strategy.md) for the long-term distribution system, and [advocacy operating model](lore/advocacy-operating-model.md) for execution and learning discipline.
+Competitive and market claims rest on the [market research](workdir/market-research/README.md) archive under `workdir`; its index carries a corrections log and supersedes any single study file.
+
+Open [core positioning](lore/core-positioning.md) for messaging, verified and contested claims, and the naming decision; [initial rollout](lore/initial-rollout.md) for the first campaign, the first article's structure, and the Agoda safety boundary; [channel strategy](lore/channel-strategy.md) for the long-term distribution system and its leverage order; [growth evidence](lore/growth-evidence.md) for what actually grew comparable projects and how to measure it; and [advocacy operating model](lore/advocacy-operating-model.md) for execution and learning discipline.

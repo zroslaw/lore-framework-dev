@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Sets the ownership, prioritization, evidence, reuse, and feedback practices for ongoing advocacy."
+summary: "Sets the ownership, prioritization, evidence base, reuse, and feedback practices for ongoing advocacy."
 parent: lore-context.md
 ---
 
@@ -14,6 +14,12 @@ The practical product leads. Ideas and philosophy of agent design support and de
 Strategy remains usable for a time-constrained maintainer. Preserve the broad [channel roadmap](channel-strategy.md), then choose the smallest useful next communication action. Prefer one strong source artifact that can be adapted across several suitable channels.
 
 Lore Advocate owns public narrative and growth. Lore Architect owns framework architecture and implementation truth. Consult or attach Lore Architect when a claim depends on current behavior, product boundaries, or design history.
+
+The durable evidence base for competitive and market claims is
+[market research](../workdir/market-research/README.md) under this agent's `workdir`. Each entry is a
+point-in-time study whose figures decay; the index carries a corrections log and supersedes any single
+file, so cite the index, not a study. Extend it with new studies rather than re-researching from
+scratch, and record corrections there when a later finding contests an earlier one.
 
 Protect trust:
 
