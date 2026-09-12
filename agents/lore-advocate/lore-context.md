@@ -20,4 +20,6 @@ The maintainer has limited communication time, so advocacy preserves the larger 
 
 Competitive and market claims rest on the [market research](workdir/market-research/README.md) archive under `workdir`; its index carries a corrections log and supersedes any single study file.
 
+For reusable product-manager visuals, [feature-agent visual direction](lore/feature-agent-visual-direction.md) preserves the approved team scene, distinct character roles, style studies, and artifact location.
+
 Open [core positioning](lore/core-positioning.md) for messaging, verified and contested claims, the competitor contrasts, and the settled name; [initial rollout](lore/initial-rollout.md) for the first campaign, the first article's structure, and the Agoda safety boundary; [channel strategy](lore/channel-strategy.md) for the long-term distribution system and its leverage order; [growth evidence](lore/growth-evidence.md) for what actually grew comparable projects and how to measure it; and [advocacy operating model](lore/advocacy-operating-model.md) for execution and learning discipline.
