@@ -13,3 +13,6 @@ __pycache__/
 
 # Local scratch (workspace convention)
 .tmp/
+
+# Quality-suite debug output (regenerated; see tests/quality/)
+results/
