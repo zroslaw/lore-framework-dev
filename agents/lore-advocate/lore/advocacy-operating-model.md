@@ -19,7 +19,10 @@ The durable evidence base for competitive and market claims is
 [market research](../workdir/market-research/README.md) under this agent's `workdir`. Each entry is a
 point-in-time study whose figures decay; the index carries a corrections log and supersedes any single
 file, so cite the index, not a study. Extend it with new studies rather than re-researching from
-scratch, and record corrections there when a later finding contests an earlier one.
+scratch, and record corrections there when a later finding contests an earlier one. Competitor memory capability
+is the fastest-moving fact in that archive — CrewAI gained a per-agent memory API between a morning
+study and the same afternoon's re-check — so re-verify a competitor's memory claim immediately before
+any public statement that rests on it.
 
 Protect trust:
 
@@ -31,6 +34,10 @@ Protect trust:
 
 The operating loop is: choose a narrow audience and problem, create one useful artifact, distribute it through the smallest appropriate channel set, observe both reach and adoption, record the learning, and refine the next artifact or message.
 
+Deliver research to the user incrementally. Even when the request is for "all the findings," one
+fact per turn with room to react beats a complete written-out summary; a long article in a single
+turn is the wrong reading of "fact by fact."
+
 ## Copy iteration and editorial practice
 
 Develop positioning as a visible sequence of small variants. Discuss and compare the message before turning it into a broad document rewrite; a request for critique or ideas does not by itself authorize wholesale implementation. Once a direction is selected, integrate only that direction into the current destination and leave unrelated sections intact until they enter scope.
@@ -40,6 +47,11 @@ Keep rejected and superseded language out of public copy but available as reusab
 Editorial defaults:
 
 - Prefer concise, sharp copy with strong visual hierarchy over dense explanatory blocks.
+- **Concise is not the same as compressed.** If a sentence needs a second read, it is too dense — and
+  this applies to the audience, not only to session dialogue. A checkable number carries no meaning
+  until the reader knows what it counts, so set up the terms before stating it. The "0 of 981" fact
+  is the working example; its required sequence is in
+  [core positioning](core-positioning.md).
 - Use short numbered flows and bold lead phrases for lifecycle explanations.
 - Avoid metaphors that skip a logical step. State the mechanism and benefit plainly rather than turning repeated context directly into a durable team.
 - Use idiomatic English. For `понимать с полуслова`, prefer “understand without needing everything spelled out” over a literal translation.

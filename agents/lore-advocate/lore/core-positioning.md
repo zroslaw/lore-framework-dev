@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Positions Lore Agents around growing AI teams, deliberate curation, collaboration, and practical proof, with the market-verified and contested claims."
+summary: "Positions Lore Agents around growing AI teams, role-bounded whole-session learning, collaboration, and practical proof, with the market-verified and contested claims and the settled name decision."
 parent: lore-context.md
 ---
 
@@ -36,10 +36,10 @@ Describe Lore itself as the agent's Git-backed directory, not as a workspace. `r
 The positioning has three connected pillars:
 
 1. **Named, role-based specialists are the unit of knowledge.** An agent has an identity, responsibilities, and accumulated expertise that can span sessions and projects.
-2. **Knowledge is deliberately curated.** Reflection and merge turn experience into useful working knowledge instead of automatically accumulating every interaction. Frame this as higher-quality, team-scale knowledge, not as extra maintenance. This is a contrarian posture rather than an invention: the rest of the market automates capture, and mem0 explicitly calls manual curation a "scaling wall" it exists to eliminate. Claim the posture and the reason for it, never the novelty.
+2. **Knowledge is role-bounded and taken from the whole session.** Two properties carry this pillar, and neither of them is "manual". First, reflection runs at the end of a session, over the entire session: with the full arc in view the agent can judge what mattered, what turned out wrong, and what was noise. Competitors extract from fragments — mem0 and CrewAI pull facts out of individual task outputs, Letta's sleeptime process fires roughly every five steps — so they summarize pieces without knowing how the story ended. Second, the agent's **role is the relevance boundary**: the role decides what is worth keeping in the first place, which is what keeps the knowledge base focused rather than merely large. Everyone else preserves everything and filters at retrieval time by similarity, recency decay, importance heuristics, or inferred scope — hoarding plus search. The contrarian contrast with mem0's "scaling wall" still holds, but the axis is **focused vs. everything**, never **manual vs. automatic**. Claim the posture and the reason for it, never the novelty.
 3. **Specialists collaborate.** Agents recall their own knowledge and can consult, attach, and work with other agents' expertise.
 
-The central mental model is a team of teammates: give specialists resources and tasks, work alongside them, and guide them when needed. In return, sustained work makes them more capable and self-sufficient over time. This is not automatic learning: reflection and finalization deliberately curate decisions, feedback, domain knowledge, and operational wisdom into durable expertise.
+The central mental model is a team of teammates: give specialists resources and tasks, work alongside them, and guide them when needed. In return, sustained work makes them more capable and self-sufficient over time. Reflection and merge turn decisions, feedback, domain knowledge, and operational wisdom into durable expertise. Do not frame that as the user approving what the agent learns. Finalization being user-invoked is an implementation detail — it can be triggered automatically when a session goes stale or is archived — so human approval is not an axis we compete on, and claiming it makes us the slow, high-maintenance option in a market that is automating.
 
 Git-backed Markdown, portability, team sharing, and support across coding engines are important supporting facts, but they are not the principal differentiation on their own — and the git substrate specifically is no longer ours to claim. Letta shipped Context Repositories (Markdown with YAML frontmatter in a real git repo, syncable to a GitHub remote) on 2026-02-12, and Claude Code ships a native per-subagent `memory:` field whose `project` scope is documented as shareable through version control. Leading with the substrate invites an easy and correct rebuttal. Re-cut it as a **review and distribution** claim instead: expertise as a team artifact you clone, correct in a pull request, and publish. Letta's announcement never mentions pull requests, review, or teams, so that framing is unoccupied.
 
@@ -51,13 +51,23 @@ The strongest current proof story is self-hosting: Lore Agents is developed with
 
 The first target audience is people who already use coding agents daily across multiple sessions or projects and are tired of repeatedly rebuilding context. This is a beachhead, not the category boundary. Start use cases with the broad continuity pattern, then show personal domains, research and evaluation, long-running projects, integrations, multi-specialist collaboration, and shared software expertise. Individual expertise can accumulate first and become team-shared by publishing the agent repo.
 
-The voice mainly explains the practical product, then occasionally explores role-based agents, deliberate curation, shared team knowledge, and agent collaboration as design ideas. Even for technical audiences, do not reduce the core story to software engineering or the SDLC. Keep terminology exact: distinguish the Lore Agents framework from Lore Agents as named specialists whenever grammar or product meaning could be ambiguous.
+The voice mainly explains the practical product, then occasionally explores role-based agents, role-bounded learning, shared team knowledge, and agent collaboration as design ideas. Even for technical audiences, do not reduce the core story to software engineering or the SDLC. Keep terminology exact: distinguish the Lore Agents framework from Lore Agents as named specialists whenever grammar or product meaning could be ambiguous.
 
 Working pitch, pending the re-cut described below:
 
 > A team of named AI specialists that learns and grows with you.
 
 Short-description copy currently uses the same promise: "Named AI specialists that learn and grow with you."
+
+**Direction for the re-cut, not a decision.** The user pointed toward *"a team of virtual
+self-learning and self-growing AI experts"* on 2026-09-12 and explicitly deferred the final wording.
+The logic is that "named specialists" is the crowded half (CrewAI 58.4k, BMAD 52.9k, wshobson 39.6k)
+while the growth property is what the subagent collections demonstrably lack. The tension to resolve
+before adopting it: "that learn" is itself contested (OpenAI Frontier, claude-mem, mem0, Letta), so
+this shifts weight onto the other crowded component. Whatever wording is selected has to carry what
+actually distinguishes us — whole-session reflection and the role as the relevance boundary — rather
+than a bare promise of learning. Develop it as explicitly compared variants, implement only the
+selected one, and then hold it.
 
 ## Claims verified against the market
 
@@ -73,8 +83,20 @@ agent definitions use the `memory:` field**. Roughly a thousand named specialist
 them remember anything. It was measured by clone-and-grep, so it is checkable rather than asserted,
 and it is the cleanest one-line statement of what Lore adds.
 
+**The number means nothing to a first-time reader without setup, so never state it first.** Tested
+live: the compressed archive form (three collection names, star counts, "981 definitions, zero use
+the memory field") did not land and needed a full rephrase. Budget three to five short sentences
+ahead of it, in this order: these GitHub collections of ready-made AI agents are very popular (76k
+stars across three) -> one of those "specialists" is just a Markdown file holding instructions, a
+prompt with a job title -> Claude Code has a `memory:` setting, one line that gives an agent a notes
+folder it reads back later -> we downloaded all three collections, counted 981 agent files, and
+searched for that line, and found zero -> so the market already loves named specialists, and every
+one of them starts each session blank. The compressed form stays correct for the archive and for
+readers already inside the category.
+
 **Also defensible:** role as the relevance boundary for what an agent learns — nobody else has this,
-as the rest of the market filters by recency, importance, embedding, or file size; agents consulting
+as the rest of the market filters by recency, importance, embedding, inferred scope, or file size;
+and reflection over a whole session rather than over individual task outputs or an N-step interval; agents consulting
 one another's separate knowledge bases; and cross-engine support combined with per-agent durable
 knowledge.
 
@@ -89,21 +111,44 @@ that list.
 problems. A hostile critic can cite it, so do not stand on ground that paper already took.
 
 **Closest competitor is Letta Code** (~3.3k stars), which reaches roughly 3.5 of our 5 axes. It stops
-short on roles (its subagents are generic utilities; memory is an identity, not a professional
-remit), on deliberate curation, on cross-engine support (it is its own harness), and on team review.
+short on roles, on curation control, on cross-engine support (it is its own harness), and on team
+review. The concrete evidence for the roles gap is its `persona.md`, which sits in the always-loaded
+`system/` tier and reads *"I am a Letta agent. I remember durable preferences and improve with use."*
+That is a personality and a voice, not a declared domain, so nothing there bounds what the agent
+considers worth saving. Its subagents — `recall`, `history-analyzer`, plus the "dreaming" and
+"memory doctor" workers — are staff for the memory system, not named professionals with domains; the
+word is shared, the concept is not, so never let a comparison table imply equivalence. Its default
+update path is continuous and unattended (tool edits auto-commit; sleeptime fires on a step
+interval); `/remember` is the exception. Same substrate, opposite control model.
+
+**CrewAI (58.4k stars) is the orchestration contrast.** An agent there is config with three text
+fields — `role`, `goal`, `backstory` — grouped into a crew that `crewai run` executes once and
+exits; the definition never changes on its own, so the team is a list in a config file rather than
+colleagues who develop. The one-line contrast that works: **they orchestrate agents; we accumulate
+expertise** — their agents are workers you configure, ours are specialists you teach. Since
+2026-09-12 they do ship memory (a unified API with agent-level scoping, LLM-inferred scopes, and a
+LanceDB vector store), so do not claim they have none; claim that capture is automatic, model-decided,
+unbounded by any declared role, and binary on disk rather than reviewable. Their phrase "a team of AI
+specialists" remains unavailable to us. Both CrewAI and mem0 run the same business model — free OSS
+library, paid enterprise platform — which is the category default; not doing it should be a stated
+choice rather than an omission.
 
 Once a re-cut pitch is selected, hold it. Rewriting positioning repeatedly correlates with losing —
 see [growth evidence](growth-evidence.md).
 
 ## The name collision
 
-**"Lore" is already taken twice in this exact category:** `BYK/loreai` (withlore.ai, 110 stars,
-actively pushed) positions itself as our direct opposite — "No context files. No workflow changes." —
-and `makenotion/lore` (142 stars, Aug 2026) is Notion's "AI memory backed by Notion". Discoverability
-and a distinctive identity are both at risk.
+**The name is settled: we keep "Lore Agents."** The user decided this on 2026-09-12 after being
+walked through the full collision evidence. Do not re-open it or re-present the rename case unless
+the user raises it.
 
-The decision is open. At zero stars the cost of renaming will never be lower than it is now, and it
-rises every week. Decide it on collision risk alone: mem0's rename produced its largest growth event,
-but only because it inherited a ~9K-star audience and GitHub Trending ranks stars *gained*, so a
-rename here buys correctness rather than attention. Revisit before any public article or directory
-submission, since both bake the name in.
+The collision itself is accepted context and still shapes copy. "Lore" is taken twice in this exact
+category: `BYK/loreai` (withlore.ai, 110 stars, actively pushed) positions itself as our direct
+opposite — "No context files. No workflow changes." — and `makenotion/lore` (142 stars, Aug 2026) is
+Notion's "AI memory backed by Notion". Two consequences to work with rather than around:
+
+- **SEO expectations are bounded.** We will not out-rank Notion for "lore agent memory", so
+  discovery has to come from the channels in [channel strategy](channel-strategy.md), not from
+  owning the word.
+- **Public copy must state our stance explicitly.** A competitor markets the opposite philosophy
+  under the same word, so the name cannot be assumed to carry the meaning; say what Lore is.

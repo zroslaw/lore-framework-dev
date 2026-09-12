@@ -70,6 +70,12 @@ bypass that limit too.
 Watch the measurement trap that nearly produced a false positive: pypistats' 180-day window leaves
 the current month partial, which reads as a step change if taken as a monthly total.
 
+**Sanity-check a download curve for step discontinuities before using it.** CrewAI's PyPI downloads
+ran 300K-1.7M/day through July and August 2026 and fell to ~85K/day overnight on 2026-08-25, then
+stayed flat. A 95% single-day drop is not users leaving — something automated stopped, or the bot
+filtering changed — and the ~85K/day floor is the honest number. "Use downloads, not stars" is right
+but not sufficient on its own.
+
 ## What to avoid copying
 
 The memecoin, GeoIP and cohort telemetry, eleven releases in a day, promotional banners shipped

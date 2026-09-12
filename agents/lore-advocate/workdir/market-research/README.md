@@ -15,7 +15,8 @@ superseded one. Do not cite a single file without checking here first.
 |---|---|---|
 | claude-mem (now "Grok Mem") — thedotmack / Alex Newman | [origins](claude-mem-origins.md), [promotion](claude-mem-promotion.md) | 2026-09-12 |
 | mem0 (formerly embedchain) — mem0ai, YC S24, $24M raised | [origins](mem0-origins.md), [promotion](mem0-promotion.md) | 2026-09-12 |
-| Multi-agent specialist landscape — does anything already do this? | [landscape](multi-agent-specialist-landscape.md) | 2026-09-12 |
+| Multi-agent specialist landscape — does anything already do this? | [landscape](multi-agent-specialist-landscape.md), [Letta MemFS addendum](letta-memfs-addendum.md) | 2026-09-12 |
+| CrewAI — crewAIInc, $18M raised — **quick pass, not a full study** | [quick pass](crewai-quick-pass.md) | 2026-09-12 |
 
 Category ranking by stars at 2026-09-12: claude-mem 93,703 · mem0 65,153 · cognee 30,650 ·
 supermemory 29,636 · agentmemory 28,363 · Letta 24,702.
@@ -28,6 +29,9 @@ supermemory 29,636 · agentmemory 28,363 · Letta 24,702.
 | 2026-09-12 | Watchers/stars ratio **withdrawn** as evidence of weak adoption. mem0 scores 0.38% vs claude-mem 0.32% despite $24M funding and ~47x the usage — the heuristic does not discriminate in either direction. Measurement retained, inference retracted. | claude-mem-origins.md §5 |
 | 2026-09-12 | "Installers cause growth" **narrowed**. mem0 shipped a Claude Code plugin 2026-03-25 with no effect on its download curve. Corrected rule below. | claude-mem-promotion.md |
 | 2026-09-12 | "Landing page live on day one" **dropped** from the repeatable list. mem0 hit GitHub Trending #1 with unedited shadcn placeholder text still on its page. | claude-mem-promotion.md |
+| 2026-09-12 | **CrewAI scores P on axis 2, not N** — it ships a unified memory API with agent-level scoping, persistence across sessions, and LLM-inferred scopes. Capture is automatic and model-decided and nothing bounds it by a declared role, so it is not *curated* in our sense. Axis 3 stays N: a LanceDB binary store cannot be diffed or corrected in a PR. Row total 2.0 -> 2.5. Details in [crewai-quick-pass.md](crewai-quick-pass.md). | multi-agent-specialist-landscape.md §2 (table row 6), §3 |
+| 2026-09-12 | **"Manual vs. automatic" retired as our curation axis** (user correction). Finalization being user-invoked is an implementation detail and is automatable, so human approval is not a differentiator. The defensible pair is **whole-session reflection** (competitors extract from fragments: mem0 and CrewAI from individual task outputs, Letta's sleeptime every ~5 steps) and **role as the relevance boundary**. Axis is focused vs. everything. | multi-agent-specialist-landscape.md §3; "What the landscape study changed" §3 below |
+| 2026-09-12 | **Naming decision closed: keep "Lore Agents."** The collision evidence stands as context and as an SEO constraint; the rename question is settled and not to be re-opened. | "What the landscape study changed" §5 below |
 
 ## What we now believe
 
@@ -95,6 +99,16 @@ memecoin farming incentive and diverge from a flat download curve; mem0's are pa
 a different product (embedchain) pre-rename; and the watchers/stars ratio proved unable to tell the
 two apart. **Use install and download curves.** Stars are a lagging attention metric, not adoption.
 
+**And sanity-check those curves for step discontinuities before using them** — a fourth way the
+numbers lied. CrewAI's PyPI downloads (mirrors excluded) ran 300K-1.7M/day through July and August
+2026, then fell to ~85K/day overnight on 2026-08-25 and stayed flat. A 95% single-day drop is not
+users leaving; something automated stopped, or PyPI changed its bot filtering. Treat the ~85K/day
+floor as the real number. "Use downloads, not stars" is right, but not sufficient on its own.
+
+**Competitor memory capability is the fastest-moving fact in this archive.** CrewAI's memory API was
+missed by a morning study and found the same afternoon. Re-verify axis 2 for any competitor
+immediately before making a public claim that rests on it.
+
 Neither founder's standing mattered: claude-mem's author had 124 other public repos topping out at
 44 stars.
 
@@ -112,17 +126,28 @@ agent definitions across wshobson/agents (39.6k), VoltAgent (25.0k) and contains
 the `memory:` field. ~1,000 named specialists, 76k stars, none of them remember anything. This is
 the cleanest, most checkable one-line statement of what Lore adds.
 
-**3. Deliberate curation is contrarian, not just unique.** mem0 calls manual curation a "scaling
-wall" it exists to eliminate. The whole market automates capture. Letta's sleeptime reflection is
-close but fires automatically every N steps — the difference is *who decides and when*. Claim the
-posture, not the invention.
+**3. Our curation axis is focused vs. everything, not manual vs. automatic.** (Corrected 2026-09-12 by
+user direction — this supersedes the original framing of this point.) Human approval is not the
+differentiator: finalization is user-invoked today but is automatable, and defending manual control
+makes us the slow option in a market that is automating. Two properties are defensible instead.
+**Whole-session reflection:** finalization runs over the entire session, so what mattered, what turned
+out wrong, and what was noise can be judged with the full arc in view — mem0 and CrewAI extract facts
+from individual task outputs, Letta's sleeptime fires roughly every five steps, and all of them
+summarize fragments without knowing how the story ended. **Role as the relevance boundary:** the
+declared role decides what is worth keeping in the first place, which keeps the base focused rather
+than merely large, while everyone else preserves everything and filters at retrieval time by
+similarity, recency decay, importance, or inferred scope. mem0's "scaling wall" contrast still holds
+on the new axis. Claim the posture, not the invention.
 
 **4. Closest competitor is Letta Code** (~3.3k stars), scoring ~3.5 of our 5 axes. It stops short on
 roles (its subagents are generic utilities; memory is an identity, not a professional remit),
 on deliberate curation, on cross-engine (it is its own harness), and on team review.
 
 **5. "Lore" is taken twice in this exact category.** BYK/loreai (withlore.ai, 110 stars, active) and
-makenotion/lore (Notion, 142 stars, Aug 2026). At 0 stars the cost of renaming will never be lower.
+makenotion/lore (Notion, 142 stars, Aug 2026). **The rename question is closed as of 2026-09-12: we
+keep "Lore Agents."** The evidence remains useful as a constraint — we will not out-rank Notion for
+"lore agent memory", and BYK/loreai markets the opposite philosophy under the same word, so public
+copy has to state our stance rather than assume the name carries it.
 
 **6. The category's core benefit is empirically contested.** GitOfThoughts (arXiv 2606.14470, June
 2026) tested five memory stores and found cross-problem agent memory did *not* improve accuracy on
