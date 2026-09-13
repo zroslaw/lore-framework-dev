@@ -97,3 +97,5 @@ explanation alongside a human-run parallel session** — do not assume concurren
   discarding.
 - `a-release-review-starts-with-git-status.md` — check every repo's dirty state before reviewing or
   reporting on a change set.
+- `lore-repo-divergence-is-self-inflicted.md` — the shipped path that does this to me: finalize
+  Phase 4's `git add agents/`, which is also how agent repos end up permanently diverged.

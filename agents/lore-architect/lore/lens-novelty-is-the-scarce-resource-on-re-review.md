@@ -66,6 +66,16 @@ authors anything, and explicitly instructed to verify the doc's claims about exi
 2026-08-23 design-doc review it out-yielded both a lean-design lens and a runtime-failure-modes lens
 on *factual* defects. Full brief shape and case: `parallel-reviewer-fanout-pattern.md` § Lens choice.
 
+## Novelty picks the lens, life stage picks the family — and ordering decides when
+
+A third axis, learned when a loop failed to converge (2026-09-13): **spend the expensive lenses
+early.** The two that found the largest holes in that spec — the **operator's recovery experience**
+and **new persistent state examined as state** — were both spent in the last rounds, after the
+cheaper structural lenses had already driven two rounds of fixes. Any round that introduces a state
+file or a new stopping point should get those two lenses *in that round*, not two rounds later. See
+`non-convergence-diagnose-before-reviewing-again.md`, which also covers what to do when the cap
+arrives anyway.
+
 ## See Also
 
 - `parallel-reviewer-fanout-pattern.md` § Choose lenses per *round*, not per loop — the within-loop

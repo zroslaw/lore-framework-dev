@@ -59,6 +59,8 @@ This rule composes with:
   `point-of-use-guardrails-beat-recorded-lore.md` — three principles named per this meta-rule during
   the 2026-07-28 v31 re-triage session; each was already operating as an unnamed reflex behind a
   specific fix before it got a topic
+- `a-demo-must-test-the-state-it-leaves-behind.md` — named per this meta-rule on 2026-09-13, after a
+  demo I had called verification turned out to have tested only the write half of a read/write cycle
 - `system-design-principles.md` — where new named principles get indexed
 - `lore-topic-format.md` — mechanics of topic structure
 - `framework-scope-vs-agent-scope.md` — another principle that crystallized only when named

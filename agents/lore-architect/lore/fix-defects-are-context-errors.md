@@ -164,6 +164,11 @@ proposal is a fix-free final round plus a fix-audit pass that does not consume a
 `workdir/draft-trilens-fix-boundary.md`; tracked in
 [framework-improvements-backlog.md](framework-improvements-backlog.md) § Multi-Agent Collaboration.
 
+Until that lands, there is a second response to the boundary, used when the loop *has* already hit
+the cap: diagnose the findings by origin and tier the artifact so most of it needs no further review
+—
+[non-convergence-diagnose-before-reviewing-again.md](non-convergence-diagnose-before-reviewing-again.md).
+
 See also [post-convergence-edits-need-their-own-gate.md](post-convergence-edits-need-their-own-gate.md),
 [parallel-reviewer-fanout-pattern.md](parallel-reviewer-fanout-pattern.md),
 [a-gate-that-died-is-not-a-gate.md](a-gate-that-died-is-not-a-gate.md).

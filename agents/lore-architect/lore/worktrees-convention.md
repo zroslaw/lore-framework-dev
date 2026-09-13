@@ -46,3 +46,5 @@ Replaces the earlier contributions-feature design (v8-era draft, not shipped). K
 - `framework-improvements-backlog.md` — tracks deferred extensions
 - `worktree-lifecycle-and-audit.md` — proposed lifecycle and audit
 - `framework-scope-vs-agent-scope.md` — the principle this convention applies
+- `git-common-dir-for-repo-wide-state.md` — where state written from inside a worktree must live if
+  the main checkout is to see it (`--git-common-dir`, not `--absolute-git-dir`)

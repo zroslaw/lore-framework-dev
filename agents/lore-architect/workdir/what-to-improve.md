@@ -37,6 +37,37 @@ capture would change how the system feels more than anything else here.
 
 ---
 
+## A0. Lore sync hardening (v46) — SPEC READY, TIERED, NOT YET IMPLEMENTED — added 2026-09-13
+
+**Top of the list.** Full spec: `workdir/draft-lore-sync-hardening.md` (§ 14a carries the
+implementation order; § 14 the review history).
+
+Problem, established by direct git experiment rather than from docs: lore repos accumulate local
+commits that are never pushed, nothing detects it, and once a repo diverges every later boot's
+`git pull --ff-only` fails permanently while the agent loads stale lore in degraded mode. The
+framework manufactures the state itself — `finalize.md` Phase 4 stages `git add agents/` and pushes
+without merging, `resolve-conflicts.md` gives up after three tries leaving a commit, and
+`update.md`'s push gate refuses precisely when the branch is already ahead. `repo_scan.py` computes
+no ahead/behind for agent repos, so none of it is visible to `/lr:check`.
+
+**Next action — Tier A, no further review needed:** C5 (refresh TTL keys on `last-success`, not
+`last-attempt`), C6 (`workspace-pull` Phase 0 stops pre-refusing on a dirty tree), C7
+(`conventions.md` § Tooling: Git Safety), and C4 in **bare** form (R16 ahead/behind, no marker).
+Zero findings against these across nine reviewer passes. Bare R16 is also the instrument that tells
+us whether Tiers B and C are worth building.
+
+**Then Tier B** (C1/C2/C3/C3a — the `publish-lore.md` procedure) **only after one deep
+unconstrained cold reviewer**, per `parallel-reviewer-fanout-pattern.md`'s rule for a loop that hit
+the round cap without converging. **Tier C** (marker, C8, conflict classification) is deferred by
+design — it produced most of the findings in every round, and Tier A's data should decide whether it
+is built at all.
+
+Evidence: three review rounds (3, 4, 3 cold lenses), findings 14 → 16 → 13, five BLOCK/BLOCKER
+verdicts total. Not converged at the ceiling. Round 3's only BLOCK was a defect round 2's fix
+introduced; the core design was never attacked by any lens.
+
+---
+
 ## A. Verified inconsistencies — fix now (bounded, "v28 hygiene ship" tier)
 
 ### A0. `lr-core` CLI — script-back the mechanical halves of high-frequency skills — DESIGN DRAFTED

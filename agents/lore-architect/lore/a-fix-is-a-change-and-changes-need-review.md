@@ -82,4 +82,11 @@ Severity declined monotonically across the four rounds (1 boot-breaking bug → 
 runtime bugs). **That decline is the signal to stop reviewing and switch evidence type** — a fifth
 round of the same lens buys less than one run of the thing.
 
+**Fifth occurrence (2026-09-13, design spec).** A three-round loop over the lore-sync-hardening
+spec ended on its cap, and round 3's single BLOCK was a defect **round 2's own fix had introduced** —
+a conditional rollback that was not merely wrong but never technically necessary. The new part is
+what to do about it: when the loop ends this way, classify the findings by origin and **shrink what
+ships** rather than spending a fourth round —
+[non-convergence-diagnose-before-reviewing-again.md](non-convergence-diagnose-before-reviewing-again.md).
+
 See also [versioning-release-types.md](versioning-release-types.md) for v37's gate record.
