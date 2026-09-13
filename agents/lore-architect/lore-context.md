@@ -483,14 +483,16 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
   model tier**. Anchor: `multi-engine-portability-direction.md`; see also `docs-engines-convention.md`,
   `cursor-dual-skill-tree-one-repo.md`.
 
-- **Lore-sync hardening (v46, in flight)** — agent repos go stale because the framework itself
-  manufactures divergence (finalize, conflict resolution, update publication) and nothing reports it.
-  **All ten changes ship as v46; tiering is withdrawn** after its seams produced findings in
-  consecutive rounds. The deep grounded review is complete and applied;
-  the round-7 amendments and the formerly deferred marker/reader/C8 work each still owe their first
-  review. `lore-repo-divergence-is-self-inflicted.md`, `v46-sync-hardening-tiered-plan.md`,
-  `tiering-a-reviewed-spec-creates-unreviewed-seams.md`, `review-grounding-beats-lens-novelty.md`,
-  `sidecar-publish-rejected.md`, `a-detection-tier-must-outlive-the-cure-it-measures.md`.
+- **Lore-sync hardening (v46, in flight)** — **one release; no tiered rollout**. The latest
+  code-grounded review found shared-checkout rollback/index races and marker-lifetime failures.
+  The revised design isolates authoring in one worktree per writing session, publishes exact
+  snapshots to explicit destinations, and records per-session outcomes; no shared-checkout reset.
+  Current spec: `workdir/draft-lore-sync-hardening.md`; executable reference and adversarial tests:
+  `workdir/v46-prototype/`. **Production remains v45; caller integration is outstanding.** See
+  `v46-sync-hardening-tiered-plan.md`, `lore-repo-divergence-is-self-inflicted.md`, and
+  `sidecar-publish-rejected.md` (the new design avoids its dirty-primary failure by isolating
+  authoring from the first write).
+
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** item —
   active follow-ups from the 2026-06-13 architecture review. That review's settled dispositions
   (DF-inside-`lr` and team-shared/multi-author as deliberate, not defects — don't re-raise) live in

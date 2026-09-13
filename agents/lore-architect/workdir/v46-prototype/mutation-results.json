@@ -1,0 +1,32 @@
+[
+  {
+    "mutation": "missing-exact-head-guard",
+    "test": "Fixture.test_external_session_commit_is_detected_without_undoing_it",
+    "detected": true,
+    "exit_code": 1
+  },
+  {
+    "mutation": "unrelated-index-changes-accepted",
+    "test": "Fixture.test_intruding_private_index_changes_are_refused_without_reset",
+    "detected": true,
+    "exit_code": 1
+  },
+  {
+    "mutation": "setup-required-cooldown-removed",
+    "test": "Refresh.test_setup_required_uses_its_own_cooldown_without_success_stamp",
+    "detected": true,
+    "exit_code": 1
+  },
+  {
+    "mutation": "implicit-push-destination",
+    "test": "Fixture.test_destination_ignores_push_default_refspec_and_pushurl",
+    "detected": true,
+    "exit_code": 1
+  },
+  {
+    "mutation": "delete-other-branch-marker",
+    "test": "Fixture.test_status_is_identical_across_main_and_worktree_branches",
+    "detected": true,
+    "exit_code": 1
+  }
+]

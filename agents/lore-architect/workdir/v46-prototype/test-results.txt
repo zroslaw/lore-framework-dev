@@ -1,0 +1,46 @@
+test_bad_paths_refused_before_staging (__main__.Fixture.test_bad_paths_refused_before_staging) ... ok
+test_commit_hook_failure_preserves_work_and_does_not_push (__main__.Fixture.test_commit_hook_failure_preserves_work_and_does_not_push) ... ok
+test_commit_lock_never_gets_deleted_by_contender (__main__.Fixture.test_commit_lock_never_gets_deleted_by_contender) ... ok
+test_crash_after_commit_is_visible_and_does_not_adopt_unknown_tip (__main__.Fixture.test_crash_after_commit_is_visible_and_does_not_adopt_unknown_tip) ... ok
+test_crash_after_push_before_receipt_is_recovered (__main__.Fixture.test_crash_after_push_before_receipt_is_recovered) ... ok
+test_creation_deletion_modes_and_symlinks_survive (__main__.Fixture.test_creation_deletion_modes_and_symlinks_survive) ... ok
+test_destination_ignores_push_default_refspec_and_pushurl (__main__.Fixture.test_destination_ignores_push_default_refspec_and_pushurl) ... ok
+test_external_session_commit_is_detected_without_undoing_it (__main__.Fixture.test_external_session_commit_is_detected_without_undoing_it) ... ok
+test_foreign_conflict_stays_visible_with_canonical_ahead_zero (__main__.Fixture.test_foreign_conflict_stays_visible_with_canonical_ahead_zero) ... ok
+test_incomplete_known_schema_cannot_claim_success (__main__.Fixture.test_incomplete_known_schema_cannot_claim_success) ... ok
+test_intruding_private_index_changes_are_refused_without_reset (__main__.Fixture.test_intruding_private_index_changes_are_refused_without_reset) ... ok
+test_literal_magic_looking_filename_is_not_a_glob (__main__.Fixture.test_literal_magic_looking_filename_is_not_a_glob) ... ok
+test_lost_push_acknowledgment_recovers_without_duplicate_commit (__main__.Fixture.test_lost_push_acknowledgment_recovers_without_duplicate_commit) ... ok
+test_network_failure_retains_snapshot_and_reports_unknown (__main__.Fixture.test_network_failure_retains_snapshot_and_reports_unknown) ... ok
+test_next_canonical_pull_and_next_session_succeed (__main__.Fixture.test_next_canonical_pull_and_next_session_succeed) ... ok
+test_no_shared_commit_or_rollback_even_when_other_session_advances_main (__main__.Fixture.test_no_shared_commit_or_rollback_even_when_other_session_advances_main) ... ok
+test_nonconflicting_remote_change_merges_then_publishes (__main__.Fixture.test_nonconflicting_remote_change_merges_then_publishes) ... ok
+test_one_success_cannot_clear_another_sessions_failure (__main__.Fixture.test_one_success_cannot_clear_another_sessions_failure) ... ok
+test_pending_snapshot_is_not_recommitted_on_retry (__main__.Fixture.test_pending_snapshot_is_not_recommitted_on_retry) ... ok
+test_preexisting_index_lock_is_never_removed (__main__.Fixture.test_preexisting_index_lock_is_never_removed) ... ok
+test_read_only_status_does_not_remove_a_concurrent_replacement (__main__.Fixture.test_read_only_status_does_not_remove_a_concurrent_replacement) ... ok
+test_rebase_without_rebase_head_is_detected (__main__.Fixture.test_rebase_without_rebase_head_is_detected) ... ok
+test_record_first_failure_stays_stable_across_retries (__main__.Fixture.test_record_first_failure_stays_stable_across_retries) ... ok
+test_repeated_blocked_attempts_do_not_add_commits (__main__.Fixture.test_repeated_blocked_attempts_do_not_add_commits) ... ok
+test_repeated_remote_races_stop_after_three_actual_pushes (__main__.Fixture.test_repeated_remote_races_stop_after_three_actual_pushes) ... ok
+test_slow_git_hook_is_bounded_and_leaves_interrupted_work_visible (__main__.Fixture.test_slow_git_hook_is_bounded_and_leaves_interrupted_work_visible) ... ok
+test_status_is_identical_across_main_and_worktree_branches (__main__.Fixture.test_status_is_identical_across_main_and_worktree_branches) ... ok
+test_tampered_record_cannot_redirect_publisher_into_primary (__main__.Fixture.test_tampered_record_cannot_redirect_publisher_into_primary) ... ok
+test_two_sessions_same_file_are_isolated_and_both_survive_merge (__main__.Fixture.test_two_sessions_same_file_are_isolated_and_both_survive_merge) ... ok
+test_unknown_version_and_invalid_json_are_retained_and_visible (__main__.Fixture.test_unknown_version_and_invalid_json_are_retained_and_visible) ... ok
+test_unrelated_canonical_staging_never_enters_merge (__main__.Fixture.test_unrelated_canonical_staging_never_enters_merge) ... ok
+test_unrelated_work_in_private_session_prevents_push (__main__.Fixture.test_unrelated_work_in_private_session_prevents_push) ... ok
+test_update_defers_on_dirty_canonical_target_without_writing_it (__main__.Fixture.test_update_defers_on_dirty_canonical_target_without_writing_it) ... ok
+test_update_defers_when_canonical_has_unpublished_commits (__main__.Fixture.test_update_defers_when_canonical_has_unpublished_commits) ... ok
+test_update_no_merge_preserves_snapshot_after_remote_race (__main__.Fixture.test_update_no_merge_preserves_snapshot_after_remote_race) ... ok
+test_failure_uses_exponential_backoff (__main__.Refresh.test_failure_uses_exponential_backoff) ... ok
+test_huge_invalid_negative_and_future_fields_are_bounded (__main__.Refresh.test_huge_invalid_negative_and_future_fields_are_bounded) ... ok
+test_missing_success_does_not_bypass_failure_backoff (__main__.Refresh.test_missing_success_does_not_bypass_failure_backoff) ... ok
+test_recent_success_suppresses_refresh (__main__.Refresh.test_recent_success_suppresses_refresh) ... ok
+test_setup_required_uses_its_own_cooldown_without_success_stamp (__main__.Refresh.test_setup_required_uses_its_own_cooldown_without_success_stamp) ... ok
+test_ttl_zero_forces_refresh_even_after_failure (__main__.Refresh.test_ttl_zero_forces_refresh_even_after_failure) ... ok
+
+----------------------------------------------------------------------
+Ran 41 tests in 122.506s
+
+OK

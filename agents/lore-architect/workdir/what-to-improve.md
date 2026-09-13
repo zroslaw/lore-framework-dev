@@ -37,41 +37,26 @@ capture would change how the system feels more than anything else here.
 
 ---
 
-## A0. Lore sync hardening (v46) — ONE SHIP, SPEC AMENDED, NOT YET IMPLEMENTED — updated 2026-09-13
+## A0. Lore sync hardening (v46) — DESIGN REPLACED, REFERENCE TESTS PASSED — updated 2026-09-13
 
-**Top of the list.** Full spec: `workdir/draft-lore-sync-hardening.md` (§ 0 is the ship map; § 14 the
-review history). Lore: `v46-sync-hardening-tiered-plan.md`.
+**Top of the list.** Current contract: `workdir/draft-lore-sync-hardening.md`. Executable reference:
+`workdir/v46-prototype/`. One v46 release; no tiered release plan.
 
-Problem, established by direct git experiment rather than from docs: lore repos accumulate local
-commits that are never pushed, nothing detects it, and once a repo diverges every later boot's
-`git pull --ff-only` fails permanently while the agent loads stale lore in degraded mode. The
-framework manufactures the state itself — `finalize.md` Phase 4 stages `git add agents/` and pushes
-without merging, `resolve-conflicts.md` gives up after three tries leaving a commit, and
-`update.md`'s push gate refuses precisely when the branch is already ahead. `repo_scan.py` computes
-no ahead/behind for agent repos, so none of it is visible to `/lr:check`.
+The latest code-grounded review reproduced unsafe shared-checkout rollback, unrelated staging
+entering a merge, publication of unrelated ancestor commits, wrong push destinations and failure
+markers disappearing while work remained blocked. The replacement design isolates authoring from
+the first write in one worktree per session. The helper never mutates the primary branch/index,
+never resets on failure, publishes exact commits to exact destinations, and keeps one durable
+operation record per session. Status is read-only. Boot-time updates remain conservative.
 
-**Scope: all ten changes ship together as v46** (user, 2026-09-13). The A/B/C tiering and the v46/v47
-split are withdrawn — the tier seams were themselves generating findings. Tier words survive in the
-spec only as review history.
+**Reference validation:** 41 tests passed; the six refresh tests were rerun after the final numeric
+bounds fix, and all five mutation controls were detected.
 
-**Next action — two review gates, then implement:**
+**Next action:** integrate the complete caller inventory in the spec's § 9. Production remains v45; no caller currently routes through this
+prototype. Prototype mechanics are not evidence that real engines obey session bindings.
 
-1. One reviewer over **round 7's own amendments** (the shape round 6 used). Round 7 rewrote the
-   rollback rule, the failure classification, three `update.md` gate clauses, the write-set and
-   eleven tests; every round of this spec that fixed something introduced something.
-2. A **first review of the marker cluster** — the stranded-publish marker, `read_stranded_marker()`
-   and C8. Deferred as Tier C through every round, so never examined as shipping work, and it
-   produced the majority of findings whenever it was looked at.
-
-Then implement in build order: C1 first (everything delegates to it), C5/C6/C7 rules 1-2 any time.
-
-**Review record: seven rounds.** Three three-lens rounds (14 → 16 → 13 findings) never converged at
-the ceiling; round 4 reviewed a subset and found a BLOCK plus six real findings; round 5 reviewed
-round 4's amendments; **round 7 was the deep unconstrained cold reviewer — BLOCK, thirteen findings
-(3 BLOCKER, 5 HIGH, 4 MEDIUM, 1 LOW), all verified against the live docs and applied.** The three
-blockers: a rollback with no correct target after a merge commit; a failure table missing the only
-outcome the update path can produce; and a fix cancelled by a duplicate condition left standing two
-sections away.
+The old 1,663-line spec and seven review rounds remain in Git history. Do not reinstate their
+withdrawn rollback, global-marker, zero-ahead-gate deletion or tier-specific tests as requirements.
 
 ---
 

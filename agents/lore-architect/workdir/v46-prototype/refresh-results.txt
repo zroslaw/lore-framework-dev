@@ -1,0 +1,11 @@
+test_failure_uses_exponential_backoff (__main__.Refresh.test_failure_uses_exponential_backoff) ... ok
+test_huge_invalid_negative_and_future_fields_are_bounded (__main__.Refresh.test_huge_invalid_negative_and_future_fields_are_bounded) ... ok
+test_missing_success_does_not_bypass_failure_backoff (__main__.Refresh.test_missing_success_does_not_bypass_failure_backoff) ... ok
+test_recent_success_suppresses_refresh (__main__.Refresh.test_recent_success_suppresses_refresh) ... ok
+test_setup_required_uses_its_own_cooldown_without_success_stamp (__main__.Refresh.test_setup_required_uses_its_own_cooldown_without_success_stamp) ... ok
+test_ttl_zero_forces_refresh_even_after_failure (__main__.Refresh.test_ttl_zero_forces_refresh_even_after_failure) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK

@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-13",
+  "scope": "Design reference only; production framework unchanged",
+  "full_suite": {
+    "tests": 41,
+    "result": "passed",
+    "note": "Followed by final numeric-bound adjustment and affected-suite rerun"
+  },
+  "affected_suite_after_final_edit": {
+    "tests": 6,
+    "result": "passed",
+    "area": "refresh scheduling"
+  },
+  "mutation_controls": {
+    "detected": 5,
+    "total": 5
+  },
+  "sha256": {
+    "publish.py": "1a96ae26567100fc70d6a74dcc46d205812207ac30f33bf2aab4be7e66919039",
+    "test_publish.py": "fea8120e256e39d81dd23b83f0c4f7a40fb17b1fc1b20c075f5763716ce8a3ff",
+    "run_mutations.py": "71d7e02cb21e7beca257ef911808eaa1fd96e652df40fca114ceaa251260045c"
+  },
+  "not_run": [
+    "production integration tests",
+    "real-engine lifecycle suite",
+    "TriLens",
+    "release/dogfood"
+  ]
+}
