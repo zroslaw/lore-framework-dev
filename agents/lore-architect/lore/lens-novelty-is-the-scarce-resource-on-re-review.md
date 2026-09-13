@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "On a re-review, inventory the lenses already spent before choosing new ones; let the artifact's life stage pick the lens family (design doc → executor lens), and after a fix round add a claim audit plus a cheap redundancy pass."
+summary: "On a re-review, inventory the lenses already spent before choosing new ones; life stage picks the lens family, a fix round adds a claim audit; and when novelty runs out, change the unit and the question rather than the rigor."
 parent: lore-context.md
 ---
 
@@ -76,6 +76,38 @@ file or a new stopping point should get those two lenses *in that round*, not tw
 `non-convergence-diagnose-before-reviewing-again.md`, which also covers what to do when the cap
 arrives anyway.
 
+## Change the unit, and the question, before adding rigor
+
+When novelty itself runs out, the next move is not a new lens — it is a new **unit** of review. The
+v46 spec had spent eleven lenses across three rounds (adversarial, simplicity ×4,
+framework-coherence, alternative-designs, executor fidelity, conflict-classification, operator
+recovery, claim audit, marker-as-state, first-principles regression) and still would not converge
+(14 → 16 → 13 findings). Every one of them was a **correctness** lens asked of the **whole
+document**.
+
+Round 4 changed neither rigor nor model tier. It changed two other things, and found six real
+findings including a BLOCK where the correctness lenses had stalled:
+
+- **The unit** — Tier A alone, as a shippable artifact, instead of the whole spec.
+- **The question** — not "is this right?" but "does this ship, to real users, on the tree that
+  exists?"
+
+The three lenses then followed from that: tier-boundary/partial-ship, call-site/integration reality
+(read the shipped call graph, not the spec's prose), and installed-population/first-boot-after-upgrade.
+All three are **situational** — they ask what happens when the artifact meets a specific reality —
+where the spent eleven were all **analytical**.
+
+**The move: when correctness lenses stop yielding, the remaining risk is usually not in the design
+but at its boundary with something real** — a subset, a call site, an installed population, an
+upgrade. Ask what reality the artifact has never been held against, and make that the lens.
+
+Two corroborations from that round. The call-site lens found what prose review structurally cannot:
+the shipped code's real statuses, and the tests pinning a contract the spec had silently changed
+(`execution-testing-catches-blind-ambiguity.md`). The installed-population lens caught a cry-wolf
+defect — warning on the ordinary unpushed-commit state — that no correctness lens flags, because the
+code is *correct*; it is the user's attention that the finding spends. The tier-boundary lens has its
+own topic: `tiering-a-reviewed-spec-creates-unreviewed-seams.md`.
+
 ## See Also
 
 - `parallel-reviewer-fanout-pattern.md` § Choose lenses per *round*, not per loop — the within-loop
@@ -83,6 +115,8 @@ arrives anyway.
 - `trilens-loop-feature.md` — the loop re-spawns reviewers each round but never says re-pick the
   lenses; this judgement stays in lore.
 - `a-fix-is-a-change-and-changes-need-review.md` — why a fix round needs a round of its own.
+- `non-convergence-diagnose-before-reviewing-again.md` — what to do when the cap arrives anyway, and
+  the tiering response whose seams the new unit of review exists to catch.
 - `versioning-release-types.md` — where the spent-lens inventory is recoverable per version.
 - `check-own-lore-before-dismissing-a-finding.md` — the triage-side discipline for what the new
   lenses return.

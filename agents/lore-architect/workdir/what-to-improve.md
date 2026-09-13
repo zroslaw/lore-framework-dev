@@ -50,11 +50,16 @@ without merging, `resolve-conflicts.md` gives up after three tries leaving a com
 `update.md`'s push gate refuses precisely when the branch is already ahead. `repo_scan.py` computes
 no ahead/behind for agent repos, so none of it is visible to `/lr:check`.
 
-**Next action — Tier A, no further review needed:** C5 (refresh TTL keys on `last-success`, not
-`last-attempt`), C6 (`workspace-pull` Phase 0 stops pre-refusing on a dirty tree), C7
-(`conventions.md` § Tooling: Git Safety), and C4 in **bare** form (R16 ahead/behind, no marker).
-Zero findings against these across nine reviewer passes. Bare R16 is also the instrument that tells
-us whether Tiers B and C are worth building.
+**Next action — implement Tier A, now amended and cleared:** C5 (refresh TTL keys on
+`last-success`, not `last-attempt`, with outcome-keyed backoff), C6 (`workspace-pull` Phase 0 stops
+pre-refusing on a dirty tree), C7 (`conventions.md` § Tooling: Git Safety, rules 1-2 plus a Known
+gap), and C4 in **bare** form (R16 ahead/behind, severity keyed on `diverged`, no marker). Bare R16
+is also the instrument that tells us whether Tiers B and C are worth building.
+
+A round-4 review scoped to **Tier A alone** (2026-09-13) returned 2× SHIP-WITH-FIXES and 1× BLOCK —
+six real findings, all amended into the spec. The earlier "no further review needed" was wrong:
+nine passes had reviewed the whole spec, never the subset, and two of the six would have shipped a
+user-visible regression. Ships as **v46** (release-notes-only, cache-affecting); Tier B becomes v47.
 
 **Then Tier B** (C1/C2/C3/C3a — the `publish-lore.md` procedure) **only after one deep
 unconstrained cold reviewer**, per `parallel-reviewer-fanout-pattern.md`'s rule for a loop that hit

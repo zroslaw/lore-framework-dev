@@ -650,6 +650,12 @@ if git_answered(rc) and rc == 0:
                                     diverged=bool(behind)))
 ```
 
+**Tier C only — skip the next two paragraphs when implementing C4 in bare form (§ 14a):** the
+`read_stranded_marker` call below, and the *"The marker never fires R16 on its own"* paragraph
+after it. The marker does not exist in Tier A. **Resume at *Anything else*, which does apply** —
+its no-upstream suppression is generic and must survive into bare form, or every local-only repo
+raises a false R16.
+
 Then call `read_stranded_marker(repo)` (§ 4 Step 5c rule 4) and attach its result to the finding as
 `marker` when it returns one. The marker, not the commit count, is what turns R16 from "you have
 unpushed commits" into "publication has been failing for six days, because of this." Its age is the
@@ -670,6 +676,46 @@ once it matters.
 
 Import `git_answered` from `.common` alongside the existing `git` import.
 
+### Severity in bare form — amended after round 4
+
+**Replace the 120-second debounce above with severity keyed on `diverged`.** In bare form:
+
+```python
+severity = "warn" if behind else "info"
+findings.append(finding("R16", severity, "repos", "sync",
+                        repo=info["name"], ahead=ahead, behind=behind,
+                        diverged=bool(behind)))
+```
+
+That call replaces the one in the § 7 snippet above, which still hardcodes the literal `"warn"` —
+copy this one, not that one.
+
+`ahead > 0, behind == 0` is not a fault. `git pull --ff-only` fast-forwards straight through it
+(§ 1.1), boot is unaffected, and it clears itself the moment the user pushes — it is the ordinary
+state of any session that has committed and not yet pushed, which in this framework is most of
+them. Warning on it puts a permanent increment into the warnings count `/lr:check` shows in its
+compact summary, and within a week users learn that the counter means "you haven't pushed" and stop
+reading it. That is the cry-wolf failure this spec spends § 4 forbidding, shipped in the very first
+thing users see.
+
+`ahead > 0, behind > 0` is the permanent failure — every boot's `--ff-only` now fails and the agent
+loads stale lore. That earns `warn`.
+
+This also removes the debounce's second git call and its timestamp parsing: the transient
+commit→push window is ahead-only, so it is already `info` under this rule. The 120-second
+paragraph above is superseded for bare form — it survives only if Tier C's marker is ever built,
+where it discriminates a fresh marker from an old one.
+
+### Fix text in bare form — the generic remedy is unsafe
+
+`docs/findings-catalog.md`'s Fix column must **not** carry `fetch && merge && push` for the
+diverged case. This spec says so itself, in § 4 Step 5c: *"do not offer `git merge && git push`.
+Those commands re-hit the same content conflict and drop the user into a `UU` working tree holding
+lore they may not own, with less context than the framework had when it refused."* Bare R16 cannot
+distinguish a divergence that will merge cleanly from one hiding a real content collision, and the
+safe branch in the original row is gated on `marker.reason`, which Tier A never produces. So bare
+form inspects and hands off; it does not resolve.
+
 ### `docs/findings-catalog.md` — new row in § Repo findings
 
 | ID | Say using the finding data | Fix | Fix tier |
@@ -678,6 +724,14 @@ Import `git_answered` from `.common` alongside the existing `git` import.
 
 Wording rule: the R16 row must state the boot-pull consequence, not only the commit count. The
 count alone reads as routine.
+
+**Tier A replaces the row above with this one** (amended after round 4 — no `marker`, no
+`MERGE_HEAD`, no blind merge, and the boot-pull consequence attached only to the state that
+actually has it):
+
+| ID | Say using the finding data | Fix | Fix tier |
+|---|---|---|---|
+| R16 | When `diverged` is false: the repo has `ahead` local commit(s) not yet on its remote. Say it plainly and do **not** imply breakage — boot pulls still succeed in this state; it clears on the next push. When `diverged` is true: the repo is `ahead` **and** `behind`, so **every agent boot from this repo now fails to pull and loads stale lore**, and it will stay that way until someone reconciles it. Both counts are as of the last fetch — `check` never fetches — so state them as last-known, not current. | Not diverged: `git -C "<repo>" push`. Diverged: `git -C "<repo>" fetch origin && git -C "<repo>" log --oneline --left-right @{u}...HEAD` to see both sides, then reconcile deliberately — boot the agent that owns the conflicting paths if lore files are involved. Never offer a bare `merge && push`: it re-hits the same conflict and leaves a `UU` tree holding lore the user may not own. | 2 |
 
 ---
 
@@ -689,14 +743,68 @@ is written and never consulted. A workspace failing every attempt looks fresh fo
 **Change:** read `last-success` for the age comparison. Keep every existing self-heal branch
 (missing, unparseable, naive, future-dated → refresh now); a missing `last-success` refreshes.
 
-**Keep `last-attempt` as a floor.** Read both: refresh when
-`now - last_success >= ttl` **and** `now - last_attempt >= retry_floor`, with
-`retry_floor = 900` seconds. Without the floor, a persistently failing workspace would attempt a
-bounded `workspace-pull` on every boot. The lock already prevents concurrent attempts; the floor
-prevents serial ones.
+**Two questions, two stamps — do not collapse them into one floor.** *Amended after round 4;
+the original single unconditional floor was wrong in both directions.*
+
+- **Are we due?** Keyed on `last-success` alone: no usable stamp, or `now - last_success >= ttl`.
+- **May we attempt now?** Keyed on the *outcome* of the last attempt, not merely its age.
+  - The last attempt **succeeded** (`last-attempt` equals `last-success`, or there is no usable
+    `last-attempt`) → attempt immediately. No floor.
+  - The last attempt **failed or was partial** → require
+    `now - last_attempt >= backoff(consecutive_failures)`.
+
+`backoff(n) = min(ttl, RETRY_BASE * 2 ** (n - 1))` for `n >= 1`, with `RETRY_BASE = 900` seconds,
+capped at the TTL. **`backoff(0)` is never evaluated** — `n == 0` means the last attempt did not
+fail, which is the no-floor branch above. An implementer who reaches `backoff(0)` has mis-bucketed
+the attempt; guard it rather than letting `2 ** -1` yield a silent 450.
+
+**The counter, fully specified.** `consecutive-failures` is a new state-file field. It is written by
+`write_state`, which gains a `consecutive_failures=None` keyword in its signature and emits
+`consecutive-failures: "<n>"` quoted, exactly like the timestamps and for the same reason (the
+framework parser returns strings regardless; quoting keeps a real YAML parser from auto-typing it).
+`read_state` needs no change — it returns raw strings. `needs_refresh` parses it with
+`int()` inside a `try`, and **every unusable shape self-heals to `0`**: absent, empty,
+non-numeric, or negative. `0` means "no failures recorded", which routes to the no-floor branch —
+the safe direction, consistent with this module's rule that a corrupt stamp costs one extra refresh
+rather than suppressing one. This matches how `_stamp_age` already treats every malformed
+timestamp.
+
+**Which attempts increment it.** `refreshed` resets it to `0`. `failed` and `partial` increment it.
+**`setup-required` does neither** — it leaves the counter untouched and is treated as a *success*
+for the floor question, because it is not a failure to reach the remote: it is a workspace whose
+repos were never cloned, which no amount of retrying fixes and which already suppresses its own
+repeat messaging. Every one of `_do_refresh`'s four statuses is therefore assigned a bucket; add a
+new one and this rule must be extended with it.
+
+**What the backed-off case returns.** When the workspace is due but the floor has not expired,
+`run_workspace_refresh` returns `{"status": "fresh"}`, unchanged from today — `agent-boot.md`
+renders that silently, so a boot in this window says nothing. Worst case is one silent window of
+`ttl`, which is exactly today's behaviour for a failing workspace, so this is not a regression; it
+is the pre-existing ceiling reached by a different route. **Known gap, deliberately not closed in
+Tier A:** nothing surfaces "this workspace has failed to refresh `n` times in a row." The
+attempts that *do* run still report `partial` / `failed` with a reason, and `/lr:check` S19 still
+reports freshness from pull evidence, so the condition is observable — just not proactively
+announced. Revisit alongside R16's data.
+
+**Why a flat floor fails.** Applied unconditionally it is simultaneously too strong and too weak.
+Too strong: it silently floors *every* refresh at 900s regardless of the configured TTL, so
+`--workspace-ttl 0` stops meaning "always refresh" — a documented CLI contract pinned by two
+shipped tests (`test_workspace_refresh.py`, `test_ttl_zero_always_refreshes` at both call sites).
+Too weak: real boots are hours apart, so a 900s floor never engages between them, and a workspace
+that can never succeed — offline, expired credentials, or a Codex sandbox that blocks `.git`
+network access — goes from one bounded 90s `workspace-pull` every 16 hours to one on *every boot*,
+permanently. Keying the staleness question on `last-success` is correct and stays; the retry
+cadence is a separate question and needs backoff, not a constant.
 
 Update `needs_refresh`'s docstring — it is the literate spec for this function's manual fallback,
-so the new rule must be stated there, not only in the code.
+so the new rule must be stated there, not only in the code. Update `cli.py`'s `--workspace-ttl`
+help text too: it currently says "if the last attempt is older than N seconds" and "0 always
+refreshes", and both halves become false.
+
+**Rollout note.** The two `test_ttl_zero_always_refreshes` tests pin the *old* contract. Under this
+amendment `ttl=0` on a healthy workspace still refreshes immediately, so they should still pass —
+verify that rather than assuming it, and if either fails, the amendment is wrong, not the test
+(`a-red-test-may-be-asserting-a-true-fact.md`).
 
 ---
 
@@ -759,6 +867,30 @@ New subsection under § Tooling (sibling of *CWD Safety* and *Portable Shell*):
 Cross-reference it from `publish-lore.md`, `finalize.md`, `update.md` and `workspace-push.md`
 (pointer, not restatement).
 
+### Tier A form — amended after round 4
+
+**Ship rules 1 and 2 only.** Rules 3 and 4 both end in `See publish-lore.md`, which C1 creates and
+C1 is Tier B. Landing them in Tier A adds two dangling cross-references to the one document every
+automatic git path is bound by — the reference rot the standing improvement list already carries as
+item A1. They move to Tier B, alongside the document they cite.
+
+**Rule 1 ships with a Known gap, not silently.** `docs/finalize.md` § Phase 4 step 1 is literally
+`git -C <repo> add agents/` — the exact directory-add rule 1 forbids. C2 is what fixes it, and C2
+is Tier B. A convention that the framework's own shipped code visibly violates, with nothing saying
+so, is worse than no convention: the next reader cannot tell whether it is a rule or an aspiration.
+So Tier A's § Tooling: Git Safety carries a closing subsection, in the `### Known gap:
+workspace-root paths` style this file already uses:
+
+> **### Known gap: `finalize.md` Phase 4**
+>
+> `finalize.md` § Phase 4 stages `git add agents/`, which rule 1 forbids. It is the last automatic
+> path in the framework that does, and it is scheduled for replacement by the `publish-lore.md`
+> procedure. Until then, treat rule 1 as binding on all new and modified code and do not cite
+> Phase 4 as precedent.
+
+Do **not** fix `finalize.md` Phase 4 as part of Tier A. It is C2's job, C2 is gated behind the deep
+cold review, and a partial hand-fix here is unreviewed Tier B work wearing Tier A's clearance.
+
 ---
 
 ## 10a. C8 — `lrb status` surfaces a stranded publication
@@ -807,6 +939,32 @@ green against HEAD, via a detached worktree with `LR_FRAMEWORK_DIR`.
 | T8 | `workspace-pull` Phase 0 with a dirty file the incoming commit also touches | pull refused, dirty-cause wording emitted |
 | T8b | `workspace-pull` Phase 0 on a diverged root | diverged-cause wording, **not** "commit or stash" |
 | T9 | Grep the shipped tree for `--autostash`, `reset --hard`, `git add agents/`, bare `git add -A` without `--` | no hits outside `conventions.md`'s own prohibition text |
+
+**Amended after round 4 — Tier A adjustments to this table:**
+
+- **T1/T2 assert severity, not just presence.** T1 (ahead-only) must assert `severity == "info"`;
+  T2 (diverged) must assert `severity == "warn"`. That is the cry-wolf guard, and without it the
+  amended § 7 rule ships untested.
+- **T4 is rewritten for the outcome-keyed backoff; T5 and T6 stand as written.** T5
+  (`last-success` absent → True) and T6 (`last-success` recent, `last-attempt` old → False) both
+  exercise the *due* question, which the backoff does not touch — no edit needed, and each still
+  passes. T4 becomes: last attempt *failed*,
+  `last-success` old → False before `backoff(n)`, True after. Add **T4b**: last attempt
+  *succeeded*, `last-success` older than a `ttl` below 900 → **True immediately**, no floor. T4b is
+  the regression guard for the `--workspace-ttl 0` contract, and it is red against the unamended
+  design.
+- **T9 is deferred to Tier B.** `docs/finalize.md` § Phase 4 currently contains `git add agents/`
+  and only C2 removes it, so T9 cannot pass on a Tier-A-only tree. Landing it now means either a
+  test that fails on green code or a pattern narrowed until it no longer catches the thing it
+  exists to catch. Tier A instead runs **T9a**: the same grep for `--autostash`, `reset --hard`
+  and `--force` in automatic paths only, which passes on the current tree and locks in rule 2 of
+  § Tooling: Git Safety. **Scope the pattern to git invocations**, not bare flag names:
+  `scripts/lrb.py:941` contains `cmd.extend(["--force", "--sandbox", "disabled"])`, a Cursor
+  subprocess flag with nothing to do with git, and a naive `--force` grep fails on green code.
+  Match `git` and the flag on one line (e.g. `grep -nE 'git .*(--autostash|--force|reset --hard)'`),
+  and assert the hit set is empty outside `conventions.md`'s own prohibition text.
+
+Tier A's deterministic set is therefore T1, T2, T3, T4, T4b, T5, T6, T7, T8, T8b, T9a.
 
 ### Procedure-level (`tests/lifecycle/`, real engine, cheapest tier)
 
@@ -871,6 +1029,32 @@ guard for a defect this review introduced and then removed.
   blocks `.git` writes and network, so publication already degrades there; `engines/codex.md` gains
   one sentence stating that under a blocked sandbox the lore files remain on disk uncommitted and
   the user must publish manually — unchanged in substance, now stated.
+### Tier A rollout — added after round 4
+
+§ 12 above is written for the ten-change ship. Tier A is four of those ten, and needs its own
+answers rather than a subtraction exercise:
+
+- **Version: v46, release-notes-only, cache-affecting.** It touches `scripts/lr_core/repo_scan.py`,
+  `workspace_refresh.py`, `common.py`, `cli.py`, `preflight.py`, `scripts/workspace-pull`, and two
+  SKILL.md-referenced docs, so the release notes carry the hoisted **Clear Plugin Cache** footer
+  per `conventions.md` § Clear Plugin Cache. No migration, no repo file changes, no schema change.
+- **Tier B becomes v47**, and Tier C is decided from R16's data rather than scheduled. Shipping
+  Tier A as its own version is not bookkeeping: R16 only starts measuring how often divergence
+  actually happens once it is installed and running in a real workspace, and that measurement is
+  what § 14a says should decide whether Tier C is built at all.
+- **Manifests:** all four to `1.46.0`.
+- **Skill count:** unchanged at 31. Tier A creates no skill and no new doc — `publish-lore.md` is
+  Tier B.
+- **Release notes must state what Tier A does *not* do.** It reports divergence; it does not stop
+  the framework from causing it. A user who reads "lore sync hardening" and assumes finalize no
+  longer strands commits will be wrong for a whole release cycle. One sentence, in the notes.
+- **History backfill:** the v46 entry in `versioning-release-types.md` in the same finalization,
+  describing the tier honestly — detection plus three contained fixes, not the cure.
+- **Gate dispositions:** deterministic tests and `/lr:check` run; dogfood onto this workspace; the
+  lifecycle suite and TriLens are `did not run` unless asked, and this round-4 design review is
+  recorded as what it was — a design gate, not a code gate. It certifies the spec, not the
+  implementation.
+
 - **Ordering.** C5, C6 and C7 are independent and can land first. C1 precedes C2, C3, C3a, C3b,
   C4 and C8 — C4 and C8 both read the marker C1 defines. C4 without C1 is still worth landing
   (bare ahead/behind detection), so it may go early in reduced form if C1 slips.
@@ -909,10 +1093,19 @@ That is not a signal to review harder. It is a signal that this document has out
 review can certify, and the answer is to ship it in tiers and let the cheap tier produce the
 evidence for the expensive one.
 
-**Tier A — land first, no further review.** C5 (refresh TTL on `last-success`), C6 (`workspace-pull`
+**Tier A — land first.** C5 (refresh TTL on `last-success`), C6 (`workspace-pull`
 Phase 0), C7 (`conventions.md` § Tooling: Git Safety), and **C4 in bare form** — R16 reporting
 ahead/behind only, with no marker dependency. Nine reviewer passes produced zero findings against
 any of these. Each stands alone, and bare R16 starts measuring how often divergence actually occurs.
+
+> **Superseded in part, 2026-09-13.** "No further review" was wrong, and the reason is worth
+> keeping: those nine passes reviewed the **whole spec**, in which Tier B's artifacts exist by
+> assumption. Tiering is itself a change, and the subset had never been reviewed as a subset. A
+> round-4 review scoped to Tier A alone returned two SHIP-WITH-FIXES and one **BLOCK**, six real
+> findings, two of which would have shipped a user-visible regression (§ 14, *Fifth*). They are
+> amended into §§ 7, 8, 10, 11 and 12. **Tier A is implementation-ready as amended**; the general
+> lesson — carving a reviewed whole into tiers produces an unreviewed artifact at every seam — is
+> the part that outlives this spec.
 
 **Tier B — the cure.** C1, C2, C3, C3a. Before implementing, run **one deep unconstrained
 cold reviewer** over Tier B alone — the framework's prescribed substitute when the round cap ends a
@@ -1016,8 +1209,76 @@ table. Rejected, with the reason recorded in § 3: it trades away automatic reco
 `lore-context.md`, the single most frequent collision in the system, for a manual stop every time
 two sessions run the same agent. The simplification is real; the trade is bad.
 
+Fifth, a round of three cold lenses scoped to **Tier A only** — tier-boundary/partial-ship,
+call-site/integration reality, and installed-population/first-boot-after-upgrade. Run 2026-09-13 at
+the user's direction, against a deliberately clean tree (a partial Tier A implementation was
+reverted first so all three lenses certified one state). Verdicts: SHIP-WITH-FIXES,
+SHIP-WITH-FIXES, **BLOCK**. Thirteen findings, six real after triage, all amended into §§ 7, 8, 10,
+11 and 12 in place rather than recorded only here.
+
+The round existed because **tiering is itself a change, and nobody had reviewed the subset as a
+subset.** Every prior round read the whole spec, where Tier B's artifacts are present by
+assumption. What it forced:
+
+- **C5's flat retry floor was wrong in both directions** — two lenses, independently. Too strong:
+  ANDed unconditionally it floors *every* refresh at 900s regardless of configured TTL, breaking
+  the documented `--workspace-ttl 0` contract that two shipped tests pin. Too weak: real boots are
+  hours apart, so the floor never engages between them, and a workspace that can never sync
+  (offline, expired credentials, Codex's sandboxed `.git`) went from one bounded 90s
+  `workspace-pull` per 16 hours to one on *every boot*, permanently — against § 12's own
+  "Boot latency: unchanged". Replaced by outcome-keyed backoff.
+- **C7 would have shipped a rule the framework itself breaks.** Rule 1 forbids `git add
+  <directory>`; `finalize.md` § Phase 4 step 1 *is* `git add agents/`, and only C2 (Tier B) removes
+  it. Now ships with an explicit Known gap, and rules 3–4 move to Tier B with the document they
+  cite.
+- **The R16 catalog row contradicted § 4 Step 5c** — it offered `merge && push` as the generic
+  remedy, the exact sequence Step 5c calls unsafe because it re-hits the conflict and leaves a `UU`
+  tree. Bare R16 cannot tell which divergences are clean, and the safe branch was gated on marker
+  data Tier A never produces.
+- **R16 warned on the ordinary unpushed-commit state**, which is not a fault at all — cry-wolf in
+  the first thing users see, shipped alongside pages forbidding it. Severity now keys on
+  `diverged`, which also deletes the 120s debounce, one git call and its timestamp parsing.
+- Also: the marker paragraph in § 7 had no in-place "Tier C only" marking (the qualifier lived
+  seven sections away in § 14a); the bare-C4 snippet omitted the debounce its own prose promised;
+  T9 cannot pass on a Tier-A-only tree; and § 12 had no Tier-A rollout.
+
+Sixth, **one cold reviewer over the round-4 amendments alone** — the lens being whether the fixes
+introduced defects, this document's own recurring failure. Verdict: SHIP-WITH-FIXES, ten findings,
+nine applied and one accepted. It was worth running: two were HIGH and one of those is the shape
+the lens was chosen for — § 14's closing paragraph still read *"the substitute for a fourth round is
+one deep unconstrained cold reviewer... before any implementation begins"*, directly contradicting
+the readiness § 14a now asserts a few dozen lines earlier. A new statement of readiness left
+standing beside an old statement of non-readiness is precisely `single-canonical-source-discipline`'s
+failure mode, self-inflicted while fixing something else. The other HIGH: `consecutive-failures` was
+introduced as "a new integer field" with no serialization, no parse-failure rule and no slot in
+`write_state`'s signature — an implementer would have invented all three. Also forced: `backoff(0)`
+guarded rather than left to evaluate `2 ** -1`; `setup-required` explicitly bucketed; the
+backed-off return status stated and its silence recorded as a known gap; T9a's pattern scoped to
+git invocations after verification that `scripts/lrb.py:941` carries a non-git `--force`; the § 7
+skip note corrected from "four paragraphs" to the two actually skipped, since *Anything else* must
+survive into bare form; and the amended severity rule given its own copyable call site.
+
+**Accepted, not applied (1):** the finding that this document is now long enough that its tier
+qualifications are hard to follow. True, and not fixable by another edit to it — the answer is that
+Tier A's amendments live in the sections that own them, which is what round 4 did.
+
+**Declined (1):** an off-switch or tuning knob for R16. It is clearable by pushing, so it is not the
+unclearable-finding trap `conventions.md` warns about.
+
+Lenses now spent across five rounds: adversarial, simplification/simplicity (×4),
+framework-coherence, alternative-designs, executor fidelity, conflict-classification correctness,
+operator recovery, claim audit, marker-as-persistent-state, first-principles regression,
+tier-boundary/partial-ship, call-site/integration reality, installed-population/upgrade.
+
 **Status after three rounds: not converged.** Findings fell 14 → 16 → 13, and the last round's were
 smaller in kind — but it still produced a BLOCK, and its fixes are unreviewed. The loop's three-round
 ceiling ended it, not a clean round. Per this framework's own rule, the substitute for a fourth
 round is one deep unconstrained cold reviewer, and that is the recommended next step before any
 implementation begins.
+
+**Status after five rounds — this paragraph supersedes the one above for Tier A only.** The
+sentence "before any implementation begins" was written when this document was one indivisible
+ship. It still binds **Tier B and Tier C**: neither may be implemented without the deep
+unconstrained cold reviewer. It no longer binds **Tier A**, which was carved out, reviewed on its
+own in round 4, amended, and re-reviewed in round 5. Tier A is implementation-ready as amended
+(§ 14a). Nothing else in this document is.
