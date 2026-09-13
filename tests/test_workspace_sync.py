@@ -835,5 +835,193 @@ class TestPruneSafety(SyncCase):
         self.assertEqual(git_out(checkout, "cat-file", "-t", sha), "commit")
 
 
+class TestRoundOneRegressions(SyncCase):
+    """One test per finding from the pre-release review rounds."""
+
+    def test_dry_run_survives_a_dead_worktree_registration(self):
+        """The dry-run branch used to crash on any prunable worktree, aborting the run."""
+        _, checkout = self.make_repo("lore-a")
+        self.make_repo("lore-b")
+        wt = os.path.join(self.tmp, "wt-dead")
+        git(checkout, "worktree", "add", "-b", "dead-branch", wt)
+        shutil.rmtree(wt)
+
+        report = self.sync("--dry-run")
+        entry = self.repo_report(report, "lore-a")
+        retained = {r["path"]: r["reason"] for r in entry["worktrees"]["retained"]}
+        self.assertIn("would be pruned", retained.get(wt, ""))
+        self.assertEqual(entry["worktrees"]["pruned"], [], "a dry run prunes nothing")
+        self.assertIn("wt-dead", git_out(checkout, "worktree", "list"))
+        # The whole run survived: the other repo still has its own entry.
+        self.repo_report(report, "lore-b")
+
+    def test_dry_run_previews_a_worktree_removal(self):
+        _, checkout = self.make_repo("lore-a")
+        wt = os.path.join(self.tmp, "wt-clean")
+        git(checkout, "worktree", "add", "-b", "clean-branch", wt)
+
+        entry = self.repo_report(self.sync("--dry-run", "--prune-worktrees"), "lore-a")
+        retained = {r["path"]: r["reason"] for r in entry["worktrees"]["retained"]}
+        self.assertEqual(retained.get(wt), "would be removed")
+        self.assertTrue(os.path.isdir(wt))
+
+    def test_one_unsafe_registration_names_itself_not_its_neighbour(self):
+        _, checkout = self.make_repo("lore-a")
+        safe = os.path.join(self.tmp, "wt-safe")
+        unsafe_parent = os.path.join(self.tmp, "volume", "wt-unsafe")
+        os.makedirs(os.path.dirname(unsafe_parent))
+        git(checkout, "worktree", "add", "-b", "safe-branch", safe)
+        git(checkout, "worktree", "add", "-b", "unsafe-branch", unsafe_parent)
+        shutil.rmtree(safe)
+        shutil.rmtree(os.path.join(self.tmp, "volume"))
+
+        entry = self.repo_report(self.sync(), "lore-a")
+        retained = {r["path"]: r["reason"] for r in entry["worktrees"]["retained"]}
+        self.assertEqual(entry["worktrees"]["pruned"], [])
+        self.assertIn("unmounted", retained[unsafe_parent])
+        self.assertIn("another registration", retained[safe],
+                      "a safe entry must not be labelled as the unsafe one")
+
+    def test_deleting_a_credential_shaped_file_is_published(self):
+        bare, checkout = self.make_repo("lore-a")
+        write(os.path.join(checkout, ".env"), "TOKEN=secret\n")
+        git(checkout, "add", "-f", ".env")
+        git(checkout, "commit", "-m", "oops")
+        git(checkout, "push")
+        self.assertIn(".env", git_out(bare, "ls-tree", "-r", "--name-only", "HEAD"))
+
+        os.remove(os.path.join(checkout, ".env"))
+        report = self.sync()
+        entry = self.repo_report(report, "lore-a")
+
+        self.assertTrue(report["ok"], report["errors"])
+        self.assertIn(".env", entry["committed"])
+        self.assertEqual(entry["held"], [])
+        self.assertNotIn(".env", git_out(bare, "ls-tree", "-r", "--name-only", "HEAD"),
+                         "removing a leaked credential must reach the remote")
+
+    def test_a_path_held_twice_is_reported_once(self):
+        _, checkout = self.make_repo("lore-a")
+        write(os.path.join(checkout, ".env"), "TOKEN=secret\n")
+        git(checkout, "add", "-f", ".env")
+        git(checkout, "commit", "-m", "oops")
+        # `git rm --cached` leaves the same path as both a deletion and untracked.
+        git(checkout, "rm", "--cached", ".env")
+
+        entry = self.repo_report(self.sync(), "lore-a")
+        paths = [h["path"] for h in entry["held"]]
+        self.assertEqual(len(paths), len(set(paths)), paths)
+
+    def test_a_merge_interrupted_before_the_claim_lands_is_still_ours(self):
+        """The claim is written before `git merge`, so a kill in between cannot orphan it."""
+        _, checkout = self.make_repo("lore-a")
+        other = self.other_clone("lore-a")
+        write(os.path.join(other, "lore", "topic.md"), "their version\n")
+        git(other, "add", "-A")
+        git(other, "commit", "-m", "theirs")
+        git(other, "push")
+        write(os.path.join(checkout, "lore", "topic.md"), "my version\n")
+
+        self.sync()  # conflicts and leaves the merge claimed
+        marker = os.path.join(checkout, ".git", ws.MERGE_MARKER)
+        self.assertTrue(os.path.exists(marker))
+        claim = json.load(open(marker))
+        merge_head = open(os.path.join(checkout, ".git", "MERGE_HEAD")).read().strip()
+        self.assertEqual(claim["target"], merge_head,
+                         "the claim must name the commit git is actually merging")
+
+    def test_a_clean_merge_clears_the_claim(self):
+        _, checkout = self.make_repo("lore-a")
+        other = self.other_clone("lore-a")
+        write(os.path.join(other, "lore", "theirs.md"), "theirs\n")
+        git(other, "add", "-A")
+        git(other, "commit", "-m", "theirs")
+        git(other, "push")
+        write(os.path.join(checkout, "lore", "mine.md"), "mine\n")
+
+        self.sync()
+        self.assertFalse(os.path.exists(os.path.join(checkout, ".git", ws.MERGE_MARKER)),
+                         "a completed merge must not leave a claim behind")
+
+    def test_foreign_merge_refusal_names_commands_that_end_the_state(self):
+        _, checkout = self.make_repo("lore-a")
+        other = self.other_clone("lore-a")
+        write(os.path.join(other, "lore", "theirs.md"), "theirs\n")
+        git(other, "add", "-A")
+        git(other, "commit", "-m", "theirs")
+        git(other, "push")
+        git(checkout, "fetch", "origin")
+        git(checkout, "merge", "--no-commit", "--no-ff", "origin/main")
+
+        entry = self.repo_report(self.sync(), "lore-a")
+        self.assertIn("git -C", entry["blocked"])
+        self.assertIn("commit", entry["blocked"])
+        self.assertIn("merge --abort", entry["blocked"])
+
+    def test_one_repos_failure_does_not_erase_the_runs_report(self):
+        infos = [{"name": "boom", "path": "/nonexistent", "kind": "lore"}]
+
+        class Args(object):
+            workspace = self.ws
+            dry_run = True
+            no_push = False
+            prune_worktrees = False
+
+        original = ws.sync_repo
+
+        def exploding(info, **kwargs):
+            if info["name"] == "boom":
+                raise RuntimeError("synthetic failure")
+            return original(info, **kwargs)
+
+        self.make_repo("lore-a")
+        original_classify = ws.classify_repos
+        ws.sync_repo = exploding
+        ws.classify_repos = lambda w: original_classify(w) + infos
+        try:
+            from lr_core.common import Result
+            res = Result()
+            ws.cmd_workspace_sync(Args(), res)
+        finally:
+            ws.sync_repo = original
+            ws.classify_repos = original_classify
+
+        names = {r["name"]: r for r in res.data["repos"]}
+        self.assertIn("lore-a", names, "a healthy repo keeps its entry")
+        self.assertEqual(names["boom"]["status"], "blocked")
+        self.assertIn("synthetic failure", names["boom"]["blocked"])
+        self.assertFalse(res.ok)
+
+    def test_index_lock_is_not_relayed_as_delete_the_lock_file(self):
+        raw = ("fatal: Unable to create '/x/.git/index.lock': File exists.\n\n"
+               "Another git process seems to be running in this repository...\n"
+               "remove the file manually to continue.")
+        explained = ws.explain_git_failure(raw, "git add failed")
+        self.assertIn("concurrent session", explained)
+        self.assertNotIn("remove the file manually", explained)
+
+    def test_pathspec_file_is_written_inside_the_repo(self):
+        _, checkout = self.make_repo("lore-a")
+        spec = ws._pathspec_file(checkout, ["a", "b"])
+        try:
+            self.assertTrue(spec.startswith(os.path.realpath(checkout)), spec)
+            self.assertEqual(open(spec).read(), "a\0b")
+        finally:
+            os.remove(spec)
+
+    def test_interrupted_worktree_removal_is_named_as_wreckage(self):
+        _, checkout = self.make_repo("lore-a")
+        wt = os.path.join(self.tmp, "wt-half")
+        git(checkout, "worktree", "add", "-b", "half-branch", wt)
+        os.remove(os.path.join(wt, ".git"))  # what a killed `worktree remove` leaves
+
+        entry = self.repo_report(self.sync("--prune-worktrees"), "lore-a")
+        retained = {r["path"]: r["reason"] for r in entry["worktrees"]["retained"]}
+        self.assertIn("interrupted removal", retained.get(wt, ""))
+        self.assertEqual(entry["worktrees"]["pruned"], [],
+                         "a directory that still holds files keeps its registration")
+        self.assertTrue(os.path.isdir(wt))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
