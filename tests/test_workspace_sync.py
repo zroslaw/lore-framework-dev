@@ -1023,5 +1023,127 @@ class TestRoundOneRegressions(SyncCase):
         self.assertTrue(os.path.isdir(wt))
 
 
+class TestRoundTwoRegressions(SyncCase):
+    """One test per finding from review round 2."""
+
+    def _workspace_repo(self):
+        """The workspace root as its own repo with a remote, as a real workspace has."""
+        bare = os.path.join(self.origins, "ws.git")
+        subprocess.run(["git", "init", "--bare", "-b", "main", bare],
+                       stdout=subprocess.DEVNULL, check=True)
+        subprocess.run(["git", "init", "-b", "main", self.ws],
+                       stdout=subprocess.DEVNULL, check=True)
+        git(self.ws, "config", "user.name", "test")
+        git(self.ws, "config", "user.email", "test@example.com")
+        write(os.path.join(self.ws, "README.md"), "workspace\n")
+        git(self.ws, "add", "-A")
+        git(self.ws, "commit", "-m", "seed")
+        git(self.ws, "remote", "add", "origin", bare)
+        git(self.ws, "push", "-u", "origin", "main")
+        return bare
+
+    def test_workspace_root_publishes_only_framework_managed_paths(self):
+        bare = self._workspace_repo()
+        # A framework-managed path and a personal one, both dirty.
+        write(os.path.join(self.ws, ".claude", "commands", "lr-x-agent.md"), "shortcut\n")
+        write(os.path.join(self.ws, "my-private-draft.md"), "not for sharing\n")
+
+        report = self.sync()
+        entry = self.repo_report(report, os.path.basename(self.ws))
+
+        self.assertIn(".claude/commands/lr-x-agent.md", entry["committed"])
+        held = {h["path"]: h["reason"] for h in entry["held"]}
+        self.assertIn("my-private-draft.md", held)
+        self.assertIn("framework-managed", held["my-private-draft.md"])
+        tree = git_out(bare, "ls-tree", "-r", "--name-only", "HEAD")
+        self.assertNotIn("my-private-draft.md", tree,
+                         "workspace-push's contract: unmanaged root files are left alone")
+        self.assertTrue(os.path.exists(os.path.join(self.ws, "my-private-draft.md")))
+
+    def test_a_repo_whose_worktree_points_elsewhere_is_refused(self):
+        _, checkout = self.make_repo("lore-a")
+        decoy = os.path.join(self.tmp, "decoy-home")
+        os.makedirs(decoy)
+        write(os.path.join(decoy, "tax-return.pdf"), "private\n")
+        git(checkout, "config", "core.worktree", decoy)
+
+        report = self.sync()
+        entry = self.repo_report(report, "lore-a")
+
+        self.assertFalse(report["ok"])
+        self.assertEqual(entry["status"], "blocked")
+        self.assertIn("working tree is configured elsewhere", entry["blocked"])
+        self.assertEqual(entry["committed"], [])
+        bare = os.path.join(self.origins, "lore-a.git")
+        self.assertNotIn("tax-return.pdf",
+                         git_out(bare, "ls-tree", "-r", "--name-only", "HEAD"))
+
+    def test_a_tracked_submodule_pointer_is_held(self):
+        bare, checkout = self.make_repo("lore-a")
+        sub_bare, sub_checkout = self.make_repo("subproject", lore=False,
+                                                clone_name="subproject-src")
+        env = os.environ.copy()
+        env.update(GIT_ENV)
+        env["GIT_ALLOW_PROTOCOL"] = "file"
+        subprocess.run(["git", "-C", checkout, "-c", "protocol.file.allow=always",
+                        "submodule", "add", sub_bare, "sub"],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env)
+        git(checkout, "add", "-A")
+        git(checkout, "commit", "-m", "add submodule")
+        git(checkout, "push")
+        # Move the submodule to a commit that exists nowhere else.
+        sub = os.path.join(checkout, "sub")
+        write(os.path.join(sub, "local.md"), "never pushed\n")
+        git(sub, "add", "-A")
+        git(sub, "commit", "-m", "local only")
+
+        entry = self.repo_report(self.sync(), "lore-a")
+        held = {h["path"]: h["reason"] for h in entry["held"]}
+        self.assertIn("sub", held, entry["held"])
+        self.assertIn("nested git repository", held["sub"])
+        self.assertNotIn("sub", entry["committed"])
+
+    def test_a_symlink_is_held_rather_than_publishing_its_target(self):
+        _, checkout = self.make_repo("lore-a")
+        secret = os.path.join(self.tmp, "elsewhere", "private-notes.pem")
+        os.makedirs(os.path.dirname(secret))
+        write(secret, "KEY\n")
+        os.symlink(secret, os.path.join(checkout, "notes-link.md"))
+
+        entry = self.repo_report(self.sync(), "lore-a")
+        held = {h["path"]: h["reason"] for h in entry["held"]}
+        self.assertIn("notes-link.md", held)
+        self.assertIn("symlink", held["notes-link.md"])
+        self.assertEqual(entry["committed"], [])
+
+
+    def test_renaming_away_from_a_secret_name_completes(self):
+        """The origin of a rename is a deletion, so the hold must not strand it."""
+        bare, checkout = self.make_repo("lore-a")
+        write(os.path.join(checkout, "credentials.json"), "{}\n")
+        git(checkout, "add", "-f", "credentials.json")
+        git(checkout, "commit", "-m", "oops")
+        git(checkout, "push")
+        git(checkout, "mv", "credentials.json", "config.json")
+
+        report = self.sync()
+        entry = self.repo_report(report, "lore-a")
+
+        self.assertTrue(report["ok"], report["errors"])
+        self.assertIn("credentials.json", entry["committed"],
+                      "the removal must be recorded, not held")
+        self.assertIn("config.json", entry["committed"])
+        tree = git_out(bare, "ls-tree", "-r", "--name-only", "HEAD")
+        self.assertNotIn("credentials.json", tree)
+        self.assertIn("config.json", tree)
+        # And the repo is not left permanently dirty by a stranded staged deletion.
+        self.assertEqual(git_out(checkout, "status", "--porcelain"), "")
+
+    def test_our_own_timeout_is_not_reported_as_someone_elses_lock(self):
+        timed_out = ws.explain_git_failure("timed out after 120s", "git commit failed")
+        self.assertIn("did not finish in time", timed_out)
+        self.assertNotIn("concurrent session", timed_out)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
