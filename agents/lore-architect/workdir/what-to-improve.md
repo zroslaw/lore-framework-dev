@@ -37,23 +37,27 @@ capture would change how the system feels more than anything else here.
 
 ---
 
-## A0. Lore sync hardening (v46) — DESIGN REPLACED, REFERENCE TESTS PASSED — updated 2026-09-13
+## A0. Lore sync hardening (v46) — DESIGN UNFINISHED, PAUSED — updated 2026-09-13
 
-**Top of the list.** Current contract: `workdir/draft-lore-sync-hardening.md`. Executable reference:
+**Top of the list.** Latest decision: `workdir/v46-session-worktree-decision.md`, which supersedes
+parts of `workdir/draft-lore-sync-hardening.md`. Executable earlier reference:
 `workdir/v46-prototype/`. One v46 release; no tiered release plan.
 
 The latest code-grounded review reproduced unsafe shared-checkout rollback, unrelated staging
 entering a merge, publication of unrelated ancestor commits, wrong push destinations and failure
 markers disappearing while work remained blocked. The replacement design isolates authoring from
-the first write in one worktree per session. The helper never mutates the primary branch/index,
-never resets on failure, publishes exact commits to exact destinations, and keeps one durable
-operation record per session. Status is read-only. Boot-time updates remain conservative.
+boot for each Lore repository in one reused worktree per session/repo. Lore Python owns lifecycle,
+using `.worktree/<session-uuid>/<repo>/`; native engine worktrees are not a dependency. Required safe
+local Lore integration supersedes the earlier primary-read-only invariant. Source/document repo
+publication policy, durable resume and write enforcement still need design. Never reset on failure.
 
 **Reference validation:** 41 tests passed; the six refresh tests were rerun after the final numeric
 bounds fix, and all five mutation controls were detected.
 
-**Next action:** integrate the complete caller inventory in the spec's § 9. Production remains v45; no caller currently routes through this
-prototype. Prototype mechanics are not evidence that real engines obey session bindings.
+**Next action:** resume and finish design, reconcile the old spec/prototype with the latest decision,
+and settle source branch/PR policy and safe local-first publication before implementation.
+Production remains v45; no caller currently routes through this prototype. Earlier test results
+do not validate the amended lifecycle, local-first protocol or real-engine session binding.
 
 The old 1,663-line spec and seven review rounds remain in Git history. Do not reinstate their
 withdrawn rollback, global-marker, zero-ahead-gate deletion or tier-specific tests as requirements.

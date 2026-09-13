@@ -1,5 +1,9 @@
 # V46 design prototype
 
+**Historical reference, design unfinished:** the later [session worktree decision](../v46-session-worktree-decision.md)
+changes binding, repeated-checkpoint lifecycle and local integration requirements. This prototype
+and its recorded tests have not been updated to validate those requirements. Resume design first.
+
 An executable reference for [the revised design](../draft-lore-sync-hardening.md). This is **not an
 installed framework command**. It validates the choice to isolate session authoring and publication
 before wiring that choice into the framework's writing entry points.

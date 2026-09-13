@@ -483,15 +483,14 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
   model tier**. Anchor: `multi-engine-portability-direction.md`; see also `docs-engines-convention.md`,
   `cursor-dual-skill-tree-one-repo.md`.
 
-- **Lore-sync hardening (v46, in flight)** — **one release; no tiered rollout**. The latest
-  code-grounded review found shared-checkout rollback/index races and marker-lifetime failures.
-  The revised design isolates authoring in one worktree per writing session, publishes exact
-  snapshots to explicit destinations, and records per-session outcomes; no shared-checkout reset.
-  Current spec: `workdir/draft-lore-sync-hardening.md`; executable reference and adversarial tests:
-  `workdir/v46-prototype/`. **Production remains v45; caller integration is outstanding.** See
-  `v46-sync-hardening-tiered-plan.md`, `lore-repo-divergence-is-self-inflicted.md`, and
-  `sidecar-publish-rejected.md` (the new design avoids its dirty-primary failure by isolating
-  authoring from the first write).
+- **Lore-sync hardening (v46)** — **DESIGN UNFINISHED; not ready for implementation**. One
+  release, no tiers. Latest authority: `workdir/v46-session-worktree-decision.md`; earlier draft and
+  prototype need redesign. Lore Python owns session worktrees: eager boot/attach binding, same-repo
+  reuse, `.worktree/<session-uuid>/<repo>/` proposed layout. Finalize attempts safe local Lore
+  integration and remote push; source/document publication follows its workflow. Native engines
+  are optional UI integration, not lifecycle owners. Production remains v45. See
+  `v46-sync-hardening-tiered-plan.md` for decisions, evidence limits and open work; earlier prototype
+  checks do not validate this later design. Resume design before implementation.
 
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** item —
   active follow-ups from the 2026-06-13 architecture review. That review's settled dispositions

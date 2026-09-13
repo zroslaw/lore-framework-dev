@@ -1,34 +1,94 @@
 ---
 lore: 1
 type: topic
-summary: "V46 current design: one worktree per writing session, deterministic publication, per-session durable outcomes; reference prototype in workdir/v46-prototype, production integration still outstanding."
+summary: "V46 unfinished design: Lore-owned session worktrees, eager agent boot binding, local Lore integration and push; latest decision amendment, evidence limits and open design work."
 parent: lore-context.md
 ---
 
-# V46 Lore-Sync Hardening — Current Design
+# V46 Lore-Sync Hardening — Unfinished Design
 
-All changes remain one v46 release. The A/B/C rollout was withdrawn; the filename is retained to
-preserve existing links.
+**DESIGN UNFINISHED — not ready for implementation.** The user paused the difficult design
+session on 2026-09-13 to preserve findings and continue later. All changes remain one v46 release;
+the A/B/C rollout was withdrawn, and this filename is retained to preserve links. Production
+remains v45; no worktree lifecycle change has shipped.
 
-The current contract is `workdir/draft-lore-sync-hardening.md`; the reference implementation,
-adversarial tests and their limitations are in `workdir/v46-prototype/README.md`. Production
-integration is a separate remaining step, enumerated in the spec's § 9.
+## Latest decision and source precedence
 
-The 2026-09-13 code-grounded review reproduced shared-checkout rollback removing another session's
-commit, a merge commit absorbing unrelated staged work, narrow update commits publishing unrelated
-ancestors, bare push succeeding at the wrong destination, and marker predicates erasing evidence
-of still-blocked publication. A common-directory marker also conflicted with branch-local cleanup.
-The previous seven-round design and its provenance remain in Git history at `ebaed0f`.
+Read [the session worktree decision](../workdir/v46-session-worktree-decision.md) first. It is the
+latest user-selected amendment and supersedes conflicting sections of
+[the earlier draft](../workdir/draft-lore-sync-hardening.md): lazy first-write Lore binding,
+repo-first layout, reliance on native engine lifecycle, and the primary-read-only publication
+invariant. The draft and [reference prototype](../workdir/v46-prototype/README.md) retain useful
+mechanics and evidence, but need redesign, not just caller integration.
 
-The revised design uses a private worktree **before the first session write**, exact destination
-publication, and durable per-operation outcomes. It eliminates shared-checkout rollback; pending
-private commits cannot block primary boot pulls. A status read never acknowledges delivery or
-deletes records. Primary synchronization and private publication health are separate facts.
+Lore's Python runtime owns creation, durable registration, recovery and verification. Boot/attach
+binds an agent's repository **before loading context**; agents in the same session and repository
+reuse that worktree. Other repositories bind before their first write, including the workspace
+repository if its tracked files will change. Read-only inspection needs no worktree.
 
-This does not revive the rejected sidecar publisher: that mechanism copied dirty primary files
-and left pull blockers behind; the new mechanism authors only in the private worktree and must
-pass publish → primary pull → next-session tests. Existing dirty primary work still needs explicit
-adoption; installing the helper cannot isolate old sessions that already hold primary paths.
+The selected layout is `.worktree/<session-uuid>/<repo>/`: singular, session-first. This is a
+**proposed replacement** for the installed `.worktrees/<repo>/<slug>/` convention, not current
+runtime behavior. Canonical Git identity, not the display basename, determines repository reuse;
+colliding names require distinct stable keys. Keep the durable session UUID separate from each
+finalization/checkpoint UUID. Resume, compaction and repeated finalizations retain bindings;
+independent sessions/forks have separate identities. Workers inherit explicitly and still need
+coordinated file ownership and serialized Git operations. Finalization does not remove worktrees;
+cleanup is explicit and must prove no remaining work, delivery or active operation.
 
-The prototype validates mechanics, not production caller integration, cross-engine fidelity,
-legacy migration or release readiness. Do not turn prototype test counts into a ship-gate result.
+A worktree checks out a branch already belonging to the original repository's shared Git database.
+Create that branch at binding; there is no branch-import step at finalization. Record base, target
+and publication policy. Do not force a branch already checked out by another session.
+
+## Publication policy and remaining decisions
+
+Inventory every bound repository and account for intended changes and unpublished history; never
+blindly stage all files. For each participating Lore repository, attempt safe local default-branch
+integration and remote push. Report local integration separately from remote delivery: offline
+local integration leaves pending publication, not full success. Retry must preserve outgoing
+history without duplicating work. There is no cross-repository atomicity promise.
+
+Resolve integration in isolation, protect cooperating writers with a repository lock, recheck
+identity and cleanliness, and advance the primary only by a verified fast-forward. Never overwrite
+primary WIP or force-push. The finalizing session owns conflict resolution and validation, but
+ambiguous semantics or unsafe primary state must leave an explicit blocked result. Locks do not
+control arbitrary external Git writers; detecting and recovering from those races is open work.
+Reread integrated Lore before continuing the session.
+
+Source/document repository publication remains **workflow-dependent and unresolved as a universal
+default**. The recommendation is a named feature branch from binding, then commit, required checks,
+push and PR/MR under the project's authority, without automatic main integration. Content type
+alone does not grant publication authority. Preserve a checkpoint and exact pending action where
+that authority or policy is missing.
+
+Native worktrees exist in Claude Code, Codex and Cursor, based on official documentation and
+installed CLI help checked in this session; no complete three-engine lifecycle trial was run.
+[Dated engine findings](../workdir/v46-native-worktree-engine-check.md) preserve sources and scope.
+Native UI integration may expose Lore's bound paths, but cannot own a competing lifecycle.
+Multi-root editing does not prove automatic isolation of independent nested repositories. A
+worktree of the parent workspace does not create worktrees of its child repositories. A registry
+or path reminder also does not enforce write isolation against unrestricted tools; guards and
+explicit cooperative limitations still need design and tests.
+
+## Evidence and boundaries
+
+The 2026-09-13 code-grounded review reproduced shared-checkout soft reset removing another session's
+commit, a merge commit absorbing foreign staged work, narrow commits publishing unrelated outgoing
+ancestors, bare push succeeding at an unintended destination, and marker predicates erasing
+still-blocked publication evidence. A common-directory marker also conflicted with branch-local
+cleanup. The previous seven-round design and provenance remain in Git history at `ebaed0f`.
+
+Isolation avoids shared-checkout authoring and rollback; it does not magically handle old sessions
+already holding primary paths. This is distinct from the rejected dirty-primary sidecar publisher,
+which copied files and left pull blockers behind. Preserve the publish → primary read → next-session
+verification requirement and status reads that never acknowledge delivery or erase evidence.
+
+The earlier prototype's 41 checks and five detected mutations are evidence for that prototype,
+**not validation of the later boot-bound, repeated-checkpoint, local-first design**. Preserve exact
+artifact/test dispositions in `workdir/v46-prototype/`. The lock-first exploration is unchosen
+history, not current instructions.
+
+Resume with stable UUID acquisition/recovery, boot/attach and write routing, crash recovery,
+repeated checkpoints, source workflow and branch collisions, local-only delivery, concurrent
+primary/remote changes, dirty-primary blocking, cleanup and tool guards. Update conventions,
+procedures and prototype together, then exercise two repositories, same-repo agent reuse and
+context restoration across all three engines. Do not infer release readiness from earlier checks.

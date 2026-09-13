@@ -1,5 +1,10 @@
 # V46 — Safe Concurrent Lore Publication
 
+**Design amendment:** [Session worktree decision](v46-session-worktree-decision.md) supersedes
+this draft on eager boot binding, session-first `.worktree` layout, engine-independent lifecycle,
+and required controlled local Lore integration. The prototype and invariants below have not yet
+been updated to that decision; their validation is not evidence for the amended protocol.
+
 **Status: revised design with an executable reference prototype; production integration not yet performed.**
 **Updated:** 2026-09-13. **Scope:** one v46 release, no A/B/C release split.
 
