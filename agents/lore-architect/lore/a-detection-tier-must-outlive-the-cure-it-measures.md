@@ -36,9 +36,14 @@ and the tier seams had already forced two rewrites of its wording and severity
 ([tiering-a-reviewed-spec-creates-unreviewed-seams.md](tiering-a-reviewed-spec-creates-unreviewed-seams.md)),
 so shipping it early risks churning a warning users have begun to rely on.
 
-**Decision, 2026-09-13 (user-directed):** design Tier B to completion and decide Tier C before
-shipping anything; Tier B needs its deep unconstrained cold review regardless, and holding Tier A
-costs almost nothing. Current tier state:
+**Decision, 2026-09-13 (user-directed):** design the cure to completion before shipping anything —
+holding the detection work cost almost nothing. Later the same day the user withdrew the tiering
+altogether and **all ten changes ship as one v46**, which settles this instance by removing the
+ordering question
+([tiering-a-reviewed-spec-creates-unreviewed-seams.md](tiering-a-reviewed-spec-creates-unreviewed-seams.md)
+§ When to abandon the tiering). The test above is unaffected: it applies to any "ship the detector
+first" plan, and here it is what showed the instrumentation argument was empty before the cut was
+abandoned for independent reasons. Current ship state:
 [v46-sync-hardening-tiered-plan.md](v46-sync-hardening-tiered-plan.md).
 
 Sibling shape: a guard or metric keyed on a state the design is about to change selects a population

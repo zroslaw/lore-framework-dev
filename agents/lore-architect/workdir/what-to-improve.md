@@ -37,10 +37,10 @@ capture would change how the system feels more than anything else here.
 
 ---
 
-## A0. Lore sync hardening (v46) — SPEC READY, TIERED, NOT YET IMPLEMENTED — added 2026-09-13
+## A0. Lore sync hardening (v46) — ONE SHIP, SPEC AMENDED, NOT YET IMPLEMENTED — updated 2026-09-13
 
-**Top of the list.** Full spec: `workdir/draft-lore-sync-hardening.md` (§ 14a carries the
-implementation order; § 14 the review history).
+**Top of the list.** Full spec: `workdir/draft-lore-sync-hardening.md` (§ 0 is the ship map; § 14 the
+review history). Lore: `v46-sync-hardening-tiered-plan.md`.
 
 Problem, established by direct git experiment rather than from docs: lore repos accumulate local
 commits that are never pushed, nothing detects it, and once a repo diverges every later boot's
@@ -50,26 +50,28 @@ without merging, `resolve-conflicts.md` gives up after three tries leaving a com
 `update.md`'s push gate refuses precisely when the branch is already ahead. `repo_scan.py` computes
 no ahead/behind for agent repos, so none of it is visible to `/lr:check`.
 
-**Next action — implement Tier A, now amended and cleared:** C5 (refresh TTL keys on
-`last-success`, not `last-attempt`, with outcome-keyed backoff), C6 (`workspace-pull` Phase 0 stops
-pre-refusing on a dirty tree), C7 (`conventions.md` § Tooling: Git Safety, rules 1-2 plus a Known
-gap), and C4 in **bare** form (R16 ahead/behind, severity keyed on `diverged`, no marker). Bare R16
-is also the instrument that tells us whether Tiers B and C are worth building.
+**Scope: all ten changes ship together as v46** (user, 2026-09-13). The A/B/C tiering and the v46/v47
+split are withdrawn — the tier seams were themselves generating findings. Tier words survive in the
+spec only as review history.
 
-A round-4 review scoped to **Tier A alone** (2026-09-13) returned 2× SHIP-WITH-FIXES and 1× BLOCK —
-six real findings, all amended into the spec. The earlier "no further review needed" was wrong:
-nine passes had reviewed the whole spec, never the subset, and two of the six would have shipped a
-user-visible regression. Ships as **v46** (release-notes-only, cache-affecting); Tier B becomes v47.
+**Next action — two review gates, then implement:**
 
-**Then Tier B** (C1/C2/C3/C3a — the `publish-lore.md` procedure) **only after one deep
-unconstrained cold reviewer**, per `parallel-reviewer-fanout-pattern.md`'s rule for a loop that hit
-the round cap without converging. **Tier C** (marker, C8, conflict classification) is deferred by
-design — it produced most of the findings in every round, and Tier A's data should decide whether it
-is built at all.
+1. One reviewer over **round 7's own amendments** (the shape round 6 used). Round 7 rewrote the
+   rollback rule, the failure classification, three `update.md` gate clauses, the write-set and
+   eleven tests; every round of this spec that fixed something introduced something.
+2. A **first review of the marker cluster** — the stranded-publish marker, `read_stranded_marker()`
+   and C8. Deferred as Tier C through every round, so never examined as shipping work, and it
+   produced the majority of findings whenever it was looked at.
 
-Evidence: three review rounds (3, 4, 3 cold lenses), findings 14 → 16 → 13, five BLOCK/BLOCKER
-verdicts total. Not converged at the ceiling. Round 3's only BLOCK was a defect round 2's fix
-introduced; the core design was never attacked by any lens.
+Then implement in build order: C1 first (everything delegates to it), C5/C6/C7 rules 1-2 any time.
+
+**Review record: seven rounds.** Three three-lens rounds (14 → 16 → 13 findings) never converged at
+the ceiling; round 4 reviewed a subset and found a BLOCK plus six real findings; round 5 reviewed
+round 4's amendments; **round 7 was the deep unconstrained cold reviewer — BLOCK, thirteen findings
+(3 BLOCKER, 5 HIGH, 4 MEDIUM, 1 LOW), all verified against the live docs and applied.** The three
+blockers: a rollback with no correct target after a merge commit; a failure table missing the only
+outcome the update path can produce; and a fix cancelled by a duplicate condition left standing two
+sections away.
 
 ---
 

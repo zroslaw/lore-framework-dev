@@ -44,6 +44,7 @@ their file as a hint over an authoritative source
 
 Where the file goes is its own decision:
 [git-common-dir-for-repo-wide-state.md](git-common-dir-for-repo-wide-state.md).
-The marker itself is deferred to Tier C in
-[v46-sync-hardening-tiered-plan.md](v46-sync-hardening-tiered-plan.md) — precisely because these
-rules made it expensive relative to what independent detection already gives.
+These rules made the marker expensive relative to what independent detection already gives, which is
+why review after review deferred it. The tiering that deferred it is withdrawn, so **the marker and
+its canonical reader now ship in v46** and owe the first review they never had
+([v46-sync-hardening-tiered-plan.md](v46-sync-hardening-tiered-plan.md)).

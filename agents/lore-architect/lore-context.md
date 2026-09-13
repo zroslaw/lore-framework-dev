@@ -485,11 +485,11 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
 
 - **Lore-sync hardening (v46, in flight)** — agent repos go stale because the framework itself
   manufactures divergence (finalize, conflict resolution, update publication) and nothing reports it.
-  Tiered off `workdir/draft-lore-sync-hardening.md`, but **nothing ships until Tier B is designed to
-  completion and Tier C decided** (user, 2026-09-13): Tier A (detection + cheap fixes) is *held* —
-  a Tier-A-only round found six findings including a BLOCK, and its R16 warning would measure a
-  regime Tier B removes. Tier B (the cure) still owes its deep cold review.
-  `lore-repo-divergence-is-self-inflicted.md`, `v46-sync-hardening-tiered-plan.md`,
+  **All ten changes ship as v46; tiering is withdrawn** after its seams produced findings in
+  consecutive rounds. The deep grounded review is complete and applied;
+  the round-7 amendments and the formerly deferred marker/reader/C8 work each still owe their first
+  review. `lore-repo-divergence-is-self-inflicted.md`, `v46-sync-hardening-tiered-plan.md`,
+  `tiering-a-reviewed-spec-creates-unreviewed-seams.md`, `review-grounding-beats-lens-novelty.md`,
   `sidecar-publish-rejected.md`, `a-detection-tier-must-outlive-the-cure-it-measures.md`.
 - **Lore housekeeping / consolidation "sleep" pass** and the **simplification/subtraction** item —
   active follow-ups from the 2026-06-13 architecture review. That review's settled dispositions

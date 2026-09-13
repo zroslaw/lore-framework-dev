@@ -1,58 +1,67 @@
 ---
 lore: 1
 type: topic
-summary: "Active project state: v46 lore-sync-hardening is tiered (A, B, C), but nothing ships until Tier B is designed to completion and Tier C decided; the authoritative spec is workdir/draft-lore-sync-hardening.md."
+summary: "Active project state: lore-sync-hardening ships as one v46 release (tiering withdrawn); the deep cold review is done and applied, two review gates remain; spec is workdir/draft-lore-sync-hardening.md."
 parent: lore-context.md
 ---
 
-# v46 Lore-Sync Hardening — Tiered Shipping Plan
+# v46 Lore-Sync Hardening — One Ship
 
-**The work is tiered; the shipping order is not "Tier A first."** Decision, 2026-09-13
-(user-directed, superseding § 14a of the spec): **design Tier B to completion and decide Tier C
-before shipping anything.** Tier B needs its deep unconstrained cold review regardless, and holding
-Tier A costs almost nothing — see
-[a-detection-tier-must-outlive-the-cure-it-measures.md](a-detection-tier-must-outlive-the-cure-it-measures.md)
-for why the "ship the detector first to get data" argument does not survive: Tier B removes the very
-causes bare R16 would be counting.
+**Everything ships as v46: all ten changes, no tiers, no v47** (user, 2026-09-13, superseding the
+tiered plan the same day). The authoritative statement is § 0 of the spec.
 
-The authoritative artifacts are on disk, not here — this topic is the pointer and the ordering
-decision:
+The work was cut into tiers A/B/C earlier that day and briefly carried two different ship orders.
+Both are withdrawn. The tiering was itself the problem: it put a version number in three places, a
+marker that half the document assumed and half deferred, and a convention whose rules cited a
+document in another tier — and the seams generated findings in two consecutive rounds
+([tiering-a-reviewed-spec-creates-unreviewed-seams.md](tiering-a-reviewed-spec-creates-unreviewed-seams.md)).
+**Tier vocabulary survives in the spec as review history, not as a plan.**
 
-- **`workdir/draft-lore-sync-hardening.md`** — the spec: ten changes (C1–C8), five invariants, 34
-  tests. § 14 carries the full review history; § 14a's *tiering* stands, its *ordering* does not.
+The authoritative artifacts are on disk, not here:
+
+- **`workdir/draft-lore-sync-hardening.md`** — the spec: ten changes (C1–C8), five invariants,
+  45 tests. § 0 is the ship map; § 14 the review history.
 - **`workdir/what-to-improve.md`** — the standing ranked list, where this work sits first
   ([standing-improvement-list-practice.md](standing-improvement-list-practice.md)).
 
-## The tiers
+## Where it stands
 
-- **Tier A — small, safe, independently useful; held, not shipped.** C5 (refresh TTL keys on
-  `last-success`, not `last-attempt`), C6 (`workspace-pull` Phase 0 stops pre-refusing on a dirty
-  tree), C7 (`conventions.md` § Tooling: Git Safety), and **C4 in bare form** — R16 reporting
-  agent-repo ahead/behind with no marker dependency. Nine whole-spec reviewer passes found nothing
-  here; a round scoped to **Tier A alone** then found six, including a BLOCK
-  ([tiering-a-reviewed-spec-creates-unreviewed-seams.md](tiering-a-reviewed-spec-creates-unreviewed-seams.md)).
-  C5's `retry_floor` was one of them —
-  [a-rate-floor-is-wrong-in-both-directions.md](a-rate-floor-is-wrong-in-both-directions.md).
-  R16 is user-facing and its wording and severity have already been rewritten twice at the tier
-  seams; shipping it early would churn a warning users start to rely on.
-- **Tier B — the cure.** C1 (`docs/publish-lore.md`), C2 (finalize Phase 4), C3 (update publication
-  in `no-merge` mode), C3a (`resolve-conflicts.md` retargeted). **Design it to completion, then one
-  deep unconstrained cold reviewer before implementing.**
-- **Tier C — deferred by design.** The stranded-publish marker, C8 (`lrb status`), and the
-  Ours/Foreign conflict classification. These produced most of the findings in every round. Decide
-  from the divergence rate that exists *after* Tier B, not from anything Tier A could measure before
-  it.
+**Seven review rounds. The deep unconstrained cold review is done and its findings are applied; two
+gates remain.**
 
-## Why it is tiered rather than reviewed again
+Round 7 was the deep pass the non-convergence rule prescribes — one cold reviewer, no assigned lens,
+grounded in the live framework docs rather than the spec's claims about them. Verdict **BLOCK**,
+thirteen findings (3 BLOCKER, 5 HIGH, 4 MEDIUM, 1 LOW), all verified before applying. The three
+blockers are worth remembering as shapes, not just fixes:
 
-Three review rounds did not converge (14 → 16 → 13 findings, five BLOCK/BLOCKER verdicts), and the
-reason dictated the response — see
+- **A rollback with no correct target.** `reset --soft HEAD^` assumed this operation's commit is the
+  tip; after a completed merge it is not, so the rollback would have dropped the merge and stranded
+  the commit — the ratchet the rule exists to prevent, produced by the rule itself.
+- **A failure table that was not exhaustive.** Plain non-fast-forward rejection had no row, and it is
+  the only blocked outcome of the entire update path. An unlisted outcome means the executor guesses.
+- **A fix cancelled by a condition left in place.** `update.md` states the zero-ahead gate in three
+  places; removing one and keeping another left the push still skipped and the retry marker born
+  stale. See [a-change-set-is-wider-than-its-diff.md](a-change-set-is-wider-than-its-diff.md).
+
+**Still owed before implementation:** (1) a single reviewer over round 7's own amendments — every
+round here that fixed something introduced something
+([a-fix-is-a-change-and-changes-need-review.md](a-fix-is-a-change-and-changes-need-review.md)); and
+(2) a first review of the stranded-publish marker, its canonical reader and C8, which were deferred
+through every round and have never been examined as shipping work.
+
+## Why the review kept not converging
+
+Three three-lens rounds did not converge (14 → 16 → 13 findings, five BLOCK/BLOCKER verdicts), and
+the reason dictated the response — see
 [non-convergence-diagnose-before-reviewing-again.md](non-convergence-diagnose-before-reviewing-again.md).
-**Round 3's fixes are themselves unreviewed, so the spec is not implementation-ready as written even
-though it reads finished.** Rounds 4 and 5 changed the *unit* of review rather than the rigor (Tier A
-alone; then my own tiering amendments) and found sixteen more findings between them —
+**Each round's fixes were themselves unreviewed, so the spec was never implementation-ready as
+written even when it read finished.** Rounds 4 and 5 changed the *unit* of review rather than the
+rigor (a subset alone; then the tiering amendments) and found sixteen more findings between them —
 [lens-novelty-is-the-scarce-resource-on-re-review.md](lens-novelty-is-the-scarce-resource-on-re-review.md)
-§ Change the unit.
+§ Change the unit. Round 7 changed the *instrument* instead: one deep unconstrained reviewer that
+verified the spec's claims against the live docs rather than reading the spec on its own terms. It
+found three blockers nine prior lens-passes had not, which is the case for that substitution when a
+lens loop stalls.
 
 Problem statement: [lore-repo-divergence-is-self-inflicted.md](lore-repo-divergence-is-self-inflicted.md).
 Rejected alternative: [sidecar-publish-rejected.md](sidecar-publish-rejected.md).

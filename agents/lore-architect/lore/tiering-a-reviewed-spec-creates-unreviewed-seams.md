@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Tiering a reviewed spec is itself a change, and the subset has never been reviewed as a subset — run one scoped round over the tier you are about to ship, and look first at the five seam shapes."
+summary: "Tiering a reviewed spec is itself a change, and the subset has never been reviewed as a subset — run one scoped round over the tier you ship, watch the five seam shapes, and collapse the tiering once its seams produce findings twice."
 parent: lore-context.md
 ---
 
@@ -64,7 +64,37 @@ left standing beside the old one, introduced while fixing something else
 [a-fix-is-a-change-and-changes-need-review.md](a-fix-is-a-change-and-changes-need-review.md),
 [single-canonical-source-discipline.md](single-canonical-source-discipline.md)).
 
-Worked instance and current tier state:
-[v46-sync-hardening-tiered-plan.md](v46-sync-hardening-tiered-plan.md). Whether the first tier is
-worth shipping first at all:
+## When to abandon the tiering rather than re-cut it
+
+The seams kept reporting. After the Tier-A-only round above, **re-ordering the tiers (B before A)
+immediately produced four more contradictions** — a version number stated in three places, a marker
+half the document assumed and half deferred, a convention whose rules cited a document in another
+tier. On 2026-09-13 the user withdrew the tiering entirely: **all ten changes ship as one v46.**
+
+The lesson is not "don't tier". It is about the **second signal**: when the tier boundaries have
+generated findings in *consecutive* rounds, the cut is not paying for itself, and **re-cutting
+produces another unreviewed artifact rather than a cleaner one.** Collapse it.
+
+Two markers that the cut costs more than it saves:
+
+- **A decision has to be re-made per tier** — which version, which tests, which rollout section.
+  Three rollout sections disagreeing about a version number is not a bookkeeping slip; it is the seam
+  reporting itself.
+- **A component keeps moving between tiers.** The conflict-classification rule moved from C to B
+  because without it the cure had no defined behaviour — a sign the boundary was drawn *through* a
+  mechanism rather than between mechanisms.
+
+**When collapsing, do not delete the tier prose.** Mark it as review history and add one
+authoritative ship map that explicitly wins over every section that contradicts it: the tier
+vocabulary is load-bearing for the review record long after it stops being a plan, and the substantive
+amendments each scoped round produced stay in force, because they were findings about the changes
+themselves and not about the cut
+([single-canonical-source-discipline.md](single-canonical-source-discipline.md)). Collapsing also
+un-defers whatever the last tier held, which then owes a review it never had.
+
+Worked instance and current ship state:
+[v46-sync-hardening-tiered-plan.md](v46-sync-hardening-tiered-plan.md). Whether a first tier is worth
+shipping first at all:
 [a-detection-tier-must-outlive-the-cure-it-measures.md](a-detection-tier-must-outlive-the-cure-it-measures.md).
+What to reach for instead, once the cut is gone and the loop is still stalled:
+[review-grounding-beats-lens-novelty.md](review-grounding-beats-lens-novelty.md).
