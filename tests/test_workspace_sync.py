@@ -522,7 +522,8 @@ class TestInvariants(unittest.TestCase):
     """
 
     ALLOWED_SUBCOMMANDS = {
-        "add", "branch", "cat-file", "commit", "config", "fetch", "log", "merge",
+        "add", "branch", "cat-file", "commit", "config", "diff-tree", "fetch", "log",
+        "merge",
         "push", "remote", "rev-list", "rev-parse", "show", "status", "symbolic-ref",
         "worktree",
     }
@@ -1002,12 +1003,18 @@ class TestRoundOneRegressions(SyncCase):
 
     def test_pathspec_file_is_written_inside_the_repo(self):
         _, checkout = self.make_repo("lore-a")
-        spec = ws._pathspec_file(checkout, ["a", "b"])
+        spec = ws._pathspec_file(checkout, ["a", "b"], "commit-paths")
+        other = ws._pathspec_file(checkout, ["a"], "add-paths")
         try:
             self.assertTrue(spec.startswith(os.path.realpath(checkout)), spec)
             self.assertEqual(open(spec).read(), "a\0b")
+            self.assertNotEqual(spec, other,
+                                "two live pathspecs must never share a filename")
+            self.assertEqual(open(spec).read(), "a\0b",
+                             "writing the second must not disturb the first")
         finally:
             os.remove(spec)
+            os.remove(other)
 
     def test_interrupted_worktree_removal_is_named_as_wreckage(self):
         _, checkout = self.make_repo("lore-a")
@@ -1137,6 +1144,48 @@ class TestRoundTwoRegressions(SyncCase):
         self.assertNotIn("credentials.json", tree)
         self.assertIn("config.json", tree)
         # And the repo is not left permanently dirty by a stranded staged deletion.
+        self.assertEqual(git_out(checkout, "status", "--porcelain"), "")
+
+
+    def test_mixing_staged_and_unstaged_paths_commits_both(self):
+        """Two live pathspecs must not share a filename; the staged side gets dropped."""
+        bare, checkout = self.make_repo("lore-a")
+        # One path already staged by hand (as a hook or a person would leave it)...
+        write(os.path.join(checkout, "lore", "staged.md"), "staged by hand\n")
+        git(checkout, "add", "lore/staged.md")
+        # ...and one with something still unstaged, so both pathspecs are in play.
+        write(os.path.join(checkout, "lore", "untracked.md"), "untracked\n")
+
+        report = self.sync()
+        entry = self.repo_report(report, "lore-a")
+
+        self.assertTrue(report["ok"], report["errors"])
+        tree = git_out(bare, "ls-tree", "-r", "--name-only", "HEAD")
+        self.assertIn("lore/staged.md", tree, "an already-staged path must reach the remote")
+        self.assertIn("lore/untracked.md", tree)
+        self.assertIn("lore/staged.md", entry["committed"])
+        self.assertEqual(git_out(checkout, "status", "--porcelain"), "")
+
+    def test_rename_with_a_further_edit_commits_both_sides(self):
+        bare, checkout = self.make_repo("lore-a")
+        write(os.path.join(checkout, "credentials.json"), "{}\n")
+        git(checkout, "add", "-f", "credentials.json")
+        git(checkout, "commit", "-m", "oops")
+        git(checkout, "push")
+        git(checkout, "mv", "credentials.json", "config.json")
+        # Editing the destination after the move mixes a staged deletion with an
+        # unstaged modification — the shape that exposed the shared-pathspec bug.
+        write(os.path.join(checkout, "config.json"), '{"edited": true}\n')
+
+        report = self.sync()
+        entry = self.repo_report(report, "lore-a")
+
+        self.assertTrue(report["ok"], report["errors"])
+        tree = git_out(bare, "ls-tree", "-r", "--name-only", "HEAD")
+        self.assertNotIn("credentials.json", tree,
+                         "the credential must actually leave the remote")
+        self.assertIn("config.json", tree)
+        self.assertIn("edited", git_out(bare, "show", "HEAD:config.json"))
         self.assertEqual(git_out(checkout, "status", "--porcelain"), "")
 
     def test_our_own_timeout_is_not_reported_as_someone_elses_lock(self):
