@@ -48,5 +48,11 @@ exists somewhere colder in the codebase before designing a new one. The clever a
 considered here was rejected on exactly that ground —
 [sidecar-publish-rejected.md](sidecar-publish-rejected.md).
 
-Design and shipping order:
-[v46-sync-hardening-tiered-plan.md](v46-sync-hardening-tiered-plan.md).
+## What shipped against it (v46)
+
+`/lr:workspace-sync` is the **repair**: it commits what is uncommitted, merges what the remote has,
+and pushes, per repo, in one pass — so a diverged agent repo is recoverable by a command rather
+than by hand ([workspace-sync-feature.md](workspace-sync-feature.md)). It does **not** close the
+three paths above, which still manufacture the state, and `/lr:check` is still blind to
+ahead/behind. Prevention — binding each session to its own worktree — remains unshipped and
+unversioned: [v46-sync-hardening-tiered-plan.md](v46-sync-hardening-tiered-plan.md).

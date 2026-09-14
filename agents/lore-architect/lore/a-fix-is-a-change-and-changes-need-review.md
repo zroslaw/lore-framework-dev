@@ -89,4 +89,10 @@ what to do about it: when the loop ends this way, classify the findings by origi
 ships** rather than spending a fourth round —
 [non-convergence-diagnose-before-reviewing-again.md](non-convergence-diagnose-before-reviewing-again.md).
 
+**Sixth occurrence (v46, 2026-09-13), and the testing corollary.** Round 3 found that round 2's
+fix had introduced a branch its own regression test could not reach — two pathspec files written to
+one fixed filename, dropping already-staged paths from a commit while reporting them as committed.
+The rule that comes out of it is about the *test*, not the review:
+[a-fix-s-regression-test-misses-the-branch-the-fix-added.md](a-fix-s-regression-test-misses-the-branch-the-fix-added.md).
+
 See also [versioning-release-types.md](versioning-release-types.md) for v37's gate record.

@@ -1,17 +1,28 @@
 ---
 lore: 1
 type: topic
-summary: "The workspace command surface — init (converges), pull, push, and diagnosis — all reading one deterministic scanner; v45 folded the status half into /lr:check."
+summary: "The workspace command surface — init (converges), pull, push, diagnosis via /lr:check, and v46 sync (repair) — reading one deterministic scanner; the filename says four, the surface is five."
 parent: lore-context.md
 ---
 
-# The Workspace Lifecycle: Four Commands, One Scanner
+# The Workspace Lifecycle: One Scanner, and a Surface That Grew to Five
 
     workspace-init    initialize, or CONVERGE an initialized workspace to disk reality
     workspace-pull    consume  — pull the workspace repo, clone declared repos, pull top-level repos
     workspace-push    publish  — commit and push the framework-managed workspace files
     workspace-status  diagnose — read-only; every finding names the command that fixes it
                                 (v45: absorbed into `/lr:check`; the skill no longer exists)
+    workspace-sync    repair   — v46; commit, integrate and publish every repo in one pass.
+                                The only one that commits on the user's behalf.
+
+**The filename says four; the surface is five.** It is retained because links point at it.
+`workspace-sync` is the repair half the other four never had: pull only fast-forwards, push only
+publishes the workspace repo's managed files, check reports without fixing. It shares `is_managed`
+with push rather than reimplementing the managed-path rule, because push's scope is a promise the
+system had already published
+([a-new-command-inherits-its-neighbours-published-promises.md](a-new-command-inherits-its-neighbours-published-promises.md)).
+It also derives child-repo dirty and behind state itself — the gap documented below is exactly why.
+See [workspace-sync-feature.md](workspace-sync-feature.md).
 
 ## The gap this closed
 

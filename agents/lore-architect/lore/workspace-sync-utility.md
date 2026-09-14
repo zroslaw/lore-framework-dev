@@ -1,3 +1,16 @@
+---
+lore: 1
+type: topic
+summary: "Historical v11-v24 workspace-sync bootstrap utility (renamed to workspace-pull in v25): script phases, repos: schema, parser/security hardening. The name was reused for a different v46 command."
+parent: lore-context.md
+---
+
+**Name reused in v46.** This topic is the *historical* `workspace-sync` (v11–v24), which v25
+renamed to `/lr:workspace-pull`. v46 gave the name to an entirely different command — the
+workspace *repair* pass — after twenty-one versions of the old one not existing. When a reference
+to "workspace-sync" is ambiguous, date it: before v25 it means this bootstrap utility, from v46 it
+means [workspace-sync-feature.md](workspace-sync-feature.md).
+
 Historical v11 baseline. The `workspace-sync` utility was the workspace-level git orchestration
 skill that bootstrapped a fresh workspace (cloning declared siblings) and kept an existing one in
 sync (pulling everything). It replaced `/lr:pull-domain` in v11 and was itself hard-renamed and

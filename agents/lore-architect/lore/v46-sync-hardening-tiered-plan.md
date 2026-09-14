@@ -1,16 +1,27 @@
 ---
 lore: 1
 type: topic
-summary: "V46 unfinished design: Lore-owned session worktrees, eager agent boot binding, local Lore integration and push; latest decision amendment, evidence limits and open design work."
+summary: "Unversioned, deferred design for Lore-owned session worktrees: eager boot binding, local Lore integration and push, evidence limits and open work. It did not ship as v46 — v46 was spent on workspace-sync."
 parent: lore-context.md
 ---
 
-# V46 Lore-Sync Hardening — Unfinished Design
+# Session-Worktree Lore-Sync Hardening — Unfinished, Unversioned Design
 
-**DESIGN UNFINISHED — not ready for implementation.** The user paused the difficult design
-session on 2026-09-13 to preserve findings and continue later. All changes remain one v46 release;
-the A/B/C rollout was withdrawn, and this filename is retained to preserve links. Production
-remains v45; no worktree lifecycle change has shipped.
+**DESIGN UNFINISHED — not ready for implementation, and no longer carrying a version number.**
+The user paused the difficult design session on 2026-09-13 to preserve findings and continue later.
+**This design did not ship.** v46 was spent instead on `/lr:workspace-sync`
+([workspace-sync-feature.md](workspace-sync-feature.md)), released 2026-09-13 as tag
+`lr--v1.46.0`, so production is at v46 and the label "v46" here is historical — treat the design as
+**unversioned and deferred** until it is scheduled against a real release. All its changes remain
+one release; the A/B/C rollout was withdrawn. The filename is retained because links point at it,
+the same discipline this topic already applied to that withdrawal.
+
+**The two are complements, not alternatives.** This design *prevents* the divergence states;
+`workspace-sync` *resolves* them after the fact. Shipping the repair does not reduce the case for
+the prevention, and the repair stays worth having once prevention lands
+([lore-repo-divergence-is-self-inflicted.md](lore-repo-divergence-is-self-inflicted.md)). No
+worktree lifecycle change has shipped: `.worktrees/<repo>/<slug>/` is still the installed
+convention.
 
 ## Latest decision and source precedence
 
