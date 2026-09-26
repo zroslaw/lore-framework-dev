@@ -37,9 +37,8 @@ own finalization, and the variant is worse than the one recorded.
 
 Finalize Phase 4 Step 1 is `git -C <repo> add agents/`, justified in the doc as *"scoped to the
 agent tree so incidental untracked files elsewhere are not swept in."* That justification holds only
-for a repo with one agent. `lore-framework-dev` holds **`lore-architect` and `lore-advocate`**, so
-the command staged `agents/lore-advocate/workdir/agoda-internal-announcement.md` — another agent's
-untracked draft — into a commit titled `Finalize session 463ddfa1`. I caught it at
+for a repo with one agent. `lore-framework-dev` held more than one agent, so the command staged
+another agent's untracked internal-announcement draft into a commit titled `Finalize session 463ddfa1`. I caught it at
 `git diff --cached` and unstaged it before committing.
 
 **No second session was required.** The recorded failure needs a concurrent writer; this one needs

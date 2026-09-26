@@ -23,9 +23,8 @@ integration has shipped or that all lifecycle context is captured without effort
 uses Lore's deliberate reflection and merge curation. Scope an agent's responsibility to the
 feature; avoid promising exhaustive memory or guaranteed delivery improvements.
 
-The reusable visual directions and assets belong to `lore-advocate`, under
-`agents/lore-advocate/workdir/artifacts/lore-agents-style-study/` in this repo. The architect
-supplies accurate role, curation and collaboration framing; the advocate owns visual direction.
+The advocacy owner maintains reusable visual directions and assets. The architect supplies accurate
+role, curation and collaboration framing; the advocate owns visual direction.
 
 Related foundations: [team-shared knowledge](team-shared-knowledge-principle.md),
 [the positioning triad](positioning-triad-differentiation.md), and
