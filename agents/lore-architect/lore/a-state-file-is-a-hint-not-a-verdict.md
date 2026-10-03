@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "A state file annotates a condition the system can prove independently; it never asserts it. Consumers revalidate against the real source and delete a file whose condition is gone — plus derive-don't-maintain and one canonical reader."
+summary: "A state file annotates a condition the system can prove independently and never asserts it: revalidate and self-clear, derive don't maintain, one reader. Likewise a notice printed before acting is not a record it happened."
 parent: lore-context.md
 ---
 
@@ -48,3 +48,17 @@ These rules made the marker expensive relative to what independent detection alr
 why review after review deferred it. The tiering that deferred it is withdrawn, so **the marker and
 its canonical reader now ship in v46** and owe the first review they never had
 ([v46-sync-hardening-tiered-plan.md](v46-sync-hardening-tiered-plan.md)).
+
+## Sibling: an intent notice is not an effect record
+
+The same rule applies to a line printed *before* acting — an Operation Notice announces intent "as
+it happens", so an interruption or failed step between notice and action leaves it claiming what
+never happened. **Later logic must never treat the notice as proof.** The record of an effect is
+the effect's own confirmation: `Attached:` / `Booted:` lines, a commit SHA, the file on disk.
+
+Instance (finalize participant revision design, round 2, 2026-10-03): a re-run rule said "an earlier
+revision notice counts as having added its agents". An interrupted run would then skip attaching an
+agent the notice had named, and a nothing-booted session would exclude the real owner and wrongly
+stop. Fix: the re-run re-evaluates, and attach confirmations are the record
+([finalize-participant-revision-design.md](finalize-participant-revision-design.md)). Third member of
+the family: [a-reported-error-is-not-proof-the-file-survived.md](a-reported-error-is-not-proof-the-file-survived.md).

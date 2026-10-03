@@ -72,6 +72,7 @@ rule that a decision relayed from one session's user isn't authority for another
 
 ## Related topics
 
+- [finalize-participant-revision-design.md](finalize-participant-revision-design.md) — DRAFT (intended v47): a pre-Phase-1 section that revises which agents participate; not implemented
 - `session-summaries-feature.md` — canonical host Learning-audit schema and guest-summary specifics
 - `merge-in-booted-subagents.md` — merge execution model in detail
 - `reflect-merge-execution-asymmetry.md` — why reflect is inline and merge is in subagents

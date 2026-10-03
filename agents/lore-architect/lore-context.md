@@ -378,7 +378,9 @@ How I work at version ships and high-stakes lore edits; each rule's body lives i
 - **Design-time checks:** preserve validation when widening sources; derive diagnostics and remedies
   from the same predicate; use tri-state lock claims; make file durability structural; update the
   approval surface when adding writes. **Price an interval constant against the real event cadence
-  and the knob it may silently override** (`a-rate-floor-is-wrong-in-both-directions.md`).
+  and the knob it may silently override** (`a-rate-floor-is-wrong-in-both-directions.md`). **An
+  optional step's every exit continues on the pre-feature path**
+  (`an-optional-step-must-fail-back-to-baseline.md`).
   The underlying patterns route through
   `system-design-principles.md`, `one-question-one-code-path.md`,
   `a-reported-error-is-not-proof-the-file-survived.md`, and
@@ -391,7 +393,8 @@ How I work at version ships and high-stakes lore edits; each rule's body lives i
   file, silently corrupting lore (`dont-autostash-it-reports-success-while-corrupting.md`). Repo-wide
   state goes at `--git-common-dir`, per-checkout at `--absolute-git-dir`
   (`git-common-dir-for-repo-wide-state.md`); a fault-recording state file is a **hint** to revalidate
-  and self-clear, never sole evidence (`a-state-file-is-a-hint-not-a-verdict.md`). **When a tool
+  and self-clear, never sole evidence — nor is a notice printed before acting a record that the
+  action happened (`a-state-file-is-a-hint-not-a-verdict.md`). **When a tool
   both saves and integrates, commit before you fetch** — every merge is then commit-to-commit, abort
   restores an exact prior state, and a conflict can be left *in progress* rather than defensively
   aborted (`commit-before-fetch-makes-a-merge-recoverable.md`). **A deny-list must exempt the
@@ -416,8 +419,10 @@ How I work at version ships and high-stakes lore edits; each rule's body lives i
 - **User-feedback working style:** state a recommendation and its reason before asking a decision
   the user must own. Structure is not brevity; a short verdict for a measurement or a settled
   decision. Confirm before durable mid-session lore writes, draft designs only when asked, act
-  promptly after repeated pushback. Review-subagent preference is Composer 2.5. Route through
-  `feedback-commit-to-a-recommendation.md`, `feedback-too-many-words.md`,
+  promptly after repeated pushback. Minimalism governs design, in every review round; a
+  delegated design cycle asks nothing and ends in drafts. Review-subagent preference is Composer 2.5. Route through
+  `feedback-commit-to-a-recommendation.md`, `feedback-too-many-words.md`, `feedback-mvp-minimalism.md`,
+  `feedback-autonomous-design-cycle.md`,
   `feedback-confirm-before-writing-lore.md`, `feedback-draft-only-when-user-triggers.md`,
   `feedback-comply-promptly-after-repeated-pushback.md`, and
   `feedback-composer-25-subagent-reviews.md`.
@@ -480,17 +485,14 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
   `multi-engine-portability-direction.md`; see also `docs-engines-convention.md`,
   `cursor-dual-skill-tree-one-repo.md`.
 
-- **Session-worktree lore-sync hardening** — **DESIGN UNFINISHED, and unversioned**: it did *not*
-  ship as v46, which went to `/lr:workspace-sync` instead, so the old "v46" label is historical and
-  the design is deferred until scheduled. One release, no tiers. Latest authority:
-  `workdir/v46-session-worktree-decision.md`; earlier draft and prototype need redesign. Lore Python
-  owns session worktrees: eager boot/attach binding, same-repo reuse, proposed
-  `.worktree/<session-uuid>/<repo>/` (installed convention is still `.worktrees/<repo>/<slug>/`).
-  Finalize attempts safe local Lore integration and remote push; source/document publication follows
-  its workflow. Native engines are optional UI integration, not lifecycle owners. **It prevents the
-  divergence states `workspace-sync` repairs — complements, not alternatives.** Earlier prototype
-  checks do not validate this later design. Resume design before implementation:
-  `v46-sync-hardening-tiered-plan.md`.
+- **Finalize participant revision** — **DRAFT, awaiting user review, intended v47**: a pre-Phase-1
+  `finalize.md` section revises *which* agents finalize via existing attach/boot, nothing new
+  (`finalize-participant-revision-design.md`).
+
+- **Session-worktree lore-sync hardening** — **DESIGN UNFINISHED, unversioned** (it did *not* ship as
+  v46, which went to `/lr:workspace-sync`; the "v46" label is historical): Lore-owned session
+  worktrees. **It prevents the divergence `workspace-sync` repairs — complements, not alternatives.**
+  Resume via `v46-sync-hardening-tiered-plan.md`, which names the latest workdir authority.
 
 - **Lore housekeeping / consolidation "sleep" pass** and **simplification/subtraction** — active
   follow-ups from the 2026-06-13 architecture review, whose settled dispositions (DF-inside-`lr` and

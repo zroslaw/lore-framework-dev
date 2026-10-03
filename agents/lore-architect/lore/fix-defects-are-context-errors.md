@@ -169,6 +169,10 @@ the cap: diagnose the findings by origin and tier the artifact so most of it nee
 —
 [non-convergence-diagnose-before-reviewing-again.md](non-convergence-diagnose-before-reviewing-again.md).
 
+A 2026-10-03 design review showed the same shape in a *design* rather than a release: a stop clause
+already ruled out by the design doc's own invariant reappeared in the spec after a fix round
+([an-optional-step-must-fail-back-to-baseline.md](an-optional-step-must-fail-back-to-baseline.md)).
+
 See also [post-convergence-edits-need-their-own-gate.md](post-convergence-edits-need-their-own-gate.md),
 [parallel-reviewer-fanout-pattern.md](parallel-reviewer-fanout-pattern.md),
 [a-gate-that-died-is-not-a-gate.md](a-gate-that-died-is-not-a-gate.md).
