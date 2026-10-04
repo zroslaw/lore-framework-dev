@@ -40,6 +40,7 @@ the *complete* suite, not a proportionate subset (see `execution-testing-catches
 
 **Default model tier (v28, 2026-07-21):** real-engine ship gates use the cheapest practical model
 per engine by default: Claude Code -> `haiku`, Codex -> `gpt-5.4-mini`, Cursor -> `composer-2.5`.
+**The Codex default `gpt-5.4-mini` is stale (2026-10-04):** a ChatGPT-account Codex login rejects it (400 "model is not supported"), so the identity probe fails and the whole Codex arm reads `FAILED identity`; `MODEL_DEFAULTS` in `run_matrix.py` and `harness.py` still name it, so set `LR_TEST_MODEL` (models then available: `gpt-5.6-luna` cheap but weak, `gpt-5.5` stronger but slow — see `~/.codex/models_cache.json`). `gpt-5.5` can exceed the 420s `LR_RUN_TIMEOUT` (an ERROR with `TimeoutExpired` means too slow, not a regression; rerun with `LR_RUN_TIMEOUT=1200`), and a Codex usage limit makes every later scenario fail at the identity probe with the limit text — read stderr before triaging.
 `LR_TEST_MODEL` remains an explicit override for deliberate higher-tier probes, but do not
 accidentally run the preship e2e gate on `sonnet` or another expensive/default account tier. This
 also applies to the sibling `tests/quality/` regular matrix default.
@@ -58,6 +59,12 @@ non-empty session summary (guest summaries may omit the agent name string); asse
 `host_agent: helper-agent` only on the nothing-booted path. Proven green on Cursor `composer-2.5`
 against the v47 worktree. Design context:
 [finalize-participant-revision-design.md](finalize-participant-revision-design.md).
+
+**Opt-in TriLens module (2026-10-04):** `test_trilens_loop.py` (28–29) is too heavy for the matrix by user decision — it moved from `STANDARD_MODULES` to `OPT_IN_MODULES` in `run_matrix.py` and runs only via `--modules test_trilens_loop.py` (default lists 8 modules); `tests/README.md` says so.
+
+**Running Codex/Cursor arms against a worktree without touching real config (2026-10-04):** Codex has no per-invocation plugin dir and Cursor's installed `~/.cursor/plugins` can outrank `--plugin-dir`, so the identity check refuses a worktree run (`FAILED identity` at ~0.2s = did not run, not red). Use a throwaway `HOME=$T`: Codex — copy `auth.json`, `installation_id`, `models_cache.json`, `config.toml` into `$T/.codex/` with the `[marketplaces.lore-framework] source` sed-repointed at the worktree, then `HOME=$T codex plugin add lr@lore-framework`; Cursor — symlink all of `~/.cursor` except `plugins`, plus `~/Library/Keychains` and `Library/Application Support/Cursor` (the token is in the login keychain); copy `~/.gitconfig` for fixture commits. Run `HOME=$T LR_FRAMEWORK_DIR=<worktree> LR_LIFECYCLE=1 python3 tests/lifecycle/run_matrix.py --engines codex,cursor --results-dir <tmp>`, then delete `$T` (it holds a Codex auth token). Claude needs none of this. A durable `LR_HOME` override would remove the manual setup (not built; backlog).
+
+**A removed skill leaves a stale scenario (test_27, fixed 2026-10-04):** `test_27_workspace_status` drove `lr:workspace-status`, removed in v45, and survived two ships because the suite was on-request. It failed on Claude but PASSED on Cursor/Codex, whose wrapper pointed at the also-removed `docs/workspace-status.md` and let the model improvise — a pass on one engine does not prove the surface exists. Repointed `WORKSPACE_STATUS_PROMPT` and the wrapper at `lr:check --workspace --no-network`. On any ship that removes or renames a skill/doc, grep `harness.py` prompt constants and the engine-wrapper branches (~490–530) for the old name. Triage lesson: a plausible environment cause (e.g. "temp HOME lacked a git identity" for Codex `test_05`) is a hypothesis until a run with the fix applied turns green; when main equals the previous tag, main itself is the "does it fail on the previous release?" baseline.
 
 **`/lr:trilens-loop` coverage (v30, 2026-07-25):** scenarios **28–29** in
 `tests/lifecycle/test_trilens_loop.py` drive the skill end-to-end. A planted uncommitted lore topic

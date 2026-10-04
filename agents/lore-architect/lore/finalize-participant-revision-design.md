@@ -1,14 +1,14 @@
 ---
 lore: 1
 type: topic
-summary: "Implemented for the v47 release candidate: finalize revises its participants before Phase 1 — best-fit host, uncapped additions with a cost note, and one confidentiality gate."
+summary: "Shipped in v47: finalize revises its participants before Phase 1 — best-fit host, uncapped additions with a cost note, and one confidentiality gate."
 parent: lore-context.md
 ---
 
 # Finalize Participant Revision
 
-**Status: implemented in the v47 release candidate (commit `33c7461`), not published, merged, or
-tagged.** First written 2026-10-03 in an autonomous design cycle
+**Status: shipped as v47 (2026-10-04, tag `lr--v1.47.0` at `17ba607`; implementation commit
+`33c7461`).** First written 2026-10-03 in an autonomous design cycle
 ([feedback-autonomous-design-cycle.md](feedback-autonomous-design-cycle.md)); revised 2026-10-04 by
 user decision in a design dialogue and re-reviewed (design rounds 4–6 and spec rounds 1–3, three
 cold reviewers each, all ending without BLOCKER/HIGH). v47 is release-notes-only and

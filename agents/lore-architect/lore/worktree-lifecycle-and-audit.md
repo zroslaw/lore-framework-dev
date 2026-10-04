@@ -13,6 +13,8 @@ The workspace worktree convention needs a lifecycle as well as a location rule: 
 
 An audit should derive its report from Git rather than require new mandatory metadata: each worktree's branch, last-commit age, clean/dirty status, and merged status, with stale or unowned dirty trees flagged. Keep Git worktrees as the primitive; do not add a heavyweight wrapper command before the convention and report prove insufficient.
 
+**`git -C <repo> worktree add` resolves a relative path against `<repo>`** — `git -C lore-framework worktree add .worktrees/lore-framework/<slug>` lands inside the repo, not at the workspace-root `.worktrees/<repo>/<slug>/` the convention requires, and tests looking at the workspace root fail on a missing `VERSION`. Pass an absolute path; remove a mistaken one with `git worktree remove --force <path>` plus `rmdir -p`; after a ship `rmdir` the empty `.worktrees/<repo>` dirs.
+
 ## See Also
 
 - `worktrees-convention.md` — current workspace invariant and placement rule

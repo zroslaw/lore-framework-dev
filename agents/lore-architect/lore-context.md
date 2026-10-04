@@ -225,7 +225,7 @@ Shared-lore publication is a separate unshipped direction
 `lore-framework/VERSION` is the single source of truth — **establish the current version from the
 repo at the start of any framework-work session, never from this file**: `cat VERSION`,
 `git log --oneline -5`, `git tag --list 'lr--v1.4*'`, then confirm the tag is at HEAD. Last known
-here: **v46** (`lr--v1.46.0`) — *last known*, not *current*; a fast-moving scalar in a slow-moving
+here: **v47** (`lr--v1.47.0`) — *last known*, not *current*; a fast-moving scalar in a slow-moving
 summary is a stale read waiting to happen, on disk or in a loaded context
 (`lore-context-shape-discipline.md`). Each agent repo stamps the version in its
 `lore-repo.md`, and four version-bearing plugin manifests mirror `1.<VERSION>.0` (a `/lr:check`
@@ -485,7 +485,7 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
   `multi-engine-portability-direction.md`; see also `docs-engines-convention.md`,
   `cursor-dual-skill-tree-one-repo.md`.
 
-- **Finalize participant revision** — **unshipped v47 candidate `33c7461`**: `finalize.md`
+- **Finalize participant revision** — **shipped in v47**: `finalize.md`
   pre-Phase-1 participant revision via boot/attach — best-fit host, uncapped additions,
   confidentiality gate after selection and before apply (outcome `skipped` when it fires),
   in-place guest promotion without re-attach, and `revised` only after a successful apply
