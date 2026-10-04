@@ -39,9 +39,10 @@ agent's, or one the session read files from or consulted an agent of — change 
 booted, stop as in step 5; otherwise print the confidential line from step 4, only when revision
 would have changed something.
 
-1. **Candidates** — the workspace's agents not already active, from the routing map in the
-   workspace memory file; if that is missing or incomplete, `lr-core discover` (it includes repo
-   descriptions) plus each `role.md` `description`.
+1. **Candidates** — the agents in the workspace this session runs in, never another workspace,
+   that are not already active, from the routing map in the workspace memory file; if that is
+   missing or incomplete, `lr-core discover` (it includes repo descriptions) plus each `role.md`
+   `description`.
 2. **Add** an agent only when the session produced durable knowledge that belongs squarely to its
    role — a decision, fact, record, or lesson it would need the next time it is booted; where
    descriptions name an owner for some material, that owner. Judge by what the session did and
@@ -54,7 +55,7 @@ would have changed something.
    stays host on a close call: it is replaced only when both the main topic (where most of the
    effort went) and the main result lie in the other agent's role; if they disagree or there is no
    clear main topic, it is a close call. A replaced booted agent becomes an ordinary guest; Phase 4
-   still commits its repo if the session changed files under its agent directory.
+   still commits its repo (see *No empty commits* under Invariants).
 4. **Notice** — per the Operation Notice convention, only if something changes, print one line
    before applying it, each clause only when it applies:
 
@@ -73,20 +74,31 @@ would have changed something.
    host, the booted agent stays host. Then continue to Phase 1.
 
    **The only stop:** with nothing booted, if no agent qualifies, a confidential repo is in use, or
-   the host cannot be booted, print `No agent owns this session's work — nothing to finalize.` and
-   stop with nothing written and no completion line.
+   the host cannot be booted, print `Nothing to finalize: <reason>.` — "no agent owns this
+   session's work", "confidential <repo> in use; boot an agent yourself", or "could not boot
+   <agent>" — and stop with nothing written and no completion line.
 ```
 
-### 1b. `## Invariants`: append one bullet
+### 1b. `## Invariants`: append one bullet, amend one
+
+Append:
 
 ```markdown
 - **Revision only adds.** Finalize may add agents and re-designate the host before Phase 1; it
   never removes an active agent, and never stops a finalize that has a booted agent.
 ```
 
+Replace the *No empty commits* bullet with (the exception sits here, where Phase 4 reads it):
+
+```markdown
+- **No empty commits.** If nothing was produced by phases 1–3 in a given repo, skip committing in
+  that repo — unless revision replaced the booted agent from that repo and the session changed
+  files under its agent directory; commit those.
+```
+
 ### 1c. Nothing else in finalize.md changes
 
-Leave Step 0, the phases, Phase 4, and When to use unchanged. A session in the right agent takes
+Leave Step 0, the phases, Phase 4's steps, and When to use unchanged. A session in the right agent takes
 exactly today's path.
 
 ## 2. `lore-framework/docs/summarize.md`

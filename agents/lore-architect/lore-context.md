@@ -484,9 +484,9 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
   `multi-engine-portability-direction.md`; see also `docs-engines-convention.md`,
   `cursor-dual-skill-tree-one-repo.md`.
 
-- **Finalize participant revision** — **DRAFT (revised 2026-10-04), intended v47**: a pre-Phase-1
-  `finalize.md` section revises *which* agents finalize via existing attach/boot — best-fit host,
-  uncapped additions, one confidentiality gate (`finalize-participant-revision-design.md`).
+- **Finalize participant revision** — **unshipped v47 candidate `33c7461`**: `finalize.md`
+  pre-Phase-1 participant revision via boot/attach — best-fit host, uncapped additions,
+  confidentiality gate (`finalize-participant-revision-design.md`).
 
 - **Session-worktree lore-sync hardening** — **DESIGN UNFINISHED, unversioned** (it did *not* ship as
   v46, which went to `/lr:workspace-sync`; the "v46" label is historical): Lore-owned session

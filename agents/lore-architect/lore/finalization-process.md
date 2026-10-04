@@ -9,6 +9,12 @@ parent: lore-context.md
 
 Session finalization is user-triggered. It is a four-phase process orchestrated by `docs/finalize.md`:
 
+**Before Phase 1 — Revise participants** (v47 release candidate): finalize first compares the
+session against the roles of agents in the workspace running that session. It may add agents and
+choose a finalization host using the existing boot and attach procedures; a booted agent keeps close
+calls, and a confidentiality gate fails closed. The resulting host-first active set is used by every
+phase below. See `finalize-participant-revision-design.md`.
+
 **Phase 1 — Reflect** (`/lr:reflect`): runs **inline**, host-first, per active agent. The agent reviews the session and writes reflection topics to each active agent's `reflections/`. Each topic is one atomic insight, lesson, or decision. Topics named `role-update-*.md` signal that `role.md` needs updating. The host retains a per-agent Reflection outcome — completed paths and themes (including completed with zero topics), or a failed result with any known partial paths. Reflection stays inline because it needs the current session context; a fresh-booted subagent would not have it. Detailed instructions in `lore-framework/docs/process-reflection.md`.
 
 **Phase 2 — Merge** (`/lr:merge`): runs in **parallel subagents, one per active agent**. Each write-capable subagent boots as its target agent, receives that agent's known current-session reflection paths, and integrates its reflections into `lore/`, `lore-context.md`, and `role.md`. It cleans up only successfully integrated reflections and returns a structured Merge handoff: concrete current-session learning, Lore destinations and semantic actions, residual unmerged inputs, and anomalies. It does **not** commit — phase 4 handles that. Detailed instructions in `lore-framework/docs/process-merge.md`. See `merge-in-booted-subagents.md` and `reflect-merge-execution-asymmetry.md`.
@@ -72,7 +78,7 @@ rule that a decision relayed from one session's user isn't authority for another
 
 ## Related topics
 
-- [finalize-participant-revision-design.md](finalize-participant-revision-design.md) — DRAFT (intended v47): a pre-Phase-1 section that revises which agents participate; not implemented
+- [finalize-participant-revision-design.md](finalize-participant-revision-design.md) — v47 release candidate: the pre-Phase-1 participant-revision policy and its validation record
 - `session-summaries-feature.md` — canonical host Learning-audit schema and guest-summary specifics
 - `merge-in-booted-subagents.md` — merge execution model in detail
 - `reflect-merge-execution-asymmetry.md` — why reflect is inline and merge is in subagents

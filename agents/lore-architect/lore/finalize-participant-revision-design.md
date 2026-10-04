@@ -1,21 +1,31 @@
 ---
 lore: 1
 type: topic
-summary: "DRAFT (revised 2026-10-04, intended v47): finalize revises its participants before Phase 1 — best-fit host, uncapped additions with a cost note, one confidentiality gate; authority is the workdir pair."
+summary: "Implemented for the v47 release candidate: finalize revises its participants before Phase 1 — best-fit host, uncapped additions with a cost note, and one confidentiality gate."
 parent: lore-context.md
 ---
 
-# Finalize Participant Revision (Draft Design)
+# Finalize Participant Revision
 
-**Status: DRAFT, not implemented.** First written 2026-10-03 in an autonomous design cycle
+**Status: implemented in the v47 release candidate (commit `33c7461`), not published, merged, or
+tagged.** First written 2026-10-03 in an autonomous design cycle
 ([feedback-autonomous-design-cycle.md](feedback-autonomous-design-cycle.md)); revised 2026-10-04 by
 user decision in a design dialogue and re-reviewed (design rounds 4–6 and spec rounds 1–3, three
-cold reviewers each, all ending without BLOCKER/HIGH). Implementation is planned for a later session
-as **v47** (release-notes-only, cache-affecting). Authority is the workdir pair, not this summary:
+cold reviewers each, all ending without BLOCKER/HIGH). v47 is release-notes-only and
+cache-affecting. The workdir pair preserves the original design and exact-edit record:
 
 - `workdir/draft-finalize-participant-revision-design.md` — problem, design, edge cases,
   rejected alternatives, extension points, §9 review log;
 - `workdir/draft-finalize-participant-revision-spec.md` — the exact edits.
+
+The candidate passed a valid isolated Codex 0.160.0 nothing-booted (D3) dogfood run: it discovered
+only the fixture workspace, selected and booted the role-fitting `helper-agent`, persisted a
+release-calendar canary, and committed and pushed the fixture-local result. The complete
+deterministic suite (635 tests across 17 modules, including 62 focused contract tests) and the
+plugin check passed; the check's only finding was an unrelated stale Codex v32 cache backup.
+Lifecycle and TriLens were intentionally not run. The abandoned
+`v46-sync-hardening` worktree had no unique commits or diff beyond current main, so it was removed
+rather than merged.
 
 ## Problem
 
@@ -53,14 +63,15 @@ the wrong agent was booted, nothing was booted, or a consulted agent should keep
   files under its agent dir — `finalize.md`'s *No empty commits* invariant would otherwise skip it
   (verified in the source; see
   [settle-conflicting-reviewer-claims-in-the-source.md](settle-conflicting-reviewer-claims-in-the-source.md)).
+  The exception is written into that invariant itself, where Phase 4 reads it (2026-10-04 re-read).
 - **Notice:** an Operation Notice ([operation-notice-convention.md](operation-notice-convention.md)),
   printed *before* applying, only when something changes. The re-run rule re-evaluates rather than
   trusting an earlier notice — attach confirmations are the record
   ([a-state-file-is-a-hint-not-a-verdict.md](a-state-file-is-a-hint-not-a-verdict.md) § intent
   notices).
 - **One stop rule, stated once:** only with nothing booted — no agent qualifies, a confidential repo
-  is in use, or the host's boot fails — finalize prints that no agent owns the work and stops with
-  nothing written. A booted agent is never dropped; with one, every failure falls back to today's
+  is in use, or the host's boot fails — finalize prints `Nothing to finalize: <reason>.` and stops
+  with nothing written. A booted agent is never dropped; with one, every failure falls back to today's
   behavior ([an-optional-step-must-fail-back-to-baseline.md](an-optional-step-must-fail-back-to-baseline.md)).
 - **Completion line:** names the final host and reports `revised` / `checked, no change` /
   `skipped` (`--transcript` or the confidentiality gate).
@@ -68,9 +79,8 @@ the wrong agent was booted, nothing was booted, or a consulted agent should keep
 - **Edits outside `finalize.md`:** short summarize Step 3 / field-note edits, one consult sentence,
   one SKILL line; `attach.md` deliberately untouched.
 
-## When resuming
+## If changing this feature
 
-Read the design's §9 review log before changing anything — it records what was applied, accepted, or
-declined and why. The round-6 and spec-round-3 fixes were not re-reviewed by a further round, so
-re-read spec §1a against the then-current `finalize.md` once before implementing. Lifecycle context:
+Use the workdir pair for the original decisions, rejected alternatives, and exact-edit record; read
+the current `finalize.md` before proposing a change. Lifecycle context:
 [finalization-process.md](finalization-process.md).

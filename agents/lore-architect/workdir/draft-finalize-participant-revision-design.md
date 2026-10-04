@@ -86,7 +86,8 @@ later be replaced as a unit by repo visibility metadata (§7 item 4), and it kee
 reusable selection kernel (§7 item 7).
 
 1. **Candidates.**
-   - Start from every workspace agent that is not already active.
+   - Start from every agent in the workspace this session runs in (never another workspace) that
+     is not already active.
    - The source is the routing map in the workspace memory file. If the map is missing or
      incomplete, use `lr-core discover` (repo descriptions included) plus each `role.md`
      description.
@@ -111,7 +112,8 @@ reusable selection kernel (§7 item 7).
      of the effort went) and the main result lie in the other agent's role; if they disagree, or
      the session has no clear main topic, it is a close call.
    - A replaced booted agent becomes an ordinary guest. Phase 4 still commits its repo if the
-     session changed files under its agent directory.
+     session changed files under its agent directory; the exception is written into `finalize.md`'s
+     *No empty commits* invariant, where Phase 4 reads it, and step 3 points there.
 4. **Notice.** Following the Operation Notice convention, print one line before applying the
    change, only when something changes (the confidential line follows the gate above). Include
    each clause only when it applies:
@@ -136,9 +138,9 @@ reusable selection kernel (§7 item 7).
    - If an attach fails, continue without that agent and say so. If it was the would-be host, the
      booted agent stays host.
    - **The only stop:** with nothing booted, when no agent qualifies under step 2, a confidential
-     repo is in use, or the host's boot fails, print
-     `No agent owns this session's work — nothing to finalize.` and stop with nothing written and no
-     completion line. A booted agent is never dropped, and revision never stops a finalize that has
+     repo is in use, or the host's boot fails, print `Nothing to finalize: <reason>.` (no agent
+     owns this session's work / confidential `<repo>` in use, boot an agent yourself / could not
+     boot `<agent>`) and stop with nothing written and no completion line. A booted agent is never dropped, and revision never stops a finalize that has
      one.
 
 Under `--transcript`, skip this section.
@@ -540,3 +542,16 @@ Verdicts: SHIP, SHIP-WITH-FIXES ×2, no BLOCKER or HIGH.
 fixes are local wording and were not re-reviewed by a fourth round. The implementer should re-read
 §1a once against the patched `finalize.md` before committing.
 
+**Pre-implementation re-read (2026-10-04, single reader, not a TriLens round):** spec §1a and every
+§2–§7 anchor checked against the v46 tree (`finalize.md` unchanged since v44); all anchors hold.
+
+*Applied:*
+- **The demoted-agent commit exception moved to where Phase 4 reads it.** Step 3's sentence
+  contradicted the *No empty commits* invariant at a distance, and §1c told the implementer to leave
+  Phase 4 alone; an executor at Phase 4 reads Phase 4 and the invariants, not a pre-Phase-1 step
+  (`instruction-location-beats-emphasis-in-long-docs.md`). §1b now amends the invariant; step 3
+  points to it. Failure it prevents: a demoted host in a different repo from the new host, with only
+  `workdir/` edits, left uncommitted.
+- **The stop line names its reason.** `No agent owns this session's work` was false for the
+  confidential and boot-failure cases; it is now one line, `Nothing to finalize: <reason>.`, with
+  three reasons — still one stop, no new line.
