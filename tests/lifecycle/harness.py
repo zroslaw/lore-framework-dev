@@ -63,12 +63,23 @@ REFLECT_TOOL_CANARY = "kestrel-deploy-4471"  # fact to be captured into reflecti
 MERGE_TOOL_CANARY = "otter-deploy-8823"      # pre-seeded reflection fact to be merged in
 HELPER_FACT = "flux-widget-6620"      # in helper-agent's lore; consult/attach target
 FINALIZE_TOOL_CANARY = "juniper-monitor-3390"  # fact reflected+merged by finalize e2e
+# helper-agent domain canary for v47 finalize participant-revision scenarios
+REVISE_FINALIZE_CANARY = "calendar-canary-7744"
 BROKEN_REF = "nonexistent-topic-xyz.md"        # seeded broken cross-reference for /lr:check
 REVIEW_DEFECT_CANARY = "ghost-topic-4417.md"   # dangling ref planted in the trilens-loop review target
 
 AGENT_NAME = "test-agent"
 HELPER_AGENT_NAME = "helper-agent"
 REPO_NAME = "test-lore"
+HELPER_RELEASE_CALENDAR_ROLE = (
+    "---\n"
+    "description: Owns the fixture project's release calendar\n"
+    "---\n\n"
+    "# Helper Agent\n\n"
+    "You own the fixture project's release calendar — schedule dates, freeze windows, "
+    "and ship-day sequencing. Durable decisions about the release calendar belong "
+    "in your lore, not in a general fixture agent's.\n"
+)
 
 BOOT_PROMPT = (
     f"Invoke the lr:boot skill to boot as lore agent '{AGENT_NAME}'. "
@@ -139,6 +150,29 @@ FINALIZE_PROMPT = (
     "of better alerting. Now invoke the lr:finalize skill to run the full session "
     "finalization: reflect, merge, summarize, then commit and push. Print DONE "
     "when finalize completes."
+)
+
+# v47 participant revision: boot the wrong host, learn a helper-domain fact, finalize.
+REVISE_FINALIZE_PROMPT = (
+    f"Invoke the lr:boot skill to boot as lore agent '{AGENT_NAME}'. "
+    "During this session you decided a durable release-calendar fact that belongs "
+    f"to '{HELPER_AGENT_NAME}' (who owns the fixture project's release calendar): "
+    f"the next freeze window opens on '{REVISE_FINALIZE_CANARY}'. "
+    "Do not attach any guest yourself. Now invoke the lr:finalize skill to run the "
+    "full session finalization: revise participants if needed, then reflect, merge, "
+    "summarize, commit and push. Print DONE when finalize completes."
+)
+
+# v47 participant revision: nothing booted — finalize must pick and boot the owner.
+REVISE_FINALIZE_NOTHING_BOOTED_PROMPT = (
+    "Do not boot any lore agent first. "
+    "During this session you decided a durable release-calendar fact that belongs "
+    f"to '{HELPER_AGENT_NAME}' (who owns the fixture project's release calendar): "
+    f"the next freeze window opens on '{REVISE_FINALIZE_CANARY}'. "
+    "Now invoke the lr:finalize skill to run the full session finalization: revise "
+    "participants if needed (including booting the right host when nothing is "
+    "booted), then reflect, merge, summarize, commit and push. Print DONE when "
+    "finalize completes."
 )
 
 CREATE_REPO_PROMPT = (
@@ -405,6 +439,28 @@ def codex_prompt(prompt):
             f"better alerting. Then read '{FRAMEWORK_DIR}/docs/finalize.md' and follow it to "
             "run the full session finalization: reflect, merge, summarize, then commit and push. "
             "Print DONE when finalize completes.",
+        )
+    if prompt == REVISE_FINALIZE_PROMPT:
+        return _codex_boot_prompt(
+            AGENT_NAME,
+            "During this session you decided a durable release-calendar fact that belongs "
+            f"to '{HELPER_AGENT_NAME}' (who owns the fixture project's release calendar): "
+            f"the next freeze window opens on '{REVISE_FINALIZE_CANARY}'. "
+            "Do not attach any guest yourself. Then read "
+            f"'{FRAMEWORK_DIR}/docs/finalize.md' and follow it to run the full session "
+            "finalization: revise participants if needed, then reflect, merge, summarize, "
+            "commit and push. Print DONE when finalize completes.",
+        )
+    if prompt == REVISE_FINALIZE_NOTHING_BOOTED_PROMPT:
+        return (
+            "Do not boot any lore agent first. "
+            "During this session you decided a durable release-calendar fact that belongs "
+            f"to '{HELPER_AGENT_NAME}' (who owns the fixture project's release calendar): "
+            f"the next freeze window opens on '{REVISE_FINALIZE_CANARY}'. "
+            f"Read '{FRAMEWORK_DIR}/docs/finalize.md' and follow it to run the full session "
+            "finalization: revise participants if needed (including booting the right host "
+            "when nothing is booted), then reflect, merge, summarize, commit and push. "
+            "Print DONE when finalize completes."
         )
     if prompt == CREATE_REPO_PROMPT:
         return (
@@ -1419,17 +1475,51 @@ def is_clean(repo):
     return _git(repo, "status", "--porcelain").stdout.strip() == ""
 
 
-def grep_agent_dir(fx, needle):
+def agent_dir(fx, agent=AGENT_NAME):
+    """Absolute path to `agents/<agent>/` inside the fixture repo."""
+    return os.path.join(fx.repo, "agents", agent)
+
+
+def grep_agent_dir(fx, needle, agent=AGENT_NAME):
     """True if `needle` appears in any file under the agent's lore/ or lore-context.md."""
-    targets = [os.path.join(fx.agent_dir, "lore-context.md")]
-    lore_dir = os.path.join(fx.agent_dir, "lore")
-    targets += [os.path.join(lore_dir, n) for n in os.listdir(lore_dir)]
+    base = agent_dir(fx, agent)
+    targets = [os.path.join(base, "lore-context.md")]
+    lore_dir = os.path.join(base, "lore")
+    if os.path.isdir(lore_dir):
+        targets += [os.path.join(lore_dir, n) for n in os.listdir(lore_dir)]
     for path in targets:
         if os.path.isfile(path):
             with open(path, encoding="utf-8", errors="ignore") as f:
                 if needle in f.read():
                     return True
     return False
+
+
+def find_session_summary(fx, agent=AGENT_NAME):
+    """Return (path, text) of one session summary under agents/<agent>/sessions/, or (None, None)."""
+    sessions_dir = os.path.join(agent_dir(fx, agent), "sessions")
+    if not os.path.isdir(sessions_dir):
+        return None, None
+    for root, _dirs, files in os.walk(sessions_dir):
+        for name in files:
+            if name.endswith(".md"):
+                path = os.path.join(root, name)
+                with open(path, encoding="utf-8", errors="ignore") as fh:
+                    return path, fh.read()
+    return None, None
+
+
+def write_helper_release_calendar_role(fx):
+    """Overwrite helper-agent's role with a distinct release-calendar domain and commit it.
+
+    Used by finalize participant-revision scenarios. Callers must pass a fixture built with
+    `second_agent=True`. Does not change the shared `build_fixture` default helper role.
+    """
+    path = os.path.join(agent_dir(fx, HELPER_AGENT_NAME), "role.md")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(HELPER_RELEASE_CALENDAR_ROLE)
+    _commit_all(fx.repo, "fixture: helper-agent owns release calendar")
+    _git(fx.repo, "push", "origin", "main")
 
 
 def codex_agent_messages(stdout):

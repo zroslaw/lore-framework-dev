@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Lifecycle scenarios 10-13: reflect, merge, summarize, finalize end-to-end
-(catalog: workdir/draft-testing-pipeline.md).
+"""Lifecycle scenarios 10-15: reflect, merge, summarize, finalize end-to-end,
+and v47 finalize participant revision (catalog: workdir/draft-testing-pipeline.md;
+participant-revision design: workdir/draft-finalize-participant-revision-spec.md §7).
 
 Merge is the framework's highest-risk procedure per its own design notes (a
 multi-step lore-integration process explicitly flagged as fidelity-unverified
@@ -18,10 +19,12 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from harness import (
-    AGENT_NAME, ENGINE, FINALIZE_PROMPT, FINALIZE_TOOL_CANARY, MERGE_PROMPT,
-    MERGE_TOOL_CANARY, REFLECT_PROMPT, REFLECT_TOOL_CANARY, SKIP_REASON,
-    SUMMARIZE_PROMPT, build_fixture, grep_agent_dir, head, is_clean,
-    lore_snapshot, reflections_dir, run_engine, seed_reflection,
+    AGENT_NAME, ENGINE, FINALIZE_PROMPT, FINALIZE_TOOL_CANARY, HELPER_AGENT_NAME,
+    MERGE_PROMPT, MERGE_TOOL_CANARY, REFLECT_PROMPT, REFLECT_TOOL_CANARY,
+    REVISE_FINALIZE_CANARY, REVISE_FINALIZE_NOTHING_BOOTED_PROMPT,
+    REVISE_FINALIZE_PROMPT, SKIP_REASON, SUMMARIZE_PROMPT, build_fixture,
+    find_session_summary, grep_agent_dir, head, is_clean, lore_snapshot,
+    reflections_dir, run_engine, seed_reflection, write_helper_release_calendar_role,
 )
 
 
@@ -44,6 +47,11 @@ def _learning_section(summary_text):
         return ""
     tail = summary_text.split(marker, 1)[1]
     return tail.split("\n## ", 1)[0].strip()
+
+
+def _said(result):
+    """Text the engine told the user (transcript preferred, else final message)."""
+    return (result.transcript or "") + "\n" + (result.text or "")
 
 
 # Engines whose CLI agent reliably executes summarize Step 1.5.
@@ -217,6 +225,64 @@ class FinalizeScenarios(unittest.TestCase):
         )
 
         assert_usage_without_archive(self, self.fx.agent_dir, summary_text)
+
+
+@unittest.skipIf(SKIP_REASON, SKIP_REASON)
+class FinalizeParticipantRevisionScenarios(unittest.TestCase):
+    """v47: finalize revises participants before Phase 1 (wrong-host + nothing-booted)."""
+
+    def setUp(self):
+        tmp = tempfile.mkdtemp(prefix="lr-lifecycle-revise-")
+        if os.environ.get("LR_KEEP_FIXTURES"):
+            print(f"\n  [fixture kept] {tmp}", file=sys.stderr)
+        else:
+            self.addCleanup(shutil.rmtree, tmp, ignore_errors=True)
+        # Own fixture with second_agent — do not reuse FinalizeScenarios.self.fx.
+        self.fx = build_fixture(tmp, second_agent=True)
+        write_helper_release_calendar_role(self.fx)
+
+    def _assert_helper_learned(self, result):
+        self.assertEqual(result.exit_code, 0, f"engine run failed: {result.stderr[-500:]}")
+        said = _said(result)
+        self.assertIn(
+            "Revising this session's agents",
+            said,
+            "participant revision must print the revising Operation Notice:\n" + said[-2000:],
+        )
+        self.assertTrue(
+            grep_agent_dir(self.fx, REVISE_FINALIZE_CANARY, agent=HELPER_AGENT_NAME),
+            f"canary missing from {HELPER_AGENT_NAME} lore/ or lore-context.md",
+        )
+        summary_path, summary_text = find_session_summary(self.fx, agent=HELPER_AGENT_NAME)
+        self.assertTrue(
+            summary_path,
+            f"no session summary under {HELPER_AGENT_NAME}/sessions/",
+        )
+        # Guest or host summary both prove participation; body need not restate the agent name.
+        self.assertTrue(
+            summary_text and summary_text.strip(),
+            f"empty session summary at {summary_path}",
+        )
+
+    def test_14_finalize_revises_participants(self):
+        """Wrong-host path: boot test-agent, learn helper-domain fact, finalize revises."""
+        r = run_engine(self.fx.workspace, REVISE_FINALIZE_PROMPT)
+        print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
+        self._assert_helper_learned(r)
+
+    def test_15_finalize_revises_nothing_booted(self):
+        """Nothing-booted path: finalize picks helper-agent as host and boots it."""
+        r = run_engine(self.fx.workspace, REVISE_FINALIZE_NOTHING_BOOTED_PROMPT)
+        print(f"\n  [{self.id().split('.')[-1]}] {r.summary()}")
+        self._assert_helper_learned(r)
+        summary_path, summary_text = find_session_summary(self.fx, agent=HELPER_AGENT_NAME)
+        # Canonical summary home is the finalization host.
+        self.assertIn(
+            f"host_agent: {HELPER_AGENT_NAME}",
+            summary_text,
+            "nothing-booted finalize must make helper-agent the finalization host:\n"
+            + summary_text[:800],
+        )
 
 
 if __name__ == "__main__":

@@ -118,6 +118,8 @@ Scenario catalog status (numbering per the draft):
 | 12 | Merge | ✅ `lifecycle/test_finalize.py` |
 | 13 | Summarize | ✅ `lifecycle/test_finalize.py` |
 | 14 | Finalize end-to-end | ✅ `lifecycle/test_finalize.py` |
+| 14b | Finalize revises participants (v47 wrong-host) | ✅ `lifecycle/test_finalize.py` (`test_14`) |
+| 14c | Finalize revises participants (v47 nothing-booted) | ✅ `lifecycle/test_finalize.py` (`test_15`) |
 | 15 | Concurrent finalize collision | deferred — needs two-clone push-race scripting |
 | 16 | Finalize with guest attached | deferred — needs cross-repo guest fixture |
 | 17 | create-repo | ✅ `lifecycle/test_repo_workspace.py` |
