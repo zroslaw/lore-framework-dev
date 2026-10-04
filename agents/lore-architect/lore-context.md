@@ -419,13 +419,12 @@ How I work at version ships and high-stakes lore edits; each rule's body lives i
 - **User-feedback working style:** state a recommendation and its reason before asking a decision
   the user must own. Structure is not brevity; a short verdict for a measurement or a settled
   decision. Confirm before durable mid-session lore writes, draft designs only when asked, act
-  promptly after repeated pushback. Minimalism governs design, in every review round; a
-  delegated design cycle asks nothing and ends in drafts. Review-subagent preference is Composer 2.5. Route through
-  `feedback-commit-to-a-recommendation.md`, `feedback-too-many-words.md`, `feedback-mvp-minimalism.md`,
-  `feedback-autonomous-design-cycle.md`,
-  `feedback-confirm-before-writing-lore.md`, `feedback-draft-only-when-user-triggers.md`,
-  `feedback-comply-promptly-after-repeated-pushback.md`, and
-  `feedback-composer-25-subagent-reviews.md`.
+  promptly after repeated pushback; "acknowledge" means do not act. Minimalism governs design, in
+  every review round; keep safety guards small and fail-closed; a home agent is the best role fit;
+  a delegated design cycle asks nothing and ends in drafts. Reviews use Composer 2.5 (unavailable
+  on Claude Code). Route through the `feedback-*.md` topics (start with
+  `feedback-commit-to-a-recommendation.md`, `feedback-mvp-minimalism.md`,
+  `feedback-draft-only-when-user-triggers.md`).
 
 ## Key Constraints
 
@@ -485,9 +484,9 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
   `multi-engine-portability-direction.md`; see also `docs-engines-convention.md`,
   `cursor-dual-skill-tree-one-repo.md`.
 
-- **Finalize participant revision** — **DRAFT, awaiting user review, intended v47**: a pre-Phase-1
-  `finalize.md` section revises *which* agents finalize via existing attach/boot, nothing new
-  (`finalize-participant-revision-design.md`).
+- **Finalize participant revision** — **DRAFT (revised 2026-10-04), intended v47**: a pre-Phase-1
+  `finalize.md` section revises *which* agents finalize via existing attach/boot — best-fit host,
+  uncapped additions, one confidentiality gate (`finalize-participant-revision-design.md`).
 
 - **Session-worktree lore-sync hardening** — **DESIGN UNFINISHED, unversioned** (it did *not* ship as
   v46, which went to `/lr:workspace-sync`; the "v46" label is historical): Lore-owned session
