@@ -44,6 +44,21 @@ per engine by default: Claude Code -> `haiku`, Codex -> `gpt-5.4-mini`, Cursor -
 accidentally run the preship e2e gate on `sonnet` or another expensive/default account tier. This
 also applies to the sibling `tests/quality/` regular matrix default.
 
+**Finalize participant revision (v47, 2026-10-04):** `FinalizeParticipantRevisionScenarios` in
+`test_finalize.py` — `test_14_finalize_revises_participants` (wrong-host: boot `test-agent`, learn a
+helper-domain release-calendar canary, finalize revises so `helper-agent` learns) and
+`test_15_finalize_revises_nothing_booted` (nothing booted: finalize picks and boots
+`helper-agent` as host). Harness constants and helpers:
+`REVISE_FINALIZE_PROMPT`, `REVISE_FINALIZE_NOTHING_BOOTED_PROMPT`, `REVISE_FINALIZE_CANARY`,
+`write_helper_release_calendar_role()`, `grep_agent_dir(..., agent=)`, `find_session_summary()`.
+Each scenario builds its **own** fixture with `second_agent=True` and overwrites only the helper
+role inside the test class — do not change the shared `build_fixture` helper role used by
+consult/attach scenarios. Assertions: revising Operation Notice, canary under the helper agent dir,
+non-empty session summary (guest summaries may omit the agent name string); assert
+`host_agent: helper-agent` only on the nothing-booted path. Proven green on Cursor `composer-2.5`
+against the v47 worktree. Design context:
+[finalize-participant-revision-design.md](finalize-participant-revision-design.md).
+
 **`/lr:trilens-loop` coverage (v30, 2026-07-25):** scenarios **28–29** in
 `tests/lifecycle/test_trilens_loop.py` drive the skill end-to-end. A planted uncommitted lore topic
 carrying a dangling cross-reference and a contradiction against committed fixture lore is reviewed in a
@@ -226,7 +241,10 @@ most. Free layer-1/2 tests (script tests, lint checks) remain ungated and pass i
 
 **Run the free deterministic suite first, and know how to invoke it.** `python3 -m unittest discover
 -s tests` fails outright with `Start directory is not importable`; run each module individually as
-`tests/README.md` shows. `test_lrb.py` writes progress to **stdout** while unittest reports to
+`tests/README.md` shows. **`unittest -k` is substring match over test ids, not pytest boolean
+expressions** — `test_14 or test_15` matches nothing; filter by class name, a shared substring, or
+`Class.test_method` ([unittest-k-is-substring-not-pytest.md](unittest-k-is-substring-not-pytest.md)).
+`test_lrb.py` writes progress to **stdout** while unittest reports to
 **stderr**, so a `tail` of combined output shows no result — capture stderr separately or the module
 looks broken. 540 tests across 15 modules run in a couple of minutes at zero cost, which is why they
 precede everything here in the gate order (`role.md` § Lore-Curation Disciplines).

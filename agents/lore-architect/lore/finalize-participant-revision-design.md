@@ -25,7 +25,11 @@ deterministic suite (**684 tests, 49 skipped**, green at polish tip with `LR_FRA
 worktree HEAD — an earlier 635/17 claim in the draft record was superseded) and the plugin check
 passed; the check's only finding was an unrelated stale Codex v32 cache backup. A one-off `P7` flake
 did not reproduce on immediate re-run.
-Lifecycle and TriLens were intentionally not run. The abandoned
+**Lifecycle (participant revision only):** `FinalizeParticipantRevisionScenarios` in
+`tests/lifecycle/test_finalize.py` (`test_14` wrong-host, `test_15` nothing-booted) — green on
+Cursor `composer-2.5` against the v47 worktree (2026-10-04). See
+[lifecycle-testing-harness.md](lifecycle-testing-harness.md). The broader lifecycle suite and
+TriLens were intentionally not run for the design ship. The abandoned
 `v46-sync-hardening` worktree had no unique commits or diff beyond current main, so it was removed
 rather than merged.
 

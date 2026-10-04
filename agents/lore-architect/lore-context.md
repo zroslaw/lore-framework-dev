@@ -489,7 +489,9 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
   pre-Phase-1 participant revision via boot/attach — best-fit host, uncapped additions,
   confidentiality gate after selection and before apply (outcome `skipped` when it fires),
   in-place guest promotion without re-attach, and `revised` only after a successful apply
-  (`finalize-participant-revision-design.md`).
+  (`finalize-participant-revision-design.md`). Lifecycle harness:
+  `FinalizeParticipantRevisionScenarios` (`test_14`/`test_15`) in `test_finalize.py` — see
+  `lifecycle-testing-harness.md`.
 
 - **Session-worktree lore-sync hardening** — **DESIGN UNFINISHED, unversioned** (it did *not* ship as
   v46, which went to `/lr:workspace-sync`; the "v46" label is historical): Lore-owned session
