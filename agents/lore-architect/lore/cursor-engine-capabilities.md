@@ -78,7 +78,9 @@ This hub is the starting map for install, refresh, fallback, invocation, and con
 - `engine-session-log-formats.md`
 - `subagent-as-optimization-vs-subagent-as-semantics.md` — optimization vs semantics classification
 - `cursor-task-free-text-brief-validated.md` — free-text `Task` brief shape confirmed
-- `cursor-merge-via-task.md` — merge upgraded from serial host-side to `Task`
+- `cursor-merge-via-task.md`
+- [cursor-framework-polish-orchestration.md](cursor-framework-polish-orchestration.md) — Composer 2.5
+  Task fan-out for post-review implementation polish — merge upgraded from serial host-side to `Task`
 - `merge-in-booted-subagents.md` — engine-neutral merge execution model
 - `trilens-loop-feature.md` — semantics-class procedure; also uses `Task` on Cursor
 - `feedback-composer-25-subagent-reviews.md` — composer-2.5 as a reviewer tier

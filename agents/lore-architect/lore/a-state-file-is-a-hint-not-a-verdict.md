@@ -60,5 +60,10 @@ Instance (finalize participant revision design, round 2, 2026-10-03): a re-run r
 revision notice counts as having added its agents". An interrupted run would then skip attaching an
 agent the notice had named, and a nothing-booted session would exclude the real owner and wrongly
 stop. Fix: the re-run re-evaluates, and attach confirmations are the record
-([finalize-participant-revision-design.md](finalize-participant-revision-design.md)). Third member of
+([finalize-participant-revision-design.md](finalize-participant-revision-design.md)).
+
+Instance (finalize participant revision, polish 2026-10-04): treating a revising **Operation Notice**
+as proof that participants changed would report outcome `revised` when every proposed attach failed
+and the original host remained. Fix: `revised` requires a successful boot, attach, or in-place
+promotion; failed applies fall back to `checked, no change` even when the notice printed. Third member of
 the family: [a-reported-error-is-not-proof-the-file-survived.md](a-reported-error-is-not-proof-the-file-survived.md).

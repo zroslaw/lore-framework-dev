@@ -422,8 +422,9 @@ How I work at version ships and high-stakes lore edits; each rule's body lives i
   promptly after repeated pushback; "acknowledge" means do not act. Minimalism governs design, in
   every review round; keep safety guards small and fail-closed; a home agent is the best role fit;
   a delegated design cycle asks nothing and ends in drafts. Reviews use Composer 2.5 (unavailable
-  on Claude Code). Route through the `feedback-*.md` topics (start with
-  `feedback-commit-to-a-recommendation.md`, `feedback-mvp-minimalism.md`,
+  on Claude Code). Continuing Codex-orchestrated polish inside Cursor uses parallel Composer 2.5
+  `Task` subagents — see `cursor-framework-polish-orchestration.md`. Route through the `feedback-*.md`
+  topics (start with `feedback-commit-to-a-recommendation.md`, `feedback-mvp-minimalism.md`,
   `feedback-draft-only-when-user-triggers.md`).
 
 ## Key Constraints
@@ -486,7 +487,9 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
 
 - **Finalize participant revision** — **unshipped v47 candidate `33c7461`**: `finalize.md`
   pre-Phase-1 participant revision via boot/attach — best-fit host, uncapped additions,
-  confidentiality gate (`finalize-participant-revision-design.md`).
+  confidentiality gate after selection and before apply (outcome `skipped` when it fires),
+  in-place guest promotion without re-attach, and `revised` only after a successful apply
+  (`finalize-participant-revision-design.md`).
 
 - **Session-worktree lore-sync hardening** — **DESIGN UNFINISHED, unversioned** (it did *not* ship as
   v46, which went to `/lr:workspace-sync`; the "v46" label is historical): Lore-owned session

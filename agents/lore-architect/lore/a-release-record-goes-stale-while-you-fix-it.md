@@ -24,6 +24,9 @@ Standing practice, as the **last** step before tag and push:
 - **Measure counts, do not derive them.** The 431 was arrived at by adjusting a previous number
   rather than running the suite; the real figure was 432 discovered / 384 run / 48 skipped, and
   stating all three is more useful than a single total that hides the skipped real-engine tier.
+  **Re-run the deterministic suite with `LR_FRAMEWORK_DIR` pointed at the worktree HEAD** before
+  finalizing any disposition line that cites unit-test totals — polish commits supersede earlier
+  numbers (v47: draft **635/17** → remeasured **684 tests, 49 skipped** green at polish tip).
 - Keep a **claim-audit lens** in any round that follows fixes
   ([parallel-reviewer-fanout-pattern.md](parallel-reviewer-fanout-pattern.md) already names it as a
   standing slot) — on v39 that lens is what caught the release denying its own review.

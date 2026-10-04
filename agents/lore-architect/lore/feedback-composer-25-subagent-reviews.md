@@ -16,7 +16,8 @@ start of the review cycle rather than silently substituting.
 
 ## See Also
 
+- [cursor-framework-polish-orchestration.md](cursor-framework-polish-orchestration.md) — Task fan-out
+  for implementation polish inside Cursor (v47).
 - `settle-conflicting-reviewer-claims-in-the-source.md`
-
 - `workspace-design-review-discipline.md`
 - `parallel-reviewer-fanout-pattern.md`

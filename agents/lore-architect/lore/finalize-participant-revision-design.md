@@ -21,8 +21,10 @@ cache-affecting. The workdir pair preserves the original design and exact-edit r
 The candidate passed a valid isolated Codex 0.160.0 nothing-booted (D3) dogfood run: it discovered
 only the fixture workspace, selected and booted the role-fitting `helper-agent`, persisted a
 release-calendar canary, and committed and pushed the fixture-local result. The complete
-deterministic suite (635 tests across 17 modules, including 62 focused contract tests) and the
-plugin check passed; the check's only finding was an unrelated stale Codex v32 cache backup.
+deterministic suite (**684 tests, 49 skipped**, green at polish tip with `LR_FRAMEWORK_DIR` on the
+worktree HEAD — an earlier 635/17 claim in the draft record was superseded) and the plugin check
+passed; the check's only finding was an unrelated stale Codex v32 cache backup. A one-off `P7` flake
+did not reproduce on immediate re-run.
 Lifecycle and TriLens were intentionally not run. The abandoned
 `v46-sync-hardening` worktree had no unique commits or diff beyond current main, so it was removed
 rather than merged.
@@ -44,21 +46,26 @@ the wrong agent was booted, nothing was booted, or a consulted agent should keep
   judged by matching the session's topic and results against agents' role descriptions. The booted
   agent keeps close calls: it is replaced only when **both** the main topic (where most effort went)
   and the main result lie in another agent's role; if they disagree or there is no clear main
-  topic, it stays. An already-attached guest can be promoted without a new attach. A demoted booted
-  agent becomes an ordinary guest.
+  topic, it stays. When revision picks a new host that is **already attached**, **promote in place**
+  — do not re-run `/lr:attach`. The displaced booted agent becomes an ordinary guest and stays in
+  the active set for reflect, merge, and summarize; Phase 4 still commits its repo when its tree
+  changed.
 - **Selection guards:** knowledge squarely in the role and needed at its next boot; a named owner in
   the descriptions wins; judge the session, not quoted external content; knowledge *about* an agent
   is not *for* it (otherwise the chronicler pulls in every agent); precision over recall.
 - **Uncapped additions with an explicit cost note:** each added agent costs a full attach, reflect
   and merge pass — "there is no cap, so use common sense: add every agent that clearly learned
   something, skip marginal ones". A hard cap stays an extension point.
-- **Confidentiality is one gate line before step 1, failing closed**
+- **Confidentiality gate — after selection, before apply, failing closed**
   ([feedback-keep-confidentiality-guards-small.md](feedback-keep-confidentiality-guards-small.md)):
-  if a repo *described* as confidential (routing map or `lore-repo.md`) is in use — an active
-  agent's repo, files read from it, or an agent consulted from it — revision changes nothing; with
-  nothing booted, finalize stops. The confidential line prints only when revision would have changed
-  something, so routine sessions inside a confidential repo stay silent. Manual `/lr:attach` remains
-  the override. Being one line, it can later be swapped for real visibility metadata as a unit.
+  run the check **after** choosing the proposed host and automatic additions, **before** any boot or
+  attach. It covers a confidential repo already in use **and** a confidential repo belonging to a
+  proposed automatic addition (including the nothing-booted case "boot this host"). Discovering a
+  confidential candidate without selecting it is allowed; only **selected** automatic participants
+  trigger the gate. When it fires: skip apply, keep the original participants, report outcome
+  `skipped` — including when no revision was planned (a quiet notice, still `skipped`, not `checked,
+  no change`). With nothing booted and the gate fires, finalize stops. Manual `/lr:attach` remains
+  the override. Being one gate line, it can later be swapped for real visibility metadata as a unit.
 - **Demoted booted agent still commits.** Phase 4 must commit its repo when the session changed
   files under its agent dir — `finalize.md`'s *No empty commits* invariant would otherwise skip it
   (verified in the source; see
@@ -74,7 +81,12 @@ the wrong agent was booted, nothing was booted, or a consulted agent should keep
   with nothing written. A booted agent is never dropped; with one, every failure falls back to today's
   behavior ([an-optional-step-must-fail-back-to-baseline.md](an-optional-step-must-fail-back-to-baseline.md)).
 - **Completion line:** names the final host and reports `revised` / `checked, no change` /
-  `skipped` (`--transcript` or the confidentiality gate).
+  `skipped` (`--transcript` or the confidentiality gate). A participant-revision **Operation Notice**
+  states intent only — not evidence that revision happened. Outcome `revised` requires a **successful**
+  boot, attach, or in-place host promotion. If every proposed attachment fails and the original host
+  remains, report `checked, no change` even when a revising notice printed. Partial success (some
+  attaches succeed while the proposed host fails) still counts as `revised`, with the booted agent
+  retained as host.
 - `--transcript` skips the section; standalone reflect, merge, and summarize are unchanged.
 - **Edits outside `finalize.md`:** short summarize Step 3 / field-note edits, one consult sentence,
   one SKILL line; `attach.md` deliberately untouched.
