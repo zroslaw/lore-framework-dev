@@ -366,7 +366,7 @@ class RepoWorkspaceScenarios(unittest.TestCase):
         )
 
     def test_27_workspace_status(self):
-        """workspace-status reports the expected finding IDs on a deliberately messy workspace."""
+        """lr:check --workspace reports the expected finding IDs on a deliberately messy workspace."""
         fx = build_fixture(self.tmp)
         make_workspace_meta_repo(fx)
         dirty_managed_and_unmanaged(fx)          # -> S1 (dirty managed), S12 (dirty other)
@@ -386,12 +386,12 @@ class RepoWorkspaceScenarios(unittest.TestCase):
         # Read-only: the messy state must survive the diagnosis untouched.
         self.assertTrue(
             os.path.isfile(os.path.join(fx.workspace, "my-private-notes.md")),
-            "workspace-status is read-only and must not remove user files",
+            "check --workspace is read-only and must not remove user files",
         )
         self.assertTrue(
             subprocess.run(["git", "-C", fx.workspace, "status", "--porcelain"],
                            capture_output=True, text=True).stdout.strip(),
-            "workspace-status committed or cleaned something — it must write nothing",
+            "check --workspace committed or cleaned something — it must write nothing",
         )
 
 

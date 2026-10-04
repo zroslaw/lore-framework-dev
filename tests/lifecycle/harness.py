@@ -213,8 +213,8 @@ WORKSPACE_PUSH_PROMPT = (
 )
 
 WORKSPACE_STATUS_PROMPT = (
-    "Invoke the lr:workspace-status skill in this workspace. Print the full "
-    "finding list verbatim, including every finding ID, then DONE."
+    "Invoke the lr:check skill with --workspace --no-network in this workspace. "
+    "Print the full finding list verbatim, including every finding ID, then DONE."
 )
 
 CHECK_PROMPT = (
@@ -497,8 +497,8 @@ def codex_prompt(prompt):
         )
     if prompt == WORKSPACE_STATUS_PROMPT:
         return (
-            f"Read '{FRAMEWORK_DIR}/docs/workspace-status.md' and follow it in this workspace. "
-            "Print the full finding list verbatim, including every finding ID, then DONE."
+            f"Read '{FRAMEWORK_DIR}/docs/check.md' and follow it with --workspace --no-network "
+            "in this workspace. Print the full finding list verbatim, including every finding ID, then DONE."
         )
     if prompt == CHECK_PROMPT:
         return (

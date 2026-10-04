@@ -92,6 +92,8 @@ under `tests/lifecycle/results/`:
 python3 tests/lifecycle/run_matrix.py --dry-run
 LR_LIFECYCLE=1 python3 tests/lifecycle/run_matrix.py --engine-jobs 3 --module-jobs 1
 LR_LIFECYCLE=1 python3 tests/lifecycle/run_matrix.py --engines claude --modules test_finalize.py
+# TriLens is heavy and excluded from the default matrix; run it only on explicit request, by itself:
+LR_LIFECYCLE=1 python3 tests/lifecycle/run_matrix.py --modules test_trilens_loop.py
 ```
 
 The runner defaults to the cheapest per-engine models already used by the harness
@@ -133,8 +135,8 @@ Scenario catalog status (numbering per the draft):
 | 25 | unregister-agent | ✅ `lifecycle/test_repo_workspace.py` |
 | 26 | unregister-repo | ✅ `lifecycle/test_repo_workspace.py` |
 | 27 | Cursor takeover (direct JSONL path) | ✅ `lifecycle/test_takeover.py` |
-| 28 | trilens-loop, one round with fixes | ✅ `lifecycle/test_trilens_loop.py` |
-| 29 | trilens-loop, report-only makes no edits | ✅ `lifecycle/test_trilens_loop.py` |
+| 28 | trilens-loop, one round with fixes | ✅ `lifecycle/test_trilens_loop.py` — **opt-in**, not in the default matrix |
+| 29 | trilens-loop, report-only makes no edits | ✅ `lifecycle/test_trilens_loop.py` — **opt-in**, not in the default matrix |
 | Tier 2 | wait/emit | covered by `test_wait.py` (protocol-level, not a lifecycle scenario) |
 | Tier 2 | spawn-teammate | deferred — not headless-scriptable (multi-pane UI) |
 | Tier 2 | df-repo-init, df-ula-file | deferred — BETA, out of scope for this pass |

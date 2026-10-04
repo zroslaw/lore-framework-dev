@@ -41,8 +41,11 @@ STANDARD_MODULES = [
     "test_repo_workspace.py",
     "test_style.py",
     "test_takeover.py",
-    "test_trilens_loop.py",
 ]
+# Selectable only by naming them in --modules; never part of the default run.
+# TriLens spawns multi-agent review rounds, which makes it too heavy for a
+# routine gate — run it only when explicitly asked, and only for itself.
+OPT_IN_MODULES = ["test_trilens_loop.py"]
 KEEPER_MODULES = ["test_lrb_lifecycle.py"]
 ENGINE_DEFAULTS = ["claude", "codex", "cursor"]
 MODEL_DEFAULTS = {"claude": "haiku", "codex": "gpt-5.4-mini", "cursor": "composer-2.5"}
@@ -282,7 +285,8 @@ def build_parser():
     parser.add_argument("--engines", default=",".join(ENGINE_DEFAULTS),
                         help="comma-separated engines to run (default: claude,codex,cursor)")
     parser.add_argument("--modules",
-                        help="comma-separated test module filenames; default is the suite's module set")
+                        help="comma-separated test module filenames; default is the suite's module set "
+                             "(opt-in modules such as test_trilens_loop.py run only when named here)")
     parser.add_argument("--engine-jobs", type=int, default=0,
                         help="max engines running at once (default: all selected engines)")
     parser.add_argument("--module-jobs", type=int, default=1,
@@ -299,9 +303,10 @@ def build_parser():
 def main(argv=None):
     args = build_parser().parse_args(argv)
     suite_modules = STANDARD_MODULES if args.suite == "standard" else KEEPER_MODULES
+    selectable = suite_modules + (OPT_IN_MODULES if args.suite == "standard" else [])
     try:
         engines = parse_csv(args.engines)
-        modules = parse_csv(args.modules, allowed=suite_modules) if args.modules else list(suite_modules)
+        modules = parse_csv(args.modules, allowed=selectable) if args.modules else list(suite_modules)
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 2
