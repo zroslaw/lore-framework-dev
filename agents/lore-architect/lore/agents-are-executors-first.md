@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Frame Lore Agents to newcomers as executors first (getting real work done) and advisors second; the advisor-only framing breaks the usage→learning loop. One of three foundational identity claims with team-shared and engine-not-KB."
+parent: lore-context.md
+---
+
 # Agents are executors first, advisors second
 
 When framing Lore Agents to newcomers, **lead with execution as the primary value, conversational use as the secondary affordance**. Don't reverse the order — readers stuck on the advisor framing miss what makes Lore Agents categorically different from "a wiki you can chat with."

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Mid-run assertions need the transcript, end-state assertions can use the final message, and per-engine capture asymmetry silently changes what a test means; a retained session log separates a skipped step from a failed one."
-parent: lore-context.md
+parent: lore/lifecycle-testing-harness.md
 ---
 
 # Mid-Run Assertions Need the Transcript; End-State Assertions Can Use the Final Message

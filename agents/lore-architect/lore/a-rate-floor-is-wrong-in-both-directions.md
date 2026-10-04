@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "An interval constant must be priced against the real cadence of the event it throttles and against any configured knob it silently overrides; one constant answering both 'is this stale?' and 'may I retry?' is wrong in both directions."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # A Rate Floor Is Wrong in Both Directions

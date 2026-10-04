@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Scope test before applying the single-canonical-source rule: the same words at many sites need one canonical site; different words following the same rule put the rule at the canonical site and the words at the point of use."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Per-site authoring is not duplication — separate the rule from the text

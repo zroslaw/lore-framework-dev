@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "In a literate accelerator the script emits data and the doc owns user-facing words; a finished-sounding script string gives the executor a cheaper path than the doc's remedy (v31 Codex test_07 version-skew case)."
+parent: lore/executable-prose-and-design-checks.md
+---
+
 # Script Emits Data, Doc Owns the Words
 
 **In a literate accelerator, the script emits data; the doc owns user-facing words.** A script

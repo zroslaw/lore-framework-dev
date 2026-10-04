@@ -31,7 +31,7 @@ When a lifecycle scenario fails, don't just read the final text output — rerun
 
 ## A third, later instance (defer-clarity)
 
-A subsequent harness run (2026-07-04, haiku) surfaced a third `agent-boot.md` fidelity issue of the same shape: haiku conflated a *deferred* version upgrade with *boot failure*, because the alarming "cannot auto-upgrade" message sat inline while the "this isn't a failure, keep going" reassurance was buried. The fix hoists the reassurance adjacent to the alarming message (`agent-boot.md` step 3 + `version-check.md` defer points). Full write-up and the generalizable rule live in `haiku-ambiguity-detector.md`; that fix is staged, not yet applied to the real framework (`port-landing-next-steps.md`).
+A subsequent harness run (2026-07-04, haiku) surfaced a third `agent-boot.md` fidelity issue of the same shape: haiku conflated a *deferred* version upgrade with *boot failure*, because the alarming "cannot auto-upgrade" message sat inline while the "this isn't a failure, keep going" reassurance was buried. The fix hoists the reassurance adjacent to the alarming message (`agent-boot.md` step 3 + `version-check.md` defer points). Full write-up and the generalizable rule live in `haiku-ambiguity-detector.md`; that fix has since landed: `agent-boot.md` Step 2 now says a deferred or failed upgrade is *not* a boot failure.
 
 ## See Also
 

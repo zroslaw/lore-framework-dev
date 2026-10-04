@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A deny-list must exempt the operations that reduce the exposure it guards against — for a commit filter, every deletion — and the exemption must be keyed on the operation, not on one encoding of it."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # A Guard Must Not Block the Operation That Removes What It Guards Against

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Release notes describe gates that are still running when they are written, so they are the artifact most likely to be false at push time — re-audit the release's own claims about itself as the last pre-push step."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A Release Record Goes Stale While You Fix the Release

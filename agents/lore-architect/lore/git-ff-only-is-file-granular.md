@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "git pull --ff-only is file-granular: only divergence, a modified tracked file an incoming commit touches, or an untracked collision block it — and shipped code gates on the wrong one."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # `git pull --ff-only` Is File-Granular, Not Repo-Granular

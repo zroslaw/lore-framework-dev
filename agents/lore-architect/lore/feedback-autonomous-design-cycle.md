@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "User working style (2026-10-03): a delegated no-questions design cycle — review today's behavior, design with edge cases, iterate reviews, write a spec, separate design/spec drafts in workdir, finalize as a draft."
-parent: lore-context.md
+parent: lore/user-feedback-working-style.md
 ---
 
 # Feedback — The Autonomous Design Cycle

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A rename/restructure sweep needs both a grep for old tokens and a semantic read of the touched prose — grep verifies tokens, only reading verifies facts."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Consistency Sweeps: Grep Catches Tokens, Reading Catches Prose

@@ -29,7 +29,7 @@ This isn't a new invention — the framework's `lr-wait` (`wait-primitive-featur
 
 ## See Also
 
-- `autonomous-agents-vision.md` — the parked vision this principle now sharpens (esp. the "cost / loop safety" open question)
+- `autonomous-agents-vision.md` — the vision (now realized as Lore Beings) this principle sharpens (esp. the "cost / loop safety" open question)
 - `autonomous-agents-substrate.md` — the switchboard daemon precedent
 - `wait-primitive-feature.md` — the shipped deterministic inbound-signal precedent
 - `naming-foundational-principles.md` — the meta-rule this topic follows (name the framing, not just the mechanism)

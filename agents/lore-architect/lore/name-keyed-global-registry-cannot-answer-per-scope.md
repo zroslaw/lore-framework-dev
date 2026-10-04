@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A registry keyed by bare name and stored outside the scope you are asking about cannot answer a per-scope question; compute per scope and state the residual limit."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # A Name-Keyed Global Registry Cannot Answer a Per-Scope Question

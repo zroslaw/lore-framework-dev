@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Tiering a reviewed spec is itself a change, and the subset has never been reviewed as a subset — run one scoped round over the tier you ship, watch the five seam shapes, and collapse the tiering once its seams produce findings twice."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Tiering a Reviewed Spec Creates an Unreviewed Artifact at Every Seam

@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Start with one agent per coherent scope; split only when a concrete pressure (the lore-context budget, real role divergence) forces it, and along the axis the pressure reveals — product vs technical are filing categories, not identities."
+parent: lore-context.md
+---
+
 # Agent split: one until forced, along the axis the pressure reveals
 
 A heuristic for deciding whether a scope of knowledge/work is one agent or several, surfaced in the lr-dev context-agent design (2026-06-01).

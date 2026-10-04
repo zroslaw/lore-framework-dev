@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A proxy is chosen because it is convenient to observe and it fails on the cases you did not have in mind — usually deliberate user action; write the real condition in words first, and prefer one an existing component already computes."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Short-Circuit on the Condition, Not a Proxy for It

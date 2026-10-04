@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "Parked exploration: use workdir/ as a structured reference library beside lore (lore = field notebook, workdir docs = reference manual), most useful for domain-heavy agents; open questions on structure and boot framing."
+parent: lore-context.md
+---
+
+# Workdir as Reference Library
+
 Design exploration (parked, not decided): using `workdir/` as a structured reference library alongside lore.
 
 ## The Distinction

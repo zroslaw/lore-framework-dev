@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "The harness's per-engine plugin-identity gate: how an installed plugin silently substitutes the tree under test, and the deterministic filesystem and engine-init-event checks that close it."
-parent: lore-context.md
+parent: lore/lifecycle-testing-harness.md
 ---
 
 # Lifecycle Harness Doesn't Verify Which Plugin Actually Loaded

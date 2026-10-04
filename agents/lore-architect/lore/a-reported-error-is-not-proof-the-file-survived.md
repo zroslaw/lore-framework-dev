@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "An error row that reads the same for a refusal and for a destroyed file is not evidence about the filesystem — when a guard promises the target is unchanged, make that structural (temp file + os.replace), not a catch block."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # A Tidy Error Row Is Not Proof the File Survived

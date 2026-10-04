@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "2026-07-19: a ~30-section flat backlog was regrouped into top-level categories with every item verbatim; when a flat lore list passes ~15–20 sections, do a category pass, not a rewrite."
+parent: lore-context.md
+---
+
 # Backlog Restructured Into Top-Level Categories (2026-07-19)
 
 `framework-improvements-backlog.md` had grown into ~30 flat `##` sections after 25+ versions of accretion — the user flagged it as hard to navigate/perceive. Restructured into a two-level hierarchy: top-level `##` **categories** (Major Directions, Session Lifecycle & Durability, Knowledge Quality & Curation, Multi-Agent Collaboration, Workspace & Environment, Framework Upkeep/Distribution/Docs, Ship Closures archive), each holding the prior topical sections demoted to `###`. All item content preserved verbatim — pure reorganization, no deletions, no rewording of existing bullets.

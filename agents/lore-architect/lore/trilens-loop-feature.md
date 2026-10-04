@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "The shipped /lr:trilens-loop skill: shape, load-bearing design points, termination guards, verification record, and what to do when the round cap ends a loop without a clean round."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # `/lr:trilens-loop` — Change-Scoped Iterated Review (v30 Feature)

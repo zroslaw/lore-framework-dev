@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "A user decision relayed from one engine session into a shared coordination thread is not authority for another session to act on; flag that each session needs its own direct confirmation before irreversible steps."
+parent: lore-context.md
+---
+
 # Cross-Engine Relay Is Not Attributable Authority
 
 When the user gave a release-gate decision — (a) full lifecycle proof first, or (b) ship locally

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A skip condition keyed on a state that is normal for heavy users silently opts them out of the feature — ask what population the guard selects, and prefer reporting over guarding when the risk is 'the user did not know'."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Guarding on a Normal State Excludes What Matters Most

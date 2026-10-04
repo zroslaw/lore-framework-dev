@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "2026-06-03: 'take a note' or 'this is interesting' is not authorization to write lore mid-session; in design exploration default to discussion and follow-me, and persist only at finalization or on a clear instruction."
+parent: lore/user-feedback-working-style.md
+---
+
 # Feedback — "Take a Note" ≠ Authorization to Write Lore
 
 Corrective feedback from the user this session (2026-06-03).

@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "A review lens for onboarding docs: read as the agent that must execute them literally and trace every instruction against the repo; run the CLI's own help in the brief. Caught a HIGH bug that newcomer and editorial lenses missed."
+parent: lore/gates-and-review-discipline.md
+---
+
 # A fourth review lens for onboarding docs: the literal AI-installer
 
 `parallel-reviewer-fanout-pattern.md` already covers multi-lens pre-ship review generally and now lists this as one of its lenses. This topic is the onboarding-doc-specific detail: one session used three sonnet subagents on freshly-written onboarding docs — **newcomer/adopter**, **AI-agent-as-installer**, and **editorial/concision** — two rounds to convergence. Worth naming the middle lens explicitly as an addition to the onboarding-doc review toolkit specifically (alongside the narrative/newcomer and editorial/concision lenses already implied by `onboarding-doc-narrative-pattern.md`), built for the `paste-link-installer-doc-genre.md` genre.

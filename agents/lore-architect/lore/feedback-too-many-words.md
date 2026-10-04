@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "The user's standing brevity feedback: ranked shortlist for options, plain paragraph plus one example for concepts, a verdict (not a briefing) for a decision already made — and structure is not brevity."
-parent: lore-context.md
+parent: lore/user-feedback-working-style.md
 ---
 
 # Feedback — "Too Many Words"

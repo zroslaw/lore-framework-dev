@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A gate result belongs to a specific artifact state — re-run or revert post-gate edits, and freeze the tree before spawning reviewers so the round has one state to certify."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Post-Convergence Edits Need Their Own Gate

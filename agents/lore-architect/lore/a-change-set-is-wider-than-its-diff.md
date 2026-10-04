@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A contract or logic change touches sites the diff never shows — the test tree that pins the old form, the docstring, the caller's comment, the procedure doc; enumerate the set and grep the changed vocabulary across it."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # A Change Set Is Wider Than Its Diff

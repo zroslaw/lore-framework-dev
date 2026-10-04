@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Scripted line-index editing of long role.md / lore-context.md bullets is the right tool but is blind to nested-bold corruption and wrong above/below cross-references — read the prose back."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # A Scripted Prose Edit Needs a Read-Back

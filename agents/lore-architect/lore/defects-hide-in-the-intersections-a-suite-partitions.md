@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "v46's five review blockers were each unreachable by its own 42-test suite; the five hiding places — between test classes, in another module's contract, in unvaried configuration, in time, in a later fix's branch."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Defects Hide in the Intersections a Test Suite Partitions Away

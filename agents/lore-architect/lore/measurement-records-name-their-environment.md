@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A recorded environment-dependent number (boot footprint, token cost, timing) must name the engine/profile/machine it was measured under, or it generates false drift alarms."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Measurement Records Name Their Environment

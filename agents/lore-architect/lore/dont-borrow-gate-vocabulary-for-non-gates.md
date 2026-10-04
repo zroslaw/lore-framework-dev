@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Reserve lens, round, and converged for /lr:trilens-loop — naming another tool's fan-out with gate vocabulary corrupts the ship record; plus how the built-in /simplify differs from TriLens and why ours still earns its keep."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Don't borrow gate vocabulary for work that is not that gate

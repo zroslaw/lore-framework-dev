@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Verify state, and verify which bug, before acting on it — diagnosis is cheap and a wrong fix is not; a failing gate names an observation, never a mechanism, and a model-routed probe is not ground truth."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 **Before repointing, deleting, or "fixing" something you believe is broken, verify the actual filesystem/state directly. Don't act on an inference — especially a dangling-reference claim.**

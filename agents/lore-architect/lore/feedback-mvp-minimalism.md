@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "User directive: fewest concepts, data, code, and instructions while staying extensible — cut what the MVP does not exercise, defer it with a reintroduction trigger, and run the minimalism lens in every review round."
-parent: lore-context.md
+parent: lore/user-feedback-working-style.md
 ---
 
 # Feedback — MVP minimalism: don't introduce what isn't needed now

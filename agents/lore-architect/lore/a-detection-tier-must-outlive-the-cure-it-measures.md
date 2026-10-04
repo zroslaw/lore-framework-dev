@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "\"Ship the detector first for data\" only holds if the later change preserves the population being measured; if the cure removes the causes, the measurement expires when the cure lands."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A Detection Tier Must Outlive the Cure It Measures

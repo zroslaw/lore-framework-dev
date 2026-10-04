@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A new test is only evidence once it has been shown red against the previous release tag and green against HEAD; run it in a detached worktree via LR_FRAMEWORK_DIR."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Prove a New Test Red Against the Previous Tag

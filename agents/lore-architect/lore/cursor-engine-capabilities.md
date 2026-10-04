@@ -40,7 +40,7 @@ validation and probe notes in the linked topics below.
   `subagent-as-optimization-vs-subagent-as-semantics.md`, `docs-engines-convention.md` § v30 profile
   corrections, `merge-in-booted-subagents.md`.
 - **Memory file** — `AGENTS.md`.
-- **Doctor** — `doctor-cursor-session-without-plugin` for missing skills entirely (v25).
+- **Missing skills entirely** — `docs/fix-cursor-session-without-plugin.md`, routed from `/lr:check` (the v25 `doctor-` doc it replaced went with `/lr:doctor` in v45).
 - **Three-manifest discipline** — `.cursor-plugin/plugin.json` bumped with Claude manifests;
   check #19 enforces; hygiene only — not a verified Cursor cache lever.
 - **Usage auto-retrieval** — plan quota scriptable via undocumented `usage-summary` API

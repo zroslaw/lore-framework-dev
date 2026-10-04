@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Never use --autostash in the framework: on a real content collision it exits 0, writes conflict markers into the file, and reports success — the general ban is on any automatic path that resolves a conflict by overwriting."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # Never `--autostash`: It Reports Success While Corrupting

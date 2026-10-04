@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "User feedback 2026-08-23: presenting balanced options instead of a recommendation reads as absence of judgement and costs trust — state the view first, then the reason, then at most one question."
-parent: lore-context.md
+parent: lore/user-feedback-working-style.md
 ---
 
 # Commit to a Recommendation

@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Codex's workspace-write sandbox blocks .git writes, so auto-pull and finalize commits fail by default; supported finalization needs danger-full-access or .git in writable_roots, set at launch, not by the plugin."
+parent: lore/codex-engine-capabilities.md
+---
+
 # Codex Sandbox Blocks `.git/` Writes
 
 Operational finding, Codex `workspace-write` sandbox (`codex exec --full-auto`), 2026-07-05. This

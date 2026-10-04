@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "How /lr:takeover pairs Cursor store.db tool results to JSONL tool_use records (no toolCallId): per-batch window matching by tool name, validated on 364 sessions, with residual same-name-batch and interrupted-session risks."
+parent: lore-context.md
+---
+
 # Cursor Takeover — Batch-Window Tool-Result Pairing
 
 How `scripts/session-takeover` pairs Cursor `store.db` tool results to JSONL `tool_use` records for `/lr:takeover` digests. Shipped and pushed as part of v26 (2026-07-14): `lore-framework` main commit `ce90f9a` (on top of `3909129` "Release v26: Cursor takeover conversion"), tagged `lr--v1.26.0`.

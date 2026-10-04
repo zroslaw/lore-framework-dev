@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "User directive (2026-10-04): keep confidentiality guards short and fail-closed; when a safety guard draws findings in two consecutive review rounds, replace it with the coarsest rule that disables the feature in the risky case."
-parent: lore-context.md
+parent: lore/user-feedback-working-style.md
 ---
 
 # Feedback — Keep Confidentiality Guards Small

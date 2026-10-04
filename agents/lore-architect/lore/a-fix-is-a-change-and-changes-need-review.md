@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "In a three-round TriLens on v37, rounds 2 and 3 each caught a defect introduced by the previous round's own fix — a review round's output is unreviewed code, and stopping after round 1 ships it."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A Fix Is a Change, and Changes Need Review
@@ -95,4 +95,4 @@ one fixed filename, dropping already-staged paths from a commit while reporting 
 The rule that comes out of it is about the *test*, not the review:
 [a-fix-s-regression-test-misses-the-branch-the-fix-added.md](a-fix-s-regression-test-misses-the-branch-the-fix-added.md).
 
-See also [versioning-release-types.md](versioning-release-types.md) for v37's gate record.
+See also [versioning-history-v37-v47.md](versioning-history-v37-v47.md) for v37's gate record.

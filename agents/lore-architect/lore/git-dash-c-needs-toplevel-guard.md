@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "git -C <dir> can target a repo other than <dir> — escaping up to an enclosing repo, or following core.worktree to another directory; one rev-parse --show-toplevel vs realpath check catches both."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # `git -C <dir>` Is Not Always the Repo You Named — Guard Before Mutating

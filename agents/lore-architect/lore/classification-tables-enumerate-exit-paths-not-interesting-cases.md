@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A failure-classification table in executable prose must be built by walking the procedure's own exit paths, not from the cases the design discussed — an unlisted outcome makes the executing model guess."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # A Classification Table Must Enumerate Exit Paths, Not Interesting Cases

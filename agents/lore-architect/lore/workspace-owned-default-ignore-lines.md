@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "The three standard workspace .gitignore lines (/.worktrees/, /.lr-beings/, /.tmp/), who maintains them, the child-repo ignore rule, the scratch rule, and the v37 retirement of the term 'workspace-owned'."
+parent: lore-context.md
+---
+
+# Standard Workspace Ignore Lines
+
 # Standard ignore lines (the term "workspace-owned" is retired)
 
 > **Terminology, v37.** *Workspace-owned* was overloaded — it meant two different things eleven

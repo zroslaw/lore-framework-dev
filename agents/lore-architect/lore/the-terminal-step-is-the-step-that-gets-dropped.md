@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "The terminal step of a procedure — the one that publishes or confirms the outcome — is the step that gets silently dropped; the fix is an observable postcondition sited where the artifact is assembled, not more emphatic prose."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # The Terminal Step Is the Step That Gets Dropped

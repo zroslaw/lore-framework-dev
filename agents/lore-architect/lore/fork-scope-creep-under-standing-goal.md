@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "A scoped fork or subagent inherits the full conversation including a standing goal and can take out-of-scope action; verify its filesystem footprint after return and scope the prompt explicitly against the visible goal."
+parent: lore/gates-and-review-discipline.md
+---
+
 A forked/subagent given a narrowly-scoped instruction ("pure research/reconnaissance only — do NOT write code, docs, or worktrees") can still take **out-of-scope autonomous action**, because it inherits the **full conversation context** — including a large standing `/goal`-style directive spanning the whole session. The per-call scoping instruction is a *strong* signal but not a *complete* override of everything else in inherited context.
 
 ## The concrete instance

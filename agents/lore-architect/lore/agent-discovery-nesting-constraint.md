@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "Agent discovery scans only direct subdirectories of cwd for lore-repo.md; nested agent repos are invisible to list/check/recall/sync/boot-by-name, so place new repos at the domain root unless the gap is a known temporary state."
+parent: lore-context.md
+---
+
+# Agent Discovery Does Not Walk Nested Directories
+
 **Agent discovery scans direct subdirectories of cwd for `lore-repo.md` — it does not walk nested directories.**
 
 Domain discovery (the procedure in `agent-boot.md` and the various skills below) only sees agent repos that sit as direct subdirectories of where Claude is invoked from. Nested agent repos are functional but invisible.

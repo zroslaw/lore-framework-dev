@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Measured 2026-07-28: agent-boot.md doubled (103→160 lines) in v31, the release that scripted boot; three causes, only one legitimate, and why the scar-tissue clauses can't be trimmed. Filed as a v32-tier item."
+parent: lore-context.md
+---
+
 # `agent-boot.md` Doubled in the Release That Scripted It
 
 Measured 2026-07-28, prompted by the user asking why boot is so big when it should be "run this,

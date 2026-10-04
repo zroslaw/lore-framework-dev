@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "For features touching 5+ framework files or needing sign-off, draft a design doc in workdir/ first: shared reasoning surface, implementation checklist, persistent rationale; skip for small obvious fixes."
+parent: lore-context.md
+---
+
+# Design Doc Before Implementing
+
 When implementing a significant framework feature, draft a design doc in `workdir/` *before* touching framework files.
 
 The doc serves three purposes:

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Before adding a command that writes where an existing one writes, enumerate what the neighbours promise about that location — docs, tests, findings catalog — and honour it by sharing the predicate, not reimplementing it."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A New Command Inherits the Promises Its Neighbours Already Published

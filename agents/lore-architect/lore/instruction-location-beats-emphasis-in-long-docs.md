@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Once a procedure doc is long enough that an executor pages it, an obligation's location decides whether it runs — three rewrites inside the doc changed nothing and relocation did; fractional step numbers are the same defect in miniature."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Instruction Location Beats Emphasis in Long Docs

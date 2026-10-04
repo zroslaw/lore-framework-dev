@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "On a re-review, inventory the lenses already spent before choosing new ones; life stage picks the lens family, a fix round adds a claim audit; and when novelty runs out, change the unit and the question rather than the rigor."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # On a Re-Review, Lens Novelty Is the Scarce Resource

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Fold a finished feature branch into local main by stashing unrelated WIP around the merge — never commit the WIP with the feature, never merge into the feature worktree."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # Fold feature worktree into local main via stash

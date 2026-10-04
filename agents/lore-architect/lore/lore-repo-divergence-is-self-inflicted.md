@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Lore agent repos go stale because three shipped framework paths manufacture divergence (local commit + advanced remote) and nothing reports it; the correct publish pattern already exists in the framework's two rarest operations."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # Lore Repo Divergence Is Self-Inflicted

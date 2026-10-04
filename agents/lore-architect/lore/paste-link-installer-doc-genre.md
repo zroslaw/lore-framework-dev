@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "A second onboarding-doc genre: written to the AI agent as the literal installer, pasted as a link; dual-audience opening, a numbered operator playbook, and the literal-execution failure mode that only a literal-executor review lens catches."
+parent: lore-context.md
+---
+
 # Paste-link installer doc — a second onboarding genre
 
 Onboarding docs used to have one genre: prose *pitching* a human reader (`onboarding-doc-narrative-pattern.md`). A second, distinct genre exists: a doc written *to the AI agent* as the literal installer, meant to be pasted as a link into any coding agent with "set this up for me." Shipped as `QUICKSTART.md` plus per-engine `INSTALL-<ENGINE>.md` in `lore-framework`.

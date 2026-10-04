@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "An optional step inserted before a mandatory procedure must continue on the pre-feature path at every exit; stop only when no baseline exists. State it once as an invariant and grep each stop clause against it."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # An Optional Step Must Fail Back to Baseline

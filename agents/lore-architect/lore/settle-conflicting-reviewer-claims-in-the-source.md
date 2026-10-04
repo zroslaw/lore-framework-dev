@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "When cold reviewers contradict each other on a fact, open the cited source and read the invariants that qualify the rule; record the check in the review log's Declined list so the claim is not re-raised."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Settle Conflicting Reviewer Claims in the Source

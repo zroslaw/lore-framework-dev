@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Repo-wide state belongs at git rev-parse --git-common-dir; per-checkout state at --absolute-git-dir. Getting it backwards hides state exactly where the worktree convention puts work."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # `--git-common-dir` for Repo-Wide State, `--absolute-git-dir` for Per-Checkout

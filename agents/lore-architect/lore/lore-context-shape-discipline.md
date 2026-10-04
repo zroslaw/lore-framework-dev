@@ -75,4 +75,12 @@ Same instinct, applied to SHAs: `release-commit-hash-from-tag.md`. Same reflex, 
 - **Periodic consolidation sibling:** the **lore housekeeping / consolidation "sleep" pass** (parked — `framework-improvements-backlog.md`) is the deep restructuring that strengthens hubs, consolidates over-granular topics, and removes stale ones — the *active* form of the "naming has no garbage-collector" gap (`naming-foundational-principles.md`).
 - First applied as a manual groom of the lore-architect's own `lore-context.md` the day it shipped (~6.4K → ~1.4K words).
 
+## Demote rule bodies into area hubs (2026-10-04 groom)
+
+The biggest single boot-cost win of the five-run grooming exercise: the "Operating Disciplines" rule bodies moved verbatim out of `lore-context.md` into four area hubs (`gates-and-review-discipline`, `executable-prose-and-design-checks`, `git-and-state-safety`, `user-feedback-working-style`), and ~85 flat root topics were re-parented under them. Measured: lore-context 9,865 → 7,306 tokens, boot map 7,981 → 3,938, boot footprint 29.9k → 23.3k (−22%), root children 139 → 57. Nothing was deleted.
+
+Why: the boot map lists the root's children, so root fan-out costs tokens every session, and rule bodies in lore-context duplicate topics that already own them. lore-context keeps one line plus a hub pointer per theme.
+
+How: when lore-context nears its 10K target or the root has more than 50 children, cluster by concern, create `type: area` hubs holding the moved standing rules and a members list, then change only `parent:` on members (filenames unchanged, so inbound links stay valid). Total corpus tokens rise slightly (hub overhead): it is a boot-cost gain, not a size gain. Measuring it: `grooming-workset-and-metrics.md`.
+
 See `process-merge.md` § Step 4, `conventions.md` § Lore Context, `naming-foundational-principles.md`, `framework-improvements-backlog.md`, `lore-search-pattern.md`.

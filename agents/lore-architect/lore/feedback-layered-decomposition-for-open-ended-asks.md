@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "2026-07-19: for broad, emotionally-loaded asks, decompose the bundled complaint into its separate axes and propose a dependency-ordered build sequence (leverage first, hierarchy last) rather than a menu."
+parent: lore/user-feedback-working-style.md
+---
+
 # Feedback — Layered, Dependency-Ordered Decomposition Wins on Open-Ended Asks
 
 Confirmed 2026-07-19. When the user opened with a broad, emotionally-loaded ask ("I want agents to be independent beings, stop micromanaging me, scale my performance"), the response that landed well was **not** a menu of options or an immediate implementation — it was decomposing "micromanagement" into three distinct axes (autonomy in depth / time / organization), naming which axis each of the user's specific complaints actually belonged to, and proposing a **dependency-ordered build sequence** (cheapest/highest-leverage step first, hierarchy/teams explicitly last because "a hierarchy of agents that each still need micromanaging just multiplies the pain"). User response: "I really like what you came up with. All these 6 points above make sense."

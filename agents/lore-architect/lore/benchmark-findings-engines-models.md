@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Evidence from the 2026-07-07 quality-benchmark v1 runs: lore utilization is robust to weak tiers, model–engine fit beats model tier, controls are stable, no confabulation, some norms are innate to strong models."
+parent: lore-context.md
+---
+
 # Empirical findings: lore utilization across engines and models
 
 From the v1 quality-benchmark runs (2026-07-07; mechanics and numbers in

@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "Proposed (not shipped): team lore needs a contribution lifecycle separate from local merge — branch, structural checks, semantic review, protected merge — scaled from solo direct publish to protected-branch review."
+parent: lore-context.md
+---
+
+# Team Lore Contribution Governance
+
 # Team Lore Contribution Governance
 
 Team-shared lore is instruction-bearing context for future agents, so its publication needs an explicit contribution lifecycle distinct from local reflection and merge. An agent can propose and structurally validate a change; writing it does not itself confer authority to publish it.

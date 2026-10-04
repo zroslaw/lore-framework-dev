@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "A green testbed run does not prove the fix is on disk: grep the persisted files, and re-read any file a parallel session may own immediately before editing (last-write-wins eats silent edits)."
+parent: lore-context.md
+---
+
 # Canonicalize Testbed Fixes — Verify What's Actually Persisted
 
 When a fix is developed in a **separate (testbed) session** — a throwaway run, a sibling Claude session, a manual experiment — **verify what actually landed on disk before declaring it done.** In-session/ephemeral fixes can produce a green run without ever being persisted, so a fresh invocation re-fails.

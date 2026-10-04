@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "User decision 2026-08-22: the lifecycle suite and the TriLens loop are on-request, not default gates; the ship record still names each one's disposition."
-parent: lore-context.md
+parent: lore/user-feedback-working-style.md
 ---
 
 # Pre-Ship Gates Are On Request

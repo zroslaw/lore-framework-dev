@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A natural-syntax delimiter collides with content — most sharply with the documentation of the delimiter itself; check what happens when your docs are treated as data."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Self-Documenting Payloads Collide With Natural-Syntax Delimiters

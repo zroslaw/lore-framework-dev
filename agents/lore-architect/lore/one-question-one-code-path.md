@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "When a diagnostic and its remedy answer the same predicate, derive both from one code path — a checker that drifts from the doer routes users to a fix that can never succeed."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Two Functions Answering One Question Must Derive From One Code Path

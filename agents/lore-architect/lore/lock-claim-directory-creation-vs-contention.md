@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A lock-claim primitive must create its lock's parent directory before the exclusive create, and must return a tri-state result — claimed/in-progress/error — never collapse 'couldn't create the lock' into 'contended.'"
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # Lock-Claim: Directory Creation vs. Contention

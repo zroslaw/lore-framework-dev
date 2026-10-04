@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Technical building blocks from the 2026-04-26 brainstorm for background lore agents on macOS: tmux persistence, iTerm2 Python API, Claude Code hooks as signal, escape-sequence status, notifications, switchboard daemon sketch."
+parent: lore-context.md
+---
+
 # Autonomous Agents — Technical Substrate
 
 Concrete building blocks identified during the 2026-04-26 brainstorm for running lore agents as autonomous background processes on macOS. Companion to `autonomous-agents-vision.md`.

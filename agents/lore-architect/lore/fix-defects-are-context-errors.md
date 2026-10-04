@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Defects introduced by fix rounds are context errors, not logic errors, and concentrate in the prose describing the fix; the second shape is redundancy added while fixing. The round cap guarantees the last round's fixes ship unreviewed."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Fix Defects Are Context Errors, and the Round Cap Guarantees They Ship

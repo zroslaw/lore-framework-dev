@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Testing-strategy docs need a discoverable chain from the lore-framework-dev root (README → tests/README → strategy/reporting → sources); a doc only deep under tests/ is invisible to release reviewers."
+parent: lore-context.md
+---
+
 # Testing docs root discoverability
 
 Testing strategy docs need a discoverable chain from the root of

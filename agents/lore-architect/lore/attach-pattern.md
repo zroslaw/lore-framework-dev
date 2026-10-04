@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "/lr:attach loads another agent as a guest into the host session for sustained multi-domain work: host-wins on conflicts, no detach, conversation-only state (not compaction-safe), and the boundary versus one-shot consult."
+parent: lore-context.md
+---
+
+# Attach Pattern
+
 `/lr:attach` loads another lore agent into the currently booted host session for sustained multi-domain work. The host remains the sole executor; the guest's role and lore-context join the host's working context. Multi-personality, single executor.
 
 Introduced in framework v4 alongside `/lr:consult`. See `consult-pattern.md` for the one-shot sibling.

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "The judgement layer for multi-lens adversarial review fan-out: lens choice per ship and per round, brief shape, triage, convergence profiles, stall handling, and when not to fan out."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 When shipping a substantive change (script, skill, doc set), run **three parallel reviewers with mutually-exclusive lenses**. Different from `sonnet-subagent-review-pattern.md`, which is single-lens role-as-perspective; this is multi-lens adversarial fan-out specifically for shipped artifacts.

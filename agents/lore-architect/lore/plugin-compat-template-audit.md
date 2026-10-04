@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "Plugin-compatibility is a property of emitted artifacts: when going plugin-first, audit every template that emits file content (the v5 leak of sibling-path boot commands), keep frozen migration templates verbatim, and back it with a check."
+parent: lore-context.md
+---
+
+# Plugin-Compat Template Audit
+
 When the framework migrates from "sibling-path form" (`lore-framework/docs/...`) to "plugin form" (`${CLAUDE_PLUGIN_ROOT}/docs/...`), it's not enough to fix the runtime code that reads files. Every **template** that emits file content must also be audited — otherwise the generator keeps producing pre-plugin artifacts indefinitely.
 
 ## The v5 leak

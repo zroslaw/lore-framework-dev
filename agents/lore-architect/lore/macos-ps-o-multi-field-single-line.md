@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "On macOS, ps -p <pid> -o a= -o b= prints both fields on one line, so Keeper's process-identity anchor embedded the full command line; issue one ps call per field. Found only on a fourth, unsandboxed pass."
+parent: lore/git-and-state-safety.md
+---
+
 # `ps -o` with multiple fields prints one line, not one line per field (macOS)
 
 `ps -p <pid> -o field1= -o field2=` prints BOTH fields on one line on macOS (confirmed on Darwin

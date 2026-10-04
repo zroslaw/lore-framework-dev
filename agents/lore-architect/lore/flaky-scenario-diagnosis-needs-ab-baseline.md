@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Thin pointer: diagnosing an intermittent engine-run failure needs a same-size sample against the pre-change baseline before blaming the candidate; the full lesson is in graduated-verification-confidence.md."
+parent: lore/gates-and-review-discipline.md
+---
+
 # Diagnosing Flaky-Scenario Regressions Needs an A/B Baseline
 
 Thin pointer — the full lesson lives in `graduated-verification-confidence.md` § Addendum: diagnosing

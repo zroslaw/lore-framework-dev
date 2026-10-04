@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A relative git ref encodes a position, and a procedure with branching intermediate steps has no single position — record an absolute sha up front, guard the reset with is-ancestor, and never reset across a merge commit."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # A Relative Git Ref Silently Retargets When the Procedure Moves HEAD

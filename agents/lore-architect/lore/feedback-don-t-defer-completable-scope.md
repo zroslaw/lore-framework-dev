@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Do bounded, mechanical sweeps in the current ship instead of backlogging them, and don't merely offer a clearly-correct bounded completion — just do it; ask only at a genuine fork."
+parent: lore/user-feedback-working-style.md
+---
+
 **Rule.** When a sweep or polish task is bounded and mechanical, do it now. Don't put it in the backlog as "vN.1 follow-up" if the work fits in the current session's scope.
 
 ## The corrective episode

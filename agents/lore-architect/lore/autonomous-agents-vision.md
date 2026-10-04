@@ -1,6 +1,15 @@
+---
+lore: 1
+type: topic
+summary: "The 2026-04-26 vision of always-on background lore agents that raise for input only when needed; realized as Lore Beings (BETA v28), with the open-question dispositions and sibling directions."
+parent: lore-context.md
+---
+
 # Autonomous Lore Agents — Vision
 
-Active design exploration (design settled 2026-07-19 as **Lore Beings** — see `lore-beings-design.md`; nothing shipped yet). User-articulated vision (2026-04-26): lore agents should evolve into **autonomous background agents**. The shape:
+# Autonomous Lore Agents — Vision
+
+Design settled 2026-07-19 as **Lore Beings** (`lore-beings-design.md`) and **shipped as BETA in v28** with the `/lr:being` surface; the persistent `launchd` Keeper is live on this machine. User-articulated vision (2026-04-26): lore agents should evolve into **autonomous background agents**. The shape:
 
 - Agents run continuously in the background, not only when the user is interacting with them.
 - The user kicks off an agent with a task; the agent works on it independently across time.
@@ -23,7 +32,7 @@ This is a **major architectural direction**, not a minor feature. It implies:
 
 Active major direction. Substrate findings (tools, APIs, protocols) captured separately in `autonomous-agents-substrate.md`.
 
-**Design settled (2026-07-19): Lore Beings.** The beings shape of this vision — a being (`being.md` descriptor) with existential tasks, run by the deterministic **Being Keeper** daemon — was agreed in a design dialogue and is ready for an MVP build (first being: the Chronicler). Anchor: `lore-beings-design.md`; full design: `workdir/draft-lore-beings.md`. Nothing shipped yet.
+**Design settled (2026-07-19): Lore Beings.** The beings shape of this vision — a being (`being.md` descriptor) with existential tasks, run by the deterministic **Being Keeper** daemon — was agreed in a design dialogue and then built (first being: the Chronicler). Anchor: `lore-beings-design.md`; full design: `workdir/draft-lore-beings.md`.
 
 **Concrete first step taken (v10):** `/lr:spawn-teammate` uses Claude Code's Agent Teams feature as the initial multi-agent substrate. The user framing: "I'll use that command for some time and check how it fits our needs." The custom tmux/iTerm2 substrate is parked but remains valid if Agent Teams proves insufficient. See `spawn-teammate-feature.md` and `autonomous-agents-substrate.md`.
 

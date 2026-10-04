@@ -75,4 +75,4 @@ design review is not implementation review.
   kept for history.
 - [findings catalog / implementation record](../workdir/v45-check-implementation.md) and
   [approved design](../workdir/draft-lr-check-front-door.md) — detailed scope and evidence.
-- [versioning-release-types.md](versioning-release-types.md) — the v45 ship record.
+- [versioning-history-v37-v47.md](versioning-history-v37-v47.md) — the v45 ship record.

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "User working style in design dialogues: queue decisions in conversation, treat 'just acknowledge it' as do-not-act, and touch drafts only on an explicit go."
-parent: lore-context.md
+parent: lore/user-feedback-working-style.md
 ---
 
 # Feedback — In Design Dialogues, Write the Draft Only When the User Says So

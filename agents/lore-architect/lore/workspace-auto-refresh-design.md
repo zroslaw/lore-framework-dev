@@ -11,7 +11,7 @@ Full doc: `workdir/draft-workspace-auto-refresh.md` (committed `f09ed9a`, `lore-
 Designed 2026-08-23 and **shipped in v42** (2026-08-23, cache-affecting). The decisions below
 survived implementation; keep them as the record of *why* the leg looks the way it does.
 
-The gap it closes: `/lr:workspace-status` already diagnoses workspace drift and names each fix; what
+The gap it closes: `/lr:workspace-status` (since v45 the workspace layer of `/lr:check`) already diagnoses workspace drift and names each fix; what
 was missing is that *it never ran on its own*. This is
 [freshness-contracts-at-session-boundaries.md](freshness-contracts-at-session-boundaries.md) applied
 one layer out — from the agent repo to the whole workspace.
@@ -40,7 +40,7 @@ and reports only what blocks the user.
 - **Dirty child repos are reported, not guarded.** See
   [guarding-on-a-normal-state-excludes-what-matters-most.md](guarding-on-a-normal-state-excludes-what-matters-most.md).
 - **`findings` reuses `workspace_scan`'s `{id, severity, data}` verbatim**, filtered to `warn`;
-  `docs/workspace-status.md` keeps ownership of message and fix prose
+  `docs/findings-catalog.md` (v42: `docs/workspace-status.md`) keeps ownership of message and fix prose
   ([script-emits-data-doc-owns-the-words.md](script-emits-data-doc-owns-the-words.md)).
 - **`pulled` derives from `git rev-parse HEAD` snapshots**, never from parsing `workspace-pull`'s
   coloured terminal output.
@@ -70,7 +70,7 @@ Two more surfaced during implementation itself, not while drafting the design:
 
 ## Deliberately out of scope
 
-A workspace cleanup command. `/lr:workspace-status` already diagnoses and names fixes.
+A workspace cleanup command. `/lr:check` (then `/lr:workspace-status`) already diagnoses and names fixes.
 
 ## See Also
 

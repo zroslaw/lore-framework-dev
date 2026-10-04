@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Once a check compares bytes, template whitespace is contract: a wrapped bootstrap block was copied verbatim, so every upgrade rewrote a correct shortcut; unwrap the template, state the rule, add the check and a test."
+parent: lore/executable-prose-and-design-checks.md
+---
+
 # Template Whitespace Becomes Contract Once a Check Is Byte-Exact
 
 The registered-shortcut bootstrap lives in each engine profile as a fenced markdown block. It was

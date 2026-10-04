@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Validated 2026-07-28: Cursor's Task tool takes a free-text prompt plus subagent_type, so per-invocation merge and trilens briefs need no predefined agent files; validates brief shape only, not end-to-end fan-out."
+parent: lore/cursor-engine-capabilities.md
+---
+
 # Cursor `Task` Free-Text Briefs — Validated
 
 **When:** 2026-07-28, live Cursor IDE session (lore-architect boot).

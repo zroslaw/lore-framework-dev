@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Before fixing a rendered artifact, ask how many independent sources compose the display and confirm each attribute's source separately — a fix that should correct several attributes at once usually assumes a shared source that isn't there."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # When One UI Row Is Wrong, Ask How Many Sources Feed It

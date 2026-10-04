@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A user waiver of a release gate must be written into the ship record as 'closed by waiver, not by execution' — never let a waived gate silently look like a passed one."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A Gate Waiver Is Itself a Record

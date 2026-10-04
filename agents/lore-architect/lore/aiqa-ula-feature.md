@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "AIQA/ULA, the first lr-dev (DF) module, shipped BETA in v16: unit-level analysis in five ordered steps writing per-file bugs/scenarios/gap YAML with provenance headers under the <repo>-df backbone; DF rename, validation, layout."
+parent: lore-context.md
+---
+
 # AIQA / ULA — First In-Plugin lr-dev Module
 
 **AIQA** = umbrella for AI-based quality assurance, organized by testing *level*. First level shipped: **ULA = Unit-Level Analysis**. Future levels: integration (ILA), e2e, feature/flow. The module is a **BETA** in `lore-framework` (built on local commit `2f1e788`, renamed dev→df, then **shipped in v16**, 2026-06-08, manifests `1.16.0`). Still BETA — schemas may change without migration.

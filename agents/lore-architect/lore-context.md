@@ -162,7 +162,7 @@ session-context boundary (boot, attach, pre-merge); `/lr:pull-lore` is the manua
 (`summary` ≤240 chars). Every **new** Lore file carries v1 frontmatter; legacy files migrate lazily
 via merge or explicitly via **`/lr:groom [scope] [--dry-run] [--all]`**, whose `--all` is
 single-session and non-resumable, so groom a large corpus per subtree
-(`lore-topic-format.md`, `lore-context-shape-discipline.md`).
+(`lore-topic-format.md`, `lore-context-shape-discipline.md`, `grooming-workset-and-metrics.md`).
 
 **The engine profile is observed, not believed.** Selection is `lr-core`'s deterministic
 `detect_engine` (ordered: `--engine` override → `CLAUDE_PLUGIN_ROOT` → process ancestry matching the
@@ -204,6 +204,8 @@ any engine can continue interrupted work (`takeover-feature.md`, `cursor-takeove
 User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone): **reflect**
 (inline, host-first, per agent — needs session context) → **merge** (parallel subagents, one per
 agent booted as itself, file-driven) → **summarize** → **commit+push** (one commit per touched repo).
+Before Phase 1, finalize revises its participants (v47, shipped): best-fit host, uncapped
+additions, one fail-closed confidentiality gate (`finalize-participant-revision-design.md`).
 See `finalization-process.md`, `finalize.md`, `merge-in-booted-subagents.md`,
 `reflect-merge-execution-asymmetry.md`, `push-conflict-resolution.md`.
 
@@ -266,103 +268,9 @@ How I work at version ships and high-stakes lore edits; each rule's body lives i
 - **On VERSION bumps:** backfill `versioning-release-types.md`, add the cache-clear footer if
   cache-affecting, bump all four manifests to `1.<VERSION>.0`, promote any newly-named principle to
   its own topic. Full curation disciplines: `role.md`.
-- **Gates: cheapest-first order, both expensive ones on request** (`role.md` carries the full rule).
-  deterministic tests → `/lr:check` → dogfood → (on request) lifecycle suite → (on request) TriLens;
-  TriLens last because dogfooding produces the evidence its reviewers read. The three instruments
-  have three different blind spots: running a procedure once finds what nine reading lenses may not
-  (the fidelity axis is **engine**, not model tier), while **review and a deterministic suite are
-  orthogonal, not redundant** — none of v46's five blockers was reachable by the suite written
-  alongside the code, because they hid in the intersections a suite partitions away. After an
-  ungated ship, say plainly what remains **untested**; **when a gate is waived and the user still
-  asks "is this safe to ship?", run the blast-radius audit and record it beside the waiver** — it
-  bounds what the unrun gate could have caught and its read-every-shared-code-edit step is the abort
-  condition. **Cheapest-first prices compute, never the user** — a free probe against live OS state
-  can charge the human six password prompts; validate on a copy. See
-  `feedback-pre-ship-gates-on-request.md`,
-  `defects-hide-in-the-intersections-a-suite-partitions.md`,
-  `blast-radius-audit-when-a-gate-is-waived.md`, `gate-waiver-is-a-record.md`,
-  `lifecycle-testing-harness.md`, `execution-testing-catches-blind-ambiguity.md`,
-  `haiku-ambiguity-detector.md`, `live-system-state-validate-on-a-copy-first.md`.
-- **When a procedure doesn't execute, change structure — not wording.** Sharpest measured case:
-  **required literal output is the first thing an executor drops**, against prose already at maximum
-  emphasis. Three shapes immune to emphasis — the **terminal step** that publishes an outcome (fix:
-  an observable postcondition where the artifact is assembled); an obligation's **location** in a doc
-  long enough to be paged; anything the model can **copy instead of compute**. See
-  `required-literal-output-is-what-models-drop.md`,
-  `the-terminal-step-is-the-step-that-gets-dropped.md`,
-  `instruction-location-beats-emphasis-in-long-docs.md`, `models-copy-what-they-should-compute.md`.
-- **When TriLens is requested, run it via `/lr:trilens-loop`**, not by hand — the skill enforces what
-  a hand-run pass forgets and routes the spawn through the engine binding. Lens *choice* and triage
-  stay mine: brief the **goal, not the rationale**; vary the lens *kind* by round; inventory spent
-  lenses before a re-review, and spend the expensive ones (operator recovery, new state as state)
-  **early**. **Convergent findings from independent lenses are strong evidence; near-total divergence
-  means the lenses were well chosen.** **Brief one reviewer per round on a lens that reads
-  *outward*** — system fit, neighbouring contracts, release completeness: a new command inherits
-  promises its neighbours published, and no test inside the new module can see the collision
-  (`a-new-command-inherits-its-neighbours-published-promises.md`). **Ask reviewers to name the
-  categories they ruled out clean.** **When lenses are spent and the loop still stalls, change the
-  *unit* and the *question* — a shippable subset, the call graph, the installed population — not the
-  rigor.** See `trilens-loop-feature.md`,
-  `parallel-reviewer-fanout-pattern.md`,
-  `lens-novelty-is-the-scarce-resource-on-re-review.md`, `sonnet-subagent-review-pattern.md`.
-- **A gate result belongs to a specific artifact state.** **`git status` on every repo is the first
-  command of a release review**, ahead of the diff and the notes: a dirty tree means the review's
-  subject does not exist yet, and a commit leaves a SHA where a dirty file leaves nothing
-  (`a-release-review-starts-with-git-status.md`). Freeze
-  before spawning — commit, name the SHA in the brief, tag only after the loop ends; **collect all
-  reports, then apply**. An edit landed after the gates pass is ungated: re-run the affected gate or
-  revert and file a follow-up. **A demo of a write operation is not evidence until it runs the next
-  ordinary read** — publish then pull, commit then boot
-  (`a-demo-must-test-the-state-it-leaves-behind.md`). An environment failure mid-run, or the engine
-  resolving a *different* plugin tree, makes results **uninterpretable** rather than red. See
-  `post-convergence-edits-need-their-own-gate.md`,
-  `macos-documents-permission-loss-mid-session.md`.
-- **Three gate dispositions — passed, waived, did not run** — and a ship record must name which
-  applies, **in the release notes before lore**: an accuracy audit passes cleanly over an absent
-  section, so audit **presence first, then accuracy**, and a **countable claim about the whole tree**
-  earns a check before the notes assert it. A waiver is itself a record; a measurement names its
-  environment. A reviewer that dies surfaces as *idle*, indistinguishable from "found nothing", so
-  the check is "did it report?", never "did it complain?". When the round cap ends a
-  loop without a clean round, **classify the findings by origin first**: a stable core with a
-  churning periphery has outgrown prose review, so tier it — one deep unconstrained cold reviewer,
-  not a fourth round. **The cut is itself a change**: review each tier as the subset it ships as, and
-  ship a *detection* tier first only if later tiers preserve what it measures
-  (`non-convergence-diagnose-before-reviewing-again.md`,
-  `tiering-a-reviewed-spec-creates-unreviewed-seams.md`,
-  `a-detection-tier-must-outlive-the-cure-it-measures.md`). **Reserve `lens`, `round`, and `converged` for
-  `/lr:trilens-loop`** — borrowed gate vocabulary corrupts the disposition record in the scrollback,
-  where no check can see it (`dont-borrow-gate-vocabulary-for-non-gates.md`). Expect fix-round
-  findings in the **prose**: context errors, usually one rule stated in two places drifting apart —
-  and expect the fix's **regression test to miss the branch the fix added**, because it tests the
-  report that prompted it rather than the states the fix made newly reachable
-  (`a-fix-s-regression-test-misses-the-branch-the-fix-added.md`). See
-  `a-gate-that-died-is-not-a-gate.md`, `gate-waiver-is-a-record.md`,
-  `measurement-records-name-their-environment.md`, `fix-defects-are-context-errors.md`,
-  `a-fix-is-a-change-and-changes-need-review.md`.
-- **A gate cannot be a model self-report** — never implement a gate in the medium it gates. Ask what
-  evidence it rests on and whether the thing under test could have produced it; coverage parity is
-  not evidence parity. Sibling: **a binding must not be selected by the thing it binds**. Everyday
-  form: a green suite written by the fix's author is a self-report until each new test is shown **red
-  against the previous tag and green against HEAD**, and a **string-containment test over prose**
-  proves only that a doc still says what its author wrote. See
-  `a-gate-cannot-be-a-model-self-report.md`,
-  `prove-a-new-test-red-against-the-previous-tag.md`.
-- **A failure list is a hypothesis until someone reads the transcripts.** An assertion names what was
-  observed, never why; re-triage from stored logs cheapest-first — the module's verdict history in
-  `results/*/summary.json`, then **durations before assertions** (seconds where minutes are normal =
-  the engine never ran) — and capture the runner's exit code **unpiped**, or you read the pipeline's
-  status and manufacture a false green. **A red test may be asserting something true about the
-  machine**: establish which side is wrong before turning it green, and give danger-guarding
-  assertions the strongest presumption of correctness.
-  See `triage-a-red-module-against-its-own-history.md`,
-  `lifecycle-harness-exit-code-is-not-a-verdict.md`, `a-red-test-may-be-asserting-a-true-fact.md`,
-  `v31-lifecycle-rerun-partial-green-2026-07-27.md`, `transcript-vs-final-message-assertions.md`.
-- **Sandboxed-review blind spot** — a review environment that structurally blocks a capability can
-  green-light code whose primary path never ran (`lore-beings-mvp-takeover-review.md`).
-- **Decide where the guardrail lives before writing the topic** — lore is retrieved when a task cues
-  it, and a one-off command cues nothing. Name the point-of-use site (script check, exact command,
-  test) as part of the fix, and prefer a deterministic check over a human prep step
-  (`point-of-use-guardrails-beat-recorded-lore.md`).
+- **Gates, review and ship records** — cheapest-first gates (deterministic tests → `/lr:check` → dogfood → lifecycle suite and TriLens only on request); every gate is named *passed*, *waived* or *did not run* in the release notes before lore; a gate result belongs to one artifact state; a gate is never a model self-report; a failure list is a hypothesis until the transcripts are read. Hub: `gates-and-review-discipline.md`.
+- **Executable prose and design checks** — when a procedure doesn't execute, change structure, not wording (required literal output, the terminal step, location, copy-vs-compute); decide where the guardrail lives; design-time checks on guards, intervals and optional steps. Hub: `executable-prose-and-design-checks.md`.
+- **Git and state safety in automatic paths** — `--ff-only` is file-granular; never autostash, stash, force or reset; state files are hints, not verdicts; commit before fetch. Hub: `git-and-state-safety.md`.
 - **Verify before asserting** — check state directly before "fixing" a suspected bug, and verify
   *which* bug. **A negative grep proves the pattern absent, never the capability absent.** Read the
   lore rule a finding rests on before calling it moot; fetch volatile external facts live with a
@@ -375,35 +283,6 @@ How I work at version ships and high-stakes lore edits; each rule's body lives i
   `a-displayed-attribute-can-have-more-than-one-source.md`,
   `check-own-lore-before-dismissing-a-finding.md`, `fetch-volatile-facts-live-not-memory.md`,
   `fork-scope-creep-under-standing-goal.md`.
-- **Design-time checks:** preserve validation when widening sources; derive diagnostics and remedies
-  from the same predicate; use tri-state lock claims; make file durability structural; update the
-  approval surface when adding writes. **Price an interval constant against the real event cadence
-  and the knob it may silently override** (`a-rate-floor-is-wrong-in-both-directions.md`). **An
-  optional step's every exit continues on the pre-feature path**
-  (`an-optional-step-must-fail-back-to-baseline.md`).
-  The underlying patterns route through
-  `system-design-principles.md`, `one-question-one-code-path.md`,
-  `a-reported-error-is-not-proof-the-file-survived.md`, and
-  `adding-a-write-means-updating-the-approval-gate.md`.
-- **Git safety in automatic paths.** `git pull --ff-only` is **file-granular** — only divergence
-  (the permanent one), a modified tracked file an incoming commit also changes, or an untracked
-  collision block it; unrelated dirty and staged paths fast-forward fine
-  (`git-ff-only-is-file-granular.md`). **Never `--autostash`**, `stash`, `--force` or `reset --hard`
-  in an automatic path: autostash on a content collision exits 0 and writes conflict markers into the
-  file, silently corrupting lore (`dont-autostash-it-reports-success-while-corrupting.md`). Repo-wide
-  state goes at `--git-common-dir`, per-checkout at `--absolute-git-dir`
-  (`git-common-dir-for-repo-wide-state.md`); a fault-recording state file is a **hint** to revalidate
-  and self-clear, never sole evidence — nor is a notice printed before acting a record that the
-  action happened (`a-state-file-is-a-hint-not-a-verdict.md`). **When a tool
-  both saves and integrates, commit before you fetch** — every merge is then commit-to-commit, abort
-  restores an exact prior state, and a conflict can be left *in progress* rather than defensively
-  aborted (`commit-before-fetch-makes-a-merge-recoverable.md`). **A deny-list must exempt the
-  operations that reduce what it guards against** — for a commit filter, every deletion, keyed on the
-  operation and not on one encoding of it, or the guard blocks removal of the very file it objects to
-  (`a-guard-must-not-block-its-own-remedy.md`). **`git -C <path>` need not act on `<path>`**: it
-  escapes up to an enclosing repo, and follows `core.worktree` to an entirely different directory —
-  one `rev-parse --show-toplevel` vs `realpath` comparison catches both
-  (`git-dash-c-needs-toplevel-guard.md`).
 - **Curation meta-rules:** name foundational principles as their own topics; single canonical source
   (pointer, don't restate — and when *changing* a rule, enumerate every site that *states* it, not
   only every site that *implements* it, including the **tests that pin the old contract** and the
@@ -416,16 +295,7 @@ How I work at version ships and high-stakes lore edits; each rule's body lives i
   `naming-foundational-principles.md`,
   `single-canonical-source-discipline.md`, `reuse-existing-correlation-signal.md`,
   `feedback-don-t-defer-completable-scope.md`, `graduated-verification-confidence.md`.
-- **User-feedback working style:** state a recommendation and its reason before asking a decision
-  the user must own. Structure is not brevity; a short verdict for a measurement or a settled
-  decision. Confirm before durable mid-session lore writes, draft designs only when asked, act
-  promptly after repeated pushback; "acknowledge" means do not act. Minimalism governs design, in
-  every review round; keep safety guards small and fail-closed; a home agent is the best role fit;
-  a delegated design cycle asks nothing and ends in drafts. Reviews use Composer 2.5 (unavailable
-  on Claude Code). Continuing Codex-orchestrated polish inside Cursor uses parallel Composer 2.5
-  `Task` subagents — see `cursor-framework-polish-orchestration.md`. Route through the `feedback-*.md`
-  topics (start with `feedback-commit-to-a-recommendation.md`, `feedback-mvp-minimalism.md`,
-  `feedback-draft-only-when-user-triggers.md`).
+- **User-feedback working style:** recommend before asking, draft only when triggered, "acknowledge" means do not act, minimalism, small fail-closed guards. Hub: `user-feedback-working-style.md`.
 
 ## Key Constraints
 
@@ -485,14 +355,6 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
   `multi-engine-portability-direction.md`; see also `docs-engines-convention.md`,
   `cursor-dual-skill-tree-one-repo.md`.
 
-- **Finalize participant revision** — **shipped in v47**: `finalize.md`
-  pre-Phase-1 participant revision via boot/attach — best-fit host, uncapped additions,
-  confidentiality gate after selection and before apply (outcome `skipped` when it fires),
-  in-place guest promotion without re-attach, and `revised` only after a successful apply
-  (`finalize-participant-revision-design.md`). Lifecycle harness:
-  `FinalizeParticipantRevisionScenarios` (`test_14`/`test_15`) in `test_finalize.py` — see
-  `lifecycle-testing-harness.md`.
-
 - **Session-worktree lore-sync hardening** — **DESIGN UNFINISHED, unversioned** (it did *not* ship as
   v46, which went to `/lr:workspace-sync`; the "v46" label is historical): Lore-owned session
   worktrees. **It prevents the divergence `workspace-sync` repairs — complements, not alternatives.**
@@ -528,9 +390,8 @@ Workspace holds **`lore-framework/`**, **`lore-framework-dev/`**, **`lore-agents
 **`lore-chronicler/`** (Being; on disk, undeclared); meta-repo `AGENTS.md` lists them after
 `/lr:workspace-init`, which converges (no `--refresh` flag).
 
-**Recent ships have gone out without a real-engine gate**, so the fixes they landed are themselves
-unreviewed; per-ship dispositions and what stays untested live in `versioning-release-types.md`
-(establish the current version from the repo, per § Versioning).
+Recent ships went out without a real-engine gate; per-ship dispositions and what stays untested
+live in `versioning-release-types.md`.
 
 My Lore corpus is still largely legacy; v1 adoption is lazy via merge or explicit via `/lr:groom`.
 Unrelated uncommitted WIP may sit on these checkouts: never sweep it into lore-finalize commits, and

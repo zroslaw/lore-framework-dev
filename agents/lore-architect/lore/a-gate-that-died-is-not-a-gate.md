@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A gate that was launched and never reported is neither a pass nor a waiver — record it as 'did not run', and retry only when the cause of death has actually been removed."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A Gate That Died Is Not a Gate
@@ -20,7 +20,7 @@ Extends [gate-waiver-is-a-record.md](gate-waiver-is-a-record.md) with a third di
 `/lr:trilens-loop` round 1 ran cleanly: three independent lenses, 11 findings, all applied, none
 declined. Round 2 was launched with three fresh reviewers, and **all three died before reporting**
 when the account hit its monthly spend limit. The honest ship record is "one clean review round,
-not two" — which is what `versioning-release-types.md`'s v37 entry says.
+not two" — which is what the v37 entry in `versioning-history-v37-v47.md` says.
 
 The loop's own stopping rules already cover this ("a round where a lens did not actually report is
 not a clean round for that lens… never bank a silent round as clean"). Living it added two things
@@ -72,7 +72,7 @@ The retry of a never-reported lens **does not count against the three-round ceil
 stopping rule), which is what makes "never bank a silent round" affordable rather than a round tax.
 And the record must still say the first attempt died and was re-run, and why the re-run was
 legitimate — a ship record showing three clean rounds while hiding a dead one is the exact failure
-this rule family exists to prevent. The v38 entry in `versioning-release-types.md` is the worked
+this rule family exists to prevent. The v38 entry in `versioning-history-v37-v47.md` is the worked
 example.
 
 ## See Also

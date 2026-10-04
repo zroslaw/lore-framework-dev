@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Decision 2026-07-28: Cursor merge runs through one write-capable Task per active agent; recall, consult, attach reconcile and conflict resolution stay serial host-side; a missing Task stops and reports."
+parent: lore/cursor-engine-capabilities.md
+---
+
 # Cursor Merge via `Task` (Not Host-Side)
 
 **Decision (2026-07-28):** `docs/engines/cursor.md` runs **merge** through Cursor `Task`

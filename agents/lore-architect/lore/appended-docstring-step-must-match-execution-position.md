@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "In a cmd_preflight-shaped docstring, a new step's correctly-appended number doesn't guarantee its textual position matches real execution order — renumber to match the code path."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Appended Docstring Step Must Match Execution Position

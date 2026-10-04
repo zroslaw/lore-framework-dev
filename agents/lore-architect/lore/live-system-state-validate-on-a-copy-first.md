@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A probe against live OS state can cost the user password prompts — an axis cheapest-first gate ordering never prices; rank mechanisms by user cost, validate on a copy, prefer ones touching only a file attribute."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # On Live macOS System State, Validate on a Copy and Prefer File-Attribute Mechanisms

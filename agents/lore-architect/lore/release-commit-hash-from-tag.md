@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Derive release commit SHAs from the lr--v1.<N>.0 tag, never from scrollback; note the v32-v35 tag gap where recovery must use versioning-release-types.md hashes instead."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # Record release commit hashes from the tag, not from memory of a recent SHA

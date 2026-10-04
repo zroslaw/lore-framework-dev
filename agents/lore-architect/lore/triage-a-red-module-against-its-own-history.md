@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Before blaming a change for a red lifecycle module, read that module's verdicts across the retained results/*/summary.json history — pre-existing flakes separate from real regressions in seconds, ahead of any transcript reading."
-parent: lore-context.md
+parent: lore/lifecycle-testing-harness.md
 ---
 
 # Triage a Red Module Against Its Own Result History

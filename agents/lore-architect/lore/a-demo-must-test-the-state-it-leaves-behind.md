@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A demo of a write operation must end by running the next read — publish then pull, commit then boot; the failure a one-shot demo cannot see is the one where the operation succeeds and leaves the system unable to repeat it."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A Demo Must Test the State It Leaves Behind

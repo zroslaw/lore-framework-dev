@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Quality-harness lessons from real failures: a broken judge invalidates the score instead of failing it, one slow run must not kill the suite, batch by billing quota, sanitize NULs at every capture boundary, and a fixed judging artifact."
+parent: lore-context.md
+---
+
 # Quality-harness operational lessons (learned from real failures)
 
 Failures during the 2026-07-06/07/09 benchmark runs, each now encoded in `tests/quality/`;

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Resolve symlinks when comparing two paths for identity; compare logical components when validating that a caller typed a contract-shaped path — using the wrong one produces a false mismatch in one direction and a false refusal in the other."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # Realpath for Identity, Logical Components for Contract Shape

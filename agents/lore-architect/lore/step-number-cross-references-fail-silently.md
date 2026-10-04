@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Renumbering a Step N heading breaks every doc citing that number silently, and the stale reference still reads plausibly; grep for citations first, cite sections by name, and never number a heading that runs before the numbered steps."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # A cross-reference by step number survives a rename and points at the wrong thing

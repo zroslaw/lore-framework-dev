@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Worktree lifecycle (create → retire), a Git-derived audit instead of new metadata, and the `git -C <repo> worktree add` relative-path trap."
+parent: lore-context.md
+---
+
 # Worktree Lifecycle and Audit
 
 The workspace worktree convention needs a lifecycle as well as a location rule: otherwise concurrent work leaves abandoned dirty trees, branches, and files.

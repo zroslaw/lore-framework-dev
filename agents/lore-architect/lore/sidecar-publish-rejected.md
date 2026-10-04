@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Rejected design: publishing lore by building a commit on origin/<branch> with git plumbing and never moving local HEAD — it works, and it plants a fresh permanent pull blocker on every publish."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # Sidecar Publish — Rejected, Do Not Re-Propose

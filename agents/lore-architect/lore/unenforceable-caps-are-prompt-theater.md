@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "A limit belongs in a substrate contract only if the substrate can enforce it; otherwise label it advisory or replace it with the nearest enforceable bound (Lore Beings: daily spawn gate plus wall-clock kill, not a mid-flight USD cap)."
+parent: lore-context.md
+---
+
 # Unenforceable Caps Are Prompt-Theater
 
 **A limit belongs in a substrate contract (schema field, config, enforcement code) only if the substrate can actually enforce it.** Named principle, surfaced 2026-07-19 while simplifying Lore Beings budgets; a sharpening of `agent-being-consciousness-substrate-split.md`.

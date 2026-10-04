@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A gate must not be implemented in the medium it gates — ask what evidence it rests on and whether the thing under test could have produced that evidence; coverage parity is not evidence parity."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A Gate Cannot Be a Model Self-Report
@@ -38,7 +38,7 @@ engines "had A7 coverage" — a coverage checkbox hid an evidence-class differen
 any tree whose `VERSION` differs from `LR_FRAMEWORK_DIR`. Filesystem only, no engine call. Run
 against the real machine state it named both stale v30 trees immediately.
 
-## The same arm, second engine, two years of latency (v41, 2026-08-17)
+## The same arm, second engine, three weeks of latency (v41, 2026-08-17)
 
 Fixing Cursor's arm did not fix the rule's other instances. **Claude's arm was still a model
 self-report** and eventually blocked the entire Claude shard: the model greps the plugin cache and

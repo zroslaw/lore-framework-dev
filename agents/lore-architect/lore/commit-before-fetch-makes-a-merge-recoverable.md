@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "When a tool both saves local work and integrates remote work, commit first: every merge is then commit-to-commit, abort restores an exact prior state, and a conflict can be left in progress rather than aborted."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # Commit Before You Fetch, and the Merge Becomes Recoverable

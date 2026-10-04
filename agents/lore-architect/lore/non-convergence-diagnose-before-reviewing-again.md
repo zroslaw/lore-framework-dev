@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "When a review loop hits the round cap, classify findings by origin first; a stable core with a churning periphery means shrink what ships into tiers — then review each tier as the subset it actually ships as."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Non-Convergence: Diagnose by Origin Before Reviewing Again

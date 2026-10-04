@@ -13,7 +13,7 @@ Progressively disclose the rest:
 
 - daily workflow — boot, recall, finalize
 - collaboration — attach and consult
-- maintenance — pull, check, doctor
+- maintenance — pull, check (`/lr:check` replaced doctor in v45)
 - setup — workspace/repo/agent creation and registration
 - advanced modules — Lore Beings, Dark Factory, worktrees, takeover
 - style controls — `/lr:style` (single skill; v35 removed the former `plain-language` / `dialogue` /

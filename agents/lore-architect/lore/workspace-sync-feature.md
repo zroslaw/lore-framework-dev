@@ -78,6 +78,6 @@ Shipped as a deliberate substitute for the unfinished session-worktree design. T
 repair does not reduce the case for the prevention, and the repair stays useful once prevention
 lands. See [v46-sync-hardening-tiered-plan.md](v46-sync-hardening-tiered-plan.md).
 
-Gate record and scope for the release: [versioning-release-types.md](versioning-release-types.md).
+Gate record and scope for the release: [versioning-history-v37-v47.md](versioning-history-v37-v47.md).
 What review caught that the suite could not:
 [defects-hide-in-the-intersections-a-suite-partitions.md](defects-hide-in-the-intersections-a-suite-partitions.md).

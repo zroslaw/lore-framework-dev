@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A state file annotates a condition the system can prove independently and never asserts it: revalidate and self-clear, derive don't maintain, one reader. Likewise a notice printed before acting is not a record it happened."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # A State File Is a Hint, Not a Verdict

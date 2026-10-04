@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "2026-06-08: 'enforce X' does not mean add a required schema field; use prose enforcement first and require a field only when it is a deliverable, not scaffolding for the agent's own reasoning."
+parent: lore/user-feedback-working-style.md
+---
+
 # Feedback: "enforce X" ≠ "add a required schema field" — schemas-as-enforcement can over-reach
 
 2026-06-08. Corrective. The user asked to *enforce* the agent considering a unit's context during bug-finding. I turned "enforce" into a **required structured `context` field** (role/callers/collaborators/lifecycle) in `bugs.schema.json`, reasoning that to force a behaviour you require an output that can't be produced without it (schemas-as-enforcement). The user rejected it sharply ("drop this shit"); I reverted to **prose-only enforcement** in `step-a` ("you **must** trace callers/neighbours").

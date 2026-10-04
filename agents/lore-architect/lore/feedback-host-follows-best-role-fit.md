@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "User decision (2026-10-04): when picking a home agent, choose the best fit by role with the incumbent keeping close calls, and price per-agent cost in prose rather than a hard numeric cap."
-parent: lore-context.md
+parent: lore/user-feedback-working-style.md
 ---
 
 # Feedback — The Host Follows the Best Role Fit

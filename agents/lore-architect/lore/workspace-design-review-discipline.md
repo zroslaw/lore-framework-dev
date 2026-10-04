@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Before implementing a workspace slice, run three parallel review lenses (framework architecture, operational UX, implementation safety) and iterate until all approve; reviewers use Composer 2.5."
+parent: lore/gates-and-review-discipline.md
+---
+
 Before implementing workspace v25 slice: run **three-lens parallel review** — (1) framework
 architecture & lore consistency, (2) operational UX & team adoption, (3) implementation safety &
 harness coverage. Iterate drafts until all lenses approve.

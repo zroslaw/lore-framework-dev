@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "The first, later-superseded probe of cursor-agent (2026.07.01): --plugin-dir mirrors Claude's flag, headless flags exist, and the smoke test was blocked by an account usage limit rather than tooling."
+parent: lore/cursor-engine-capabilities.md
+---
+
 # Cursor Agent CLI — Probe Findings (first probe, later superseded)
 
 First hands-on probe of `cursor-agent` (2026.07.01) as a port target, ahead of the parked

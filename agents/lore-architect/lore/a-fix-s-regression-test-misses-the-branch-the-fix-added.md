@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A fix's regression test covers the report that prompted it, not the branch the fix introduced; after writing a fix, ask what states the fix made newly reachable and test in that new partition."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A Fix's Regression Test Covers the Case That Prompted It, Not the Branch the Fix Added

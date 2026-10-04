@@ -1,8 +1,8 @@
 ---
 lore: 1
-type: topic
+type: area
 summary: "The multi-engine real-execution harness, its scenario coverage, assertion discipline, release-gate evidence states, and operational caveats."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Lifecycle Testing Harness

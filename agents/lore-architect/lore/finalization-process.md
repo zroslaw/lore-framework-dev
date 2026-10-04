@@ -9,7 +9,7 @@ parent: lore-context.md
 
 Session finalization is user-triggered. It is a four-phase process orchestrated by `docs/finalize.md`:
 
-**Before Phase 1 — Revise participants** (v47 release candidate): finalize first compares the
+**Before Phase 1 — Revise participants** (shipped in v47): finalize first compares the
 session against the roles of agents in the workspace running that session. It may add agents and
 choose a finalization host using the existing boot and attach procedures; a booted agent keeps close
 calls, and a confidentiality gate fails closed. The resulting host-first active set is used by every
@@ -78,7 +78,7 @@ rule that a decision relayed from one session's user isn't authority for another
 
 ## Related topics
 
-- [finalize-participant-revision-design.md](finalize-participant-revision-design.md) — v47 release candidate: the pre-Phase-1 participant-revision policy and its validation record
+- [finalize-participant-revision-design.md](finalize-participant-revision-design.md) — v47: the pre-Phase-1 participant-revision policy and its validation record
 - `session-summaries-feature.md` — canonical host Learning-audit schema and guest-summary specifics
 - `merge-in-booted-subagents.md` — merge execution model in detail
 - `reflect-merge-execution-asymmetry.md` — why reflect is inline and merge is in subagents
@@ -93,4 +93,4 @@ rule that a decision relayed from one session's user isn't authority for another
 
 ## Preservation without release (v45 session)
 
-A user can authorize finalization to preserve knowledge and development-branch commits while excluding shipping. Honor that scope: keep the chosen framework worktree and paired dev branch isolated, and do not infer permission to merge to main, tag, install, or publish a release. Concurrent main-checkout artifacts are outside that finalization. Preserve evidence with its actual artifact state and the user's chosen review scope; lifecycle or quality suites do not become mandatory merely because finalization is running. See [Unified Check Front Door](unified-check-front-door.md) for the current candidate's continuation record.
+A user can authorize finalization to preserve knowledge and development-branch commits while excluding shipping. Honor that scope: keep the chosen framework worktree and paired dev branch isolated, and do not infer permission to merge to main, tag, install, or publish a release. Concurrent main-checkout artifacts are outside that finalization. Preserve evidence with its actual artifact state and the user's chosen review scope; lifecycle or quality suites do not become mandatory merely because finalization is running.

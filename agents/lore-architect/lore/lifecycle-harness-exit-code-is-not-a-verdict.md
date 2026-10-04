@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Corrected: run_matrix.py's exit code IS trustworthy (2 on refusal, 1 on failed modules) — the false green came from piping it; only the identity-blocked-renders-as-failed defect is real."
-parent: lore-context.md
+parent: lore/lifecycle-testing-harness.md
 ---
 
 # The Lifecycle Harness's Exit Code — Corrected

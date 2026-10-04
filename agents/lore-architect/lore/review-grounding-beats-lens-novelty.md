@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "When a review loop stalls, the instrument to change is grounding, not lens novelty — license a reviewer to distrust the document's claims about other files and verify them against those files."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # When a Loop Stalls, Change the Grounding, Not the Lens

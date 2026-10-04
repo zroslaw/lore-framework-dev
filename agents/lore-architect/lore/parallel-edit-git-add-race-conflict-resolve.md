@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Never batch a file edit with git add/commit when resolving a conflict: the add can stage the pre-edit file and commit conflict markers; resolve serially and verify the committed blob with git show HEAD:path."
+parent: lore/git-and-state-safety.md
+---
+
 # Don't Parallelize Content Edit with `git add`/`commit` on Conflict Resolve
 
 When resolving a merge conflict, issuing a file edit (StrReplace/Write) in the **same parallel

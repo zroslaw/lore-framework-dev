@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Pointer-not-restatement: one canonical site per rule, pointers everywhere else — including the prose sites that merely state a rule you just fixed in code."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 **Pointer-not-restatement: when two doc sites mention the same grammar/rule/spec, one must be canonical and the other(s) must be pointer-only.** No inline restatement "for clarity" — that's the failure mode. Looks fixed today; drifts silently tomorrow when one site updates and the others don't.

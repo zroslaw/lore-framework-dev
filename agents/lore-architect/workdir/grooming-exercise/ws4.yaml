@@ -1,0 +1,395 @@
+workset:
+  ok: true
+  budget: 60000
+  estimated_tokens: 59996
+  over_budget: false
+  scope: "lore-context.md"
+  coverage:
+    status: "partial"
+    complete: false
+    files:
+      total: 314
+      mapped: 159
+      uncovered: 155
+      mapped_percent: 50.6
+    estimated_tokens:
+      total: 405120
+      mapped: 214260
+      uncovered: 190860
+      mapped_percent: 52.9
+    uncovered:
+      invalid_utf8: 0
+      legacy: 155
+      invalid_v1: 0
+      unreachable_v1: 0
+      unsupported_version: 0
+    guidance: "Use the map for mapped areas and search uncovered Lore for comprehensive recall."
+  snapshot:
+    - file: "lore-context.md"
+      sha256: "02e3865f500934fb5401fb823745b0327524d9fb8e9f27ea9416f850fa3c2b22"
+    - file: "lore/a-change-set-is-wider-than-its-diff.md"
+      sha256: "b9bc89bc3a85a825c6b44f7f9017db99ebb0777972d95b8058327331d3ca7132"
+    - file: "lore/a-demo-must-test-the-state-it-leaves-behind.md"
+      sha256: "2b33ac7cf60846c6a9e2cb80178862d7b23a65592e40251f0cb06d5859287147"
+    - file: "lore/a-detection-tier-must-outlive-the-cure-it-measures.md"
+      sha256: "038d863f766327ebf0695c4e9faa25c51029d1b7afc70bba870140966560123e"
+    - file: "lore/a-displayed-attribute-can-have-more-than-one-source.md"
+      sha256: "615fd321f3e049c7846be7b6d37a5ed97dfc8e9efab3b8bb48ed87827dce2371"
+    - file: "lore/a-fix-is-a-change-and-changes-need-review.md"
+      sha256: "6b656f236917616408330a837e72c2eccad5240a81ac96b00db8def73c225479"
+    - file: "lore/a-fix-s-regression-test-misses-the-branch-the-fix-added.md"
+      sha256: "73aa19e8fde046c52291a82b0327c56cb4482aa7646cc774873dbc5a6a67b447"
+    - file: "lore/a-gate-cannot-be-a-model-self-report.md"
+      sha256: "36b83b8f68aa5ca62a255a7d1eb2a2d16f4e753952d76df688c5d64b62eb3f79"
+    - file: "lore/a-gate-that-died-is-not-a-gate.md"
+      sha256: "7e18926e1892a8b162af68b276fb87efbe6c0d83aa12ea45b574bc97da86d221"
+    - file: "lore/a-negative-grep-proves-the-pattern-absent.md"
+      sha256: "f6126c6171ef7826bca7365aa773e4c1536b3e863bb0ad2a82bc95451b4b6fdb"
+    - file: "lore/a-new-command-inherits-its-neighbours-published-promises.md"
+      sha256: "31078f35735865a53a7706f83c005867d91993dd277061edf0128876ee847fd7"
+    - file: "lore/a-rate-floor-is-wrong-in-both-directions.md"
+      sha256: "bf351e97b75561826c0700ff3a90b56ff66056773841b18cfd6b5f6d8f7d8f4a"
+    - file: "lore/a-red-test-may-be-asserting-a-true-fact.md"
+      sha256: "7084b289670470a014bc0a7130cf98be7df1b6f9e27cbcf30d7a593593e56a04"
+    - file: "lore/a-release-record-goes-stale-while-you-fix-it.md"
+      sha256: "e30886273171e75d865a6c8ca14f6af65191e6a5fe4d786c2e8537dcd96830b9"
+    - file: "lore/a-release-review-starts-with-git-status.md"
+      sha256: "5b068805b2f8ea8626c22619d82172753f0e8734818d1369601f1ff6763c5a99"
+    - file: "lore/adding-a-write-means-updating-the-approval-gate.md"
+      sha256: "ea5af4fdd3d1c46f3f70b0d4875e5c1cbcdd6b3761a4419246623c81beb2dba0"
+    - file: "lore/an-optional-step-must-fail-back-to-baseline.md"
+      sha256: "f43f167fddf35da2febb708c672e8d325993baaef0d26b30eca4934b80fefb79"
+    - file: "lore/appended-docstring-step-must-match-execution-position.md"
+      sha256: "966c3baffe577f2f4ba95f1980c979cf98d032a7de2e6688f4e2732430cdf4b5"
+    - file: "lore/classification-tables-enumerate-exit-paths-not-interesting-cases.md"
+      sha256: "8d29b0f28063f5e7da7c8da74dac4e4f5faf0821a3ef04330cd6f6692e948d76"
+    - file: "lore/claude-engine-capabilities.md"
+      sha256: "a82d47236548853acdeaf6dffeb0639ff8fdc4ca7f3ae15cbdda4d9ce1eaa7e5"
+    - file: "lore/claude-plugin-cache-holds-multiple-versions.md"
+      sha256: "bfe26f1cc92596f435b209328d766c3550a956e1e52dc00843babc5b459c4254"
+    - file: "lore/codex-engine-capabilities.md"
+      sha256: "828b0f93e3b7c979cdef90eaa10cee247df60f79ee5d0c36d3f7212a7d22fd98"
+    - file: "lore/codex-stale-tmp-marketplace-outranks-cache.md"
+      sha256: "d18454183c802c41cf1b8b2fedbca25f4ded42cc9f29511c52b5557da104502f"
+    - file: "lore/consistency-sweep-read-not-just-grep.md"
+      sha256: "84e8bfb5812ab97096f89259bcf60e4ff211ce9216c5f52fe1f3bb2a42de6b2e"
+    - file: "lore/cursor-engine-capabilities.md"
+      sha256: "5f7cb6bb47ef7e1ce65dfe3b40b9f902709d251cdbbc896ffa3a595f56c645aa"
+    - file: "lore/cursor-framework-polish-orchestration.md"
+      sha256: "47829f4eba94dd22609b747619cc223a5c6303fd004d0c2a56e183d51a09b417"
+    - file: "lore/cursor-plugin-distribution-update-model.md"
+      sha256: "4a7662a6c4c29ea2bf2c7ab3cad302b2085fa36fa09f9da12fac84aca5c17a32"
+    - file: "lore/cursor-plugin-install-is-account-side.md"
+      sha256: "5607d6806a1e13fd7860708d5193db904f585c78f1243b8cf13dc704110a6f5d"
+    - file: "lore/ephemeral-session-plugin-snapshot-topology.md"
+      sha256: "74e19f252a95200ae8d6befd8986c61252393801f45e9d27b63a5507567bba99"
+    - file: "lore/executable-prose-and-design-checks.md"
+      sha256: "fa84a41fdf149181cc23eb5c2a905fe1fb2ab8a440934239585cddf33ba79a79"
+    - file: "lore/feedback-autonomous-design-cycle.md"
+      sha256: "340b1c9da9ece8e2dac796e43693a0923a1242601a9bb1a4f917eb3f60f35758"
+    - file: "lore/feedback-commit-to-a-recommendation.md"
+      sha256: "62737ef97ffdb049fb9e0429eb49d8cb4938382c1d95400776ab43b6a97fb0ec"
+    - file: "lore/feedback-comply-promptly-after-repeated-pushback.md"
+      sha256: "2431c587d1699ad3772e682524454ee1fbaeed6c10eb2204f80ff3eba3a0bbcb"
+    - file: "lore/feedback-composer-25-subagent-reviews.md"
+      sha256: "d77266f20d1a27041142d13e9782f7eae3c3fbcc1cdba85f66c8ff375698987c"
+    - file: "lore/feedback-confirm-before-writing-lore.md"
+      sha256: "632ccbcf2006c0c49b576fcb72604c31d6eb5e1151011460dc2f3e0c64eaaadf"
+    - file: "lore/gates-and-review-discipline.md"
+      sha256: "2121338080b2ba9de8ad1a702187c95f78e042163e012d0016933528f2d6fe18"
+    - file: "lore/guarding-on-a-normal-state-excludes-what-matters-most.md"
+      sha256: "5d8e07a8ee7d84cb94b782f740522e5a6239f1051cb5fdf0c22195e12d87912d"
+    - file: "lore/instruction-location-beats-emphasis-in-long-docs.md"
+      sha256: "aabd9c10dcf09504ecae096b35f591d47e6dd9c9a81197cdee03b6b252db0df7"
+    - file: "lore/merge-in-booted-subagents.md"
+      sha256: "ee15ab37dd28083dda9f66e6e12ca6bd4a2eeb50174eb59346cff3951f496688"
+    - file: "lore/models-copy-what-they-should-compute.md"
+      sha256: "d04cbeb984c42234afeba492e8d04dc247a202dc331cc01edac53e84dc4c7a12"
+    - file: "lore/one-question-one-code-path.md"
+      sha256: "3254ada3ad9c7fe4300ec25b42d213d1cbf9099f8bef3cb2a616cc61665e52a6"
+    - file: "lore/operation-notice-convention.md"
+      sha256: "0d6231b0bfd40cbeea245d4b3d407031ecc6b012ea8d34d0d967342be5213541"
+    - file: "lore/per-site-authoring-is-not-duplication.md"
+      sha256: "ed3d7f8fb41d2b1d797a8ab03659462daabb4329f3ea53912653c3922409d967"
+    - file: "lore/project-scope-plugin-config-feature.md"
+      sha256: "7d6a78adb58caa99ecde2c4b3100d2fc669b154a9cd6aa6ef28e49bb165533a0"
+    - file: "lore/public-communication-ownership.md"
+      sha256: "c56da26ac0325ac517c7c9667ec77cfb6eee6bbd76e496561a18fd713dcc2508"
+    - file: "lore/required-literal-output-is-what-models-drop.md"
+      sha256: "798f2c828df34167a0a73517f4a26ec7d37b124b0c9dcc3808e2eb99c0e2824b"
+    - file: "lore/scripted-prose-edit-needs-a-read-back.md"
+      sha256: "66e7778ea18c901486e77c2d04145ce60e0e8703171e7e38aaf5810a2c1116a3"
+    - file: "lore/self-documenting-payload-vs-heading-delimiters.md"
+      sha256: "9e3a4841c04b05c82abdb7d118a226664df1734d6575461283d51d2375866ac8"
+    - file: "lore/session-summaries-feature.md"
+      sha256: "0c8e24d8056a144478bf492996501d57e0261001e698626e585b550702a171d5"
+    - file: "lore/short-circuit-on-the-condition-not-a-proxy.md"
+      sha256: "d78ad20e18bf33ed69eed9e7e545969fc6bb99ccfdce4107b81b13cafb4cbad1"
+    - file: "lore/single-canonical-source-discipline.md"
+      sha256: "47372538ca498266f2beabb9a758598cdb450d9c767da40cbc4383cf78994af7"
+    - file: "lore/skill-announcement-convention.md"
+      sha256: "1655671957fb287342da180c71eaec130a4fba544a5b32eda5bfa3dac29e2423"
+    - file: "lore/step-number-cross-references-fail-silently.md"
+      sha256: "59c667b833e8c21736fcd90796b6887b639f6319b4efd33c29143249aa11f587"
+    - file: "lore/the-terminal-step-is-the-step-that-gets-dropped.md"
+      sha256: "23ed7787227930492ce9153d4ced4f77c032e80c0cf2f14e57d557307abc96a4"
+    - file: "lore/transcript-backed-finalization-mvp.md"
+      sha256: "59a29449e2232b883f03f9461f60a47c16ab3b5e2dd07dc76528a497d0dbe6d9"
+    - file: "lore/unified-check-front-door.md"
+      sha256: "38795172c7d7b4cd852f389a8d8bb13a3bf647474ecb85f4730d5c7ced13a594"
+    - file: "lore/user-feedback-working-style.md"
+      sha256: "209f6caf4401349a2a9d321592170e14c9401ba7f60d070c87c05d8e5e89f4d6"
+    - file: "lore/v46-sync-hardening-tiered-plan.md"
+      sha256: "d68e1aaa284ef216d7c7ad7c6522e05d3abb05f58a528414db0c93a330abe672"
+    - file: "lore/versioning-history-v01-v20.md"
+      sha256: "1f9da7fdaab0c71d497b480a6014d78483dc0d14c63e0f00c68f42d92343f871"
+    - file: "lore/versioning-release-types.md"
+      sha256: "091bd24dbd10f57e949001efba692d5f779bf24fac51750c9a981dc554793569"
+    - file: "lore/widening-a-source-drops-its-validation.md"
+      sha256: "639cdce1b86b91d2fb7b573d7fabb03ceea6a528ebc1b0c48295d6656577800d"
+    - file: "lore/workspace-auto-refresh-design.md"
+      sha256: "e87e7c19ec2bdc7cd4fa8da9780a76202d69942a4d4238fcf53ff852d6442858"
+    - file: "lore/workspace-lifecycle-four-commands.md"
+      sha256: "4c2b8b81b07d1a35b04a590f539bc7c9ee397ad4226e66e8ef48eab7b46612ac"
+    - file: "lore/workspace-memory-file-contract.md"
+      sha256: "6367ed494735cdb2d06d657dd39b2882d24ca309a067122b1099a1cc6c6205a9"
+    - file: "lore/workspace-sync-feature.md"
+      sha256: "6a88c5e496b9858f719d5aa1f615844efebfc690decfab4a7ecde5a89f5d1077"
+    - file: "lore/workspace-sync-utility.md"
+      sha256: "36a3fd852217a80db3efb5ba57ac4ef538fddcc60ecaacc3eaeed43fd3cc29af"
+    - file: "lore/worktree-lifecycle-and-audit.md"
+      sha256: "c49260c7bcdf7f5815a3961a037329032689dbeb4c25b979258ad5e87d4c33db"
+  editable:
+    - file: "lore/merge-in-booted-subagents.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1121
+    - file: "lore/operation-notice-convention.md"
+      reason: "explicit_scope"
+      estimated_tokens: 973
+    - file: "lore/project-scope-plugin-config-feature.md"
+      reason: "explicit_scope"
+      estimated_tokens: 977
+    - file: "lore/public-communication-ownership.md"
+      reason: "explicit_scope"
+      estimated_tokens: 239
+    - file: "lore/session-summaries-feature.md"
+      reason: "explicit_scope"
+      estimated_tokens: 2612
+    - file: "lore/skill-announcement-convention.md"
+      reason: "explicit_scope"
+      estimated_tokens: 2110
+    - file: "lore/transcript-backed-finalization-mvp.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1610
+    - file: "lore/unified-check-front-door.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1118
+    - file: "lore/user-feedback-working-style.md"
+      reason: "explicit_scope"
+      estimated_tokens: 560
+    - file: "lore/v46-sync-hardening-tiered-plan.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1851
+    - file: "lore/versioning-release-types.md"
+      reason: "explicit_scope"
+      estimated_tokens: 2476
+    - file: "lore/workspace-auto-refresh-design.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1938
+    - file: "lore/workspace-lifecycle-four-commands.md"
+      reason: "explicit_scope"
+      estimated_tokens: 2171
+    - file: "lore/workspace-memory-file-contract.md"
+      reason: "explicit_scope"
+      estimated_tokens: 971
+    - file: "lore/workspace-sync-feature.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1325
+    - file: "lore/workspace-sync-utility.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1368
+    - file: "lore/worktree-lifecycle-and-audit.md"
+      reason: "explicit_scope"
+      estimated_tokens: 536
+    - file: "lore/claude-plugin-cache-holds-multiple-versions.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1350
+    - file: "lore/ephemeral-session-plugin-snapshot-topology.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1236
+    - file: "lore/codex-stale-tmp-marketplace-outranks-cache.md"
+      reason: "explicit_scope"
+      estimated_tokens: 711
+    - file: "lore/cursor-framework-polish-orchestration.md"
+      reason: "explicit_scope"
+      estimated_tokens: 413
+    - file: "lore/cursor-plugin-distribution-update-model.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1436
+    - file: "lore/cursor-plugin-install-is-account-side.md"
+      reason: "explicit_scope"
+      estimated_tokens: 995
+    - file: "lore/a-change-set-is-wider-than-its-diff.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1082
+    - file: "lore/a-rate-floor-is-wrong-in-both-directions.md"
+      reason: "explicit_scope"
+      estimated_tokens: 800
+    - file: "lore/adding-a-write-means-updating-the-approval-gate.md"
+      reason: "explicit_scope"
+      estimated_tokens: 555
+    - file: "lore/an-optional-step-must-fail-back-to-baseline.md"
+      reason: "explicit_scope"
+      estimated_tokens: 477
+    - file: "lore/appended-docstring-step-must-match-execution-position.md"
+      reason: "explicit_scope"
+      estimated_tokens: 856
+    - file: "lore/classification-tables-enumerate-exit-paths-not-interesting-cases.md"
+      reason: "explicit_scope"
+      estimated_tokens: 646
+    - file: "lore/consistency-sweep-read-not-just-grep.md"
+      reason: "explicit_scope"
+      estimated_tokens: 922
+    - file: "lore/guarding-on-a-normal-state-excludes-what-matters-most.md"
+      reason: "explicit_scope"
+      estimated_tokens: 645
+    - file: "lore/instruction-location-beats-emphasis-in-long-docs.md"
+      reason: "explicit_scope"
+      estimated_tokens: 945
+    - file: "lore/models-copy-what-they-should-compute.md"
+      reason: "explicit_scope"
+      estimated_tokens: 882
+    - file: "lore/one-question-one-code-path.md"
+      reason: "explicit_scope"
+      estimated_tokens: 692
+    - file: "lore/per-site-authoring-is-not-duplication.md"
+      reason: "explicit_scope"
+      estimated_tokens: 768
+    - file: "lore/required-literal-output-is-what-models-drop.md"
+      reason: "explicit_scope"
+      estimated_tokens: 815
+    - file: "lore/scripted-prose-edit-needs-a-read-back.md"
+      reason: "explicit_scope"
+      estimated_tokens: 524
+    - file: "lore/self-documenting-payload-vs-heading-delimiters.md"
+      reason: "explicit_scope"
+      estimated_tokens: 591
+    - file: "lore/short-circuit-on-the-condition-not-a-proxy.md"
+      reason: "explicit_scope"
+      estimated_tokens: 682
+    - file: "lore/single-canonical-source-discipline.md"
+      reason: "explicit_scope"
+      estimated_tokens: 2974
+    - file: "lore/step-number-cross-references-fail-silently.md"
+      reason: "explicit_scope"
+      estimated_tokens: 867
+    - file: "lore/the-terminal-step-is-the-step-that-gets-dropped.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1212
+    - file: "lore/widening-a-source-drops-its-validation.md"
+      reason: "explicit_scope"
+      estimated_tokens: 645
+    - file: "lore/a-demo-must-test-the-state-it-leaves-behind.md"
+      reason: "explicit_scope"
+      estimated_tokens: 716
+    - file: "lore/a-detection-tier-must-outlive-the-cure-it-measures.md"
+      reason: "explicit_scope"
+      estimated_tokens: 864
+    - file: "lore/a-displayed-attribute-can-have-more-than-one-source.md"
+      reason: "explicit_scope"
+      estimated_tokens: 614
+    - file: "lore/a-fix-is-a-change-and-changes-need-review.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1780
+    - file: "lore/a-fix-s-regression-test-misses-the-branch-the-fix-added.md"
+      reason: "explicit_scope"
+      estimated_tokens: 583
+    - file: "lore/a-gate-cannot-be-a-model-self-report.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1794
+    - file: "lore/a-gate-that-died-is-not-a-gate.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1415
+    - file: "lore/a-negative-grep-proves-the-pattern-absent.md"
+      reason: "explicit_scope"
+      estimated_tokens: 714
+    - file: "lore/a-new-command-inherits-its-neighbours-published-promises.md"
+      reason: "explicit_scope"
+      estimated_tokens: 519
+    - file: "lore/a-red-test-may-be-asserting-a-true-fact.md"
+      reason: "explicit_scope"
+      estimated_tokens: 799
+    - file: "lore/a-release-record-goes-stale-while-you-fix-it.md"
+      reason: "explicit_scope"
+      estimated_tokens: 1165
+    - file: "lore/a-release-review-starts-with-git-status.md"
+      reason: "explicit_scope"
+      estimated_tokens: 552
+  halo:
+    - file: "lore-context.md"
+      reason: "ancestor"
+      mode: "summary"
+      estimated_tokens: 39
+      summary: "Root working knowledge and navigation for the lore-architect."
+    - file: "lore/claude-engine-capabilities.md"
+      reason: "ancestor"
+      mode: "summary"
+      estimated_tokens: 51
+      summary: "Hub for Claude-specific install, invocation, plugin-cache, and subagent operational facts."
+    - file: "lore/codex-engine-capabilities.md"
+      reason: "ancestor"
+      mode: "summary"
+      estimated_tokens: 61
+      summary: "Hub for Codex-specific plugin install/refresh, invocation, subagent, sandbox, headless-exec, and lifecycle-harness operational facts."
+    - file: "lore/cursor-engine-capabilities.md"
+      reason: "ancestor"
+      mode: "summary"
+      estimated_tokens: 60
+      summary: "Hub for Cursor-specific plugin install/refresh, invocation, subagent, usage, boot-cost, and engine-detection operational facts."
+    - file: "lore/executable-prose-and-design-checks.md"
+      reason: "ancestor"
+      mode: "summary"
+      estimated_tokens: 69
+      summary: "Why procedures fail to execute and what to change (structure, not wording), plus design-time checks for guards, approval gates, intervals and optional steps."
+    - file: "lore/gates-and-review-discipline.md"
+      reason: "ancestor"
+      mode: "summary"
+      estimated_tokens: 72
+      summary: "How I gate, review and record a ship: cheapest-first gates, the three dispositions, TriLens judgement, artifact-state ownership, and why a gate is never a model self-report."
+    - file: "lore/feedback-autonomous-design-cycle.md"
+      reason: "direct_child"
+      mode: "summary"
+      estimated_tokens: 84
+      summary: "User working style (2026-10-03): a delegated no-questions design cycle — review today's behavior, design with edge cases, iterate reviews, write a spec, separate design/spec drafts in workdir, finalize as a draft."
+    - file: "lore/feedback-commit-to-a-recommendation.md"
+      reason: "direct_child"
+      mode: "summary"
+      estimated_tokens: 80
+      summary: "User feedback 2026-08-23: presenting balanced options instead of a recommendation reads as absence of judgement and costs trust — state the view first, then the reason, then at most one question."
+    - file: "lore/feedback-comply-promptly-after-repeated-pushback.md"
+      reason: "direct_child"
+      mode: "summary"
+      estimated_tokens: 86
+      summary: "After a second pushback on the same axis, act on the next ask instead of re-justifying: a doc-length edit is not destructive, and a repeated ask means the first answer was wrong-shaped, not under-explained."
+    - file: "lore/feedback-composer-25-subagent-reviews.md"
+      reason: "direct_child"
+      mode: "summary"
+      estimated_tokens: 58
+      summary: "User preference: lore design-review subagents use Composer 2.5 (regular, not fast) by default, not Sonnet."
+    - file: "lore/feedback-confirm-before-writing-lore.md"
+      reason: "direct_child"
+      mode: "summary"
+      estimated_tokens: 86
+      summary: "2026-06-03: 'take a note' or 'this is interesting' is not authorization to write lore mid-session; in design exploration default to discussion and follow-me, and persist only at finalization or on a clear instruction."
+    - file: "lore/versioning-history-v01-v20.md"
+      reason: "direct_child"
+      mode: "summary"
+      estimated_tokens: 58
+      summary: "Release-history entries for v1–v20: kind (migration / release-notes / both), cache-affecting annotation, and scope."
+  omitted_halo:
+    ancestor: 0
+    direct_child: 11
+    sibling: 54
+    outbound: 37
+    inbound: 5
+    legacy_reference: 47

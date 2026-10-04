@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Dispositions of the 2026-06-13 architecture self-review — actioned (lore-context shape), deferred (subtraction/sleep pass), and closed-as-deliberate (DF inside lr, team-shared framing) — so settled questions are not re-litigated."
+parent: lore-context.md
+---
+
 # Architecture-Review Dispositions (2026-06-13)
 
 A thorough self-review of the framework architecture: read the real implementation, engaged the design rationale, formed an independent critique, ranked the findings. This topic records the **dispositions** — what was actioned, deferred, or closed-as-deliberate — so settled-for-now questions don't get re-litigated. The detail of each disposition lives in its home topic (linked); this is the index.

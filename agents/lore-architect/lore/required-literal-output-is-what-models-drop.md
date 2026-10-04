@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Executors do the substantive work and drop the required literal output line; three instances in one day across two engines, all with the rule sited far from where output is composed."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Required Literal Output Is the First Thing a Model Drops

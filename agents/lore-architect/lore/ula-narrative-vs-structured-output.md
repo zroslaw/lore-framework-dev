@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "A ULA pass yields structured YAML artifacts and narrative file context (intent, tribal knowledge, severity calibration) that fits no schema; the narrative motivated the DF repo's file-lore.md aspect."
+parent: lore-context.md
+---
+
 # ULA Produces Two Output Kinds — Structured + Narrative
 
 Realization that motivated the DF repo's `file-lore.md` aspect (2026-06-03; landing file named `file-lore.md` as of the 2026-06-07 naming lock — see `df-per-repo-backbone.md`).

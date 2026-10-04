@@ -18,20 +18,15 @@ cache-affecting. The workdir pair preserves the original design and exact-edit r
   rejected alternatives, extension points, §9 review log;
 - `workdir/draft-finalize-participant-revision-spec.md` — the exact edits.
 
-The candidate passed a valid isolated Codex 0.160.0 nothing-booted (D3) dogfood run: it discovered
-only the fixture workspace, selected and booted the role-fitting `helper-agent`, persisted a
-release-calendar canary, and committed and pushed the fixture-local result. The complete
-deterministic suite (**684 tests, 49 skipped**, green at polish tip with `LR_FRAMEWORK_DIR` on the
-worktree HEAD — an earlier 635/17 claim in the draft record was superseded) and the plugin check
-passed; the check's only finding was an unrelated stale Codex v32 cache backup. A one-off `P7` flake
-did not reproduce on immediate re-run.
-**Lifecycle (participant revision only):** `FinalizeParticipantRevisionScenarios` in
-`tests/lifecycle/test_finalize.py` (`test_14` wrong-host, `test_15` nothing-booted) — green on
-Cursor `composer-2.5` against the v47 worktree (2026-10-04). See
+Validation: an isolated Codex 0.160.0 nothing-booted dogfood run booted the role-fitting
+`helper-agent` and persisted a canary; the deterministic suite (684 tests, 49 skipped, measured at
+polish tip — see [a-release-record-goes-stale-while-you-fix-it.md](a-release-record-goes-stale-while-you-fix-it.md))
+and the plugin check passed. Lifecycle: `FinalizeParticipantRevisionScenarios` in
+`tests/lifecycle/test_finalize.py` (`test_14` wrong-host, `test_15` nothing-booted), green on Cursor
+`composer-2.5` against the v47 worktree (2026-10-04); see
 [lifecycle-testing-harness.md](lifecycle-testing-harness.md). The broader lifecycle suite and
-TriLens were intentionally not run for the design ship. The abandoned
-`v46-sync-hardening` worktree had no unique commits or diff beyond current main, so it was removed
-rather than merged.
+TriLens were intentionally not run. The abandoned `v46-sync-hardening` worktree had no unique
+commits beyond main and was removed.
 
 ## Problem
 

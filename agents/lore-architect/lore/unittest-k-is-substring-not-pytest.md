@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "stdlib unittest -k is substring/glob over test ids, not pytest boolean expressions — compound patterns match nothing."
-parent: lore-context.md
+parent: lore/lifecycle-testing-harness.md
 ---
 
 # unittest `-k` Is Substring Match, Not pytest Expressions

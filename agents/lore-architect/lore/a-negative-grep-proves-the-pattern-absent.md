@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "An empty grep proves the searched pattern absent, never the capability absent — before asserting an absence as load-bearing evidence, read the entry point instead of resting on a pattern search."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A Negative Grep Proves the Pattern Absent, Not the Capability

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "User preference: lore design-review subagents use Composer 2.5 (regular, not fast) by default, not Sonnet."
-parent: lore-context.md
+parent: lore/user-feedback-working-style.md
 ---
 
 # Feedback — Composer 2.5 for design-review subagents

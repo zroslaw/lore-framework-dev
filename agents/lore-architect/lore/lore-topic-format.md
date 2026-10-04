@@ -39,3 +39,9 @@ rule is a second implementation with its own drift surface
   what a scripted edit cannot see about the prose it writes.
 - `single-canonical-source-discipline.md` — why the field schema is pointed at, not restated here.
 - `naming-foundational-principles.md` — when a framing deserves its own topic at all.
+
+## Splitting an oversized topic losslessly
+
+Done for `versioning-release-types.md` (84 KB, history entries stranded after an unrelated section): keep the original filename as the `area` hub (a `topic` cannot have children, and every inbound link and `§ Section` citation keeps resolving), move bodies verbatim into children by slicing lines with a script rather than retyping, then prove losslessness by checking that every non-blank original line appears in the concatenated new files (0 missing).
+
+Traps: a child's `parent:` must be the agent-relative path `lore/<hub>.md`, not a bare filename (`invalid_parent_path`). Sections other topics cite by name (`§ Cost`, `§ Lens choice`) must stay in the hub, so count inbound `§` citations before choosing a split; `parallel-reviewer-fanout-pattern.md` and `lifecycle-testing-harness.md` were deliberately not split (about 14 and 6 citations to repair first).

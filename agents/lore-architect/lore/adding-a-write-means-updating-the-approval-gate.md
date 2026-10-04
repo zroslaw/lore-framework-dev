@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "A procedure's approval surface is a separate site from its action list: adding a write means updating the confirmation template, the dry-run output, and every hand-maintained enumeration."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Adding a Write to a Gated Procedure Means Updating the Gate's Template

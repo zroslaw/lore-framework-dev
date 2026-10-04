@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Five reusable principles for measuring agent behavior, borrowed from industry evals: many simple probes, staged scoring, a control arm, difficulty axes against saturation, and a pinned judge with deterministic-first checks."
+parent: lore-context.md
+---
+
 # Benchmark measurement design — principles borrowed from industry evals
 
 Distilled from the research pass (NIAH/RULER/NoLiMa, LongMemEval-V2, BEAM,

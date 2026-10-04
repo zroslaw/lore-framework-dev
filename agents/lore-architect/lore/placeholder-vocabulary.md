@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "Framework doc placeholders and their meaning (<lore-agent-repo>, <guest-lore-agent-repo>, <agent-name>, <workspace>, ${CLAUDE_PLUGIN_ROOT}): a placeholder is a slot resolved per invocation, with the frozen-template exception."
+parent: lore-context.md
+---
+
+# Placeholder Vocabulary
+
 Framework docs use placeholders that an agent substitutes at runtime (e.g., when executing a migration). Placeholder names carry semantics — confusing names cause wrong substitutions, especially in multi-repo domains.
 
 Defined in `lore-framework/docs/conventions.md`, section **Placeholder Vocabulary**.

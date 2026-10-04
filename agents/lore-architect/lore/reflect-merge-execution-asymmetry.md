@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Reflect runs inline because it needs session context; merge runs in booted subagents because it is file-driven. The rule: delegate to a booted subagent only when the work is file-driven."
+parent: lore-context.md
+---
+
 # Reflect vs Merge: Execution Asymmetry
 
 Reflect and merge are finalization phases that look symmetric on the surface but have deliberately different execution models:

@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "After a second pushback on the same axis, act on the next ask instead of re-justifying: a doc-length edit is not destructive, and a repeated ask means the first answer was wrong-shaped, not under-explained."
+parent: lore/user-feedback-working-style.md
+---
+
 # Feedback — Comply Promptly After Repeated Pushback
 
 When the user pushes back a second time on the same axis (doc length, tone, scope) after I already

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "When a merge collides with local WIP, compute whether the incoming version contains it — extract with git show, diff untracked files directly, prove superset line by line with grep -qxF, back up before discarding."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # Prove WIP Superseded Before Discarding It in a Merge Collision

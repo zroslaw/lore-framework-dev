@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "In ancestry-walk process reaping, snapshot all descendants before signaling any ancestor, or the OS reparents survivors to PID 1 and the walk finds nothing; found in the Being Keeper's _kill."
+parent: lore-context.md
+---
+
 # Kill-tree ordering: enumerate descendants before signaling any ancestor
 
 General principle for **any** process-supervisor code that reaps a tree by walking ancestry

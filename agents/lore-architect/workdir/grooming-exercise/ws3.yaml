@@ -1,0 +1,246 @@
+workset:
+  ok: true
+  budget: 90000
+  estimated_tokens: 90000
+  over_budget: false
+  scope: null
+  coverage:
+    status: "partial"
+    complete: false
+    files:
+      total: 310
+      mapped: 150
+      uncovered: 160
+      mapped_percent: 48.4
+    estimated_tokens:
+      total: 401651
+      mapped: 207734
+      uncovered: 193917
+      mapped_percent: 51.7
+    uncovered:
+      invalid_utf8: 0
+      legacy: 160
+      invalid_v1: 0
+      unreachable_v1: 0
+      unsupported_version: 0
+    guidance: "Use the map for mapped areas and search uncovered Lore for comprehensive recall."
+  snapshot:
+    - file: "lore-context.md"
+      sha256: "e6a1f4bd701b40a85dafa148925ccd27deac74ccedcc2bd76a40226d76d2de96"
+    - file: "lore/a-fix-is-a-change-and-changes-need-review.md"
+      sha256: "ac9e99185fa13e046d7407d72285592b2fe3932f0aa36a7f403aa7888aa01fb3"
+    - file: "lore/a-gate-cannot-be-a-model-self-report.md"
+      sha256: "a15dec288ca347f96ae8308a091a18e0c1414815a09f4ec6d08d13f01c079de8"
+    - file: "lore/a-gate-that-died-is-not-a-gate.md"
+      sha256: "0e4f51c79a0fdfe4d9380fed1d5d71a9bdcb53589dbbc5518bce87325fd1fb79"
+    - file: "lore/adopter-command-surface-curation.md"
+      sha256: "5adfff381288b01b8c6005b033fdeabee742676b2c6b8be8807540a9839306ed"
+    - file: "lore/agent-being-consciousness-substrate-split.md"
+      sha256: "4ff809f7ad66daf3373711effe9e1e9e12a1d1021f0a40eda3eee563663e80e4"
+    - file: "lore/agent-boot-doc-fidelity-fixes.md"
+      sha256: "82d34d7073799e6e47a41a2bb0f195e1b519d43125ad0cd7531ad4e299937b04"
+    - file: "lore/agent-boot-doc-grew-when-scripted.md"
+      sha256: "b8a1a758b8cbe59b8ccc578c8614132685e928c31b0698112ef68a74204f0197"
+    - file: "lore/agent-discovery-nesting-constraint.md"
+      sha256: "b1a916947e9f956fedd91281be6539c42adaa8911dca57e435ec02c7488666bc"
+    - file: "lore/agent-split-only-when-forced.md"
+      sha256: "bc06752a0423046ae53ecec5a0d9bc474c42dad2251803b31e2d9610d02de749"
+    - file: "lore/agents-are-executors-first.md"
+      sha256: "231dc3f9fec6a9a5e10d36fd65c39ffa81b279df06865eb1ff2a84fe25e1f102"
+    - file: "lore/ai-installer-review-lens.md"
+      sha256: "4ed72b7c6a76bb8eec5f6e34798ddcac6f8d5f68462c989314ecb1670412f8c3"
+    - file: "lore/aiqa-ula-feature.md"
+      sha256: "f0032d2eba9bcc832f71074a8a567b6d80fb22bf5e2a4687e74a7ac54c1e368e"
+    - file: "lore/architecture-overview.md"
+      sha256: "9f00ab2297b717bd37614858695637c6ce2c146be48a0d3ccf449ef6c37575a6"
+    - file: "lore/architecture-review-dispositions.md"
+      sha256: "642d9101d50ad3da8003b07c5c2faa450709832a7545232f4b2d0a54b3d03556"
+    - file: "lore/attach-pattern.md"
+      sha256: "7729112fc6a5fdd8498ad816545c65d4e76f416a073d3e9e74de3736bcf45a9b"
+    - file: "lore/auto-pull-mechanism.md"
+      sha256: "a016542e25e802f7472c3c7a9462ed70bdac628f78229e00ca3557fd4076b993"
+    - file: "lore/autonomous-agents-substrate.md"
+      sha256: "5550ee8d1a9746b7a68c5e4c8b28dcbd01c639966dddf8af644632e11ce2e5e6"
+    - file: "lore/autonomous-agents-vision.md"
+      sha256: "91e78ff35ff361c6520b662668406739a4403d7abecb84b3acd45a58744bbef8"
+    - file: "lore/backlog-categorization-precedent.md"
+      sha256: "5be3f7fb37ee929b70e94959e6096504fd3795920938b5f4a11a8d7a4b9af865"
+    - file: "lore/benchmark-findings-engines-models.md"
+      sha256: "a60cc31b3024c5df8bce9e4fc3eaff0e0a92df3edb8bc834d11131133087f6ad"
+    - file: "lore/benchmark-harness-operational-lessons.md"
+      sha256: "c38786ab3aa8de83ed69f4e95726e70b33cae81069645b9d7577326b6bb3a596"
+    - file: "lore/benchmark-measurement-design-principles.md"
+      sha256: "1a225838fdbc5660c43e555c7417d0d876c06c23642db67a45cbd336752df8ea"
+    - file: "lore/blast-radius-audit-when-a-gate-is-waived.md"
+      sha256: "46e601ffbd73ddb82d3b826349caae1cdf414a2fac64cfaa179b0430b404ec7c"
+    - file: "lore/cache-clear-footer-convention.md"
+      sha256: "360d93bc062c633038c88248c491a7888ab78a82f53bd2e4306a0b093168b3ac"
+    - file: "lore/canonicalize-testbed-fixes.md"
+      sha256: "f7d4a2daa4d3407051a7b8515a061c370948b00327817191ed32dd093df6685b"
+    - file: "lore/check-own-lore-before-dismissing-a-finding.md"
+      sha256: "8dd454ac0efe95eb4263b4b089c4a434f3a87ed87cc3dede534d4f36a7d87381"
+    - file: "lore/classification-tables-enumerate-exit-paths-not-interesting-cases.md"
+      sha256: "110130cf275b90d4c80f70927b0abc932e4794b291bf155b8264874d617a209a"
+    - file: "lore/claude-coupling-inventory-and-port-tiers.md"
+      sha256: "04fbcad3d1e6b769e7159d05f2331c1ae7ed62bfb4ff67c45ebcf6ed3ea63d07"
+    - file: "lore/claude-engine-capabilities.md"
+      sha256: "a82d47236548853acdeaf6dffeb0639ff8fdc4ca7f3ae15cbdda4d9ce1eaa7e5"
+    - file: "lore/codex-exec-real-invocation-contract.md"
+      sha256: "8c006060a57a2c73a179c99d28e58a07455c2c9e5fd81dd9f06079577f910f4e"
+    - file: "lore/cursor-engine-capabilities.md"
+      sha256: "5f7cb6bb47ef7e1ce65dfe3b40b9f902709d251cdbbc896ffa3a595f56c645aa"
+    - file: "lore/finalization-process.md"
+      sha256: "e8121ae84e89d356ecc90e02411bbffe327a01f6a0d7696218aef314dff288b4"
+    - file: "lore/finalize-participant-revision-design.md"
+      sha256: "eb47a32ccdf1cbf4229425e11456b6f21895f99b3c31f9b964d826965ed2fd4f"
+    - file: "lore/lifecycle-testing-harness.md"
+      sha256: "1b38a090ee40f924bd2adc0e8c87ee7f194f3bf17841c188ae4460c22041ca10"
+    - file: "lore/parallel-reviewer-fanout-pattern.md"
+      sha256: "6f823ba1a71d558aad861fa13f69aa01cc0a8e5ddcd0f2772d0c121e4a5e844a"
+    - file: "lore/public-communication-ownership.md"
+      sha256: "c56da26ac0325ac517c7c9667ec77cfb6eee6bbd76e496561a18fd713dcc2508"
+    - file: "lore/versioning-history-v01-v20.md"
+      sha256: "1f9da7fdaab0c71d497b480a6014d78483dc0d14c63e0f00c68f42d92343f871"
+    - file: "lore/versioning-history-v21-v36.md"
+      sha256: "45383308b5ccec2f7c55f979f176e55abd0c54d7b61d5b83c5563a85cd31d4f2"
+    - file: "lore/versioning-history-v37-v47.md"
+      sha256: "8037b9e53f42f4e31d9d9f8672f8473819f8cbf253f42e07c96bab062f41ed8c"
+    - file: "lore/versioning-release-types.md"
+      sha256: "091bd24dbd10f57e949001efba692d5f779bf24fac51750c9a981dc554793569"
+    - file: "lore/worktree-lifecycle-and-audit.md"
+      sha256: "c49260c7bcdf7f5815a3961a037329032689dbeb4c25b979258ad5e87d4c33db"
+  editable:
+    - file: "lore-context.md"
+      reason: "recently_changed"
+      estimated_tokens: 9865
+    - file: "lore/a-fix-is-a-change-and-changes-need-review.md"
+      reason: "recently_changed"
+      estimated_tokens: 1775
+    - file: "lore/a-gate-cannot-be-a-model-self-report.md"
+      reason: "recently_changed"
+      estimated_tokens: 1789
+    - file: "lore/a-gate-that-died-is-not-a-gate.md"
+      reason: "recently_changed"
+      estimated_tokens: 1410
+    - file: "lore/adopter-command-surface-curation.md"
+      reason: "recently_changed"
+      estimated_tokens: 381
+    - file: "lore/agent-being-consciousness-substrate-split.md"
+      reason: "recently_changed"
+      estimated_tokens: 948
+    - file: "lore/agent-boot-doc-fidelity-fixes.md"
+      reason: "recently_changed"
+      estimated_tokens: 1012
+    - file: "lore/agent-boot-doc-grew-when-scripted.md"
+      reason: "recently_changed"
+      estimated_tokens: 883
+    - file: "lore/agent-discovery-nesting-constraint.md"
+      reason: "recently_changed"
+      estimated_tokens: 736
+    - file: "lore/agent-split-only-when-forced.md"
+      reason: "recently_changed"
+      estimated_tokens: 779
+    - file: "lore/agents-are-executors-first.md"
+      reason: "recently_changed"
+      estimated_tokens: 584
+    - file: "lore/ai-installer-review-lens.md"
+      reason: "recently_changed"
+      estimated_tokens: 975
+    - file: "lore/aiqa-ula-feature.md"
+      reason: "recently_changed"
+      estimated_tokens: 2240
+    - file: "lore/architecture-overview.md"
+      reason: "recently_changed"
+      estimated_tokens: 1025
+    - file: "lore/architecture-review-dispositions.md"
+      reason: "recently_changed"
+      estimated_tokens: 842
+    - file: "lore/attach-pattern.md"
+      reason: "recently_changed"
+      estimated_tokens: 1335
+    - file: "lore/auto-pull-mechanism.md"
+      reason: "recently_changed"
+      estimated_tokens: 2266
+    - file: "lore/autonomous-agents-substrate.md"
+      reason: "recently_changed"
+      estimated_tokens: 2124
+    - file: "lore/autonomous-agents-vision.md"
+      reason: "recently_changed"
+      estimated_tokens: 1849
+    - file: "lore/backlog-categorization-precedent.md"
+      reason: "recently_changed"
+      estimated_tokens: 707
+    - file: "lore/benchmark-findings-engines-models.md"
+      reason: "recently_changed"
+      estimated_tokens: 701
+    - file: "lore/benchmark-harness-operational-lessons.md"
+      reason: "recently_changed"
+      estimated_tokens: 1659
+    - file: "lore/benchmark-measurement-design-principles.md"
+      reason: "recently_changed"
+      estimated_tokens: 700
+    - file: "lore/canonicalize-testbed-fixes.md"
+      reason: "recently_changed"
+      estimated_tokens: 737
+    - file: "lore/cursor-engine-capabilities.md"
+      reason: "recently_changed"
+      estimated_tokens: 1521
+    - file: "lore/finalization-process.md"
+      reason: "recently_changed"
+      estimated_tokens: 2398
+    - file: "lore/finalize-participant-revision-design.md"
+      reason: "recently_changed"
+      estimated_tokens: 1758
+    - file: "lore/versioning-history-v01-v20.md"
+      reason: "recently_changed"
+      estimated_tokens: 3241
+    - file: "lore/versioning-history-v21-v36.md"
+      reason: "recently_changed"
+      estimated_tokens: 5372
+    - file: "lore/versioning-history-v37-v47.md"
+      reason: "recently_changed"
+      estimated_tokens: 10312
+    - file: "lore/versioning-release-types.md"
+      reason: "recently_changed"
+      estimated_tokens: 2476
+    - file: "lore/worktree-lifecycle-and-audit.md"
+      reason: "recently_changed"
+      estimated_tokens: 536
+    - file: "lore/parallel-reviewer-fanout-pattern.md"
+      reason: "oversized_topic"
+      estimated_tokens: 8936
+    - file: "lore/lifecycle-testing-harness.md"
+      reason: "oversized_topic"
+      estimated_tokens: 8568
+    - file: "lore/blast-radius-audit-when-a-gate-is-waived.md"
+      reason: "rotation"
+      estimated_tokens: 810
+    - file: "lore/cache-clear-footer-convention.md"
+      reason: "rotation"
+      estimated_tokens: 1552
+    - file: "lore/check-own-lore-before-dismissing-a-finding.md"
+      reason: "rotation"
+      estimated_tokens: 811
+    - file: "lore/classification-tables-enumerate-exit-paths-not-interesting-cases.md"
+      reason: "rotation"
+      estimated_tokens: 640
+    - file: "lore/claude-coupling-inventory-and-port-tiers.md"
+      reason: "rotation"
+      estimated_tokens: 1007
+    - file: "lore/claude-engine-capabilities.md"
+      reason: "rotation"
+      estimated_tokens: 1789
+    - file: "lore/codex-exec-real-invocation-contract.md"
+      reason: "rotation"
+      estimated_tokens: 712
+    - file: "lore/public-communication-ownership.md"
+      reason: "rotation"
+      estimated_tokens: 239
+  halo: []
+  omitted_halo:
+    ancestor: 0
+    direct_child: 109
+    sibling: 0
+    outbound: 1
+    inbound: 2
+    legacy_reference: 137

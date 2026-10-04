@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "2026-07-10: three review rounds on the v25 implementation converged on doc-only fixes; cross-doc routing, canonical-vs-pointer copies and release-note order are where operator/docs ships need multi-round review."
+parent: lore/gates-and-review-discipline.md
+---
+
 # v25 Implementation Review — Lessons (2026-07-10)
 
 Three in-session lore-architect review rounds on the v25 implementation converged after doc-only

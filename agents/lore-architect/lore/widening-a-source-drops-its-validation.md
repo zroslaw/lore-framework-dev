@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "When a change broadens where a value comes from, the validation attached to the old source does not travel with it — re-attach it at the sink."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Widening a Value's Source Drops Its Validation

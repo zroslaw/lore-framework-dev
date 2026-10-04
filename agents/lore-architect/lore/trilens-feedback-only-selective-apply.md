@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "A small change can take one TriLens round in feedback-only mode: gather independent findings, triage with the user, then apply a short fix-now list; the workspace-ignore instance and what was deferred or dropped."
+parent: lore/gates-and-review-discipline.md
+---
+
+# Trilens: Feedback-Only Then Selective Apply
+
 # Trilens: feedback-only then selective apply
 
 For a small doc/script change, one trilens round with **feedback only** (no auto-apply) worked well: gather independent findings, triage with the user in short turns, then apply a short fix-now list.

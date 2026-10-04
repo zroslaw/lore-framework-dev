@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Prose review is structurally blind to execution-fidelity ambiguity, because the reviewer resolves it as charitably as the author did; run the doc against a real (weaker) model — and run that leg first."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 **Doc wording that a strong model resolves correctly by inference can still be genuinely ambiguous — and prose review alone won't catch it, because the reviewer is itself a strong model exercising the same charitable inference the doc's author relied on.** Only running the literal text against a weaker (or just different) model surfaces the gap.

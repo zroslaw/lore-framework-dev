@@ -1,3 +1,12 @@
+---
+lore: 1
+type: topic
+summary: "v13/v14 auto-pull: boot, attach and pre-merge run git pull --ff-only on the agent repo (one doc, four call sites); transport-aware hang model with Bash-tool timeout backstop, invariants, and /lr:pull-lore's pull-then-re-read."
+parent: lore-context.md
+---
+
+# Auto-Pull Mechanism
+
 **Auto-pull (v13)** — boot, attach, and pre-merge automatically `git pull --ff-only` the agent's lore agent repo before reading lore. Plus a user-invoked `/lr:pull-lore` skill for mid-session force refresh of all active agents' repos.
 
 The mechanism is the **freshness contract** for team-shared agent repos: whenever the host crosses a session-context boundary (boot, attach, the moment before merging reflections into lore), the local repo state must match the team's latest pushed state. Stale lore at merge time was the motivating failure — integrating reflections into days-old lore could re-introduce decisions the team already revised.
@@ -29,7 +38,7 @@ v14 corrected the hang-prevention model. v13 had said "with a short timeout (60s
   - `GIT_SSH_COMMAND='ssh -o BatchMode=yes -o ConnectTimeout=10'` (SSH only) — BatchMode turns unknown-host-key / passphrase prompts into immediate failure; ConnectTimeout bounds the connect.
   - (optional, HTTPS) `-c http.lowSpeedLimit=1000 -c http.lowSpeedTime=15` BEFORE the `pull` subcommand — aborts a stalled transfer; the backstop already covers it.
 
-HTTPS was already safe since v13 (`GIT_TERMINAL_PROMPT=0` + backstop); v14's `GIT_SSH_COMMAND` is SSH-only and additive. The same hardening went into `scripts/workspace-sync`, but as a **persistent script it uses the env-var route** (no Bash-tool timeout available) — see `portable-shell-in-framework-docs.md`.
+HTTPS was already safe since v13 (`GIT_TERMINAL_PROMPT=0` + backstop); v14's `GIT_SSH_COMMAND` is SSH-only and additive. The same hardening went into the workspace clone/pull script (`scripts/workspace-pull`, then named `workspace-sync`), but as a **persistent script it uses the env-var route** (no Bash-tool timeout available) — see `portable-shell-in-framework-docs.md`.
 
 The v14 fix validated `shared-procedure-doc-pattern.md`: the change lived in ONE doc (`auto-pull.md`); `agent-boot`/`attach`/`process-merge` just point at it — a single edit site fixed every caller.
 
@@ -56,7 +65,7 @@ The "two-step" mental model (pull then re-read) is the discoverable surprise —
 
 ## Distinct From
 
-- **`/lr:workspace-sync`** — workspace-wide: discovers `lore-repo.md` files, clones declared-but-missing repos, pulls every top-level git repo (including non-lore application repos). Auto-pull is single-repo and never clones. The two are explicit peers in their respective See Alsos.
+- **`/lr:workspace-pull`** (v25 rename of the original `workspace-sync`; v46 reused the name `/lr:workspace-sync` for the repair pass) — workspace-wide: discovers `lore-repo.md` files, clones declared-but-missing repos, pulls every top-level git repo (including non-lore application repos). Auto-pull is single-repo and never clones. The two are explicit peers in their respective See Alsos.
 - **`version-check.md`** — repo-version reconciliation: applies migrations and stamps `lore-repo.md` after a framework `VERSION` bump. Auto-pull is git-only and never modifies file contents. They run in sequence at boot — pull first so version-check sees freshest stamp.
 - **`resolve-conflicts.md`** — finalize-time merge of remote conflicts in agent subtrees. Triggered only when push is rejected. Auto-pull is the *prevention* arm of the same problem.
 

@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Read the per-module duration column before any assertion message: seconds-long runs mean the engine never ran (limit or identity), full durations mean a real failure to triage."
-parent: lore-context.md
+parent: lore/lifecycle-testing-harness.md
 ---
 
 # Read Durations Before Reading Assertions

@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "The empirical codex exec --json contract (codex-cli 0.142.5): JSONL event sequence, usage but no USD cost, spurious stderr on success, --skip-git-repo-check, bad-model failure shape, and agent_message as the only said-text item."
+parent: lore/codex-engine-capabilities.md
+---
+
 # Codex `exec` real invocation contract (empirical)
 
 Empirically probed the real `codex-cli 0.142.5` non-interactive contract — `codex exec --json

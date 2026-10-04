@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Run git status on every repo before the diff and before the notes — a dirty tree means the review's subject does not exist yet, and uncommitted fixes are the most invisible form of ungated work."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # A Release Review Starts With `git status`, Not With the Diff

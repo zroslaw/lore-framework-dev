@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "The cheap structured substitute when the user waives the expensive gates: partition the change set, prove the untouched untouched, read every shared-code edit, and A/B the essential path's real output."
-parent: lore-context.md
+parent: lore/gates-and-review-discipline.md
 ---
 
 # Blast-Radius Audit When a Gate Is Waived

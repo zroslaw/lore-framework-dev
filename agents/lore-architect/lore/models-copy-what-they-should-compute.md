@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "In executable prose, anything the model can copy instead of compute will be copied: examples get printed verbatim and machine-resolved paths get retyped and silently corrected. Remove the copyable artifact rather than warning against it."
-parent: lore-context.md
+parent: lore/executable-prose-and-design-checks.md
 ---
 
 # Models Copy What They Should Compute

@@ -1,0 +1,113 @@
+workset:
+  ok: true
+  budget: 60000
+  estimated_tokens: 59991
+  over_budget: false
+  scope: null
+  coverage:
+    status: "partial"
+    complete: false
+    files:
+      total: 307
+      mapped: 130
+      uncovered: 177
+      mapped_percent: 42.3
+    estimated_tokens:
+      total: 399858
+      mapped: 187091
+      uncovered: 212767
+      mapped_percent: 46.8
+    uncovered:
+      invalid_utf8: 0
+      legacy: 177
+      invalid_v1: 0
+      unreachable_v1: 0
+      unsupported_version: 0
+    guidance: "Use the map for mapped areas and search uncovered Lore for comprehensive recall."
+  snapshot:
+    - file: "lore-context.md"
+      sha256: "e6a1f4bd701b40a85dafa148925ccd27deac74ccedcc2bd76a40226d76d2de96"
+    - file: "lore/a-change-set-is-wider-than-its-diff.md"
+      sha256: "c254e6ffccdb746b62cb3733aad99bd0a3a825f85daff0f9fa17520fd7c9803e"
+    - file: "lore/a-demo-must-test-the-state-it-leaves-behind.md"
+      sha256: "0211c0c0908131fabe7fa20dae2285254e507c181359ed6b0577243e13a7bf25"
+    - file: "lore/a-detection-tier-must-outlive-the-cure-it-measures.md"
+      sha256: "e48cad2f236e8fa0c33c679b4ad462f83493362c15b5f098c0b96f74f557b174"
+    - file: "lore/a-displayed-attribute-can-have-more-than-one-source.md"
+      sha256: "c91cbd518debcbe0c04334e17d9af9837f0e37fb74c112e0444b77120fe33e74"
+    - file: "lore/a-fix-is-a-change-and-changes-need-review.md"
+      sha256: "098b18d95e977c87177615e78fae9775e10e3f4301515ac2ff2b534130b1a0b5"
+    - file: "lore/a-fix-s-regression-test-misses-the-branch-the-fix-added.md"
+      sha256: "ac156af0d50be3b2249a34a0abdccc6df624596b9fabd7ed94569c39c25d55dc"
+    - file: "lore/adopter-command-surface-curation.md"
+      sha256: "87d7110d557692e00d570e73ffea4a6ab1672e81dca0446f2879aaf0d161ed6a"
+    - file: "lore/cursor-engine-capabilities.md"
+      sha256: "5f7cb6bb47ef7e1ce65dfe3b40b9f902709d251cdbbc896ffa3a595f56c645aa"
+    - file: "lore/finalization-process.md"
+      sha256: "e8121ae84e89d356ecc90e02411bbffe327a01f6a0d7696218aef314dff288b4"
+    - file: "lore/finalize-participant-revision-design.md"
+      sha256: "eb47a32ccdf1cbf4229425e11456b6f21895f99b3c31f9b964d826965ed2fd4f"
+    - file: "lore/lifecycle-testing-harness.md"
+      sha256: "1b38a090ee40f924bd2adc0e8c87ee7f194f3bf17841c188ae4460c22041ca10"
+    - file: "lore/parallel-reviewer-fanout-pattern.md"
+      sha256: "6f823ba1a71d558aad861fa13f69aa01cc0a8e5ddcd0f2772d0c121e4a5e844a"
+    - file: "lore/versioning-release-types.md"
+      sha256: "16d2d16db0a566772c2a808abdb42471a9bf874e58a3fc29232c035828e5cfd3"
+    - file: "lore/worktree-lifecycle-and-audit.md"
+      sha256: "c49260c7bcdf7f5815a3961a037329032689dbeb4c25b979258ad5e87d4c33db"
+  editable:
+    - file: "lore-context.md"
+      reason: "recently_changed"
+      estimated_tokens: 9865
+    - file: "lore/cursor-engine-capabilities.md"
+      reason: "recently_changed"
+      estimated_tokens: 1521
+    - file: "lore/finalization-process.md"
+      reason: "recently_changed"
+      estimated_tokens: 2398
+    - file: "lore/finalize-participant-revision-design.md"
+      reason: "recently_changed"
+      estimated_tokens: 1758
+    - file: "lore/worktree-lifecycle-and-audit.md"
+      reason: "recently_changed"
+      estimated_tokens: 536
+    - file: "lore/versioning-release-types.md"
+      reason: "oversized_topic"
+      estimated_tokens: 20923
+    - file: "lore/parallel-reviewer-fanout-pattern.md"
+      reason: "oversized_topic"
+      estimated_tokens: 8936
+    - file: "lore/lifecycle-testing-harness.md"
+      reason: "oversized_topic"
+      estimated_tokens: 8568
+    - file: "lore/a-change-set-is-wider-than-its-diff.md"
+      reason: "rotation"
+      estimated_tokens: 1075
+    - file: "lore/a-demo-must-test-the-state-it-leaves-behind.md"
+      reason: "rotation"
+      estimated_tokens: 711
+    - file: "lore/a-detection-tier-must-outlive-the-cure-it-measures.md"
+      reason: "rotation"
+      estimated_tokens: 859
+    - file: "lore/a-displayed-attribute-can-have-more-than-one-source.md"
+      reason: "rotation"
+      estimated_tokens: 609
+    - file: "lore/a-fix-is-a-change-and-changes-need-review.md"
+      reason: "rotation"
+      estimated_tokens: 1774
+    - file: "lore/adopter-command-surface-curation.md"
+      reason: "rotation"
+      estimated_tokens: 374
+  halo:
+    - file: "lore/a-fix-s-regression-test-misses-the-branch-the-fix-added.md"
+      reason: "direct_child"
+      mode: "summary"
+      estimated_tokens: 84
+      summary: "A fix's regression test covers the report that prompted it, not the branch the fix introduced; after writing a fix, ask what states the fix made newly reachable and test in that new partition."
+  omitted_halo:
+    ancestor: 0
+    direct_child: 111
+    sibling: 0
+    outbound: 3
+    inbound: 1
+    legacy_reference: 139

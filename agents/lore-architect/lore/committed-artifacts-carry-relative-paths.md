@@ -2,7 +2,7 @@
 lore: 1
 type: topic
 summary: "Every path committed to a workspace or lore agent repo must be relative; the absolute-path shortcut bug also made S11 report every agent unregistered, because a checker matching on a value lies about absence when the value is wrong."
-parent: lore-context.md
+parent: lore/git-and-state-safety.md
 ---
 
 # A committed absolute path publishes local config as shared config
