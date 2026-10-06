@@ -44,3 +44,5 @@ Plugin-layer concern (the three-layer model — `architecture-overview.md`). The
 - `ailment-catalog-pattern.md` — `doctor-stale-plugin-cache.md` was the symptom; this topic is its root cause
 - `naming-foundational-principles.md` — naming the root cause (not just patching the symptom) is the meta-rule applied here
 - `framework-improvements-backlog.md` — open question (auto-invalidation?) + check #19 graceful-skip follow-up
+
+A license-only change is not a release and skips this bump; see [relicensing-checklist.md](relicensing-checklist.md).
