@@ -215,19 +215,26 @@ the shipped prose states the limit rather than implying a guarantee. Neither blo
 
 ### `/lr:spawn-teammate` Beta Graduation
 
-- **Lore-write serialization** — concurrent teammates write last-write-wins. Is file-lock/queued-merge needed or is "defer lore-changing work to finalization" sufficient?
-- **Automated teammate finalization** — lead triggering finalization on all teammates before disbanding via SendMessage channel. Explore.
+- **Lore-write serialization** — concurrent teammates write last-write-wins. Is file-lock/queued-merge needed or is "defer lore-changing work to finalization" sufficient? (A blocker, not polish, for long autonomous team work — see *Team mode* below.)
+- **Automated teammate finalization** — lead triggering finalization on all teammates before disbanding via SendMessage channel. Explore. (Also a blocker for autonomous teams — *Team mode* below.)
 - **Hook integration** — test whether `Stop`/`Notification` hooks fire in teammate sessions; could automate teammate finalization.
 - **Subagent-definition mode** — track if Agent Teams adds `skills`/`mcpServers` support; would enable more explicit spawning.
 - **`/lr:check` validators** — add checks for Agent Teams enabled, teammate boot paths valid. Deferred until usage shows what to check.
 - **Finalize/summarize consistency with teammate model** — those docs were designed for host+attached-guest; verify they compose correctly with Agent Teams' separate teammate sessions.
-- **User-primary-interlocutor framing** — graduation invariant or tunable? Currently locked as a design invariant in BETA after the post-v10 boot-prompt reframe.
+- **User-primary-interlocutor framing** — graduation invariant or tunable? Currently locked as a design invariant in BETA after the post-v10 boot-prompt reframe. 2026-10-12 evidence: an autonomous agent team needs the inverse — see *Team mode* below.
 
 See `spawn-teammate-feature.md` for full beta graduation question list.
 
 ### Agent Teams / Spawn-Teammate (additions)
 
 - **Real-world trial run for `/lr:spawn-teammate`** — `~/.claude/settings.json` now sets `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (configured this session). Next session after Claude Code restart, `/lr:spawn-teammate` is usable. Worth a real trial on framework work — the feature is BETA with open design questions (last-write-wins lore serialization, finalization across teammates). First usage will inform graduation. See `spawn-teammate-feature.md` for the open beta questions.
+- **Team mode for autonomous agent teams (found 2026-10-12; not urgent).** A user evaluating Lore as the runtime for an autonomous team of role agents — a PM agent coordinating QA, architect and engineer agents, the human escalated to only on serious issues — found three gaps:
+  1. `docs/teammate-conventions.md` is the inverse of what such a team needs. It makes the user in the pane the only interlocutor and allows `SendMessage` to the lead or another teammate only on explicit user request (§ The user in your own pane is your interlocutor; § SendMessage to the lead is for explicit user-requested coordination only). An autonomous team needs agents that coordinate directly and take questions to a lead agent, not to the human.
+  2. Lore-write serialization (last-write-wins) and finalization across teammates, both open BETA questions above, become blockers for long autonomous team work.
+  3. The Being Keeper starts sessions only on schedules (existential-task schedules and `lrb schedule` one-shots). Nothing starts a session on an event such as "start the architect when a story is accepted"; `lr-wait` gives a running session a file inbox, not a trigger.
+
+  **Do, if Lore is to host such teams through Agent Teams:** a second teammate mode ("team mode") selected at spawn time, beside today's user-primary mode, plus answers to the two BETA questions; an event-triggered spawn is the matching Keeper gap. The user chose plain subagents (hub and spoke, peers cannot message) as the default instead, so this is not urgent. Engine reality as of the 2026-10-12 docs snapshot: only Claude Code documents peer messaging among subagents (`claude-subagent-capabilities.md` § Compared with the other engines). Sits under the autonomy ladder's *Teams & hierarchy* rung (§ Autonomous Agents / Lore Beings). See `spawn-teammate-feature.md` § Autonomous-team fit.
+- **Re-verify the named-`Agent` → teammate binding on Claude Code 2.1.296 (found 2026-10-12).** `docs/engines/claude.md`'s subagent-spawn binding says a `name`d `Agent` call becomes an Agent-Teams teammate that does not auto-return its report. The 2.1.296 tool schema describes `name` only as "addressable via SendMessage while running" and marks `team_name` deprecated and ignored ("the session has a single implicit team"). Grade: docs and schema reading only — not enough to rewrite a binding. **Do:** run one named and one unnamed `Agent` call, observe which returns its report, then correct or reaffirm every site that states the trap: the binding in `docs/engines/claude.md`; `docs/spawn-teammate.md` § Spawn the teammates via the Agent tool (its `TeamCreate` / `team_name` path); `claude-engine-capabilities.md`; `docs-engines-convention.md` § v30 profile corrections; `parallel-reviewer-fanout-pattern.md` § Result delivery differs by spawn kind; `trilens-loop-feature.md`. See `claude-subagent-capabilities.md` § The named-teammate binding may be stale.
 
 ### TriLens Fix Boundary (`/lr:trilens-loop`, designed 2026-08-11, not yet implemented)
 

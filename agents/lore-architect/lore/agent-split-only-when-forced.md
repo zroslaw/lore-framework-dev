@@ -29,6 +29,14 @@ It's a *router-not-payload* problem: `lore-context.md` is a thin index into deep
 
 Generalizes `framework-scope-vs-agent-scope.md` ("isolate the universal core first, push specifics out only as needed") to the question of how finely to slice agents: don't pre-fragment; let pressure reveal the seam. The same "don't build the boundary until forced" instinct that keeps the framework thin keeps the agent roster from over-splitting.
 
+**A split on independence of views is a different case.** The private product-development method
+(2026-10-12) splits work across four role agents on independence of views, not on filing
+categories, so it does not directly contradict this rule. Whether that independence is the
+"genuine role divergence" pressure above is part of reconciling the method with lr-dev
+([lr-dev-direction.md](lr-dev-direction.md) § Open decisions). Compare
+[subagent-as-optimization-vs-subagent-as-semantics.md](subagent-as-optimization-vs-subagent-as-semantics.md),
+where independence from the caller is the deliverable rather than an optimization.
+
 ## See Also
 
 - `framework-scope-vs-agent-scope.md` — the broader "isolate the core, push specifics out only as needed" rule this extends to agent granularity.

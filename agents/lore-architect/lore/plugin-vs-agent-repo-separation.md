@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "Plugin and agent repos stay separate: the plugin is what's distributed, the dev repo how it's built and verified; lore-framework-dev is also Lore's never-shipped product repo in the private product-development method."
+parent: lore-context.md
+---
+
 Plugin repos and agent repos serve different purposes and remain separate, even when an agent's lore is *about* the plugin's design.
 
 ## The Rule
@@ -26,17 +33,42 @@ First instance: `lore-framework-dev/tests/test_wait.py` — stdlib `unittest` (n
 
 ## Concrete Decision (this session)
 
-`lore-framework/` (plugin) stays slim. `lore-framework-agents/` (a separate agent repo) was carved out to host `lore-architect` — and any future agents whose work is *about* the framework. Currently nested at `lore-framework/lore-framework-agents/` as a temporary placement; intent is to extract to a domain-root sibling on its own GitHub repository. See `agent-discovery-nesting-constraint.md` for the temporary trade-off.
+`lore-framework/` (plugin) stays slim. `lore-framework-agents/` (a separate agent repo) was carved out to host `lore-architect` — and any future agents whose work is *about* the framework. Currently nested at `lore-framework/lore-framework-agents/` as a temporary placement; intent is to extract to a domain-root sibling on its own GitHub repository. See `agent-discovery-nesting-constraint.md` for the temporary trade-off. (Done since: the repo is the domain-root `lore-framework-dev/`, commit `9dd12f8`.)
+
+## The Product Repo (2026-10-12)
+
+On 2026-10-12 the user designed a generic, story-driven method for almost autonomous product
+development by teams of Lore agents. It is private — repo `lore-product-method`, agent
+`method-keeper`: consult it for the method, and keep its content out of this public repo.
+
+The method separates a **product repo** — a Lore repo holding the product's agent team, its stories
+and its e2e story tests, never shipped — from **source repos** and optional **release repos**. For
+Lore, `lore-framework-dev` is the product repo, and `lore-framework` is both the source repo and the
+current release. That is the slim-plugin rule above from a second direction, with a concrete
+mechanism behind it: the Claude marketplace entry declares `"source": "./"`
+(`.claude-plugin/marketplace.json`), so any team files committed to `lore-framework` would ship to
+every user.
+
+A Lore pilot of the method is planned: role agents (product manager, QA engineer, engineer,
+possibly an architect role beside lore-architect), a `stories/` tree and an `e2e/` harness in
+`lore-framework-dev`, starting with a baseline of story tests for existing features. The existing
+`tests/` (testing strategy, release-gate policy, lifecycle harness) is the natural start.
+
+**Overlap to reconcile:** the method shares the Dark Factory north star with `lr-dev-direction.md`
+but makes different choices — role agents in a product repo, where lr-dev chose skills, not agents,
+over a per-repo `<repo>-df` backbone. Reconcile the two before either grows further; see
+`agent-split-only-when-forced.md` for why the method's four-role split is not a direct
+contradiction.
 
 ## Operational Rule
 
 When designing where a new artifact goes, ask: **"is this distributed via the Claude Code marketplace, or cloned into the domain by contributors who want to work with it?"**
 
 - Distributed → plugin (`lore-framework/`).
-- Cloned → agent repo (`lore-framework-agents/`, `lore-agents/`, or appropriate agent repo).
+- Cloned → agent repo (`lore-framework-dev/`, `lore-agents/`, or appropriate agent repo).
 
 The same content question applies to where new agents go:
-- Agent is *about* the framework itself → `lore-framework-agents/`.
+- Agent is *about* the framework itself → `lore-framework-dev/`.
 - Agent is personal/domain-specific → `lore-agents/` or a new domain-specific repo.
 
 ## Relationship to `framework-scope-vs-agent-scope.md`

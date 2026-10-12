@@ -36,7 +36,12 @@ validation and probe notes in the linked topics below.
   parallel `Task` fan-out (one write-capable `Task` per active agent for merge;
   `cursor-merge-via-task.md`). Recall / lore-search, consult, attach version-reconcile, and conflict
   resolution remain **serial host-side** until separately upgraded. If `Task` is missing on an old CLI
-  build, stop and report — do not silently host-side merge. See
+  build, stop and report — do not silently host-side merge. **Docs snapshot 2026-10-12**
+  (cursor.com/docs/subagents; read, not run; local cursor-agent 2026.10.01): resume by agent ID with
+  full context; a subagent returns only a final result, and the docs describe no inter-subagent
+  messaging; nesting is one extra level; definitions are read from `.cursor/agents/`,
+  `.claude/agents/` and `.codex/agents/`; subagents are available in the CLI. Cross-engine
+  comparison: [claude-subagent-capabilities.md](claude-subagent-capabilities.md). See
   `subagent-as-optimization-vs-subagent-as-semantics.md`, `docs-engines-convention.md` § v30 profile
   corrections, `merge-in-booted-subagents.md`.
 - **Memory file** — `AGENTS.md`.

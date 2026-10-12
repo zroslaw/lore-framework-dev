@@ -86,6 +86,7 @@ Generated tests live **permanently** in the DF repo, not migrated into the sourc
 - ~~Generator path for context agents~~ — moot; no context agent. The per-repo instance is a DF repo + config, emitted by the aspect-agnostic `df-repo-init` skill.
 - Scenario→code binding; generated-vs-human test de-dup.
 - **Re-validate ULA gap analysis on a file that HAS tests** — the end-to-end run was on a test-less file, so the `ula-missed` direction is unexercised. See `ula-validated-turbo-boost-switcher.md`.
+- **Reconcile with the product-development method (2026-10-12).** The user's private, story-driven method for almost autonomous product development by teams of Lore agents (agent `method-keeper`; keep its content out of this public repo) shares this direction's Dark Factory north star but makes different choices: role agents in a never-shipped product repo, where lr-dev chose skills, not agents, over a per-repo `<repo>-df` backbone. Its four-role split rests on independence of views, not on filing categories, so it does not directly contradict `agent-split-only-when-forced.md` — but the two directions must be reconciled before either grows further. For Lore itself, `lore-framework-dev` is the method's product repo; see `plugin-vs-agent-repo-separation.md` § The Product Repo.
 
 ## Operational note
 
@@ -118,3 +119,4 @@ Key design decisions: `df-` skill prefix required (supersedes `dev-`; not just g
 - `ailment-catalog-pattern.md` — accretion discipline modeled for the lr-dev feature catalog.
 - `framework-improvements-backlog.md` § lr-dev — running backlog.
 - `architecture-review-dispositions.md` — the 2026-06-13 architecture-review triage; records the DF-inside-`lr` and team-shared framings as deliberate current decisions (DF-split a known future option).
+- `plugin-vs-agent-repo-separation.md` § The Product Repo — the 2026-10-12 product-development method's product/source/release repo split, which overlaps this direction (see § Open decisions).

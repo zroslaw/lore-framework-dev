@@ -335,15 +335,18 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
   narrative context live in a `<repo>-df` backbone; skills not agents, persistence external. First
   aspect: **AIQA/ULA** (`/lr:df-repo-init`, `/lr:df-ula-file`), unit-level analysis with a
   bug-verification track, BETA. Design thread closed. Anchor: `lr-dev-direction.md`; see
-  `df-per-repo-backbone.md`, `aiqa-ula-feature.md`, `df-module-conventions.md`.
+  `df-per-repo-backbone.md`, `aiqa-ula-feature.md`, `df-module-conventions.md`. **Overlap to
+  reconcile:** the user's private product-development method (`method-keeper`; its content stays
+  out of this public repo) shares the DF north star but puts role agents in a never-shipped product
+  repo — `lore-framework-dev` for Lore (`plugin-vs-agent-repo-separation.md`).
 - **Autonomous agents / Lore Beings** — agents as always-on background collaborators with persistent
   task state, raising for input only when needed. A being is an ordinary lore agent plus a `being.md`
   descriptor, and the **Being Keeper** (`lrb`) is deterministic substrate, never an LLM. CLI-only;
   budget = daily-USD spawn gate + per-task wall-clock kill. BETA since v28 with the `/lr:being`
   surface. **The persistent `--launchd` Keeper install is live on this machine** — a candidate
   explanation whenever a repo changes under me mid-session. Open gaps (headless permissions,
-  self-scheduling, per-kind contracts, the B11 login item) and the rest of the design live in the
-  anchor: `lore-beings-design.md`; see also
+  self-scheduling, no event-triggered spawn, per-kind contracts, the B11 login item) and the rest
+  of the design live in the anchor: `lore-beings-design.md`; see also
   `agent-being-consciousness-substrate-split.md`, `kill-tree-enumerate-before-signal-ordering.md`,
   `lore-beings-mvp-takeover-review.md`, `autonomous-agents-vision.md`, `wait-primitive-feature.md`.
 - **Multi-engine portability (Codex, Cursor)** — **shipped, not in flight.** All three engines are

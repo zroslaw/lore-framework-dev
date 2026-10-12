@@ -26,7 +26,9 @@ the linked topics below.
   agent-initiated path is to read `docs/<skill>.md` directly. Per-agent shortcuts are personal
   skills in `~/.codex/skills/`, invoked as `$lr-<agent>-agent`.
 - **Subagent model** — native in-session `spawn_agent` / `wait_agent`; the Codex engine profile's
-  host-reads-steps override is real, not speculative.
+  host-reads-steps override is real, not speculative. Per the 2026-10-12 docs (read, not run),
+  custom agents are TOML files in `.codex/agents/` and coordination is parent-mediated, with
+  `multi_agent_v2` still off on 0.160.0 — `codex-native-multi-agent-subsystem.md` § Docs snapshot.
 - **Memory file** — `AGENTS.md`.
 - **Sandbox/gits state** — default sandbox blocks `.git` writes; supported finalization path
   requires `.git` writable through launch or configuration. Network denial is expected and Lore

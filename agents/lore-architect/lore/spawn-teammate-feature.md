@@ -1,3 +1,10 @@
+---
+lore: 1
+type: topic
+summary: "/lr:spawn-teammate (BETA, v10+): lore agents as Agent Teams teammates whose interlocutor is the user — spawn prompt, boot-time teammate rules, post-spawn verification, graduation questions, and the autonomous-team gap."
+parent: lore-context.md
+---
+
 # `/lr:spawn-teammate` — Feature (v10, BETA)
 
 Added in v10. Spawns one or more lore agents as Claude Code Agent Teams teammates. The current session becomes the team lead.
@@ -71,6 +78,27 @@ This is the framework's third instance of graduated-verification-confidence (aft
 5. **`/lr:check` validators** — add checks for spawn-teammate-related state (Agent Teams enabled, teammate boot paths valid). Deferred until usage shows what to check.
 6. **Consistency review of `/lr:finalize` multi-teammate behavior** — finalize and summarize docs were designed for host+attached-guest model. Do they compose correctly with Agent Teams' separate teammate sessions, or need adjustments?
 7. **User-primary-interlocutor framing** — should this be locked as a graduation invariant in stable releases, or remain tunable? Currently treated as an invariant in BETA based on observed dominant usage pattern.
+
+## Autonomous-team fit (2026-10-12)
+
+Found while a user evaluated Lore as the runtime for an autonomous team of role agents — a PM agent
+coordinating QA, architect and engineer agents, the human escalated to only on serious issues. For
+that use the feature's invariant points the wrong way: `docs/teammate-conventions.md` makes the
+user in the pane the only interlocutor and permits `SendMessage` to the lead or other teammates only
+on explicit user request, while an autonomous team needs agents that coordinate directly and take
+questions to a lead agent, not to the human.
+
+Hosting such teams through Agent Teams would need a **second teammate mode ("team mode") selected
+at spawn time**. That bears on the *user-primary-interlocutor* question above: the current framing
+could remain the default mode rather than the only one. The *lore-write serialization* and
+*automated finalization* questions turn from polish into blockers for long autonomous work, and
+the Keeper has a matching gap — it starts sessions only on schedules, never on an event.
+
+The user chose plain subagents (hub and spoke, peers cannot message) as the default instead, so
+this is filed rather than scheduled: `framework-improvements-backlog.md` § Agent Teams /
+Spawn-Teammate (additions), *Team mode*. Which engines document peer messaging among subagents at
+all: [claude-subagent-capabilities.md](claude-subagent-capabilities.md) § Compared with the other
+engines.
 
 ## See Also
 

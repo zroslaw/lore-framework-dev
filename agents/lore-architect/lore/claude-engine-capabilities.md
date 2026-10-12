@@ -35,7 +35,11 @@ are written in Claude terms first, and other engines override only the binding p
   the call an Agent-Teams teammate, and **a teammate does not auto-return its final report** — spawn
   unnamed when you need the result back, or instruct the teammate to `SendMessage` its report before
   going idle. See `docs-engines-convention.md` § v30 profile corrections and § Engine traps belong in
-  the binding.
+  the binding. **Trap (2) may be stale on 2.1.296** — the current tool schema describes `name` only
+  as "addressable via SendMessage"; re-verify by running before relying on either account. The
+  2026-10-12 docs snapshot (resume via `SendMessage`, peer messaging among subagents, 3-level
+  nesting, 20 concurrent, new frontmatter fields) is in
+  [claude-subagent-capabilities.md](claude-subagent-capabilities.md).
 - **MCP tool idle timeout** — a single MCP tool call is killed after
   `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT` (default **1 800 000 ms = 30 min**) without a response or
   progress. This caps `lr-wait`'s `sleep`/`wait_for_event` in practice, and the abort leaves the
@@ -89,6 +93,8 @@ details living in the linked topics below rather than scattered through multi-en
 - `macos-case-insensitive-filename-collision-with-memory-files.md` — the case-insensitive collision between the memory file and `docs/engines/claude.md`
 - `docs-engines-convention.md` § Engine traps belong in the binding — why the `fork` / named-teammate traps live in the profile rather than only in lore
 - `subagent-as-optimization-vs-subagent-as-semantics.md` — when `fork` is not merely suboptimal but invalid
+- [claude-subagent-capabilities.md](claude-subagent-capabilities.md) — 2026-10-12 docs snapshot of
+  subagent resume, peer messaging, nesting and frontmatter, with the cross-engine comparison
 - `wait-primitive-feature.md` — the MCP idle-timeout ceiling and the long-wait fallback
 - `macos-documents-permission-loss-mid-session.md` — the mid-session TCC ailment
 - `ephemeral-session-plugin-snapshot-topology.md` — the per-session plugin-snapshot divergence
