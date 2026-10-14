@@ -1,0 +1,70 @@
+---
+lore: 1
+type: topic
+summary: "How a Codex host is extended (2026-10-14): AGENTS.md discovery, skill locations, config.toml layers, hooks (events, trust, plugin and managed hooks), subagents and custom agents, and import from Claude Code, Claude Cowork, or Cursor."
+parent: lore/extension-platform.md
+---
+
+# Codex configuration and extensibility
+
+Checked 2026-10-14. Documented unless a line says otherwise. These apply to the ChatGPT desktop app
+(Codex and local Work), Codex CLI, and the IDE extension on the same host.
+
+## AGENTS.md
+
+- Global: `~/.codex/AGENTS.override.md` or `AGENTS.md` (first non-empty). Project: from the Git
+  root down to the working directory, one file per directory (`AGENTS.override.md`, then
+  `AGENTS.md`, then `project_doc_fallback_filenames`). Files closer to the working directory come
+  later and win. Limit `project_doc_max_bytes` = 32 KiB by default.
+- Personal custom instructions in Codex live in the global `AGENTS.md`.
+- `## Code Review Rules` sections guide GitHub code review.
+
+## Skills
+
+- Locations: `$CWD/.agents/skills` up to `$REPO_ROOT/.agents/skills` (REPO), `$HOME/.agents/skills`
+  (USER), `/etc/codex/skills` (ADMIN), bundled (SYSTEM: `skill-creator`, `plan`, and others).
+  Symlinks are followed. Same-name skills are not merged.
+- Progressive disclosure: the initial list (name, description, path) uses at most 2% of context
+  (or 8,000 characters); `skills.max_context_tokens` up to 10,000.
+- Invoke with `$skill` or `/skills`, or implicitly by description. `$skill-installer` adds curated
+  skills. Disable one with `[[skills.config]] path = ... enabled = false`.
+- Custom prompts are deprecated; use skills.
+
+## config.toml layers
+
+- `~/.codex/config.toml` (user), `.codex/config.toml` (trusted projects only), system and
+  cloud-managed configuration, and `requirements.toml` (enforced by admins). Separate profile
+  files can live under `CODEX_HOME`.
+
+## Hooks (GA since 2026-05)
+
+- Events: `SessionStart`, `SessionEnd`, `UserPromptSubmit`, `PreToolUse`, `PermissionRequest`,
+  `PostToolUse`, `PreCompact`, `PostCompact`, `SubagentStart`, `SubagentStop`, `Stop`, `Interrupt`.
+- Sources: `hooks.json` or `[hooks]` in any config layer, and plugin-bundled hooks. All matching
+  hooks run; command hooks for one event run concurrently.
+- Non-managed hooks need review and **trust** (by hash) in `/hooks`; managed hooks are trusted by
+  policy. `--dangerously-bypass-hook-trust` skips trust for one run.
+- Handlers can be commands or **MCP tool hooks**; background hooks exist.
+- Cloud-orchestrated Work and dots run only admin-defined remote MCP hooks; command hooks and
+  plugin hooks do not run there.
+
+## Subagents
+
+- On by default in current Codex releases; `/subagents` in the CLI. ChatGPT Work also runs
+  subagents in its hosted environment; **Ultra** reasoning delegates proactively.
+- Custom agents: TOML files in `~/.codex/agents/` or `.codex/agents/`; limits under `[agents]`
+  (`max_concurrent_threads_per_session`, `default_subagent_model`).
+
+## Import from another agent (2026-08-11)
+
+- The desktop app imports from **Claude Code, Claude Cowork, or Cursor**; Codex CLI `/import` from
+  Claude Code or Cursor (up to 50 chats from the last 30 days).
+- Mapping: instruction files → `AGENTS.md`; `settings.json` → `config.toml`; skills → skills;
+  plugins → plugins; slash commands → skills; subagents → Codex subagents; hooks → Codex hooks;
+  MCP config → Codex MCP config; Claude Code project memories → Codex memories. The desktop app
+  can keep imports in sync.
+
+Sources: https://learn.chatgpt.com/docs/agent-configuration/agents-md ;
+https://learn.chatgpt.com/docs/build-skills ; https://learn.chatgpt.com/docs/hooks ;
+https://learn.chatgpt.com/docs/agent-configuration/subagents ; https://learn.chatgpt.com/docs/import ;
+https://learn.chatgpt.com/docs/config-file/config-basic ; https://learn.chatgpt.com/docs/custom-prompts
