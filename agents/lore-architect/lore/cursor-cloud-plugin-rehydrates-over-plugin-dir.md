@@ -56,7 +56,9 @@ plugin directories answered a question that was about to be paid for.
 1. Move aside `~/.cursor/plugins/cache/zroslaw-lore-framework` and
    `~/.cursor/plugins/marketplaces/github.com/zroslaw`.
 2. Strip the `lr` entry from `~/.cursor/plugins/cache/.cloud-plugin-manifest.json`.
-3. Keep `~/.cursor/plugins/local/lore-framework` → worktree (optional but useful).
+3. Keep `~/.cursor/plugins/local/lore-framework` → worktree (optional). Caveat: per Cursor's docs a
+   symlink there loads only when its target is inside that folder, so this step likely does
+   nothing (`cursor-engine-capabilities.md`).
 4. Re-run with `LR_FRAMEWORK_DIR=<worktree>`.
 5. **Re-check immediately before the suite starts** — rehydration can complete within ~25s of
    step 1. Rely on the harness's deterministic check for the verdict, not on having done steps 1–3.

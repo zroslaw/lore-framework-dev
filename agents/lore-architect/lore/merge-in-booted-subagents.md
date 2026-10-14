@@ -40,6 +40,20 @@ This mirrors the `/lr:consult` pattern (the consult subagent also boots as its t
 
 Each agent writes to its own `agents/<name>/` subtree — no file-level contention. Parallel execution turns multi-agent finalize from O(N) sequential reads of large lore contexts into O(1) wall-clock. For a single-agent session the parallelism is degenerate (one subagent) — the uniformity is a design choice, not a performance claim.
 
+### Known race: the pre-merge `--fresh` pull (open)
+
+The lore writes do not contend, but the git pull before them does. When two or more active agents
+share one repo, their merge subagents run `lr-core preflight --fresh` on that repo at the same
+moment, and one can fail with `fatal: Cannot fast-forward to multiple branches.` Seen twice on
+2026-10-14 in `lore-framework-dev`: first in a finalize whose two merge subagents raced, then in a
+later finalize, where this agent's merge (beside `claude-expert`'s) hit it on the first try and a
+retry 10 seconds later reported `up-to-date`. Cause (inference, not tested): two concurrent pulls
+both write `FETCH_HEAD`, so one pull sees several for-merge refs. Effect is benign — merge
+continues in degraded mode or after the retry, and no lore is lost — but it is predictable for any
+multi-agent repo. Until fixed, a merge brief for a shared repo should say "on this error, wait
+about 10 s and retry once". Candidate fixes: `framework-improvements-backlog.md` § Finalization /
+Autopush.
+
 ## Retained returns are load-bearing
 
 **The host must retain each subagent's return value through to phase 3.** Summarize uses every

@@ -92,5 +92,10 @@ a local Cowork session — and never in chat or on mobile chat.
 
 ## Boundaries
 
-This agent lives in a public repository: Lore holds public product facts only, never business
-plans, commercial strategy, unpublished numbers, credentials, or personal data.
+- **Sibling experts** in this repo (since 2026-10-14): **openai-expert** owns ChatGPT, Codex, and
+  the OpenAI developer platform; **cursor-expert** owns Cursor (editor, CLI, cloud agents, web and
+  mobile). Route questions about those products to them. Compare products only at the level that
+  a Claude answer needs. Cross-product example: remote MCP, in [connectors](lore/connectors.md).
+- **lore-architect** owns Lore framework design and implementation. I supply the Claude facts.
+- This agent lives in a public repository: Lore holds public product facts only, never business
+  plans, commercial strategy, unpublished numbers, credentials, or personal data.

@@ -51,6 +51,9 @@ The v14 fix validated `shared-procedure-doc-pattern.md`: the change lived in ONE
 - **Uncommitted changes preserved.** `--ff-only` either advances cleanly or refuses with a clear error. Auto-pull never stashes.
 - **Per-repo scope.** Multi-repo flows iterate; auto-pull itself is single-repo.
 - **Idempotent.** Running twice on a clean repo produces no observable difference.
+- **Not safe to run twice *at once* in one repo.** Two simultaneous pulls (parallel merge
+  subagents of one finalize) can fail with `Cannot fast-forward to multiple branches.`; the failure
+  is benign and a retry succeeds. See `merge-in-booted-subagents.md` § Known race.
 
 ## /lr:pull-lore Specifics
 

@@ -11,7 +11,8 @@ Source: https://claude.com/pricing, checked 2026-10-13 (documented). List prices
 use.
 
 - **Free** ($0): chat on web, desktop, and mobile; web search, file creation, code execution;
-  memory, connectors, Artifacts, Claude Design, Slides, Docs.
+  memory, connectors, Artifacts, Claude Design, Slides, Docs. Free has only one custom connector
+  (checked 2026-10-14, [connectors](connectors.md)).
 - **Pro**: $20/month, or $17/month billed annually ($200/year). Adds more usage, Claude Code,
   Projects, Claude Science, task handoff and scheduling, Dashboards (beta), more models, Claude in
   Chrome and Microsoft 365. Skills need Pro or higher.

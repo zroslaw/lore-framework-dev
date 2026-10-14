@@ -346,7 +346,8 @@ files+git. Extends `agent-as-universal-working-environment.md` beyond terminals 
 surface-federation angle distinct from (and not eroded by) the engine-federation claims
 that `similar-projects-landscape.md`'s 2026-07-20 re-survey found competitors now also
 make; none of the surveyed CLI-bound tools reach non-CLI surfaces like this today. Medium
-build, biggest strategic reach.
+build, biggest strategic reach. A 2026-10-14 idea extends this from read-only to a full surface
+profile (boot, recall, reflect, merge over remote MCP): backlog § Shell-less Surfaces.
 
 ### C4. Scheduled autonomous maintenance — OPEN
 Nightly routine (Claude Code cron/routines exist now): workspace-pull → script-backed

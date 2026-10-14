@@ -112,7 +112,10 @@ Bundled MCP servers use root `.mcp.json`; the first, `lr-wait`, is stdlib Python
 Engine-specific operational knowledge has one hub topic per engine:
 `claude-engine-capabilities.md`, `codex-engine-capabilities.md`, `cursor-engine-capabilities.md` —
 entry points for install/update, invocation, subagents, memory file, MCP/plugin loading, sandbox,
-boot cost and harness caveats; keep atomic findings there. At least one Claude Code host flavor
+boot cost and harness caveats; keep atomic findings there. **Engine product facts** (features,
+surfaces, plans, CLI changes) belong to `claude-expert`, `openai-expert` and `cursor-expert` in this
+repo — consult them; their findings arrive graded *read the docs*, so probe before one changes a
+profile. At least one Claude Code host flavor
 snapshots the **entire plugin bundle per session**, so a mid-session version bump or git pull doesn't
 reach it (`ephemeral-session-plugin-snapshot-topology.md`).
 
@@ -208,6 +211,10 @@ Before Phase 1, finalize revises its participants (v47, shipped): best-fit host,
 additions, one fail-closed confidentiality gate (`finalize-participant-revision-design.md`).
 See `finalization-process.md`, `finalize.md`, `merge-in-booted-subagents.md`,
 `reflect-merge-execution-asymmetry.md`, `push-conflict-resolution.md`.
+
+Two open hazards in a repo with several agents (backlog § Finalization / Autopush): Phase 4 stages
+all of `agents/`, so stage only the active agents' folders by hand; and parallel merge subagents
+race on the `--fresh` pull (`Cannot fast-forward to multiple branches.`), so retry once after ~10 s.
 
 Canonical host summaries carry a compact per-agent **Learning audit** from the retained Reflection
 outcomes and Merge handoffs. Only a *completed* reflection set lets an unlisted input be called
@@ -369,7 +376,8 @@ Recurring funnel bug: fresh-start framing leaves the **team-join path** invisibl
   `architecture-review-dispositions.md`. The 2026-07-02 review added post-merge diff verification and
   recall-time staleness surfacing.
 - **Parked:** workdir-as-reference-library; vector-DB search (until >100 topics/agent); the remaining
-  session-as-durable-artifact cluster. See `framework-improvements-backlog.md`,
+  session-as-durable-artifact cluster; Lore over a remote MCP server as a surface profile for
+  shell-less clients (idea only — raise it again only on request). See `framework-improvements-backlog.md`,
   `session-as-durable-artifact-cluster.md`.
 - **Workspace layer** — shipped, no longer an exploration. Live: `init` (converges), `pull`, `push`,
   diagnosis-via-`/lr:check`, and (v46) **`sync` — the repair pass**, the only one that commits on the

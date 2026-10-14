@@ -43,7 +43,8 @@ relying on it; this area changes often.
 
 ## Children
 
-- [Connectors](connectors.md) — remote vs local, directory vs custom, where each works.
+- [Connectors](connectors.md) — remote vs local, directory vs custom, where each works, and
+  custom connector setup (plans, sign-in, network reach, MCP features).
 - [Plugins: install paths and surface support](plugins-install-and-surface-support.md) — install
   paths, limits, and the per-surface component table.
 - [Directory publishing and org controls](directory-publishing-and-org-controls.md) — submitting

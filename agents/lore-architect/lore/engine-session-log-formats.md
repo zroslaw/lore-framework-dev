@@ -8,7 +8,11 @@ Ground-truth findings from building `scripts/session-takeover` (`takeover-featur
 - `session_index.jsonl` holds only **named** threads (`{id, thread_name, updated_at}`); the sessions tree also contains many unnamed rollouts — automated sub-runs, bursts sharing one timestamp.
 - Record types: `session_meta` (id, cwd, originator, cli_version), `turn_context` (model — e.g. `gpt-5.4`), `response_item` (the payload: `message` roles user/assistant/developer, `function_call`/`custom_tool_call` + `*_output` paired by `call_id`, `reasoning` is **encrypted**), `event_msg` (redundant UI events).
 - Engine-injected context arrives as user-role messages wrapped in tags (`<environment_context>`, `<user_instructions>`); developer-role carries permissions/collaboration plumbing. Filter both.
-- `codex mcp-server` runs Codex as a stdio MCP server exposing `codex`/`codex-reply` tools — a Claude session could drive Codex directly.
+- **Removed:** `codex mcp-server` (once a stdio MCP server exposing `codex`/`codex-reply` tools) is
+  gone. `openai-expert` flagged the removal from OpenAI's docs on 2026-10-14, and the local
+  codex-cli 0.160.0 confirms it (ran `codex --help`: only `mcp`, which manages *external* MCP
+  servers; `codex mcp-server` falls through to the interactive CLI). Do not plan to drive Codex
+  from a Claude session this way.
 
 ## Claude Code (`~/.claude/projects/`)
 

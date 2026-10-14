@@ -22,6 +22,15 @@ validation and probe notes in the linked topics below.
   install entirely with committed `.cursor/settings.json` (v43,
   [project-scope-plugin-config-feature.md](project-scope-plugin-config-feature.md)) — its load
   surface is established from Cursor's shipped code, not an end-to-end run.
+- **Local-plugins symlink is probably dead (read the docs, not run).** Per Cursor's docs
+  (`cursor-expert`, 2026-10-14), a symlink in `~/.cursor/plugins/local` loads only when its target
+  is *inside* that folder. `install-cursor-plugin --symlink` and the harness prep step point
+  `~/.cursor/plugins/local/lore-framework` at a checkout *outside* it, so the profile's unverified
+  "D2 probe" surface likely fails. Probe it before relying on it or editing the profile row.
+- **CLI name** — Cursor's docs now call the CLI **`agent`**; `docs/engines/cursor.md` and this lore
+  say `cursor-agent`. Not a break: on 2026.10.01 both `~/.local/bin/agent` and
+  `~/.local/bin/cursor-agent` are symlinks to one binary (ran `ls -la`, 2026-10-14). Rename at the
+  next profile edit.
 - **Plugin refresh** — `scripts/cursor-refresh-plugin` (git pull + VERSION diff + fresh-session
   reminder), then new `cursor-agent --plugin-dir` session; no hot-reload.
 - **Mid-session fallback** — when plugin skills are unavailable, file-driven execution via
@@ -64,6 +73,10 @@ validation and probe notes in the linked topics below.
 
 Cursor-specific facts were previously split across probe notes, port validation, and dual-tree docs.
 This hub is the starting map for install, refresh, fallback, invocation, and constraints.
+
+**Cursor product facts** (features, surfaces, plans, CLI changes) belong to **`cursor-expert`** in
+this repo — consult it. This hub keeps only the facts that bind how Lore executes on Cursor. An
+expert's finding arrives graded *read the docs*; run a probe before it changes a profile.
 
 ## See Also
 

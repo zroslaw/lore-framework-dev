@@ -39,7 +39,9 @@ are written in Claude terms first, and other engines override only the binding p
   as "addressable via SendMessage"; re-verify by running before relying on either account. The
   2026-10-12 docs snapshot (resume via `SendMessage`, peer messaging among subagents, 3-level
   nesting, 20 concurrent, new frontmatter fields) is in
-  [claude-subagent-capabilities.md](claude-subagent-capabilities.md).
+  [claude-subagent-capabilities.md](claude-subagent-capabilities.md). **Nested spawn ran
+  (2026-10-14):** a subagent that ran `/lr:finalize` spawned its own merge subagent, so finalize can
+  run inside a subagent on Claude Code.
 - **MCP tool idle timeout** — a single MCP tool call is killed after
   `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT` (default **1 800 000 ms = 30 min**) without a response or
   progress. This caps `lr-wait`'s `sleep`/`wait_for_event` in practice, and the abort leaves the
@@ -79,6 +81,10 @@ are written in Claude terms first, and other engines override only the binding p
 Claude is no longer "the only engine" in the lore graph. Treat this topic as the durable entry
 point for Claude-specific install, invocation, plugin-cache, and subagent assumptions, with atomic
 details living in the linked topics below rather than scattered through multi-engine port notes.
+
+**Claude product facts** (features, surfaces, plans, models) belong to **`claude-expert`** in this
+repo — consult it. This hub keeps only the facts that bind how Lore executes on Claude Code. An
+expert's finding arrives graded *read the docs*; run a probe before it changes a profile.
 
 ## See Also
 

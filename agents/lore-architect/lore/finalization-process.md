@@ -23,6 +23,14 @@ phase below. See `finalize-participant-revision-design.md`.
 
 **Phase 4 — Commit and Push** (v8+, only from `/lr:finalize`): one commit per touched repo with a mandatory review gate, then push. Commit message default: `Finalize session <short-uuid>`. Only `/lr:finalize` touches git at the end; standalone `/lr:reflect`, `/lr:merge`, and `/lr:summarize` leave all changes uncommitted for the user to review and commit themselves.
 
+**Known open gap (v47):** Phase 4 stages `git -C <repo> add agents/`, the whole agent tree. In a
+repo with several agents this sweeps in other agents' uncommitted files, and with parallel
+finalizations (2026-10-14: three at once on `lore-framework-dev`) it sweeps in other sessions'
+work. Until the doc narrows it, stage only the active agents' `agents/<name>/` folders and check
+`git show --stat HEAD` after the commit. Fix tracked in `framework-improvements-backlog.md`
+§ Finalization / Autopush, beside the parallel-merge pull race
+(`merge-in-booted-subagents.md` § Known race).
+
 All four phases combined: `/lr:finalize`.
 
 ## Why merge moved from inline to subagents (v8)

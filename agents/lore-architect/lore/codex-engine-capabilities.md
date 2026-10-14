@@ -58,6 +58,10 @@ Codex details were spread across probe notes, port-validation topics, sandbox fi
 notes. This hub gives future work one starting place for install/update, invocation, subagents,
 MCP/plugin loading assumptions, and harness preflight.
 
+**Codex product facts** (features, surfaces, plans, CLI changes) belong to **`openai-expert`** in
+this repo — consult it. This hub keeps only the facts that bind how Lore executes on Codex. An
+expert's finding arrives graded *read the docs*; run a probe before it changes a profile.
+
 ## See Also
 
 - `codex-cli-plugin-loading-findings.md`
@@ -68,5 +72,5 @@ MCP/plugin loading assumptions, and harness preflight.
 - `codex-testing-methodology.md`
 - `docs-engines-convention.md`
 - `multi-engine-portability-direction.md`
-- `engine-session-log-formats.md` — rollout JSONL record types, session index, `codex mcp-server` (empirical, v24 takeover work)
+- `engine-session-log-formats.md` — rollout JSONL record types, session index, and the removal of `codex mcp-server` (empirical, v24 takeover work; removal confirmed on 0.160.0)
 - `codex-exec-real-invocation-contract.md` — the `codex exec` headless stdout JSONL contract (empirical, v28 Lore Beings work)

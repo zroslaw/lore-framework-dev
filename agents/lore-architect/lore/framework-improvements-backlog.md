@@ -56,11 +56,37 @@ New module/mode for development & SDLC automation; first feature is bug-finding 
 - **Whole-repo sweep skill** — `lr:dev-quality-sweep`: orchestrator that reads the manifest, picks N stale files, runs the per-file workflow on each, persists File Reports, updates the manifest. Daily-cron-friendly (budgeted bottom-N rolling). Sits on top of the per-file workflow; depends on quality-repo conventions.
 - **Automated SDD (Spec-Driven Development) — light DF prototype.** User-raised 2026-06-05. The pitch: a setup of environment + workflows where the user talks to an agent purely from the **product perspective**, and the agent does the rest internally — automatically tracks specifications, checks their internal consistency and alignment, writes code from the spec, writes and executes tests, and raises issues whenever something is wrong, misaligned, or contradicts another spec/code/test artifact. The framing is *first prototype of the Dark Factory, light version* — a graduation rung between today's per-file ULA aspect (one human-bounded analysis pass on existing code) and the full autonomous DF SDLC (continuous closed-loop product → code → test → issue). Expected to live as another aspect (or aspect cluster) on the DF backbone alongside `ula/` — specs as a first-class artifact kind under `repo-lore/<file>/` (or a new above-file repo-level layer for cross-file spec sets), with consistency-check skills as the "raises issues whenever something contradicts" surface. Open seams: how specs are authored (free-form prose? structured? both with the structured derived from prose?), how the spec-↔-code-↔-test triangle is kept aligned (which artifact wins on conflict, who writes which), how the agent decides when a product-perspective conversation has yielded enough to commit a spec change, and how this composes with AIQA/ULA (do specs drive ULA's "scenarios" or are they a parallel aspect?). Status: parked vision, no design doc yet — capture as the named SDD-light entry on the lr-dev roadmap. See `df-per-repo-backbone.md`, `lr-dev-direction.md`, `autonomous-agents-vision.md`.
 
+### Shell-less Surfaces — Lore over a Remote MCP Server (idea, 2026-10-14)
+
+- **A remote MCP server as a full Lore surface for clients with no shell and no local files** (for
+  example Claude mobile chat). Status: **idea, not designed.** Raised in a product-method pilot
+  session (its details stay in a private repo); bring it back only when that pilot's architect or
+  the user asks. It goes further than standing-list item C3 (`workdir/what-to-improve.md`), which
+  exposes only lore search/read. Shape that fits the existing framework:
+  - **A new surface profile** `docs/engines/mcp.md` with the five bindings: invocation = MCP tool
+    calls; subagent-spawn = none, so merge runs inline — lossless, because merge is
+    optimization-class (`subagent-as-optimization-vs-subagent-as-semantics.md`); a semantics-class
+    procedure such as `/lr:trilens-loop` must stop and report there. Memory-file = none (the server
+    delivers the instructions); framework-root and runtime-bounding live on the server.
+  - **Same procedures, not a fork.** The server serves the docs of the lore-framework version it
+    runs, and a Python server can import `lr_core` (preflight, lore-map) in-process.
+  - **Split:** the server does only deterministic work (git pull and push, file reads and writes,
+    scripts); the chat model does the reasoning (boot, recall, reflect, merge, summary) — the same
+    principle as `agent-being-consciousness-substrate-split.md`.
+  - **Concurrency with laptop sessions stays git-based:** pull before boot and before publish,
+    never force, report conflicts.
+
 ## Session Lifecycle & Durability
 
 ### Finalization / Autopush
 
-- **Finalize Phase 4 stages the whole `agents/` tree (found in use 2026-08-31, ships in v44).**
+- **Finalize Phase 4 stages the whole `agents/` tree (found in use 2026-08-31; still open in v47).**
+  The old "ships in v44" label was wrong: v47 `finalize.md` Phase 4 Step 1 is still
+  `git -C <repo> add agents/` (checked 2026-10-14). **Second occurrence, 2026-10-14, now with
+  parallel sessions:** three finalizations ran at once on `lore-framework-dev` — the host session
+  for its guests and two subagent sessions that each finalized a new agent — so each `add agents/`
+  would have put the other sessions' uncommitted agent folders into its own commit. Mitigated by
+  hand: each session staged only its own `agents/<name>/` and checked `git show --stat HEAD`.
   `finalize.md` Phase 4 Step 1 is `git -C <repo> add agents/`, justified as scoping away
   "incidental untracked files elsewhere" — true only for a single-agent repo. In
   `lore-framework-dev`, which holds `lore-architect` and `lore-advocate`, it staged another agent's
@@ -73,6 +99,14 @@ New module/mode for development & SDLC automation; first feature is bug-finding 
   paired guard worth considering: have Phase 4 read back `git diff --cached` and refuse paths outside
   the active agents. See `concurrent-session-committed-my-uncommitted-work.md` § Confirmed in the
   other direction, `single-canonical-source-discipline.md`.
+- **Parallel merge subagents race on the pre-merge `--fresh` pull (found 2026-10-14, twice).** When
+  two or more active agents share one repo, their merge subagents run `lr-core preflight --fresh`
+  on it at once, and one gets `fatal: Cannot fast-forward to multiple branches.`; a retry reports
+  `up-to-date`. Cause is inferred, not tested (both pulls write `FETCH_HEAD`). Benign — degraded
+  mode, no lore lost — but predictable for every multi-agent repo. Candidate fixes, not decided:
+  (a) the finalize/merge host pulls each touched repo once before it spawns the merge subagents and
+  passes `--no-pull`; (b) the preflight pull leg retries once on this exact error. (a) removes the
+  race; (b) only absorbs it. See `merge-in-booted-subagents.md` § Known race.
 
 
 - **Codex lifecycle-fidelity hardening** — the first real Codex session exposed
@@ -519,6 +553,14 @@ See `operation-notice-convention.md`.
 
 ### Documentation / Meta
 
+- **`docs/engines/cursor.md` drift flagged by `cursor-expert` (2026-10-14).** (1) Cursor's docs now
+  name the CLI `agent`; the profile says `cursor-agent` in eight places. Not a break — both names
+  are symlinks to one binary on 2026.10.01 (ran `ls -la`). (2) Per Cursor's docs a
+  `~/.cursor/plugins/local` symlink loads only when its target is inside that folder, so the
+  profile's "Local plugins dir symlink" row and `install-cursor-plugin --symlink` (target outside
+  the folder) likely describe a surface that cannot work — grade: read the docs. **Do:** probe (2)
+  on a real build, then update the row and the script's `--symlink` help; rename (1) at the same
+  profile edit. See `cursor-engine-capabilities.md`.
 - **Guardrail for stale per-session plugin snapshot at slash-command dispatch (found 2026-08-16).**
   On the "local-agent-mode-sessions" host flavor, a slash command's `SKILL.md` can resolve through a
   per-session plugin snapshot that has diverged materially from the boot-resolved installed root
