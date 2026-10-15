@@ -16,3 +16,6 @@ __pycache__/
 
 # Quality-suite debug output (regenerated; see tests/quality/)
 results/
+/.tmp/
+/.worktrees/
+/.lr-beings/
