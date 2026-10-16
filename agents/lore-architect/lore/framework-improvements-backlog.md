@@ -570,6 +570,29 @@ See `operation-notice-convention.md`.
   preamble, or an `lr-core` check comparing the invoking skill's root against the booted root. See
   `ephemeral-session-plugin-snapshot-topology.md`, `claude-engine-capabilities.md` § Operational
   shape, `point-of-use-guardrails-beat-recorded-lore.md`.
+- **Repeated same-conversation boot from registered agent shortcuts (user feedback 2026-10-16).**
+  A registered shortcut currently unconditionally routes every matching request through the full
+  boot procedure. In a continuing conversation this repeats preflight, repository freshness work,
+  Lore-map generation, and the three-line boot announcement even though the same agent's role and
+  Lore are already loaded. It creates user-visible noise and needless token work. **Do:** design a
+  framework-level loaded-agent guard for generated shortcuts or the boot entry point: reuse the
+  already-loaded agent in the same conversation; re-run boot only on an explicit refresh, a task
+  that requires fresh repository/system state, or a new conversation. The fix must be generated
+  consistently for every engine, preserve the real fresh-state path, and have lifecycle tests for
+  both repeated invocation and a new session. Do not rely on an ad hoc per-workspace shortcut edit;
+  registration currently regenerates those files. Trigger: next shortcut/boot lifecycle work.
+- **Durable asynchronous messages between lore agents (user request 2026-10-16).**
+  Today one agent cannot leave a durable, structured message for another agent to consider at its
+  next boot. Consult is intentionally read-only, attached agents share one live session, and native
+  engine teammate messaging does not persist across sessions or engines. **Do:** design an
+  agent-owned inbox/outbox feature. A sender writes a bounded message to the recipient's durable
+  inbox without loading or interrupting that recipient; the next successful recipient boot reports
+  unread messages and loads them before ordinary task work. Define message identity, sender and
+  timestamp, acknowledgement/archive behavior, retention, conflict-safe Git synchronization,
+  privacy rules, and a clear distinction between a request, an observation, and a blocking alert.
+  The feature must work consistently across Codex, Claude Code, and Cursor, and must not silently
+  turn a message into authorization for unrelated writes or external communication. Trigger: when
+  cross-agent work needs deferred handoff rather than a live attach or a manual backlog edit.
 - ~~**README skills table sync**~~ — done in v11. Table now lists all skills, grouped by purpose (workspace setup / working with agents / session lifecycle / authoring / maintenance), with `/lr:finalize` description corrected to the four-phase form. Quick Start was also restructured to lead with the team-joining path.
 - **README skill table refresh** — the table must reflect 31 skills after v45 removed `doctor` and `workspace-status`, with `/lr:check` described as the single health front door. Trigger: next time the README is touched, or sooner if asked.
 - **Adopter command-surface curation** — inventory every skill and classify it as daily workflow, collaboration, maintenance, setup, advanced module, or style. Decide retain/rename/combine/progressively disclose/retire, so a newcomer sees load → work/recall → collaborate → finalize → diagnose/refresh without learning the full catalog. Not a raw command-count reduction exercise. See `adopter-command-surface-curation.md`.

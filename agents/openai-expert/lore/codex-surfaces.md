@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Codex surfaces as of 2026-10-14: Codex in the ChatGPT desktop app, CLI (0.162.1), IDE extension, Codex Cloud, mobile, GitHub/GitLab/Slack/Linear, SDK and app server, the removed codex mcp-server, and sign-in rules."
+summary: "Codex surfaces as of 2026-10-16: Codex in the ChatGPT desktop app, CLI, IDE extension, Cloud, mobile, integrations, SDK and app server; local session observation limits; and sign-in rules."
 parent: lore/openai-apps-and-surfaces.md
 ---
 
@@ -54,6 +54,18 @@ belongs to lore-architect (`lore-framework/docs/engines/codex.md` and its
 - **`codex mcp-server` and the `codex-mcp-server` binary are removed.** Integrations must move to
   the app server, which is not an MCP server. `codex mcp` (Codex as an MCP *client*) still works.
 - Enterprise: Codex access tokens and service accounts for non-interactive automation.
+
+## Local session observation
+
+**Inference, checked 2026-10-16.** A local monitor that must discover all already-existing Codex
+chats must not use the experimental app server as its primary inventory. The app server exposes
+and controls work it starts; it is not documented as an inventory of pre-existing CLI and desktop
+chats. Use local session records as the source of truth, and use process data only as an activity
+or health signal.
+
+The desktop app can host more than one chat through shared application processes. Therefore, a
+process count is not a chat count. This is a monitoring design boundary, not a documented
+session-storage contract; recheck it when Codex changes its app-server or desktop architecture.
 
 ## Sign-in
 

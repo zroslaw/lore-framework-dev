@@ -32,3 +32,6 @@ Control, or cloud sessions.
 - [Chat, Cowork, Dispatch, Remote Control, cloud sessions](chat-cowork-dispatch-remote-control.md)
   — the correct model of each session type, its requirements, and how they differ.
 - [Claude mobile app](claude-mobile-app.md) — what works from the phone, by mode.
+- [Claude Code local session observation](claude-code-local-session-observation.md) — an
+  inference for privacy-preserving local monitoring; it distinguishes a durable conversation from
+  an intermittent CLI process.
