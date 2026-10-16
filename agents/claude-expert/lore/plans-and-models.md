@@ -34,3 +34,7 @@ Collected across areas, checked 2026-10-13 (documented):
 - [Plans and pricing](plans-and-pricing.md) — each plan's price and features, and the
   Enterprise-only list.
 - [Models lineup](models-lineup.md) — current models, API IDs, prices, and shared specs.
+- [Claude Code OAuth usage probe](claude-code-oauth-usage.md) — inference (2026-10-16): local
+  method to read account usage windows via OAuth (credential locations, endpoint, headers,
+  field names). Method only; no tokens or personal numbers; machine ops stay with
+  workstation-keeper.

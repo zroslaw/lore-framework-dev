@@ -55,7 +55,9 @@ prices in USD; recheck before use.
   plans). Image generation uses limits 3–5x faster. Sites is included during the public beta.
 - When the limit is reached mid-turn, the turn finishes. Plus and Pro can buy credits; any user can
   run local chats with an API key. Check usage at chatgpt.com/codex/settings/usage or `/status`
-  in the CLI.
+  in the CLI. For a local host that already has Codex OAuth on disk, an inferred
+  `wham/usage` probe method (field names and headers only) is in
+  [Local Codex quota probe](local-codex-quota-probe.md).
 - Every enabled MCP server adds context and uses more of the limit.
 
 Sources: https://learn.chatgpt.com/docs/pricing ; https://learn.chatgpt.com/docs/dots ;

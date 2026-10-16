@@ -19,6 +19,9 @@ in the docs. The X Subscription uses one weekly pool shared with Grok
   include it; Start does not.
 - Both reset monthly. The Spending tab at cursor.com/dashboard shows both pools and on-demand
   charges.
+- A local tool can also read plan usage through an undocumented
+  [usage-summary probe](local-usage-summary-probe.md) (inference, 2026-10-16): method only; not
+  the public Cloud Agents or Admin APIs.
 
 ## After the included usage
 

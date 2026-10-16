@@ -46,6 +46,9 @@ Bot ([plans and pricing](plans-and-pricing.md)).
   Enterprise, Start, App Store, and how switching works.
 - [Usage pools and billing](usage-pools-and-billing.md) — Cursor Models vs Other Models pools,
   on-demand, Cursor Token Rate, BYOK, Max Mode on legacy plans, Bugbot billing.
+- [Local usage-summary probe](local-usage-summary-probe.md) — inference: local cookie +
+  `GET /api/usage-summary` method (not a documented public API); machine ops stay with
+  workstation-keeper.
 - [Models lineup](models-lineup.md) — Cursor's own models, third-party models, Auto and Cursor
   Router, Fast mode and effort levels.
 

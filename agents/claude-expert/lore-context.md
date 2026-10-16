@@ -98,4 +98,6 @@ a local Cowork session — and never in chat or on mobile chat.
   a Claude answer needs. Cross-product example: remote MCP, in [connectors](lore/connectors.md).
 - **lore-architect** owns Lore framework design and implementation. I supply the Claude facts.
 - This agent lives in a public repository: Lore holds public product facts only, never business
-  plans, commercial strategy, unpublished numbers, credentials, or personal data.
+  plans, commercial strategy, unpublished numbers, credentials, personal data, or personal
+  utilization figures. For Claude Code usage windows, keep only the probe method (see
+  [plans and models](lore/plans-and-models.md)); machine collection belongs to workstation-keeper.
