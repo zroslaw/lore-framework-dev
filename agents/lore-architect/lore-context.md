@@ -206,6 +206,10 @@ any engine can continue interrupted work (`takeover-feature.md`, `cursor-takeove
 
 ## Finalization
 
+**Session running-notes scratch (not shipped):** maintain todos and learnings during execution;
+reflect and merge split by agent role at finalize. See `session-running-notes-scratch.md`; backlog
+§ Finalization / Autopush; `workdir/what-to-improve.md` C2b.
+
 User-triggered, four phases (`/lr:finalize` runs all; phases also run standalone): **reflect**
 (inline, host-first, per agent — needs session context) → **merge** (parallel subagents, one per
 agent booted as itself, file-driven) → **summarize** → **commit+push** (one commit per touched repo).

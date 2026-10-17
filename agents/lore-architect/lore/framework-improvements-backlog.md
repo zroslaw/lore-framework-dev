@@ -100,6 +100,19 @@ New module/mode for development & SDLC automation; first feature is bug-finding 
   paired guard worth considering: have Phase 4 read back `git diff --cached` and refuse paths outside
   the active agents. See `concurrent-session-committed-my-uncommitted-work.md` § Confirmed in the
   other direction, `single-canonical-source-discipline.md`.
+- **Session running notes (todos + learnings) for richer finalization** — User-raised 2026-10-17.
+  Reflect and merge today run only at session end against whatever the model still holds in context;
+  small friction, half-formed improvements, and todo items that surfaced mid-work are easy to lose.
+  Proposal: instruct every active session to keep a lightweight **running scratch** (open todos,
+  blockers, ideas, "worth remembering" bullets) and append when issues or improvement ideas appear;
+  at `/lr:reflect` and `/lr:merge`, each active agent reads that scratch, **splits** what belongs to
+  its role, and routes pieces into reflections and lore updates. Distinct from one-shot `/lr:note`
+  micro-capture (§ Process, reflect-merge ergonomics; `workdir/what-to-improve.md` C2): this is a
+  **session-scoped working buffer** with a defined handoff into the existing reflect→merge pipeline,
+  not ad-hoc one-liners only. Open design: file location (`workdir/session-notes.md`? per-session
+  under `.tmp/<session>/`? host-only vs per-agent copy), whether `agent-boot.md`,
+  `process-reflection.md`, and `process-merge.md` own the convention, and how multi-agent sessions
+  partition one scratch vs several. See `workdir/what-to-improve.md` C2b.
 - **Parallel merge subagents race on the pre-merge `--fresh` pull (found 2026-10-14, twice).** When
   two or more active agents share one repo, their merge subagents run `lr-core preflight --fresh`
   on it at once, and one gets `fatal: Cannot fast-forward to multiple branches.`; a retry reports

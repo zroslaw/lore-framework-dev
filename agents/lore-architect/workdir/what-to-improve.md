@@ -339,6 +339,13 @@ merge at finalize. Kills the learning-only-at-finalize bottleneck, partially de-
 crashed sessions, answers the backlog's reflect-merge-ergonomics item. Smallest build on
 this list.
 
+### C2b. Session running notes → reflect/merge handoff — OPEN
+User-raised 2026-10-17. During execution, keep a session scratch of **todos and learnings**
+(update when something breaks or when an improvement idea appears). At finalize, reflect and
+merge **read that scratch**, split notes by agent role, and fold them into reflections and lore
+so end-of-session recall does not depend on memory alone. Complements C2; needs a doc convention
+and multi-agent partition rules. Backlog: § Finalization / Autopush (session running notes item).
+
 ### C3. Lore MCP server (`lr-lore`) — OPEN
 Expose lore search/read over agent repos as MCP tools → claude.ai web/mobile/Slack can
 consult the team's agents without a coding CLI. Substrate is already engine-agnostic
