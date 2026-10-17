@@ -35,9 +35,12 @@ When designing a new framework operation, ask:
 
 Both answers can hold for different phases of the same skill — finalize is the canonical example (reflect inline, merge in subagents, summarize inline with per-guest writes).
 
+**MCP exception:** on the MCP engine profile (`docs/engines/mcp.md`), subagent spawn is unavailable, so merge also runs inline in the chat. That is a surface binding, not a redesign of the asymmetry — see `mcp-engine-inline-finalize.md`.
+
 ## Related topics
 
 - `merge-in-booted-subagents.md` — how the merge side of the asymmetry is implemented
+- `mcp-engine-inline-finalize.md` — MCP chat: both reflect and merge inline; server stores no reflections
 - `finalization-process.md` — the four-phase flow that contains both halves
 - `consult-pattern.md` — subagent that boots as a target agent
 - `lore-search-pattern.md` — file-driven subagent work

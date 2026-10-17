@@ -56,14 +56,15 @@ New module/mode for development & SDLC automation; first feature is bug-finding 
 - **Whole-repo sweep skill** — `lr:dev-quality-sweep`: orchestrator that reads the manifest, picks N stale files, runs the per-file workflow on each, persists File Reports, updates the manifest. Daily-cron-friendly (budgeted bottom-N rolling). Sits on top of the per-file workflow; depends on quality-repo conventions.
 - **Automated SDD (Spec-Driven Development) — light DF prototype.** User-raised 2026-06-05. The pitch: a setup of environment + workflows where the user talks to an agent purely from the **product perspective**, and the agent does the rest internally — automatically tracks specifications, checks their internal consistency and alignment, writes code from the spec, writes and executes tests, and raises issues whenever something is wrong, misaligned, or contradicts another spec/code/test artifact. The framing is *first prototype of the Dark Factory, light version* — a graduation rung between today's per-file ULA aspect (one human-bounded analysis pass on existing code) and the full autonomous DF SDLC (continuous closed-loop product → code → test → issue). Expected to live as another aspect (or aspect cluster) on the DF backbone alongside `ula/` — specs as a first-class artifact kind under `repo-lore/<file>/` (or a new above-file repo-level layer for cross-file spec sets), with consistency-check skills as the "raises issues whenever something contradicts" surface. Open seams: how specs are authored (free-form prose? structured? both with the structured derived from prose?), how the spec-↔-code-↔-test triangle is kept aligned (which artifact wins on conflict, who writes which), how the agent decides when a product-perspective conversation has yielded enough to commit a spec change, and how this composes with AIQA/ULA (do specs drive ULA's "scenarios" or are they a parallel aspect?). Status: parked vision, no design doc yet — capture as the named SDD-light entry on the lr-dev roadmap. See `df-per-repo-backbone.md`, `lr-dev-direction.md`, `autonomous-agents-vision.md`.
 
-### Shell-less Surfaces — Lore over a Remote MCP Server (idea, 2026-10-14)
+### Shell-less Surfaces — Lore over a Remote MCP Server
 
 - **A remote MCP server as a full Lore surface for clients with no shell and no local files** (for
-  example Claude mobile chat). Status: **idea, not designed.** Raised in a product-method pilot
-  session (its details stay in a private repo); bring it back only when that pilot's architect or
-  the user asks. It goes further than standing-list item C3 (`workdir/what-to-improve.md`), which
-  exposes only lore search/read. Shape that fits the existing framework:
-  - **A new surface profile** `docs/engines/mcp.md` with the five bindings: invocation = MCP tool
+  example Claude mobile chat). Status: **surface profile shipped and product-confirmed** (Lore MCP
+  0007–0009; `docs/engines/mcp.md` / `docs/mcp-finalize-workflow.md` match the live server —
+  chat-inline reflect/merge, no server reflection store; see `mcp-engine-inline-finalize.md`).
+  Broader shell-less product scope beyond that finalize shape may still expand; raise further design
+  only on request. Standing shape:
+  - **Surface profile** `docs/engines/mcp.md` with the five bindings: invocation = MCP tool
     calls; subagent-spawn = none, so merge runs inline — lossless, because merge is
     optimization-class (`subagent-as-optimization-vs-subagent-as-semantics.md`); a semantics-class
     procedure such as `/lr:trilens-loop` must stop and report there. Memory-file = none (the server
