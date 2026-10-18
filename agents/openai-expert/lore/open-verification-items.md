@@ -1,13 +1,13 @@
 ---
 lore: 1
 type: topic
-summary: "OpenAI facts that research could not settle (2026-10-14): custom MCP plan gating, custom MCP on mobile, MCP in Codex Cloud, MCP prompts, lr in desktop Codex, memory rollout, third-party-only facts. Check before relying on them."
+summary: "OpenAI questions to verify: MCP plan and surface support, desktop Lore, memory rollout, third-party reports, and Codex SDK packages, session controls, and usage exports. SDK questions added 2026-10-18; earlier items date from 2026-10-14."
 parent: lore-context.md
 ---
 
 # Open verification items
 
-As of 2026-10-14. Two research passes did not settle these facts. When a question depends on one,
+Items 1–7 date from 2026-10-14. Two research passes did not settle those facts. When a question depends on one,
 check it first, in a browser or with a hands-on test. If I cannot check it, I say that it is
 unverified. The evidence for each item is in the linked topic. This list holds only the open
 question and how to settle it. When an item is settled, update the linked topic and remove the
@@ -37,6 +37,19 @@ item here.
    - agent mode retirement in August 2026 — [Chat, Work, Codex, and dots](chat-work-codex-and-dots.md);
    - Atlas shutdown on 2026-08-09 — [Browser, Computer Use, and Atlas](browser-computer-use-and-atlas.md);
    - Pro tier usage multipliers — [Plans and pricing](plans-and-pricing.md).
+8. **Codex SDK and managed-runtime details** (open questions added 2026-10-18; not reverified).
+   The session discussion did not retain a complete source-to-claim record for these details:
+   - Which Codex SDK packages and languages are current, and how do they differ from the general
+     Agents SDK and the Codex app server?
+   - Which session methods support queued follow-ups, steering, and interruption, and at which
+     execution boundaries do they take effect?
+   - Which usage, tracing, and export data covers root sessions and subagents, and which data is
+     unsuitable for billing?
+   Settle: check current official OpenAI documentation and the
+   [Codex repository](https://github.com/openai/codex), then record sources for each supported
+   behavior. The general SDK versus managed-harness distinction is already in
+   [Developer platform](developer-platform.md), checked 2026-10-14; this question does not
+   reverify or replace that record.
 
 ## Tell lore-architect when asked
 

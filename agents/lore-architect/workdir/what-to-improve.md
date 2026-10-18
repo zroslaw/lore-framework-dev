@@ -346,6 +346,11 @@ merge **read that scratch**, split notes by agent role, and fold them into refle
 so end-of-session recall does not depend on memory alone. Complements C2; needs a doc convention
 and multi-agent partition rules. Backlog: § Finalization / Autopush (session running notes item).
 
+Related deferred proposals from 2026-10-18: whole-session reflection coverage with evidence for
+zero-learning outcomes, and background workers that prepare intermediate reflection drafts in long
+sessions. Details and open questions remain in `lore/framework-improvements-backlog.md` under
+Finalization / Autopush. No procedure changes or automatic workers are enabled.
+
 ### C3. Lore MCP server (`lr-lore`) — OPEN
 Expose lore search/read over agent repos as MCP tools → claude.ai web/mobile/Slack can
 consult the team's agents without a coding CLI. Substrate is already engine-agnostic

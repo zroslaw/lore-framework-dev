@@ -81,6 +81,39 @@ New module/mode for development & SDLC automation; first feature is bug-finding 
 
 ### Finalization / Autopush
 
+- **Reflection coverage and evidence for zero learning (2026-10-18) — deferred for later consideration.**
+  The user asked to retain this feedback with lore-architect; no framework change is approved or
+  implemented. In the multi-agent Lore Platform session, early Claude, OpenAI/Codex, and Cursor
+  research was followed by a host change to lore-platform-architect. Reflection classified the
+  experts' discussions as general information and supplied merge workers with completed, empty
+  current-session topic sets. The workers confirmed those supplied inputs; they did not independently
+  assess whether reflection covered the earlier discussion. The user challenged the resulting
+  claim that all agents had been finalized with no new learning for those experts.
+  **Observed failure:** an unsupported zero-learning judgment passed through successful merge and
+  summary stages. This does not prove every researched fact was absent from existing Lore: some
+  OpenAI SDK/API distinctions were already recorded. A comparison was required before declaring
+  no new learning. **Contributing rule ambiguity:** `docs/process-reflection.md` requires review
+  through each active agent's role, but excludes information available in documentation and general
+  knowledge. Product experts maintain sourced product knowledge, so that exclusion can discard
+  material within their role. The participant-addition filter in `docs/finalize.md` is also distinct
+  from reflection for already-active agents. Late-host bias is a plausible contributor, not a
+  separately measured mechanism.
+  **Candidate improvements, not a settled design:** (1) inventory relevant topics across the whole
+  session before filtering by role, including early work and shared ownership; (2) clarify that a
+  public source does not itself disqualify useful domain knowledge, and retain verification dates
+  and sources for changing facts; (3) require a disposition for each relevant candidate: new
+  reflection, already recorded with a Lore reference, excluded with a reason, or still unverified;
+  distinguish not assessed from nothing new; (4) check coverage before handing the completed topic
+  set to merge, and include the supporting dispositions in the handoff. Preserve the authoritative
+  reflection-set contract in `docs/process-merge.md`; merge must not invent missing session history.
+  **Regression case to consider:** early product research, late host change, and several active
+  experts. Every relevant candidate must have a recorded outcome; an evidenced zero-learning result
+  is valid and duplicate Lore is not required. Related: session running notes below, summary learning
+  audits, and transcript-backed reflection. Evidence anchor: the host summary in sibling repository
+  `lore-platform-dev`, `agents/lore-platform-architect/sessions/2026/10/2026-10-18-b3b3fbd7.md`, plus
+  the subsequent user challenge and diagnosis in that session. The summary records the original
+  judgments; it does not independently validate their completeness.
+
 - **Finalize Phase 4 stages the whole `agents/` tree (found in use 2026-08-31; still open in v47).**
   The old "ships in v44" label was wrong: v47 `finalize.md` Phase 4 Step 1 is still
   `git -C <repo> add agents/` (checked 2026-10-14). **Second occurrence, 2026-10-14, now with
@@ -113,6 +146,21 @@ New module/mode for development & SDLC automation; first feature is bug-finding 
   under `.tmp/<session>/`? host-only vs per-agent copy), whether `agent-boot.md`,
   `process-reflection.md`, and `process-merge.md` own the convention, and how multi-agent sessions
   partition one scratch vs several. See `workdir/what-to-improve.md` C2b.
+- **Intermediate background reflection for long sessions (2026-10-18) — deferred idea.**
+  User proposal: when a session runs for a long time, accumulates many messages, or approaches its
+  context limit, consider spawning a background subagent to do preparatory finalization work or at
+  least draft intermediate reflection topics. Capture useful knowledge while the relevant context
+  is still available, rather than depending only on end-of-session recall. This could complement
+  session running notes and the reflection-coverage proposal above.
+  **Questions for later design:** time/message/context thresholds and engine support; how the worker
+  receives a bounded session segment or transcript before compaction; coverage of all active agents
+  and host changes; checkpoints that prevent gaps and duplicate processing; isolated draft ownership
+  during concurrent work; cost limits; and how final reflection reconciles provisional findings with
+  later corrections, decisions, and existing Lore. A worker given only a late summary cannot recover
+  context already lost. Distinguish preparation of draft topics from merge, publication, and closing
+  the session; their scope and authorization need a separate decision. No background worker or
+  automatic finalization behavior is enabled by this note.
+
 - **Parallel merge subagents race on the pre-merge `--fresh` pull (found 2026-10-14, twice).** When
   two or more active agents share one repo, their merge subagents run `lr-core preflight --fresh`
   on it at once, and one gets `fatal: Cannot fast-forward to multiple branches.`; a retry reports

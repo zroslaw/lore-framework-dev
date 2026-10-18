@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Cursor integrations and programmatic access (2026-10-14): Slack, Microsoft Teams, GitHub, GitLab, Bitbucket, Azure DevOps, Linear, Jira, Notion, JetBrains via ACP, Xcode MCP; Cloud Agents API, SDKs, admin APIs, and Origin."
+summary: "Cursor integrations, Cloud Agents API, SDKs, admin APIs and Origin (checked 2026-10-14). Pending verification: session/run lifetime, usage attribution, follow-up and steering, and hosting boundaries."
 parent: lore/cursor-apps-and-surfaces.md
 ---
 
@@ -45,6 +45,28 @@ pricing, and privacy settings.
 - Auth: API keys from Dashboard → API Keys (`crsr_...`); Basic or Bearer. Default rate limit is
   20 requests per minute unless an endpoint says otherwise.
 - The APIs and SDKs run agent workflows. They are not a raw chat-completions API.
+
+## Pending SDK and runtime verification
+
+Recorded 2026-10-18 from session research follow-up; these are unresolved questions, not newly
+verified product facts. The session did not retain a complete source-to-claim record for these
+details. Existing SDK and cloud facts keep their 2026-10-14 check date.
+
+- **Lifetime:** What persists as an agent or session across separate runs in each SDK and the
+  Cloud Agents API? Check creation, follow-up, resume, cancellation, and deletion separately.
+- **Usage:** Which SDK events and usage APIs expose tokens, cost, and subagent usage? Can each
+  amount be attributed to a run and a parent agent without double counting?
+- **Message delivery:** Which interfaces queue a follow-up after work finishes, steer an active
+  run at a processing boundary, or interrupt it? Check delivery timing and cancellation effects;
+  do not infer active-run steering from support for follow-ups.
+- **Hosting:** Which SDK control components and tool-execution components can run on private
+  infrastructure? Distinguish a local SDK session from a self-hosted worker controlled by
+  Cursor's cloud. Recheck the boundary in [self-hosted machines](self-hosted-machines-and-remote-control.md)
+  and [cloud agents](cloud-agents.md).
+
+Before an implementation recommendation, recheck the official SDK, API, and worker documentation
+below. Record exact methods or endpoints, supported surfaces, check dates, and limits. Use
+[framework design notes](notes-for-agent-framework-designers.md) for the existing SDK/tool facts.
 
 ## Origin
 
