@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: context
-summary: "Root working knowledge for claude-expert: how to check Claude facts, the product family map, the surface model, and routes to apps, extensions, memory, plans and models, and Lore compatibility."
+summary: "Root working knowledge for claude-expert: how to check Claude facts, the product family map, the surface model, and routes to apps, extensions, memory, plans and models, the developer platform, and Lore compatibility."
 ---
 
 # Lore Context
@@ -18,7 +18,9 @@ areas linked below. Product facts here were checked on 2026-10-13 unless a line 
   1. https://claude.com/docs (index: https://claude.com/docs/llms.txt) — apps, Cowork, extensions,
      admin.
   2. https://code.claude.com/docs — Claude Code.
-  3. https://platform.claude.com/docs — models, API, per-token prices.
+  3. https://platform.claude.com/docs — models, API, per-token prices. For API and Managed Agents
+     facts, grep the `claude-api` skill bundled with Claude Code first, then confirm gaps and
+     prices here ([developer platform](lore/developer-platform.md)).
   4. https://support.claude.com — help articles and the release notes
      (https://support.claude.com/en/articles/12138966-release-notes), which date when each feature
      reached each surface.
@@ -29,7 +31,8 @@ areas linked below. Product facts here were checked on 2026-10-13 unless a line 
 - Many features roll out by plan (Max first, then Pro) and by surface. Record the plan, the
   surface, and the date.
 - Every saved fact gets a check date, a source URL, and a label: **documented** (Anthropic docs or
-  help center), **third-party report**, or **inference** (mine, untested).
+  help center), **third-party report**, **inference** (mine, untested), or **from recall** (not
+  rechecked; verify before relying on it).
 
 ## Product family
 
@@ -53,10 +56,11 @@ From the claude.com docs index and the pricing page:
   with managed configuration.
 - **Claude for Government**, **Claude Security** (beta, Enterprise), **Financial services
   plugins** for Cowork.
-- **Developer platform** — Claude API, Agent SDK, Managed Agents, Console (platform.claude.com).
+- **Developer platform** — Claude API (with the Tool Runner helper), Agent SDK, Managed Agents,
+  Console (platform.claude.com).
 
-Claude Tag, Microsoft 365, Science, Chrome, Desktop on 3P, Government, Security, and the API and
-Agent SDK have no Lore beyond this list yet.
+Claude Tag, Microsoft 365, Science, Chrome, Desktop on 3P, Government, and Security have no Lore
+beyond this list yet.
 
 ## The surface model
 
@@ -84,6 +88,9 @@ The most common confusion. Where a session runs decides what it can reach:
   chats, instructions, and projects.
 - [Plans and models](lore/plans-and-models.md) — plan tiers and prices, plan-gated features, and
   the model lineup.
+- [Developer platform](lore/developer-platform.md) — the four ways to build an agent on the API
+  (manual loop, Tool Runner, Managed Agents, Agent SDK), how to pick one, and Managed Agents
+  sandboxes and pricing.
 
 Root-level topic: [Lore compatibility on Claude surfaces](lore/lore-compatibility-on-claude-surfaces.md).
 In short (inference, untested): the `lr` plugin needs local `python3`, `git`, and the workspace
