@@ -15,7 +15,7 @@ Source: https://platform.claude.com/docs/en/about-claude/models/overview, checke
 | Claude Fable 5.1 | `claude-fable-5-1` | $10 / $50 | high | Demanding reasoning, long-horizon agentic work; slowest |
 | Claude Opus 5.5 | `claude-opus-5-5` | $4 / $20 | medium | Recommended default for most workloads; agentic coding and knowledge work |
 | Claude Sonnet 5.5 | `claude-sonnet-5-5` | $2 / $10 | high | Best balance of speed and intelligence |
-| Claude Haiku 5.5 | `claude-haiku-5-5` | from $0.10 / from $0.50 | medium | High-volume, latency-sensitive tasks; fastest |
+| Claude Haiku 5.5 | `claude-haiku-5-5` | $0.10 / $0.50 (prompt ≤100K tokens); $0.50 / $2.50 above | medium | High-volume, latency-sensitive tasks; fastest |
 
 ## Shared specs
 
@@ -23,6 +23,8 @@ Source: https://platform.claude.com/docs/en/about-claude/models/overview, checke
   `output-300k-2026-03-24` beta header, for some models), adaptive thinking (always on for Fable
   5.1 and Opus 5.5), reliable knowledge cutoff June 2026. Retirement not sooner than
   September–October 2027.
+- No long-context premium on 4.6 and later models; Haiku 5.5 is the exception above 100K-token
+  prompts (checked 2026-10-18; see [long-context cost](long-context-cost.md)).
 - Extended thinking with a manual `budget_tokens` is not accepted on current models. Use adaptive
   thinking with the effort parameter.
 - Dateless IDs are pinned snapshots (since the 4.6 generation). The same IDs work on the Claude

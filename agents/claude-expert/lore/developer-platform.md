@@ -63,7 +63,9 @@ Observed in Claude Code 2.1.302 on 2026-10-18 (operational lesson):
    https://platform.claude.com/docs/en/managed-agents/cloud-sandboxes-reference and
    https://platform.claude.com/docs/en/build-with-claude/files for those.
 3. **code.claude.com for the Agent SDK.** The skill does not generate Agent SDK code. Use
-   https://code.claude.com/docs/en/agent-sdk.
+   https://code.claude.com/docs/en/agent-sdk; find its pages in
+   https://code.claude.com/docs/llms.txt. The skill's `shared/opentelemetry.md` also says that
+   Agent SDK and Claude Code monitoring live on code.claude.com, not in the skill.
 
 ## Children
 
@@ -73,6 +75,10 @@ Observed in Claude Code 2.1.302 on 2026-10-18 (operational lesson):
   what the builder still writes.
 - [Managed Agents](managed-agents.md) — hosted agents with a sandbox: object model, features,
   use cases, environments, data limits, and pricing.
+- [Observability and cost](agent-observability-and-cost.md) — token, cost, and context tracking,
+  budgets, and OpenTelemetry for all three products; which numbers are estimates.
+- [Subagent monitoring](subagent-monitoring-and-correlation.md) — how to see and correlate
+  subagents with their session, and which data an API exposes.
 
 Boundary: the OpenAI Agents SDK and OpenAI's hosted agents belong to openai-expert. Compare only
 at the level a Claude answer needs.

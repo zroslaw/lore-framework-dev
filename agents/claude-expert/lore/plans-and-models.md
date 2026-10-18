@@ -34,6 +34,9 @@ Collected across areas, checked 2026-10-13 (documented):
 - [Plans and pricing](plans-and-pricing.md) — each plan's price and features, and the
   Enterprise-only list.
 - [Models lineup](models-lineup.md) — current models, API IDs, prices, and shared specs.
+- [Long-context cost](long-context-cost.md) — per-token price by context size (no premium except
+  Haiku 5.5 over 100K), why big contexts cost more per turn, 1M plan access, and Claude Code
+  context controls.
 - [Claude Code OAuth usage probe](claude-code-oauth-usage.md) — inference (2026-10-16): local
   method to read account usage windows via OAuth (credential locations, endpoint, headers,
   field names). Method only; no tokens or personal numbers; machine ops stay with

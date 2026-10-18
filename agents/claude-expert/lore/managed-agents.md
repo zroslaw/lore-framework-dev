@@ -36,6 +36,9 @@ through a REST API with the beta header `managed-agents-2026-04-01`; the SDK set
 - **Memory stores** — persist across sessions.
 - **Permission policies** — `always_allow`, `always_ask`, `auto`.
 - **Session budgets** in USD ([pricing](managed-agents-pricing-and-alternatives.md)).
+- **Monitoring** — Console session viewer, usage events, OpenTelemetry API tracing, and a thread
+  API for subagents ([observability](agent-observability-and-cost.md),
+  [subagent monitoring](subagent-monitoring-and-correlation.md)).
 
 ## Typical uses
 

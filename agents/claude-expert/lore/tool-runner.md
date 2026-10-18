@@ -39,3 +39,6 @@ skills, no subagents, no permission prompts, no saved sessions. For those, use t
 - Small automations in which Claude picks the order of your functions.
 
 It is a good fit when Claude must do only what your tools allow.
+
+For usage, cost, and OpenTelemetry tracing, see
+[observability and cost](agent-observability-and-cost.md).

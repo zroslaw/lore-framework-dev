@@ -89,8 +89,8 @@ The most common confusion. Where a session runs decides what it can reach:
 - [Plans and models](lore/plans-and-models.md) — plan tiers and prices, plan-gated features, and
   the model lineup.
 - [Developer platform](lore/developer-platform.md) — the four ways to build an agent on the API
-  (manual loop, Tool Runner, Managed Agents, Agent SDK), how to pick one, and Managed Agents
-  sandboxes and pricing.
+  (manual loop, Tool Runner, Managed Agents, Agent SDK), how to pick one, Managed Agents
+  sandboxes and pricing, and observability, cost tracking, and subagent monitoring.
 
 Root-level topic: [Lore compatibility on Claude surfaces](lore/lore-compatibility-on-claude-surfaces.md).
 In short (inference, untested): the `lr` plugin needs local `python3`, `git`, and the workspace
