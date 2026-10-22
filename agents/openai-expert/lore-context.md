@@ -35,7 +35,7 @@ below. Product facts here were checked on 2026-10-14 unless a line says otherwis
   `workdir/split-llms-full.py` and grep), then search snippets only for blocked pages. Detail and
   traps (plan matrix, changelog, stale snippets): [research method](lore/research-method-for-openai-docs.md).
 - Some facts are still unsettled (custom MCP plan gating, MCP on mobile and in Codex Cloud, `lr`
-  in desktop Codex). Check [open verification items](lore/open-verification-items.md) before
+  in desktop Codex, Codex multi-agent v2 wait controls). Check [open verification items](lore/open-verification-items.md) before
   relying on one.
 
 ## Product family
@@ -75,9 +75,9 @@ The most common confusion. Where a session runs decides what it can reach:
 ## Areas
 
 - [OpenAI apps and surfaces](lore/openai-apps-and-surfaces.md) — Chat, Work, Codex, dots, the
-  desktop and mobile apps, browser and Computer Use.
+  desktop and mobile apps, browser and Computer Use, Codex session logs and resume.
 - [Extension platform](lore/extension-platform.md) — plugins, apps (connectors), skills, remote
-  MCP per surface, Codex configuration, custom GPTs, admin controls.
+  MCP per surface, Codex configuration and multi-agent v2 subagents, custom GPTs, admin controls.
 - [Memory and personalization](lore/memory-and-personalization.md) — ChatGPT memory, projects,
   custom instructions, Codex memories, Computer History.
 - [Plans and models](lore/plans-and-models.md) — plan prices, Codex usage, plan-gated features,

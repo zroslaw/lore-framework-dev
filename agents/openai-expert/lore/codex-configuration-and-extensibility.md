@@ -53,7 +53,12 @@ Checked 2026-10-14. Documented unless a line says otherwise. These apply to the 
 - On by default in current Codex releases; `/subagents` in the CLI. ChatGPT Work also runs
   subagents in its hosted environment; **Ultra** reasoning delegates proactively.
 - Custom agents: TOML files in `~/.codex/agents/` or `.codex/agents/`; limits under `[agents]`
-  (`max_concurrent_threads_per_session`, `default_subagent_model`).
+  (`max_concurrent_threads_per_session`, `default_subagent_model`,
+  `default_subagent_reasoning_effort`).
+- Multi-agent v2 (checked in source for codex-cli 0.160.0 on 2026-10-22): `spawn_agent`
+  `fork_turns` sets how much parent history a child gets; `wait_agent` waits 10 seconds to one
+  hour; the base 60-second rule can keep a hub's waits short. Detail:
+  [Codex multi-agent v2 bindings](codex-multi-agent-v2-bindings.md).
 
 ## Import from another agent (2026-08-11)
 

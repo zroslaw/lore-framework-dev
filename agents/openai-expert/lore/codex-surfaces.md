@@ -61,7 +61,8 @@ belongs to lore-architect (`lore-framework/docs/engines/codex.md` and its
 chats must not use the experimental app server as its primary inventory. The app server exposes
 and controls work it starts; it is not documented as an inventory of pre-existing CLI and desktop
 chats. Use local session records as the source of truth, and use process data only as an activity
-or health signal.
+or health signal. Where the records are and what they hold (observed 2026-10-22):
+[Codex session logs and resume](codex-session-logs-and-resume.md).
 
 The desktop app can host more than one chat through shared application processes. Therefore, a
 process count is not a chat count. This is a monitoring design boundary, not a documented

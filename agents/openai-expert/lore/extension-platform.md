@@ -48,6 +48,9 @@ chats after install.
   marketplaces, Claude Code compatibility, submission, desktop-only plugins.
 - [Codex configuration and extensibility](codex-configuration-and-extensibility.md) — `AGENTS.md`,
   skill locations, `config.toml`, hooks, subagents, and import from Claude Code or Cursor.
+- [Codex multi-agent v2 bindings](codex-multi-agent-v2-bindings.md) — what a spawned child gets,
+  child model and effort, wait timeouts, the 60-second base rule, and long-command polling, for a
+  hub that starts subagents (codex-cli 0.160.0, 2026-10-22).
 - [Custom GPTs and their retirement](custom-gpts-and-retirement.md) — the GPT-to-plugin migration
   and its dates.
 - [Admin and org controls](admin-and-org-controls.md) — workspace plugin controls, RBAC, Agent

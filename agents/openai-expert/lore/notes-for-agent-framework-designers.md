@@ -1,13 +1,13 @@
 ---
 lore: 1
 type: topic
-summary: "OpenAI features an agent-framework designer should know that differ from Claude (2026-10-14): portable plugins, import with sync, cloud-coordinated local work, dots, MCP Events, MCP hooks, plan sign-in, removed codex mcp-server."
+summary: "OpenAI features for agent-framework designers that differ from Claude (2026-10): portable plugins, import with sync, cloud-coordinated local work, dots, MCP Events, MCP hooks, plan sign-in, removed codex mcp-server, multi-agent v2 hubs."
 parent: lore-context.md
 ---
 
 # Notes for agent-framework designers
 
-Checked 2026-10-14. Each fact is documented in the linked topics unless marked. The "why it
+Checked 2026-10-14 unless a line says otherwise. Each fact is documented in the linked topics unless marked. The "why it
 matters" lines are my inference.
 
 - **One package for two products.** Plugins use one universal directory for ChatGPT and Codex, a
@@ -44,6 +44,11 @@ matters" lines are my inference.
   sidebars, panels, and editors to ChatGPT; **Sites** host web apps that use each visitor's
   connected plugins.
 - **Shared thread snapshots**: read-only links to a local Codex thread, with secret redaction.
+- **Multi-agent v2 hubs** (source-checked 2026-10-22, codex-cli 0.160.0): a child started with
+  `fork_turns: "none"` gets `AGENTS.md` and `developer_instructions` but no parent history; the
+  base 60-second rule can keep a hub's waits short; a child thread resumes only through its
+  parent ([multi-agent v2 bindings](codex-multi-agent-v2-bindings.md)). Why it matters: a Lore
+  hub on Codex must put the full role brief in the task message and set its wait policy in config.
 
 Sources: see the linked topics; plus https://learn.chatgpt.com/docs/whats-new/devday-2026 and
 https://learn.chatgpt.com/docs/use-chatgpt
