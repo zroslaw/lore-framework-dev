@@ -60,6 +60,9 @@ Cost, context, OpenTelemetry, and subagent tracking:
 - Building your own CLI on it is easy. The SDK does the model calls, tools, edits, context, and
   sessions; the builder writes only the UI (output rendering, permission prompts, and any slash
   commands).
+- Authentication: a product built on the SDK for other users needs an API key or a cloud
+  provider, not a Free, Pro, or Max login (third-party report, 2026-10-22; see
+  [subscription OAuth in third-party tools](subscription-oauth-third-party-policy.md)).
 
 For Claude Code itself (terminal, IDE, cloud sessions), see
 [Claude apps and surfaces](claude-apps-and-surfaces.md).

@@ -81,13 +81,14 @@ The most common confusion. Where a session runs decides what it can reach:
 ## Areas
 
 - [Claude apps and surfaces](lore/claude-apps-and-surfaces.md) — chat, Cowork, Dispatch, Claude
-  Code remote and cloud modes, and the mobile app.
+  Code remote and cloud modes, the mobile app, and Claude Code behind LLM gateways.
 - [Extension platform](lore/extension-platform.md) — connectors, skills, plugins, directory
   publishing, and org controls.
 - [Memory and personalization](lore/memory-and-personalization.md) — memory topics, search past
   chats, instructions, and projects.
-- [Plans and models](lore/plans-and-models.md) — plan tiers and prices, plan-gated features, and
-  the model lineup.
+- [Plans and models](lore/plans-and-models.md) — plan tiers and prices, plan-gated features, the
+  model lineup, and which tools may use a subscription login (Claude Code and claude.ai only, by
+  third-party report; products for other users need API keys).
 - [Developer platform](lore/developer-platform.md) — the four ways to build an agent on the API
   (manual loop, Tool Runner, Managed Agents, Agent SDK), how to pick one, Managed Agents
   sandboxes and pricing, and observability, cost tracking, and subagent monitoring.

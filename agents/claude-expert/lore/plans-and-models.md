@@ -41,3 +41,6 @@ Collected across areas, checked 2026-10-13 (documented):
   method to read account usage windows via OAuth (credential locations, endpoint, headers,
   field names). Method only; no tokens or personal numbers; machine ops stay with
   workstation-keeper.
+- [Subscription OAuth in third-party tools](subscription-oauth-third-party-policy.md) —
+  third-party report (2026-10-22): Free, Pro, and Max logins are for Claude Code and claude.ai
+  only; a product for other users needs API keys or a cloud provider. Verify at Anthropic.

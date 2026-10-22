@@ -35,3 +35,6 @@ Control, or cloud sessions.
 - [Claude Code local session observation](claude-code-local-session-observation.md) — an
   inference for privacy-preserving local monitoring; it distinguishes a durable conversation from
   an intermittent CLI process.
+- [Claude Code and LLM gateways](claude-code-llm-gateway.md) — documented (2026-10-22): supported
+  gateway formats, no non-Claude models, the Claude apps gateway, the managed-settings lock, and
+  when a gateway replaces subscription billing with per-token billing.
