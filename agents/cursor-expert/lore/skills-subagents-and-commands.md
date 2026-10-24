@@ -43,8 +43,16 @@ Checked 2026-10-14. Documented unless a line says otherwise.
 - Custom definitions: `.cursor/agents/`, `.claude/agents/`, `.codex/agents/` (project) and the same
   under `~/` (user). `.cursor/` wins on name conflicts. Fields: `name`, `description`, `model`
   (`inherit` default), `readonly`, `is_background`. Invoke with `/name` or by asking.
-- Nesting (since 2.5): the main agent and its direct subagents can start subagents; a
-  grandchild cannot. Resume a subagent by its agent ID.
+- Nesting (since 2.5, documented): the main agent and its direct subagents can start subagents; a
+  subagent spawned by a direct subagent cannot start further subagents. Resume a subagent by its
+  agent ID.
+- **Inference** (checked 2026-10-24, one Cursor editor session): the cap is missing **Task**, not
+  only policy text. A level-1 subagent (child of the main agent) has Task and a child spawn
+  succeeds. A level-2 subagent has no Task, so it cannot spawn level-3. The same level-1 parent can
+  still spawn a grandchild with its own Task call.
+  Treat depth as **at most one hop below the main agent's direct subagents**. For deeper trees,
+  the main agent or a level-1 subagent must issue more Task calls; do not expect the level-2 worker
+  to delegate further.
 - Isolation on request: each subagent in its own git worktree or its own cloud VM.
 - **Cloud subagents** (`/in-cloud`, `/autopilot`, Agents Window): run on a VM and use the team's
   cloud MCP servers, not the local session's.
