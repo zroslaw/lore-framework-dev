@@ -36,6 +36,9 @@ The phone is mainly a client. It reaches work that needs a computer only through
 - [Codex session logs and resume](codex-session-logs-and-resume.md) — where Codex CLI keeps
   session records, what is plain or encrypted, and how to resume a session or a multi-agent child
   (observed 2026-10-22).
+- [Codex multi-agent coordination](codex-multi-agent-coordination.md) — the boundary between
+  same-session child messaging, Desktop's app-managed concurrency, and configurable Agents API
+  sessions (checked 2026-10-24).
 - [ChatGPT mobile app](chatgpt-mobile-app.md) — what works from the phone, by mode.
 - [Browser, Computer Use, and Atlas](browser-computer-use-and-atlas.md) — the cloud browser, the
   desktop built-in browser, the Chrome extension, Computer Use, Appshots, and Atlas's shutdown.
