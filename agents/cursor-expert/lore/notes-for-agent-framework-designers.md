@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Cursor mechanisms an agent-framework designer should know (2026-10-14): Claude and Codex compatibility layers, open standards, MCP server design hints, cloud VM sockets, subscriptions, orchestration, SDK custom tools, and company context."
+summary: "Cursor mechanisms for agent-framework designers: compatibility layers, open standards, MCP hints, cloud sockets, subscriptions, parent-only subagents, Project hubs, SDK peers, and company context."
 parent: lore-context.md
 ---
 
@@ -54,10 +54,17 @@ Protocol: `agent acp` serves JetBrains and custom clients).
 
 ## Orchestration patterns in the product
 
-- Subagents through the Task tool; one extra nesting level; background subagents write to
-  `~/.cursor/subagents/`; resume by agent ID; isolation by worktree or VM.
-- **Projects**: a coordinator agent that delegates and does no coding, with shared context files
-  synced across machines — close to a persistent team lead.
+- Subagents through the Task tool return only to the parent (checked 2026-10-24). Parallel
+  siblings do not share a transcript, and no model adds that channel. One extra nesting level.
+  Background subagents write to `~/.cursor/subagents/`. `resume` by agent ID continues that
+  subagent only; `resume: "self"` forks the parent. Isolate with a worktree or a VM. The parent
+  copies any cross-sibling handoff. Detail:
+  [skills, subagents, and commands](skills-subagents-and-commands.md).
+- **Projects** are a coordinator hub, not a mesh (checked 2026-10-24). The coordinator plans and
+  delegates and does not write code. Shared context files sync across machines. Staff (forum,
+  2026-09-14) and the cloud-agents release notes (week of 2026-10-05) still keep the coordinator
+  in the loop for cross-agent messages. Detail:
+  [editor and Agents Window](editor-agents-window-and-modes.md).
 - **Automation memories** (`MEMORIES.md` outside the workspace) — file-based memory like Lore's
   approach, scoped to one automation.
 
@@ -68,6 +75,13 @@ on `local.customTools` are exposed as an MCP server named `custom-user-tools`. `
 picks which on-disk layers load (`project` = `.cursor/`, `user` = `~/.cursor/`, `plugins`); without
 it, a local agent loads only inline MCP servers. It does not apply to cloud agents.
 `local.autoReview` adds the Auto-review classifier to headless runs.
+
+Agent-to-agent peers (checked 2026-10-24,
+https://cursor.com/docs/agent-sdk/guides/agent-to-agent) are full agents with their own
+instructions and session. They are not a back door between Task subagents. The caller delegates
+with the MCP tools `ask`, `check`, and `call_tool`. On Cursor-managed hosting the SDK routes and
+authenticates. A local try uses one `agent-sdk dev` process and one-way routes. Detail:
+[integrations and public API](integrations-and-public-api.md).
 
 ## Company context
 
@@ -81,4 +95,7 @@ https://cursor.com/docs/reference/third-party-hooks.md ; https://cursor.com/docs
 https://cursor.com/docs/mcp.md ; https://cursor.com/docs/api/origin/mcp.md ;
 https://cursor.com/docs/cloud-agent/capabilities.md ; https://cursor.com/docs/cloud-agent/metadata.md ;
 https://cursor.com/docs/agent/projects.md ; https://cursor.com/docs/cloud-agent/automations.md ;
-https://cursor.com/docs/sdk/typescript.md ; https://cursor.com/blog/joining-spacex ; https://x.ai/news/x-subscription
+https://cursor.com/docs/sdk/typescript.md ; https://cursor.com/docs/agent-sdk/guides/agent-to-agent ;
+https://cursor.com/docs/release-notes/cloud-agents ;
+https://forum.cursor.com/t/let-me-talk-to-subagents-and-let-sibling-agents-talk-to-each-other/171387 ;
+https://cursor.com/blog/joining-spacex ; https://x.ai/news/x-subscription

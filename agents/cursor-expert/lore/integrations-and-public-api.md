@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Cursor integrations, Cloud Agents API, SDKs, admin APIs and Origin (checked 2026-10-14). Pending verification: session/run lifetime, usage attribution, follow-up and steering, and hosting boundaries."
+summary: "Cursor integrations, Cloud Agents API, SDKs, agent-to-agent peers, admin APIs, and Origin. Peers checked 2026-10-24. Pending: session lifetime, usage attribution, follow-up, and hosting."
 parent: lore/cursor-apps-and-surfaces.md
 ---
 
@@ -46,6 +46,26 @@ pricing, and privacy settings.
   20 requests per minute unless an endpoint says otherwise.
 - The APIs and SDKs run agent workflows. They are not a raw chat-completions API.
 
+## Agent-to-agent peers
+
+Checked 2026-10-24. **Documented** (https://cursor.com/docs/agent-sdk/guides/agent-to-agent).
+These connections are not a relay for editor Task subagents
+([skills, subagents, and commands](skills-subagents-and-commands.md)).
+
+- A peer is a full agent you would also run on its own. A subagent is a child role inside one
+  agent. Subagent reach is the parent only. Peer reach is local co-hosted agents, or declared
+  deployments on the same team, by deployment slug.
+- On Cursor-managed hosting the SDK routes and authenticates. The caller does not set a URL or a
+  secret. The caller decides when to delegate. The specialist keeps its own instructions, tools,
+  and session.
+- The caller uses MCP tools on the connection: `ask` (reason; returns status, sessionId, and
+  reply), `check` (poll a running session), and `call_tool` (run a declared deterministic tool
+  with no extra model turn). Pass `sessionId` to continue the specialist's session.
+- Local try: one `agent-sdk dev` process, with `agent` set to the specialist's mount slug.
+  Prefer one-way routing. Do not add reciprocal routes for the same request.
+
+Projects stay a separate hub. See [editor and Agents Window](editor-agents-window-and-modes.md).
+
 ## Pending SDK and runtime verification
 
 Recorded 2026-10-18 from session research follow-up; these are unresolved questions, not newly
@@ -82,6 +102,6 @@ https://cursor.com/docs/integrations/github.md ; https://cursor.com/docs/integra
 https://cursor.com/docs/integrations/jira.md ; https://cursor.com/docs/integrations/notion.md ;
 https://cursor.com/docs/integrations/jetbrains.md ; https://cursor.com/docs/integrations/xcode.md ;
 https://cursor.com/docs/reference/deeplinks.md ; https://cursor.com/docs/api.md ;
-https://cursor.com/docs/cloud-agent/api/endpoints.md ; https://cursor.com/docs/sdk/typescript.md ;
+https://cursor.com/docs/cloud-agent/api/endpoints.md ; https://cursor.com/docs/sdk/typescript.md ; https://cursor.com/docs/agent-sdk/guides/agent-to-agent ;
 https://cursor.com/docs/sdk/bridge.md ; https://cursor.com/docs/origin.md ; https://cursor.com/docs/api/origin/mcp.md ;
 https://cursor.com/docs/models-and-pricing.md ; https://cursor.com/changelog

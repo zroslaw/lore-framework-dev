@@ -93,6 +93,16 @@ Where the agent loop runs, and where its tool calls run, decide what an agent ca
   ↔ Cloud Agents; Claude Remote Control ↔ Cursor Remote Control; Dispatch ↔ a My Machines worker or
   a Project coordinator; Cowork ↔ Grok Bot.
 
+## Who agents can message
+
+Checked 2026-10-24. A Task subagent returns one final message to its parent. Parallel siblings do
+not share a transcript. A model choice, including Composer 2.5, does not add a sibling channel.
+Agent SDK peers are separate full agents. They are not a relay between those subagents. A Project
+is a coordinator hub: the coordinator relays, and workers do not message each other directly.
+Open [extension platform](lore/extension-platform.md) for subagents,
+[Cursor apps and surfaces](lore/cursor-apps-and-surfaces.md) for SDK peers and Projects, and
+[notes for agent-framework designers](lore/notes-for-agent-framework-designers.md) for the pattern.
+
 ## Areas
 
 - [Cursor apps and surfaces](lore/cursor-apps-and-surfaces.md) — editor and Agents Window, CLI,

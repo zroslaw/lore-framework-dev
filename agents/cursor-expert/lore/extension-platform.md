@@ -10,7 +10,9 @@ parent: lore-context.md
 Scope: how users and teams extend Cursor's agent — MCP, plugins and marketplaces, skills,
 subagents, commands, hooks — and the admin controls over them. Rules and AGENTS.md live in
 [memory and personalization](memory-and-personalization.md). Checked 2026-10-14 against
-cursor.com docs (documented) unless a line says otherwise.
+cursor.com docs (documented) unless a line says otherwise. Task subagents return only to the
+parent that started them (checked 2026-10-24). Parallel siblings do not share a transcript.
+Detail: [skills, subagents, and commands](skills-subagents-and-commands.md).
 
 ## Customize page
 

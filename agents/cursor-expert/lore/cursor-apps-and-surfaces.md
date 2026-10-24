@@ -42,6 +42,11 @@ Control sessions. They cannot run tools themselves.
 - **Code**: Cloud Agents API, TypeScript and Python SDKs.
 - **Events and schedules**: Automations ([Bugbot and Automations](bugbot-and-automations.md)).
 
+**Who can message whom** (checked 2026-10-24). Agent SDK peers are full agents that call each
+other. They are not a relay for editor Task subagents. A Project is a coordinator hub, not a
+mesh between workers. Detail: [integrations and public API](integrations-and-public-api.md) and
+[editor, Agents Window, and modes](editor-agents-window-and-modes.md).
+
 ## Children
 
 - [Editor, Agents Window, and agent modes](editor-agents-window-and-modes.md) — the desktop app,

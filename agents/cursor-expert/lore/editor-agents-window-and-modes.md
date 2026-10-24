@@ -53,6 +53,19 @@ Checked 2026-10-14. Documented unless a line says otherwise. Current desktop ver
   cloud agents, keeps shared context files across machines, and acts on subscriptions (Slack,
   schedules, PR activity). All paid plans; not on Hobby or Privacy Mode (Legacy). Enterprise needs
   3.21.9 or later.
+- **Projects stay a hub, not a mesh** (checked 2026-10-24). **Documented**
+  (https://cursor.com/docs/agent/projects.md): the coordinator plans and delegates; it does not
+  write code; shared context files sync across the project's agents. **Third-party report**,
+  Cursor staff on the forum, 2026-09-14
+  (https://forum.cursor.com/t/let-me-talk-to-subagents-and-let-sibling-agents-talk-to-each-other/171387):
+  you can open a worker and message it; the coordinator stays in the loop; sibling-to-sibling
+  messages are not there; the coordinator relays cross-agent handoffs. **Documented**, week of
+  2026-10-05 (https://cursor.com/docs/release-notes/cloud-agents): when you @-mention an agent to
+  a Project coordinator, the coordinator can read that transcript and send messages; it can
+  message its parent coordinator; the receiver can reply. Access follows the user's. This is
+  still coordinator-shaped. It is not a free peer mesh between Task subagents
+  ([skills, subagents, and commands](skills-subagents-and-commands.md)). Agent SDK peers are a
+  different path ([integrations and public API](integrations-and-public-api.md)).
 
 ## Visual work
 
@@ -64,7 +77,9 @@ Checked 2026-10-14. Documented unless a line says otherwise. Current desktop ver
   window).
 
 Sources: https://cursor.com/docs/agent/agents-window.md ; https://cursor.com/docs/agent/overview.md ;
-https://cursor.com/docs/agent/projects.md ; https://cursor.com/docs/agent/plan-mode.md ;
+https://cursor.com/docs/agent/projects.md ; https://cursor.com/docs/release-notes/cloud-agents ;
+https://forum.cursor.com/t/let-me-talk-to-subagents-and-let-sibling-agents-talk-to-each-other/171387 ;
+https://cursor.com/docs/agent/plan-mode.md ;
 https://cursor.com/docs/agent/prompting.md ; https://cursor.com/docs/agent/design-mode.md ;
 https://cursor.com/docs/agent/tools/canvas.md ; https://cursor.com/docs/configuration/worktrees.md ;
 https://cursor.com/docs/agent/security/run-modes.md ; https://cursor.com/help/ai-features/tab.md ;

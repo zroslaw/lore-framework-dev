@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Cursor skills (Agent Skills standard, locations, frontmatter, built-in skills, cloud sync, team publish), subagents (locations, fields, nesting, cloud subagents, billing), and slash commands. Includes Claude and Codex compatibility paths."
+summary: "Cursor skills, slash commands, and subagents: locations, cloud sync, nesting, billing, and parent-only Task returns with no sibling channel. Includes Claude and Codex paths."
 parent: lore/extension-platform.md
 ---
 
@@ -51,6 +51,31 @@ Checked 2026-10-14. Documented unless a line says otherwise.
 - Billing: each request bills at the model that ran it. A named third-party model draws from Other
   Models even when the parent is on Auto, Grok, or Composer. On legacy request plans without Max
   Mode, subagents run on Composer.
+
+## Who a subagent can reach
+
+Checked 2026-10-24. The missing sibling channel is a Cursor platform limit. A model choice,
+including Composer 2.5, does not add a channel between subagents.
+
+- **Documented** (https://cursor.com/docs/subagents.md): a subagent starts with a clean context.
+  The parent must put needed context in the Task prompt. The subagent returns one final message
+  to the parent. Parallel Task calls run siblings at the same time. They do not share a transcript.
+- **Inference** from one Cursor session on 2026-10-24, consistent with that page:
+  - Two subagents exchange a message only when the parent copies one reply into the next Task
+    prompt. There is no direct send.
+  - `resume` with the same agent id continues that subagent's own thread. A new Task without
+    `resume` starts clean. `resume: "self"` forks the parent. It does not open a sibling.
+  - The parent has no roster of live subagents. It has only the agent ids it stored.
+  - A background run ends when the subagent returns a final answer. A long `sleep` does not park
+    a worker. The model can answer and finish the turn early.
+  - `interrupt: true` on `resume` stops a running subagent. There is no delete or destroy tool
+    for an agent id. After a stop, `resume` still works.
+- Patterns that fit this shape: the parent orchestrates and passes a structured handoff; a shared
+  file can be a mailbox (watch write races on one checkout); use a worktree or a cloud VM when
+  siblings edit the same tree; use a Project when the work is long-lived. A Project is a
+  coordinator hub, and Agent SDK peers are separate full agents, not a relay for these subagents
+  ([editor and Agents Window](editor-agents-window-and-modes.md),
+  [integrations and public API](integrations-and-public-api.md)).
 
 ## Commands
 
