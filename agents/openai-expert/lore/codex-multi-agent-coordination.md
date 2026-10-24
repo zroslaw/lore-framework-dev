@@ -32,6 +32,25 @@ but cannot raise that cap from the chat.
 **Documented.** A custom Agents API session can set `max_concurrent_subagents` at creation. This
 is the suitable path when an application needs a higher concurrent-worker limit.
 
+## Hierarchy and scheduling
+
+**Documented.** Child agents can create their own descendants. The active-subagent limit applies
+to the entire tree, including children, grandchildren, and deeper descendants. The public
+Responses API guide states no fixed tree-depth limit and does not specify a fairness or priority
+policy for choosing among runnable agents.
+
+Source: https://developers.openai.com/api/docs/guides/responses-multi-agent
+
+**Observed locally.** A five-level Luna chain completed in Codex Desktop:
+`luna_tree_scout` → `luna_tree_analyst` → `luna_tree_verifier` →
+`luna_tree_executor` → `luna_tree_leaf`. A pending older worker initially consumed a shared slot
+and blocked the final child. This confirms that the local active-child cap is tree-wide.
+
+Operationally, use `spawn_agent` to create a child, `followup_task` to select and start or resume
+one, `send_message` to queue information without starting a turn, `wait_agent` for a result, and
+`interrupt_agent` to stop work. Treat ordering among more runnable agents than slots as
+unspecified; the coordinator should choose the next worker explicitly with `followup_task`.
+
 ## Codex CLI test detail
 
 **Observed locally, Codex CLI 0.160.0.** A persistent `codex exec` session created children that
