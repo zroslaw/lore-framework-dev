@@ -1,13 +1,13 @@
 ---
 lore: 1
 type: topic
-summary: "OpenAI questions to verify: MCP plan and surface support, desktop Lore, memory rollout, third-party reports, Codex SDK details (2026-10-18), and Codex multi-agent v2 wait controls (2026-10-22). Others date from 2026-10-14."
+summary: "OpenAI questions to verify: MCP plan and surface support, desktop Lore, memory rollout, third-party reports, Codex SDK details, Codex multi-agent v2 wait controls, and subagent sibling discovery. Dates are per item."
 parent: lore-context.md
 ---
 
 # Open verification items
 
-Items 1–7 date from 2026-10-14, and two research passes did not settle them. Items 8 and 9 have
+Items 1–7 date from 2026-10-14, and two research passes did not settle them. Items 8 to 10 have
 their own dates. When a question depends on one, check it first, in a browser or with a hands-on
 test. If I cannot check it, I say that it is unverified. The evidence for each item is in the linked topic. This list holds only the open
 question and how to settle it. When an item is settled, update the linked topic and remove the
@@ -64,6 +64,12 @@ item here.
    Settle: run a small hub with `codex exec`, one time with the wait floor in config and one time
    with only a prompt sentence. Read the `wait_agent` calls and their `timeout_ms` values in the
    rollout files ([Codex session logs and resume](codex-session-logs-and-resume.md)).
+10. **Can a Codex subagent find its siblings' paths?** (added 2026-10-24, codex-cli 0.160.0.) A
+    child sent `send_message` to a sibling at `/root/<task_name>` and it arrived (tested), but the
+    child knew the path only from its brief. Evidence:
+    [Codex multi-agent coordination](codex-multi-agent-coordination.md), "Sibling messages".
+    Settle: start two children, do not name the peer in either brief, and ask one child to find
+    and message the other. Read its tool calls in the rollout.
 
 ## Tell lore-architect when asked
 

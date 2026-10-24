@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Codex Desktop and CLI multi-agent boundaries (checked 2026-10-24): same-session messaging, fixed app concurrency, and Agents API configuration."
+summary: "Codex Desktop and CLI multi-agent boundaries (checked 2026-10-24): same-session messaging, direct sibling send_message by /root/<task_name> path, fixed app concurrency, and Agents API configuration."
 parent: lore/openai-apps-and-surfaces.md
 ---
 
@@ -56,4 +56,24 @@ unspecified; the coordinator should choose the next worker explicitly with `foll
 **Observed locally, Codex CLI 0.160.0.** A persistent `codex exec` session created children that
 sent and received direct greetings. The same test with `--ephemeral` failed during child creation
 because the session store had no rollout. Do not use `--ephemeral` for a CLI multi-agent test.
+
+## Sibling messages in Codex CLI (tested 2026-10-24)
+
+**Observed locally, not documented.** codex-cli 0.160.0, main model gpt-5.6-terra (low effort),
+`codex exec --enable multi_agent`. Verified in the child rollouts, not only in the main thread's
+report.
+
+- The main thread started two children with `spawn_agent` (`task_name: peer_a` and `peer_b`,
+  `fork_turns: "none"`). Peer A called `send_message` with `target: "/root/peer_b"`. The tool
+  result was empty (success). The main thread did not relay the message.
+- Peer B received it as a response item `agent_message` with author `/root/peer_a`, recipient
+  `/root/peer_b`, and the text header "Message Type: MESSAGE".
+- The address is the task path `/root/<task_name>`. The child knew the path because its brief
+  named it. No evidence shows that a child can list its siblings (not tested). So the parent must
+  put each peer path in the brief.
+- Cross-product comparison (for answers only; claude-expert and cursor-expert own those facts):
+  Claude Code subagents can also message a sibling, but only with an agent ID that the main
+  session gives; Cursor CLI has no peer tool.
+- How to tell a peer message from a new task in a rollout:
+  [Codex session logs and resume](codex-session-logs-and-resume.md), "Agent messages".
 

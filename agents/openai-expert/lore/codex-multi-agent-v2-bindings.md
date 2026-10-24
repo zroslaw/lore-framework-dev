@@ -107,6 +107,9 @@ codex exec -m gpt-5.6-terra -c model_reasoning_effort=medium --enable multi_agen
   19K tokens; the run took about 1 minute.
 - This run did not test the wait settings (open item 9).
 
+A child can also send to a sibling with `send_message` and the path `/root/<task_name>` (tested
+2026-10-24): [Codex multi-agent coordination](codex-multi-agent-coordination.md).
+
 To read the hub's and children's records after a run, or to ask a past child a question, see
 [Codex session logs and resume](codex-session-logs-and-resume.md).
 

@@ -35,7 +35,7 @@ below. Product facts here were checked on 2026-10-14 unless a line says otherwis
   `workdir/split-llms-full.py` and grep), then search snippets only for blocked pages. Detail and
   traps (plan matrix, changelog, stale snippets): [research method](lore/research-method-for-openai-docs.md).
 - Some facts are still unsettled (custom MCP plan gating, MCP on mobile and in Codex Cloud, `lr`
-  in desktop Codex, Codex multi-agent v2 wait controls). Check [open verification items](lore/open-verification-items.md) before
+  in desktop Codex, Codex multi-agent v2 wait controls, Codex subagent sibling discovery). Check [open verification items](lore/open-verification-items.md) before
   relying on one.
 
 ## Product family

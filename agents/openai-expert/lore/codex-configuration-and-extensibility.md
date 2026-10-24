@@ -62,8 +62,9 @@ Checked 2026-10-14. Documented unless a line says otherwise. These apply to the 
   not state the default ("Codex chooses the default"). Blogs say 6, and that spawns queue at the
   cap — third-party report, unverified.
 - Messages between subagents: the docs describe none; coordination goes through the parent. The
-  `agent_message_board` feature is still under development and off (checked 2026-10-24). Local
-  tests where children did message each other:
+  `agent_message_board` feature is still under development and off (checked 2026-10-24). But in
+  a local test (codex-cli 0.160.0, 2026-10-24) a child called `send_message` with a sibling's
+  path `/root/<task_name>` and the sibling received it directly, with no parent relay. Detail:
   [Codex multi-agent coordination](codex-multi-agent-coordination.md).
 - The old URL developers.openai.com/codex/subagents redirects (308) to
   https://learn.chatgpt.com/docs/agent-configuration/subagents (checked 2026-10-24).
