@@ -81,7 +81,8 @@ The most common confusion. Where a session runs decides what it can reach:
 ## Areas
 
 - [Claude apps and surfaces](lore/claude-apps-and-surfaces.md) — chat, Cowork, Dispatch, Claude
-  Code remote and cloud modes, the mobile app, and Claude Code behind LLM gateways.
+  Code remote and cloud modes, the mobile app, Claude Code behind LLM gateways, and tested
+  Claude Code subagent behavior.
 - [Extension platform](lore/extension-platform.md) — connectors, skills, plugins, directory
   publishing, and org controls.
 - [Memory and personalization](lore/memory-and-personalization.md) — memory topics, search past

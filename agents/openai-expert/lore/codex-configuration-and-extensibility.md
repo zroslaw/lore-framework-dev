@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "How a Codex host is extended (2026-10-14): AGENTS.md discovery, skill locations, config.toml layers, hooks (events, trust, plugin and managed hooks), subagents and custom agents, and import from Claude Code, Claude Cowork, or Cursor."
+summary: "How a Codex host is extended (2026-10-14; subagents 2026-10-24): AGENTS.md discovery, skills, config.toml layers, hooks, subagents, custom agents, the concurrency cap, and import from Claude Code, Cowork, or Cursor."
 parent: lore/extension-platform.md
 ---
 
@@ -54,10 +54,23 @@ Checked 2026-10-14. Documented unless a line says otherwise. These apply to the 
   subagents in its hosted environment; **Ultra** reasoning delegates proactively.
 - Custom agents: TOML files in `~/.codex/agents/` or `.codex/agents/`; limits under `[agents]`
   (`max_concurrent_threads_per_session`, `default_subagent_model`,
-  `default_subagent_reasoning_effort`).
-- Multi-agent v2 (checked in source for codex-cli 0.160.0 on 2026-10-22): `spawn_agent`
-  `fork_turns` sets how much parent history a child gets; `wait_agent` waits 10 seconds to one
-  hour; the base 60-second rule can keep a hub's waits short. Detail:
+  `default_subagent_reasoning_effort`). A role can also be defined on the command line with
+  `-c agents.<name>.description=...` and `-c agents.<name>.config_file=...`; its model and
+  effort apply to the child (observed locally 2026-10-24, codex-cli 0.160.0).
+- Concurrency cap (checked 2026-10-24): `agents.max_concurrent_threads_per_session` counts
+  subagents only, not the primary thread. `agents.max_threads` is a legacy alias. The docs do
+  not state the default ("Codex chooses the default"). Blogs say 6, and that spawns queue at the
+  cap — third-party report, unverified.
+- Messages between subagents: the docs describe none; coordination goes through the parent. The
+  `agent_message_board` feature is still under development and off (checked 2026-10-24). Local
+  tests where children did message each other:
+  [Codex multi-agent coordination](codex-multi-agent-coordination.md).
+- The old URL developers.openai.com/codex/subagents redirects (308) to
+  https://learn.chatgpt.com/docs/agent-configuration/subagents (checked 2026-10-24).
+- Multi-agent v2 (checked in source for codex-cli 0.160.0 on 2026-10-22; spawn and
+  `followup_task` tested 2026-10-24): `spawn_agent` `fork_turns` sets how much parent history a
+  child gets; `wait_agent` waits 10 seconds to one hour; the base 60-second rule can keep a hub's
+  waits short. Detail:
   [Codex multi-agent v2 bindings](codex-multi-agent-v2-bindings.md).
 
 ## Import from another agent (2026-08-11)

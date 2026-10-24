@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "OpenAI questions to verify: MCP plan and surface support, desktop Lore, memory rollout, third-party reports, Codex SDK details (2026-10-18), and Codex multi-agent v2 wait controls (2026-10-22). Other items date from 2026-10-14."
+summary: "OpenAI questions to verify: MCP plan and surface support, desktop Lore, memory rollout, third-party reports, Codex SDK details (2026-10-18), and Codex multi-agent v2 wait controls (2026-10-22). Others date from 2026-10-14."
 parent: lore-context.md
 ---
 
@@ -36,7 +36,9 @@ item here.
 7. **Facts from third-party reports only:**
    - agent mode retirement in August 2026 — [Chat, Work, Codex, and dots](chat-work-codex-and-dots.md);
    - Atlas shutdown on 2026-08-09 — [Browser, Computer Use, and Atlas](browser-computer-use-and-atlas.md);
-   - Pro tier usage multipliers — [Plans and pricing](plans-and-pricing.md).
+   - Pro tier usage multipliers — [Plans and pricing](plans-and-pricing.md);
+   - Codex subagent concurrency default of 6, with spawns that queue at the cap (added 2026-10-24) —
+     [Codex configuration and extensibility](codex-configuration-and-extensibility.md).
 8. **Codex SDK and managed-runtime details** (open questions added 2026-10-18; not reverified).
    The session discussion did not retain a complete source-to-claim record for these details:
    - Which Codex SDK packages and languages are current, and how do they differ from the general
@@ -51,7 +53,9 @@ item here.
    [Developer platform](developer-platform.md), checked 2026-10-14; this question does not
    reverify or replace that record.
 9. **Codex multi-agent v2 waits in a real run** (added 2026-10-22, codex-cli 0.160.0). The
-   source defines both controls, but no run tested them. Evidence:
+   source defines both controls, but no run tested them. A real run on 2026-10-24 confirmed
+   `spawn_agent` with `fork_turns: "none"`, a custom-role child model, and `followup_task`. It did
+   not test the waits, so this item stays open. Evidence:
    [Codex multi-agent v2 bindings](codex-multi-agent-v2-bindings.md).
    - Do the `[features.multi_agent_v2]` keys `min_wait_timeout_ms`, `default_wait_timeout_ms`, and
      `max_wait_timeout_ms` change the `wait_agent` timeouts in a real hub run?

@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Codex multi-agent v2 bindings for a hub that starts subagents (codex-cli 0.160.0, 2026-10-22): spawn_agent fork_turns, child model and effort, wait_agent timeouts, the 60-second base rule, and exec_command polling."
+summary: "Codex multi-agent v2 hub bindings (codex-cli 0.160.0; source 2026-10-22, run 2026-10-24): fork_turns, child model via custom role, followup_task, wait_agent timeouts, the 60-second rule, exec_command polling."
 parent: lore/extension-platform.md
 ---
 
@@ -80,9 +80,36 @@ These rules apply to any Codex session, hub or child, that runs a long command.
   and a complete task message; wait in long intervals; do not send a message to a working child
   unless the task needs it; poll every long command until `exit_code` appears.
 
+## Tested run: custom-role model and followup_task (2026-10-24)
+
+**Observed locally** (I ran it), codex-cli 0.160.0. Command, with no project config:
+
+```
+codex exec -m gpt-5.6-terra -c model_reasoning_effort=medium --enable multi_agent \
+  -c 'agents.memtest.description="..."' \
+  -c 'agents.memtest.config_file="<abs path>/memtest.toml"' \
+  --skip-git-repo-check -s workspace-write "<prompt>" < /dev/null
+```
+
+`memtest.toml` held `model = "gpt-5.6-luna"` and `model_reasoning_effort = "low"`.
+
+- The subagents ran on gpt-5.6-luna, low effort (their `turn_context` shows it). So a custom role
+  defined with `-c agents.<name>.config_file=...` sets a subagent model and effort from the command
+  line.
+- The main thread called `spawn_agent({task_name, agent_type: "memtest", fork_turns: "none",
+  message})`. `fork_turns: "none"` gave each child a new, empty context.
+- It then called `followup_task({target: "/root/<task_name>", message})` to continue the same
+  child after it finished. 3 of 3 children recalled their first brief.
+- Local feature flags showed `multi_agent` stable true and `multi_agent_v2` stable false. Path
+  addressing (`/root/...`) and `followup_task` still worked.
+- Each child has its own rollout file in `~/.codex/sessions/YYYY/MM/DD/`. Both turns of a child
+  are in that one file (`task_started` and `task_complete` events). The main thread used about
+  19K tokens; the run took about 1 minute.
+- This run did not test the wait settings (open item 9).
+
 To read the hub's and children's records after a run, or to ask a past child a question, see
 [Codex session logs and resume](codex-session-logs-and-resume.md).
 
 Sources: https://github.com/openai/codex/tree/rust-v0.160.0 (the source files named above) ;
 https://learn.chatgpt.com/docs/agent-configuration/subagents ; local rollout logs under
-`~/.codex/sessions/` (2026-10-22).
+`~/.codex/sessions/` (2026-10-22 and 2026-10-24).

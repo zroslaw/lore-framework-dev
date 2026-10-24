@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Cursor skills, slash commands, and subagents: locations, cloud sync, nesting, billing, and parent-only Task returns with no sibling channel. Includes Claude and Codex paths."
+summary: "Cursor skills, slash commands, and subagents: locations, cloud sync, nesting, billing, parent-only Task returns with no sibling channel, CLI-tested resume by ID, transcript paths, and parallel counts. Includes Claude and Codex paths."
 parent: lore/extension-platform.md
 ---
 
@@ -78,6 +78,24 @@ including Composer 2.5, does not add a channel between subagents.
     a worker. The model can answer and finish the turn early.
   - `interrupt: true` on `resume` stops a running subagent. There is no delete or destroy tool
     for an agent id. After a stop, `resume` still works.
+- **Tested in the CLI** (ran it, 2026-10-24, `cursor-agent` 2026.10.22-27dcf5f):
+  - Run: `cursor-agent -p --force --trust --model gpt-5.6-terra-medium "<prompt>"` in a folder
+    with `.cursor/agents/memtest.md` (frontmatter `name`, `description`,
+    `model: gemini-3.7-flash-low`). The main thread called `subagent_type: "memtest"`.
+  - The tool is `Subagent({description, prompt, subagent_type, run_in_background})`, called
+    through `CallDynamicTool`. A second call `Subagent({..., resume: "<id>"})` continues the same
+    subagent. In 3 of 3 runs the subagent recalled its first brief: resume keeps the full context.
+  - The transcript does not record a model name. The subagent `model` field is set, but the model
+    that ran is not confirmed.
+  - Transcripts: `~/.cursor/projects/<path-slug>/agent-transcripts/<chat id>/subagents/<subagent
+    id>.jsonl`. The first turn and the resumed turn are in the same file.
+- **Parallel count** (third-party report, forum; no official cap found): a staff post
+  (2026-02-24) says "the model decides how many sub-agents to run in parallel". Users saw 3–4
+  unless the prompt names a number. Subagents run in batches: the next batch waits for all of the
+  previous batch. A reply on 2026-07-02 (staff role not confirmed) says there is no fixed limit,
+  but "multiple dozens may run into issues".
+  https://forum.cursor.com/t/subagents-dont-maximize-parallel-dispatch/152679 ;
+  https://forum.cursor.com/t/what-is-maximum-sub-agent-creation-limit/164696
 - Patterns that fit this shape: the parent orchestrates and passes a structured handoff; a shared
   file can be a mailbox (watch write races on one checkout); use a worktree or a cloud VM when
   siblings edit the same tree; use a Project when the work is long-lived. A Project is a

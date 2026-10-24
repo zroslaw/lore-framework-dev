@@ -57,7 +57,7 @@ Protocol: `agent acp` serves JetBrains and custom clients).
 - Subagents through the Task tool return only to the parent (checked 2026-10-24). Parallel
   siblings do not share a transcript, and no model adds that channel. One extra nesting level.
   Background subagents write to `~/.cursor/subagents/`. `resume` by agent ID continues that
-  subagent only; `resume: "self"` forks the parent. Isolate with a worktree or a VM. The parent
+  subagent only, with its full context (tested in the CLI); `resume: "self"` forks the parent. Isolate with a worktree or a VM. The parent
   copies any cross-sibling handoff. Detail:
   [skills, subagents, and commands](skills-subagents-and-commands.md).
 - **Projects** are a coordinator hub, not a mesh (checked 2026-10-24). The coordinator plans and

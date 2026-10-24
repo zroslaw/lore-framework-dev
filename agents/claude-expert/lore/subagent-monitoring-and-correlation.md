@@ -56,6 +56,7 @@ has no subagents.
   `parent_tool_use_id`, but output tokens cannot (the per-step value is a placeholder).
 - **Caps:** `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3), `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`
   (default 20), and `maxBudgetUsd` for the whole tree.
+  Tested behavior of these limits in Claude Code: [Claude Code subagents](claude-code-subagents-tested.md).
 - **No hosted API.** To get a central API, ship these signals to the builder's own backend
   (hooks, OpenTelemetry, `SessionStore`).
 

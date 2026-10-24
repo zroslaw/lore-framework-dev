@@ -95,7 +95,8 @@ Where the agent loop runs, and where its tool calls run, decide what an agent ca
 
 ## Who agents can message
 
-Checked 2026-10-24. A Task subagent returns one final message to its parent. Parallel siblings do
+Checked 2026-10-24. A Task subagent returns one final message to its parent. The parent can
+resume it by ID, and the subagent keeps its full context (ran it in the CLI). Parallel siblings do
 not share a transcript. A model choice, including Composer 2.5, does not add a sibling channel.
 Agent SDK peers are separate full agents. They are not a relay between those subagents. A Project
 is a coordinator hub: the coordinator relays, and workers do not message each other directly.

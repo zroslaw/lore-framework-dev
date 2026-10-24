@@ -38,3 +38,6 @@ Control, or cloud sessions.
 - [Claude Code and LLM gateways](claude-code-llm-gateway.md) — documented (2026-10-22): supported
   gateway formats, no non-Claude models, the Claude apps gateway, the managed-settings lock, and
   when a gateway replaces subscription billing with per-token billing.
+- [Claude Code subagents: tested behavior](claude-code-subagents-tested.md) — tested
+  (2026-10-24): resume with `SendMessage`, base cost per subagent, peer messages by agent ID,
+  nesting depth, and the documented concurrency limit.

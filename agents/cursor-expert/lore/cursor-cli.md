@@ -16,8 +16,8 @@ v2026.10.08.
   `irm 'https://cursor.com/install?win32=true' | iex` (Windows). It installs to `~/.local/bin` and
   auto-updates; `agent update` updates by hand.
 - The command in the current docs is **`agent`**. The docs no longer show `cursor-agent`. The Lore
-  engine profile and lore-architect notes still use `cursor-agent`; inference: an alias exists, not
-  checked here.
+  engine profile and lore-architect notes still use `cursor-agent`. Tested 2026-10-24:
+  `cursor-agent` still runs (build 2026.10.22-27dcf5f).
 - Auth: `agent login` (browser; `NO_OPEN_BROWSER=1` prints the URL), or a user API key in
   `CURSOR_API_KEY` or `--api-key`. `agent status` shows the account.
 
@@ -32,7 +32,9 @@ v2026.10.08.
 - Cloud handoff: start a message with `&` to send it to a cloud agent; continue on web or mobile.
 - Approvals: the CLI asks before shell commands. `/run-everything` (alias `/auto-run`), `--force`
   (`--yolo`), `--sandbox enabled|disabled`, `permissions.json` (since March 2026), and team policy.
-- Subagents run in the CLI since March 2026 (CLI changelog).
+- Subagents run in the CLI since March 2026 (CLI changelog). Tested 2026-10-24 in print mode:
+  the `Subagent` tool starts a custom subagent, and `resume` by ID keeps its full context
+  ([skills, subagents, and commands](skills-subagents-and-commands.md)).
 
 ## Headless and integration modes
 
