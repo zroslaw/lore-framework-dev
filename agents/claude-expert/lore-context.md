@@ -82,7 +82,7 @@ The most common confusion. Where a session runs decides what it can reach:
 
 - [Claude apps and surfaces](lore/claude-apps-and-surfaces.md) — chat, Cowork, Dispatch, Claude
   Code remote and cloud modes, the mobile app, Claude Code behind LLM gateways, and tested
-  Claude Code subagent behavior.
+  Claude Code subagent behavior (naming, Agent Teams, messaging, liveness).
 - [Extension platform](lore/extension-platform.md) — connectors, skills, plugins, directory
   publishing, and org controls.
 - [Memory and personalization](lore/memory-and-personalization.md) — memory topics, search past
@@ -93,6 +93,12 @@ The most common confusion. Where a session runs decides what it can reach:
 - [Developer platform](lore/developer-platform.md) — the four ways to build an agent on the API
   (manual loop, Tool Runner, Managed Agents, Agent SDK), how to pick one, Managed Agents
   sandboxes and pricing, and observability, cost tracking, and subagent monitoring.
+
+Subagent rules (tested 2026-10-25, Claude Code 2.1.309; detail in
+[subagents tested](lore/claude-code-subagents-tested.md)): the `name` on an `Agent` call plus
+`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` decide the kind (flag on: a named agent is a teammate;
+off or unset, the default: a plain subagent). A subagent sees a roster of `main` and named agents
+(no `ListAgents`); unnamed agents are reachable only by agent ID.
 
 Root-level topic: [Lore compatibility on Claude surfaces](lore/lore-compatibility-on-claude-surfaces.md).
 In short (inference, untested): the `lr` plugin needs local `python3`, `git`, and the workspace

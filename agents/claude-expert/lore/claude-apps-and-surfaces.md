@@ -9,7 +9,7 @@ parent: lore-context.md
 
 Scope: the Claude apps (web, desktop, mobile) and the session types users reach through them —
 chat, Cowork, Dispatch, and Claude Code (terminal, IDE, desktop Code tab, cloud sessions, Remote
-Control). What each extension does on each surface lives in
+Control), plus tested Claude Code subagent behavior. What each extension does on each surface lives in
 [extension platform](extension-platform.md). Which plan unlocks each surface lives in
 [plans and models](plans-and-models.md).
 
@@ -38,6 +38,6 @@ Control, or cloud sessions.
 - [Claude Code and LLM gateways](claude-code-llm-gateway.md) — documented (2026-10-22): supported
   gateway formats, no non-Claude models, the Claude apps gateway, the managed-settings lock, and
   when a gateway replaces subscription billing with per-token billing.
-- [Claude Code subagents: tested behavior](claude-code-subagents-tested.md) — tested
-  (2026-10-24): resume with `SendMessage`, base cost per subagent, peer messages by agent ID,
-  nesting depth, and the documented concurrency limit.
+- [Claude Code subagents: tested behavior](claude-code-subagents-tested.md) — area, tested
+  (2026-10-24, 2026-10-25): resume, cost, nesting, limits, the name and Agent Teams switch,
+  messaging and the roster, and keeping a subagent alive.

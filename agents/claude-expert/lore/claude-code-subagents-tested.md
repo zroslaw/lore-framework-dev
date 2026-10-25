@@ -1,18 +1,31 @@
 ---
 lore: 1
-type: topic
-summary: "Claude Code subagents, tested 2026-10-24: resume with SendMessage keeps full context, base cost and time per subagent, peer messages need an agent ID, nesting stops at level 3; plus the documented concurrency and depth limits."
+type: area
+summary: "Claude Code subagents, tested 2026-10-24 and 2026-10-25: resume keeps context, cost, nesting, limits; children cover the name and Agent Teams switch, messaging and discovery, and keeping a subagent alive. Open for any subagent question."
 parent: lore/claude-apps-and-surfaces.md
 ---
 
 # Claude Code subagents: tested behavior
+
+Area for what Claude Code subagents do in practice. Short rules that hold in every case:
+
+- The `name` parameter on `Agent` plus the Agent Teams flag decide the kind: flag on, a named
+  agent is a teammate; flag off or unset (default), it is a plain subagent with a name.
+- A named agent is reached by name; an unnamed one only by its agent ID.
+- A subagent finds named agents through a roster in its context, not through `ListAgents`.
+
+Children:
+
+- [Named agents and the Agent Teams switch](claude-code-subagent-naming-and-teams-flag.md)
+- [Messaging and discovery between agents](claude-code-subagent-messaging-and-discovery.md)
+- [Keeping a subagent alive, and its tools](claude-code-subagent-liveness-and-tools.md)
 
 **Tested** (I ran it on 2026-10-24 in Claude Code: Opus main session, Haiku subagents) unless a
 line says **documented**. One test run per item; recheck after a Claude Code update.
 
 ## Resume with full context
 
-- An unnamed `Agent` subagent stays available after it finishes. `SendMessage` to its agent ID
+- An unnamed `Agent` subagent can be resumed after it finishes (it is idle and not listed). `SendMessage` to its agent ID
   resumes it with its full history (3 of 3 resumes recalled a code word from the first brief).
 - A rule in the first brief stays active after a resume until a later message cancels it
   explicitly (test: "do not repeat the code word").
@@ -26,14 +39,16 @@ line says **documented**. One test run per item; recheck after a Claude Code upd
 
 ## Peer messages between subagents
 
-- A subagent has `SendMessage` (deferred: load it with ToolSearch) but not `ListAgents`. Thus it
-  cannot find its siblings.
-- A send to a guessed name fails: "No agent named 'Y' is reachable".
-- With the agent ID of a sibling, the send succeeds ("queued for delivery … at its next tool
-  round"). A finished receiver is resumed with the message. The message arrives in an
-  `agent-message from="<id>"` block.
-- **How to apply:** to let subagents talk to each other, give each one the agent IDs of its peers
-  in its brief.
+Corrected 2026-10-25 (the first test sent only to guessed names and found no way to discover
+siblings). Full results are in [messaging and discovery](claude-code-subagent-messaging-and-discovery.md).
+
+- A subagent has `SendMessage` (deferred: load it with ToolSearch) but not `ListAgents`.
+- A send to a name that does not exist fails: "No agent named 'Y' is reachable". Unnamed agents
+  have no name, so only their agent ID works.
+- A subagent does see a roster of `main` and the named agents at start, so it can find named
+  siblings. A message arrives in an `agent-message from="<id>"` block; a finished receiver is
+  resumed with it.
+- **How to apply:** name the agents others must find, or put agent IDs in the brief.
 
 ## Nesting
 
