@@ -43,6 +43,28 @@ Sources: the `claude-api` skill bundled with Claude Code 2.1.302; https://code.c
   `tagSession()` (Python snake_case equivalents) read and organize saved sessions.
 - Permission prompts: a `canUseTool` callback (TypeScript name seen in the hooks docs).
 
+## Session sources and streaming
+
+**Documented**, checked 2026-11-06: the session APIs can list and read local CLI sessions,
+and a fork creates a separate session with remapped message IDs. The live stream is a separate
+source: partial API events accompany completed assistant blocks. Token deltas cover the main
+agent; the CLI needs `--forward-subagent-text` to forward subagent text and thinking. Reconcile
+partial updates with completed blocks, and keep the source identity. Do not treat a raw file,
+an SDK message projection, and a live stream as identical. Sources: [session APIs](https://code.claude.com/docs/en/agent-sdk/sessions),
+[streaming](https://code.claude.com/docs/en/agent-sdk/streaming-output),
+and [CLI output](https://code.claude.com/docs/en/headless).
+
+**Limit:** the local JSONL record format is not a published stable schema. Preserve unknown
+records when inspecting it; do not assume the SDK projection includes every raw record. See
+[upstream schema discussion](https://github.com/anthropics/claude-code/issues/49400).
+
+**Local test**, CLI 2.1.317, 2026-11-04: a controlled capture contained API request-shape
+and blob records, including a system array. These can contain private instructions; sanitize raw
+files before sharing. In one cancellation test the file contained enqueue and remove records, an
+aborted assistant block, and interruption markers. These observations do not establish a stable
+format or behavior in other versions. Installed CLI help also described system prompt snapshots
+that may persist across resume until compaction; the test did not establish the snapshot setting.
+
 ## From recall, not rechecked on 2026-10-18
 
 - Python `client.interrupt()`, and the Python spelling `can_use_tool`.

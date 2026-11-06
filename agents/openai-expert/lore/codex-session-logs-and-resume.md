@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Codex CLI 0.160.0 session records (observed 2026-10-22/24): rollout JSONL path and fields, encrypted parts, NEW_TASK versus MESSAGE agent messages, codex exec resume, and why a multi-agent v2 child cannot resume alone."
+summary: "Codex 0.160.0 session logs and resume: rollout records, selective persistence, app-server history and live events, multi-agent records, and resume limits; checked 2026-11-06."
 parent: lore/openai-apps-and-surfaces.md
 ---
 
@@ -23,6 +23,26 @@ own parsing of engine logs belongs to lore-architect (its `engine-session-log-fo
 - Plain text: tool calls, tool outputs, visible assistant messages, and the final answer.
 - Encrypted (`encrypted_content`): model reasoning items, and the text of hub-to-child and
   child-to-hub messages. Only the model can read them, through a resume.
+
+## History and live events (checked 2026-11-06)
+
+- **Documented:** The [app server](https://learn.chatgpt.com/docs/app-server) provides thread
+  history and live JSON-RPC events. Local rollout JSONL, app-server history, live notifications,
+  and exec or SDK streams are distinct surfaces; do not assume they carry the same records.
+- **Source and schema, Codex 0.160.0:** Its experimental schema directs paginated-history
+  clients from full `thread/read` hydration to `thread/turns/list` and `thread/items/list`.
+  Follow the opaque cursors and request ordering explicitly. `itemsView: full` means the
+  persisted app-server items available for that view, not every live event or rollout line.
+  The [pinned history projection](https://github.com/openai/codex/blob/a956835d020762cb2b570053af06f643a11c0ecc/codex-rs/app-server-protocol/src/protocol/thread_history_projection.rs)
+  and [persistence policy](https://github.com/openai/codex/blob/a956835d020762cb2b570053af06f643a11c0ecc/codex-rs/rollout/src/policy.rs)
+  are version-specific. The policy filters live deltas, approval requests, errors and other
+  transient events; absence of an event does not prove the action did not happen.
+- **Observed, controlled test:** A completed assistant item and raw response item held the
+  same answer ID and text; combining them as separate messages duplicated the answer. A child
+  had a separate thread, with its parent ID in `thread/read`; read both threads for their
+  respective records. This narrow test does not establish complete replay, pagination behavior
+  in every case, or cross-machine portability. Recheck the version: the CLI, SDK runtime, and
+  desktop app can differ.
 
 ## Agent messages (observed 2026-10-24)
 
