@@ -1,13 +1,13 @@
 ---
 lore: 1
 type: topic
-summary: "OpenAI questions to verify: MCP plan and surface support, desktop Lore, memory rollout, third-party reports, Codex SDK details, Codex multi-agent v2 wait controls, and subagent sibling discovery. Dates are per item."
+summary: "OpenAI questions to verify: MCP plan and surface support, desktop Lore, memory rollout, third-party reports, Codex SDK, Codex v2 waits, sibling discovery, app-server subagent queries. Dates per item."
 parent: lore-context.md
 ---
 
 # Open verification items
 
-Items 1–7 date from 2026-10-14, and two research passes did not settle them. Items 8 to 10 have
+Items 1–7 date from 2026-10-14, and two research passes did not settle them. Items 8 to 11 have
 their own dates. When a question depends on one, check it first, in a browser or with a hands-on
 test. If I cannot check it, I say that it is unverified. The evidence for each item is in the linked topic. This list holds only the open
 question and how to settle it. When an item is settled, update the linked topic and remove the
@@ -69,7 +69,18 @@ item here.
     child knew the path only from its brief. Evidence:
     [Codex multi-agent coordination](codex-multi-agent-coordination.md), "Sibling messages".
     Settle: start two children, do not name the peer in either brief, and ask one child to find
-    and message the other. Read its tool calls in the rollout.
+    and message the other. Read its tool calls in the rollout. (2026-11-07: an app-server client
+    can list spawned subagents with `thread/list`, item 11, but that does not answer this item,
+    because a child has no such tool.)
+11. **App-server subagent queries** (added 2026-11-07, codex-cli 0.160.0 source). Not tested:
+    - Does `thread/list` with both `ancestorThreadId` and `sourceKinds: ["subAgentThreadSpawn"]`
+      (experimental, `experimentalApi` opt-in) return all spawned descendants of a root thread,
+      at every depth, and nothing else?
+    - Does `subagent_history_start_ordinal` mark where a `fork_turns` child's own turns start, so
+      that `thread/turns/list` results before it are copied parent turns?
+    Evidence: [Codex session logs and resume](codex-session-logs-and-resume.md), "Subagent
+    records". Settle: start an app server with the opt-in on a finished hub run that used
+    `fork_turns: "all"` and a grandchild, call both methods, and compare with the rollout files.
 
 ## Tell lore-architect when asked
 

@@ -110,6 +110,10 @@ codex exec -m gpt-5.6-terra -c model_reasoning_effort=medium --enable multi_agen
 A child can also send to a sibling with `send_message` and the path `/root/<task_name>` (tested
 2026-10-24): [Codex multi-agent coordination](codex-multi-agent-coordination.md).
 
+`spawn_agent` and `wait_agent` return almost no status (only the task path, or "Wait
+completed."). For a child's status, model per turn, and the parent-to-child link, read the thread
+records (checked 2026-11-07).
+
 To read the hub's and children's records after a run, or to ask a past child a question, see
 [Codex session logs and resume](codex-session-logs-and-resume.md).
 

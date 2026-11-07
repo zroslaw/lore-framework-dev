@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Cursor hooks (2026-10-14): event list, hooks.json sources and priority, merge rules, cloud-agent and self-hosted support, team and MDM distribution, environment variables, and Claude Code hook compatibility."
+summary: "Cursor hooks (2026-10-14): event list, subagent hook fields, hooks.json sources and priority, merge rules, cloud-agent and self-hosted support, team and MDM distribution, environment variables, and Claude Code hook compatibility."
 parent: lore/extension-platform.md
 ---
 
@@ -26,6 +26,11 @@ Command hooks are the norm; prompt-based hooks also exist (not in cloud agents).
 - App: `workspaceOpen` (can return plugin paths to load).
 - 3.24: shell and MCP hooks get a `tool_use_id` that matches `preToolUse`; every hook gets
   `transcript_path` when a `.jsonl` transcript exists.
+- Subagent fields (checked 2026-11-07): `subagentStop` is documented without `subagent_id` and
+  has `loop_count`. The base fields `model_id` and `model_params` describe the composer that
+  triggered the hook, not the subagent; a subagent gets only `subagent_model` (a slug). No source
+  for subagent effort exists. Join subagent events to other records on `tool_call_id`
+  ([session transcripts and recovery](session-transcripts-and-recovery.md)).
 
 ## Sources and priority
 

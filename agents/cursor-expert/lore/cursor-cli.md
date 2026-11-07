@@ -43,6 +43,9 @@ v2026.10.08.
   `/skill-name` in `-p` mode. Admins can block headless use for a team.
 - **ACP**: `agent acp` runs the CLI as an Agent Client Protocol server over stdio (JSON-RPC 2.0).
   JetBrains IDEs use this path ([integrations](integrations-and-public-api.md)).
+  ACP reports subagents as child sessions when the client has the `subagents` capability, and
+  through `cursor/task` otherwise. `stream-json` has no subagent events (checked 2026-11-07;
+  [session transcripts and recovery](session-transcripts-and-recovery.md)).
 - **Worker**: `agent worker start` makes the machine a Self-Hosted Machine for cloud agents
   ([self-hosted machines](self-hosted-machines-and-remote-control.md)).
 

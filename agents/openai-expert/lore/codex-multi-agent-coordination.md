@@ -67,10 +67,14 @@ report.
   `fork_turns: "none"`). Peer A called `send_message` with `target: "/root/peer_b"`. The tool
   result was empty (success). The main thread did not relay the message.
 - Peer B received it as a response item `agent_message` with author `/root/peer_a`, recipient
-  `/root/peer_b`, and the text header "Message Type: MESSAGE".
+  `/root/peer_b`, and the readable header "Message Type: MESSAGE". The message body is encrypted
+  (`encrypted_content`, rechecked 2026-11-07), so a log reader sees who sent what kind of message,
+  not its text.
 - The address is the task path `/root/<task_name>`. The child knew the path because its brief
   named it. No evidence shows that a child can list its siblings (not tested). So the parent must
-  put each peer path in the brief.
+  put each peer path in the brief. An app-server client can list a tree's spawned subagents with
+  `thread/list` (experimental filters), but that is not a child tool:
+  [Codex session logs and resume](codex-session-logs-and-resume.md), "Subagent records".
 - Cross-product comparison (for answers only; claude-expert and cursor-expert own those facts):
   Claude Code subagents can also message a sibling, but only with an agent ID that the main
   session gives; Cursor CLI has no peer tool.

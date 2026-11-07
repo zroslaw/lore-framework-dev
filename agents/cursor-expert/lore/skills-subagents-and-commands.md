@@ -89,6 +89,11 @@ including Composer 2.5, does not add a channel between subagents.
     that ran is not confirmed.
   - Transcripts: `~/.cursor/projects/<path-slug>/agent-transcripts/<chat id>/subagents/<subagent
     id>.jsonl`. The first turn and the resumed turn are in the same file.
+- Spawn tool names differ by surface: `Task` (editor, hooks, and the local CLI JSONL), `Subagent`
+  through `CallDynamicTool` (CLI test 2026-10-24), `Agent` (SDK). The JSONL is a secondary copy;
+  the primary local record is a per-agent `store.db` with parent links. Open
+  [session transcripts and recovery](session-transcripts-and-recovery.md) for local records and
+  live subagent sources.
 - **Parallel count** (third-party report, forum; no official cap found): a staff post
   (2026-02-24) says "the model decides how many sub-agents to run in parallel". Users saw 3–4
   unless the prompt names a number. Subagents run in batches: the next batch waits for all of the

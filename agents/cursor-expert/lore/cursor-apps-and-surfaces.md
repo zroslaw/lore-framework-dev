@@ -53,7 +53,8 @@ mesh between workers. Detail: [integrations and public API](integrations-and-pub
   modes, Tab, subagents, Projects, side chats, canvases.
 - [Cursor CLI](cursor-cli.md) — the `agent` command, headless mode, ACP, MCP and plugin commands.
 - [Session transcripts and recovery](session-transcripts-and-recovery.md) — CLI, ACP, and cloud
-  transcript surfaces and the limits of local recovery evidence.
+  transcript surfaces, local subagent records (`store.db` and JSONL), live subagent sources, and
+  the limits of local recovery evidence.
 - [Cloud agents](cloud-agents.md) — VMs, environments, triggers, subscriptions, hooks, billing.
 - [Self-hosted machines and Remote Control](self-hosted-machines-and-remote-control.md) — tool
   calls on the user's own machine.

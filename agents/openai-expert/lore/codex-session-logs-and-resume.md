@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Codex 0.160.0 session logs and resume: rollout records, selective persistence, app-server history and live events, multi-agent records, and resume limits; checked 2026-11-06."
+summary: "Codex 0.160.0 session logs and resume: rollout records, what persists, app-server history and live events, subagent records, discovery and status, agent messages, and resume limits; checked 2026-11-07."
 parent: lore/openai-apps-and-surfaces.md
 ---
 
@@ -20,9 +20,10 @@ own parsing of engine logs belongs to lore-architect (its `engine-session-log-fo
   `{subagent: {thread_spawn: {parent_thread_id, depth, ...}}}`.
 - `turn_context` gives the model, the reasoning effort, the sandbox policy, and the approval
   policy.
-- Plain text: tool calls, tool outputs, visible assistant messages, and the final answer.
-- Encrypted (`encrypted_content`): model reasoning items, and the text of hub-to-child and
-  child-to-hub messages. Only the model can read them, through a resume.
+- Plain text: most tool calls, tool outputs, visible assistant messages, and the final answer.
+- Encrypted (`encrypted_content`): model reasoning items, and the body of every agent-to-agent
+  message (hub to child, child to hub, peer to peer). The sender's message tool arguments are
+  encrypted too (observed 2026-11-07). Only the model can read them, through a resume.
 
 ## History and live events (checked 2026-11-06)
 
@@ -44,12 +45,57 @@ own parsing of engine logs belongs to lore-architect (its `engine-session-log-fo
   in every case, or cross-machine portability. Recheck the version: the CLI, SDK runtime, and
   desktop app can differ.
 
-## Agent messages (observed 2026-10-24)
+## Subagent records, discovery and status (checked 2026-11-07)
 
+Codex CLI 0.160.0 rollouts (**observed locally**) and the protocol source at tag `rust-v0.160.0`
+(**documented in source**; the newest tag on that date was `rust-v0.167.0`, so recheck).
+
+- **What persists (documented in source, confirmed locally).** Paginated rollouts persist all
+  completed items, including `SubAgentActivity` and `CollabAgentToolCall`. The legacy collab
+  `*End` events are transient and are not persisted (`rollout/src/policy.rs`). I stated the
+  opposite once, in a consult on 2026-11-07; read `policy.rs` at the installed tag before you
+  state a persistence rule.
+- **Each subagent is its own thread and rollout (observed).** Its `session_meta` holds
+  `parent_thread_id`, `forked_from_id`, `thread_source: "subagent"`,
+  `subagent_history_start_ordinal`, and `source.subagent.thread_spawn {parent_thread_id, depth,
+  agent_path, agent_nickname, agent_role}`.
+- **Only `thread_spawn` is a spawned subagent (documented in source).** `review`, `compact` and
+  `memory_consolidation` threads also use SubAgent sources. Filter on `thread_spawn`.
+- **The parent-to-child link (observed).** The parent rollout holds `SubAgentActivity` items with
+  `agent_thread_id`, `agent_path` and `kind` (started, interacted, interrupted, completed). In one
+  case the started item ID equalled the `spawn_agent` call ID, and the completed item ID was
+  `subagent-completed-<child turn id>`.
+- **Tool returns carry almost nothing (observed).** `spawn_agent` returns only
+  `{"task_name": "/root/<name>"}`. `wait_agent` returns only "Wait completed." or a timeout, and
+  its items had empty `receiver_thread_ids` and `agents_states`. Do not use them as a status source.
+- **Discovery through the app server (documented in source; combination not tested).**
+  `thread/list` with `ancestorThreadId` and `sourceKinds: ["subAgentThreadSpawn"]` lists the
+  spawned descendants of a thread. Both filters are experimental and need the `experimentalApi`
+  opt-in. This is a client-side query, not a tool that a child can call
+  ([open verification items](open-verification-items.md), items 10 and 11).
+- **Model per turn (documented in source, observed).** `Thread.model` and
+  `Thread.reasoningEffort` are the current configured values, not per-turn telemetry, and `Turn`
+  has no model field. The model and effort that a turn used are only in the rollout
+  `turn_context` (`model`, `effort`).
+- **Turns.** `thread/turns/list` gives turn status and times. A child made with `fork_turns`
+  holds copied parent turns. Exclude them, probably by `subagent_history_start_ordinal`
+  (not verified, item 11).
+- **Status (documented in source, observed).** `CollabAgentStatus` values: pendingInit, running,
+  interrupted, completed, errored, shutdown, notFound. In v2, `agents_states` was empty, so derive
+  a child's status from its `ThreadStatus`, its last own turn, and the last `SubAgentActivity`
+  kind. `thread/start` returns `multiAgentMode`.
+- **Sensitive native fields.** `base_instructions`, `world_state` (the full `AGENTS.md`), the
+  spawn message and prompt text, `encrypted_content`, and account fields. A monitor or exporter
+  must not copy them by default.
+
+## Agent messages (observed 2026-10-24, rechecked 2026-11-07)
+
+- Agents address each other by path: `/root` for the main thread, `/root/<task_name>` for a child.
 - A message from another agent arrives in the receiver's rollout as a response item
-  `agent_message` with an author path and a recipient path (for example `/root/peer_a` to
-  `/root/peer_b`).
-- Its header gives the kind. "Message Type: NEW_TASK" is a new task: the start of a child, or a
+  `agent_message` with `id`, `author` and `recipient` paths (for example `/root/peer_a` to
+  `/root/peer_b`). It is **not** plain text: only a short header (`Message Type`, `Task name`,
+  `Sender`) is readable, and the body is in `encrypted_content`.
+- The header gives the kind. "Message Type: NEW_TASK" is a new task: the start of a child, or a
   `followup_task` continue (same rollout file, later timestamp). "Message Type: MESSAGE" is a
   message to an agent that is already running (`send_message`, from the parent or from a peer).
 - A tool that reads transcripts must not count a MESSAGE as a new turn. Peer-message test:
