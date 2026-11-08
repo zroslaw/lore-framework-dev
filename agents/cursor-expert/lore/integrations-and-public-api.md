@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Cursor integrations, Cloud Agents API, SDKs, agent-to-agent peers, admin APIs, and Origin. Peers checked 2026-10-24. Pending: session lifetime, usage attribution, follow-up, and hosting."
+summary: "Cursor integrations, Cloud Agents API, SDKs, agent-to-agent peers, admin APIs, and Origin. Peers checked 2026-10-24. SDK 1.3.1 local runtime tested 2026-11-08. Unverified: cloud lifetime and usage, queued follow-up, hosting."
 parent: lore/cursor-apps-and-surfaces.md
 ---
 
@@ -66,27 +66,65 @@ These connections are not a relay for editor Task subagents
 
 Projects stay a separate hub. See [editor and Agents Window](editor-agents-window-and-modes.md).
 
-## Pending SDK and runtime verification
+## SDK local runtime: tested 2026-11-08
 
-Recorded 2026-10-18 from session research follow-up; these are unresolved questions, not newly
-verified product facts. The session did not retain a complete source-to-claim record for these
-details. Existing SDK and cloud facts keep their 2026-10-14 check date.
+**Local test**, not documentation: `@cursor/sdk` 1.3.1, Node 24.22, macOS x64, local runtime,
+login stored by `Cursor.auth.login()`. Cloud runtime, API-key mode, Windows, Linux, nested
+subagents, and terms for use as a backend were not tested.
 
-- **Lifetime:** What persists as an agent or session across separate runs in each SDK and the
-  Cloud Agents API? Check creation, follow-up, resume, cancellation, and deletion separately.
-- **Usage:** Which SDK events and usage APIs expose tokens, cost, and subagent usage? Can each
-  amount be attributed to a run and a parent agent without double counting?
-- **Message delivery:** Which interfaces queue a follow-up after work finishes, steer an active
-  run at a processing boundary, or interrupt it? Check delivery timing and cancellation effects;
-  do not infer active-run steering from support for follow-ups.
-- **Hosting:** Which SDK control components and tool-execution components can run on private
-  infrastructure? Distinguish a local SDK session from a self-hosted worker controlled by
-  Cursor's cloud. Recheck the boundary in [self-hosted machines](self-hosted-machines-and-remote-control.md)
-  and [cloud agents](cloud-agents.md).
+- **Auth and models:** the stored login (`~/.cursor/sdk/auth.json`) worked with no env var.
+  `Cursor.models.list()` returned 48 models; 35 have an effort-like parameter whose id differs by
+  model (`effort`, `reasoning_effort`, or `reasoning`) and whose values differ (`low/medium/high`,
+  plus `xhigh`, `max`, `minimal`, `none`, `extra-high` on some). Other parameters: `thinking`,
+  `context`, `fast`. Seven models have none, including `default` (Auto). A local run needs an
+  explicit `model` (`{ id: "default" }` works); without it `agent.send` throws `ConfigurationError`.
+- **Lifetime:** `Agent.create({ agentId, local: { cwd }, model })` keeps a caller-chosen
+  `agentId`. `agent.send()` returns a promise of a `Run`; `run.stream()` yields events;
+  `run.wait()` gives status, result, usage. `Agent.create` without a `send` leaves a phantom run in
+  status `running`, and `Agent.resume` in a new process then fails with `UnknownAgentError: already
+  has active run`: create the agent at the first send. `Agent.resume`, `get`, `list`, `listRuns`,
+  `getRun` and `messages.list` find a local agent only with `{ runtime: "local", cwd }`. Resume of
+  an unknown ID gives `AgentNotFoundError`.
+- **Usage:** a `listRuns` item has id, currentStatus, createdAt, model, and per-run usage.
+  `inputTokens` includes `cacheReadTokens`; `totalTokens` = input + output; `reasoningTokens` is
+  reported. No account limits, context window, or subagent usage appeared in the paths tested.
+- **Message delivery:** `run.steer(text)` worked in a running turn (`complete_delivered`) and the
+  turn answered it. `run.cancel()` ended a turn with status `cancelled`, and no shell child
+  processes remained.
+- **History:** `run.conversation()` returns turns with `steps` only (`thinkingMessage`,
+  `assistantMessage`, `toolCall`): no user prompt, no timestamps. A steering text shows as the
+  turn's `userMessage`. A run whose process died stays `running` and `conversation()` never
+  answers: use a timeout. `Agent.messages.list` returns user messages in order (steering
+  included) as `message.turn.value.userMessage.text`. `agent.summarize()` emits `summary` events
+  and the context survived; the summary run has no usage and no turn (inference for detection).
+- **Subagents:** inline `agents: { name: { description, prompt } }` and `.cursor/agents/*.md` both
+  worked. A subagent is a `task` tool call; `args.agentId` is present from the first `running`
+  event; `args.subagentType` is `{ kind: "custom", name }`; the result holds `conversationSteps`
+  and `agentId`, in a different step shape (`{ toolCall: { shellToolCall: ... } }`,
+  `{ thinkingMessage: { text } }`, `{ assistantMessage: { text } }`). The SDK also writes plain
+  transcripts under `~/.cursor/projects/<workspace>/agent-transcripts/<agent>/` (lossy: no tool
+  results).
+- **Sandbox:** `local.sandboxOptions` has one field, `enabled`. With `true`, the SDK threw
+  `ConfigurationError: sandboxing is not supported in this environment` inside an already
+  sandboxed shell (cause not confirmed). Without it, a shell command wrote outside `cwd`.
+- **Noise:** the SDK prints `Ripgrep path not configured` and shell-parser notes to stderr
+  (harmless). pnpm installs it but warns about ignored build scripts.
+
+## Still unverified (recorded 2026-10-18)
+
+- **Cloud and API lifetime and usage:** what persists across runs in the Cloud Agents API and the
+  cloud runtime; which events expose tokens, cost, and subagent usage there, and how to attribute
+  them to a run and a parent without double counting.
+- **Follow-up queueing in the cloud:** the local test showed steer and cancel only. Check queued
+  follow-ups after work finishes, delivery timing, and cancellation effects on the cloud runtime.
+- **Hosting:** which SDK control and tool-execution components can run on private infrastructure.
+  Distinguish a local SDK session from a self-hosted worker controlled by Cursor's cloud. Recheck
+  [self-hosted machines](self-hosted-machines-and-remote-control.md) and [cloud agents](cloud-agents.md).
+- **Nested subagents**, and terms for use of the SDK as a product backend.
 
 Before an implementation recommendation, recheck the official SDK, API, and worker documentation
-below. Record exact methods or endpoints, supported surfaces, check dates, and limits. Use
-[framework design notes](notes-for-agent-framework-designers.md) for the existing SDK/tool facts.
+below. Record exact methods or endpoints, supported surfaces, check dates, and limits. Practical
+guidance for wrappers: [framework design notes](notes-for-agent-framework-designers.md).
 
 ## Origin
 

@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Cursor mechanisms for agent-framework designers: compatibility layers, open standards, MCP hints, cloud sockets, subscriptions, parent-only subagents, Project hubs, SDK peers, and company context."
+summary: "Cursor mechanisms for agent-framework designers: compatibility layers, open standards, MCP hints, cloud sockets, subscriptions, parent-only subagents, Project hubs, SDK peers, SDK wrapping lessons, and company context."
 parent: lore-context.md
 ---
 
@@ -82,6 +82,24 @@ instructions and session. They are not a back door between Task subagents. The c
 with the MCP tools `ask`, `check`, and `call_tool`. On Cursor-managed hosting the SDK routes and
 authenticates. A local try uses one `agent-sdk dev` process and one-way routes. Detail:
 [integrations and public API](integrations-and-public-api.md).
+
+## Wrapping the SDK in another product
+
+Learned 2026-11-08 from a **local test** of `@cursor/sdk` 1.3.1 (local runtime only; shapes in
+[integrations and public API](integrations-and-public-api.md)).
+
+- The SDK runs in process: no engine child process, no process group. A hang inside the SDK hangs
+  the host.
+- Do not trust unit tests with a fake SDK for shapes. The real `messages.list` item was nested one
+  level deeper than a plausible guess. Walk the real object and keep a real-engine check.
+- Read history only through SDK calls (`listRuns`, `getRun().conversation()`, `messages.list`),
+  each with a timeout. Rebuild prompts from `messages.list`: the conversation holds none.
+- Create the agent at the first input. Pass your own `agentId` if you need a stable ID before the
+  first run.
+- Check effort against the model's own parameter list, not a fixed list: the parameter name and
+  values differ by model.
+- Tool payloads are documented as unstable: keep unknown shapes as opaque calls.
+- Expect no account limits, context window, or subagent usage from the SDK in the paths tested.
 
 ## Company context
 

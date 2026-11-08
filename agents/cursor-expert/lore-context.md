@@ -72,7 +72,7 @@ From the docs index and the docs home page:
 - **Origin** (early beta): Cursor's own git forge, with a CLI, an API, and an MCP server.
 - **Extension platform**: the Customize page, the Cursor Marketplace, team marketplaces, plugins,
   rules, skills, subagents, commands, hooks, and MCP.
-- **Developer surfaces**: Cloud Agents API, TypeScript and Python SDKs, SDK Bridge, Admin and
+- **Developer surfaces**: Cloud Agents API, TypeScript and Python SDKs (`@cursor/sdk` 1.3.1 local runtime tested 2026-11-08; cloud runtime unverified), SDK Bridge, Admin and
   Analytics APIs, ACP (JetBrains), and the Xcode MCP bridge.
 - **Business**: Teams and Enterprise (SSO, SCIM, audit logs, MCP allowlist, model access control,
   Cursor Blame, OpenTelemetry export).
