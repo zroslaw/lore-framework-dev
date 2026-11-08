@@ -65,6 +65,55 @@ aborted assistant block, and interruption markers. These observations do not est
 format or behavior in other versions. Installed CLI help also described system prompt snapshots
 that may persist across resume until compaction; the test did not establish the snapshot setting.
 
+## Verified locally, streaming-input behavior (2026-11-08)
+
+**Verified** with Claude Code 2.1.319 and `@anthropic-ai/claude-agent-sdk` 0.3.319 (the SDK
+version follows the Claude Code version), macOS. Recheck on newer versions.
+
+- **No prompt needed to start.** With streaming input, `query.initializationResult()` returns in
+  about 10 s (user hooks run) with `models` (aliases `default`, `opus`, `sonnet`, `fable`,
+  `haiku`, plus concrete IDs, each with `supportsEffort` and `supportedEffortLevels`), `account`
+  (`apiProvider`, `subscriptionType`; treat account fields as private), `claude_code_version`, and
+  `current_permission_mode` (present at runtime, missing from the TypeScript types). No model call.
+- **One `system/init` and one `result` per prompt.** Prompts sent during a turn are queued.
+  `priority: "now"` on a user message goes before queued prompts; the running tool call is not
+  aborted, the current turn ends (its result can be empty), and the next turn reads the new prompt.
+  Three prompts gave results in the order A, C (now), B.
+- **Engine-started turns.** After a background subagent (`run_in_background`) finishes, the engine
+  starts a new main turn itself (`init`, assistant text, `result`) with no prompt sent.
+- **Task messages.** `system/task_started` (`task_type: "local_agent"`, `task_id`, `tool_use_id`,
+  `subagent_type`, `spawn_depth`, `parent_task_id` when nested), `task_updated` (`patch.status`,
+  `end_time`), `task_progress`, `task_notification`. Shell commands are tasks too (`local_bash`).
+  `query.stopTask(id)` ends a task asynchronously (`task_updated` `killed`, then
+  `task_notification` `stopped`). A SIGKILL of the engine process group right after `stopTask`
+  leaves the command running, so wait for the notification. See
+  [subagent monitoring](subagent-monitoring-and-correlation.md).
+- **Shell commands run outside the engine's process group**: a `python3` command survived a group
+  SIGKILL. Claude Code also blocks a standalone `sleep N`.
+- **Context and limits.** `getContextUsage({detail:'summary'})` gives `model` (resolved ID),
+  `totalTokens`, `maxTokens`, `rawMaxTokens` with no model call. The method named
+  `usage_EXPERIMENTAL_MAY_CHANGE_DO_NOT_RELY_ON_THIS_API_YET` returns `rate_limits.five_hour` and
+  `seven_day` (`utilization`, `resets_at`) and `subscription_type`; the SDK marks it experimental.
+  A `rate_limit_event` message carries similar windows during a turn
+  (see [OAuth usage](claude-code-oauth-usage.md)).
+- **Resume.** `getSessionInfo(id)` returns `cwd`; `query({resume: id, cwd})` keeps the same session
+  ID and appends to the same file.
+- **Login and permissions.** Without a login the handshake succeeds; the first turn ends with an
+  assistant message `error: authentication_failed` and a `result` with `subtype: "success"`,
+  `is_error: true`, `result: "Not logged in · Please run /login"`. With `permissionMode: default`
+  and no `canUseTool`, a tool needing approval is denied (`system/permission_denied`, error tool
+  result) and the model continues; nothing hangs.
+- **`/compact` as a prompt** gives `system/status compacting`, `system/compact_boundary`
+  (`compact_metadata.trigger`, `pre_tokens`, `post_tokens`) and a result with 0 turns.
+- **`spawnClaudeCodeProcess`** lets the host start the `claude` process itself (for its own
+  process group); the returned child needs `stdin`, `stdout`, `kill`, `on('exit')`.
+- **Undocumented**: env `CLAUDE_CODE_EMIT_SESSION_STATE_EVENTS=1` makes the engine emit
+  `session_state_changed` (`running`, `idle`); it stays `running` while a background subagent
+  works. Verified once.
+- **Terms.** The SDK overview says third parties may not offer claude.ai login or its rate limits;
+  use API keys. Own local use of one's own login worked technically; the terms reading is
+  unsettled ([policy topic](subscription-oauth-third-party-policy.md)).
+
 ## From recall, not rechecked on 2026-10-18
 
 - Python `client.interrupt()`, and the Python spelling `can_use_tool`.
