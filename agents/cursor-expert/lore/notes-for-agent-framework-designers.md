@@ -100,6 +100,11 @@ Learned 2026-11-08 from a **local test** of `@cursor/sdk` 1.3.1 (local runtime o
   values differ by model.
 - Tool payloads are documented as unstable: keep unknown shapes as opaque calls.
 - Expect no account limits, context window, or subagent usage from the SDK in the paths tested.
+- For cost accounting (2026-11-09): take tokens per run, not per request (the SDK exposes none).
+  Do not add cache tokens to `inputTokens`: they are already in it. Send Fast and context params
+  explicitly, because the defaults can be the expensive ones. Prefer `Agent.getUsage()`
+  `rawCostCents` where the account has it; `chargedCents` is 0 for plan-included usage.
+  Compaction runs carry no usage, so a sum of run usage undercounts.
 
 ## Company context
 

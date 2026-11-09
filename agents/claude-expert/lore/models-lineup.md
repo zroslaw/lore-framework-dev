@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Current Claude models as of 2026-10-13: Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5 with API IDs, per-token prices, default effort, shared specs, caching and batch discounts, and legacy models."
+summary: "Current Claude models (2026-10-13): Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5 with API IDs, effort, and specs; full API price table with cache, fast mode, US-only, and tool fees (2026-11-09); legacy models."
 parent: lore/plans-and-models.md
 ---
 
@@ -33,11 +33,34 @@ Source: https://platform.claude.com/docs/en/about-claude/models/overview, checke
 - The Models API returns `max_input_tokens`, `max_tokens`, `line`, and a `capabilities` object
   (thinking, server tools) for each model. Read `line` rather than parsing the ID.
 
-## Discounts
+## API prices with cache (checked 2026-11-09)
 
-- Batch API: 50% off.
-- Cache reads: 10% of base input price; 2.5% on Fable 5.1 and Claude Mythos 5.1; 5% on Opus 5.5 and
-  Sonnet 5.5. Claude Mythos 5.1 appears only in the pricing notes.
+Source: https://platform.claude.com/docs/en/about-claude/pricing and
+https://code.claude.com/docs/en/fast-mode (documented). USD per million tokens.
+
+| Model | Input | 5m cache write | 1h cache write | Cache read | Output |
+|---|---|---|---|---|---|
+| Fable 5.1 | 10 | 12.50 | 20 | 0.25 | 50 |
+| Opus 5.5 | 4 | 5 | 8 | 0.20 | 20 |
+| Opus 5, Opus 4.8 | 5 | 6.25 | 10 | 0.50 | 25 |
+| Sonnet 5.5 | 2 | 2.50 | 4 | 0.10 | 10 |
+| Sonnet 5 | 2 | 2.50 | 4 | 0.20 | 10 |
+| Haiku 5.5 (prompt ≤100K) | 0.10 | 0.125 | 0.20 | 0.01 | 0.50 |
+
+- Cache writes: 1.25× input (5-minute TTL), 2× input (1-hour TTL).
+- Cache reads: 0.1× input by default; 0.05× on Opus 5.5 and Sonnet 5.5; 0.025× on Fable 5.1 and
+  Claude Mythos 5.1 (Mythos appears only in the pricing notes).
+- Sonnet 5: its introductory price is now the standard price.
+- Haiku 5.5: 5× every price when the prompt is over 100K tokens, cache tokens included
+  ([long-context cost](long-context-cost.md)).
+- **Fast mode:** Opus 5.5 $8 / $40; Opus 5 and Opus 4.8 $10 / $50 (input / output). Cache and
+  US-region multipliers apply on top. In Claude Code on a subscription, fast mode always draws
+  usage credits, which are real money ([cost data](agent-observability-and-cost.md)).
+- **US-only inference** (`inference_geo: "us"`): ×1.1 on token prices, not on tool fees.
+- **Tool fees:** web search $10 per 1,000 searches; web fetch has no fee.
+- **Batch API:** 50% off.
+- **Tokenizer:** Claude 4.7 and later models use a tokenizer that gives about 30% more tokens for
+  the same text. Compare cost per task, not only price per token.
 
 ## Legacy but available
 

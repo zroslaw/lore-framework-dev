@@ -76,7 +76,8 @@ Observed in Claude Code 2.1.302 on 2026-10-18 (operational lesson):
 - [Managed Agents](managed-agents.md) — hosted agents with a sandbox: object model, features,
   use cases, environments, data limits, and pricing.
 - [Observability and cost](agent-observability-and-cost.md) — token, cost, and context tracking,
-  budgets, and OpenTelemetry for all three products; which numbers are estimates.
+  budgets, and OpenTelemetry for all three products; Claude Code cache TTL rules and cost from
+  local transcripts; which numbers are estimates.
 - [Subagent monitoring](subagent-monitoring-and-correlation.md) — how to see and correlate
   subagents with their session, and which data an API exposes.
 

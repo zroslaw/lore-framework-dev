@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Cursor integrations, Cloud Agents API, SDKs, agent-to-agent peers, admin APIs, and Origin. Peers checked 2026-10-24. SDK 1.3.1 local runtime tested 2026-11-08. Unverified: cloud lifetime and usage, queued follow-up, hosting."
+summary: "Cursor integrations, Cloud Agents API, SDKs, agent-to-agent peers, admin APIs, and Origin. SDK 1.3.1 local runtime tested 2026-11-08, usage and cost 2026-11-09. Unverified: cloud lifetime and usage, queued follow-up, hosting."
 parent: lore/cursor-apps-and-surfaces.md
 ---
 
@@ -86,8 +86,22 @@ subagents, and terms for use as a backend were not tested.
   `getRun` and `messages.list` find a local agent only with `{ runtime: "local", cwd }`. Resume of
   an unknown ID gives `AgentNotFoundError`.
 - **Usage:** a `listRuns` item has id, currentStatus, createdAt, model, and per-run usage.
-  `inputTokens` includes `cacheReadTokens`; `totalTokens` = input + output; `reasoningTokens` is
-  reported. No account limits, context window, or subagent usage appeared in the paths tested.
+  `inputTokens` includes both `cacheReadTokens` and `cacheWriteTokens` (probe 2026-11-09 with
+  claude-haiku-5-5: 10,004 = 7,315 cache read + 2,685 cache write + 4 fresh). `totalTokens` =
+  input + output; the SDK docs formula that adds the cache tokens again is wrong.
+  `reasoningTokens` is part of output. No account limits, context window, or subagent usage
+  appeared in the paths tested.
+- **Model parameters (2026-11-09):** Fast, context, and effort are params on the model selection
+  (`fast: true/false`, `context: "256k"/"500k"`, an effort param), not model IDs. A run's `model`
+  keeps only the params the caller sent. A missing param means the catalog default, which can be
+  Fast and 500k, so send the params explicitly when cost matters. Model `default` is Auto.
+- **Cost (2026-11-09):** `Agent.getUsage()` returns server cost `{ rawCostCents, chargedCents }`
+  per agent and per run or turn. For local agents it rolls out per account; on the tested
+  individual account it returned `[feature_unavailable]`. `chargedCents` is 0 for usage included
+  in the plan, BYOK, and credit grants, so use `rawCostCents` for the list-price cost.
+- **No per-request usage:** the SDK drops its internal `modelCallCompleted` events. The local store
+  `~/.cursor/projects/<cwd>/sdk-agent-store/*/index.db` holds one usage event per run. A summary
+  (compaction) run has no usage, so its cost shows only in `getUsage` or on the dashboard.
 - **Message delivery:** `run.steer(text)` worked in a running turn (`complete_delivered`) and the
   turn answered it. `run.cancel()` ended a turn with status `cancelled`, and no shell child
   processes remained.

@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Observability for Claude agents (2026-10-18): token, cost, and context tracking, budgets, and OpenTelemetry in the Agent SDK, Tool Runner, and Managed Agents; which numbers are estimates and where real billing lives."
+summary: "Agent observability (2026-10-18): tokens, cost, context, budgets, and OpenTelemetry in the Agent SDK, Tool Runner, and Managed Agents; Claude Code cache TTL and cost from transcripts (2026-11-09); estimates versus billing."
 parent: lore/developer-platform.md
 ---
 
@@ -24,8 +24,8 @@ see [subagent monitoring](subagent-monitoring-and-correlation.md).
 
 - **Result message** of each `query()` (`SDKResultMessage` / Python `ResultMessage`):
   `total_cost_usd`, `usage`, and `modelUsage` (Python `model_usage`) with tokens and `costUSD`
-  for each model. Each `modelUsage` entry has `costBasis`: `list`, `managed` (a `modelPricing`
-  table), or `unknown`.
+  for each model. Each `modelUsage` entry has `costBasis` (v2.1.246+): `list`, `managed` (a
+  `modelPricing` table), or `unknown`.
 - **The cost is a client-side estimate** from a price table bundled at build time. It can drift
   from the bill (price changes, unknown models, billing rules). Do not bill end users from it.
   The SDK does model data-residency pricing (`inference_geo: "us"` → ×1.1 on tokens).
@@ -90,6 +90,45 @@ see [subagent monitoring](subagent-monitoring-and-correlation.md).
   `pre_compaction_tokens`.
 - Session budgets in USD pause the session at the cap
   ([pricing](managed-agents-pricing-and-alternatives.md)). Webhooks report state changes.
+
+## Claude Code cache TTL
+
+Checked 2026-11-09. Sources: https://code.claude.com/docs/en/prompt-caching,
+https://code.claude.com/docs/en/agent-sdk/cost-tracking (documented), confirmed in a scan of
+about 400 local transcripts (local test).
+
+- Only the **main conversation within plan usage** gets the 1-hour cache TTL.
+- Subagents, compaction, and title requests use the 5-minute TTL. The main conversation also
+  drops to 5 minutes when it draws usage credits, and with an API key.
+- Price each cache write from `usage.cache_creation.ephemeral_5m_input_tokens` and
+  `ephemeral_1h_input_tokens`. Never infer the TTL from the login type.
+- Fast mode on a subscription always draws usage credits (real money), so it also gets the
+  5-minute TTL on the main conversation (inference from the two rules above).
+- Prices per TTL: [models lineup](models-lineup.md#api-prices-with-cache-checked-2026-11-09).
+
+## Claude Code cost from local transcripts
+
+Local test, 2026-11-09, about 400 transcripts; record layout in
+[local session observation](claude-code-local-session-observation.md). Recheck after a Claude
+Code update.
+
+- `total_cost_usd` and `modelUsage[].costUSD` are client-side estimates from the bundled price
+  table (or `modelPricing`). They include subagents.
+- The transcript **`cost-state` record** is written at normal process exit. It is cumulative
+  across resumes, and it can be stale after the process is killed. It includes helper requests
+  that the transcript does not show (title generation; away summaries in interactive CLI
+  sessions).
+- Assistant records repeat for each content block with the same message ID. The last record has
+  the final `output_tokens`. The SDK placeholder warning above applies to streamed SDK messages,
+  not to the transcript.
+- Records with model `<synthetic>` have zero usage: skip them. `thinking_tokens` is a subset of
+  output tokens; do not add it again.
+- List-price arithmetic from transcript tokens (input, 5m and 1h cache writes, cache reads,
+  output) reproduced `costUSD` exactly in 64 of 64 cases with exact token data.
+
+**How to apply:** to rebuild Claude Code cost per session, sum the final usage of each message ID
+from the main and subagent transcripts, price each cache write by its TTL field, and compare with
+`cost-state`. A difference is usually helper requests or a stale `cost-state` after a kill.
 
 ## Authoritative billing
 

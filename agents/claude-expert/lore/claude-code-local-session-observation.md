@@ -60,3 +60,5 @@ implementation detail, so do not present it as a stable product guarantee.
   `file-history-*`, `api-request*`, `tools-used`, `cost-state`, and `system` subtypes such as
   `stop_hook_summary`, `turn_duration`, `away_summary`.
 - Thinking blocks are often recorded with empty `thinking` and a signature (text not kept).
+- Cost from these records (`cost-state`, `<synthetic>`, cache TTL fields): see
+  [observability and cost](agent-observability-and-cost.md#claude-code-cost-from-local-transcripts).

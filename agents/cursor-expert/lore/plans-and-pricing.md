@@ -32,6 +32,8 @@ Checked 2026-10-14. List prices, monthly, before tax unless noted. Recheck befor
 | Teams | $30+/user | 4–50x Plus, pooled | Team marketplace, central billing, analytics, privacy settings, SSO, mixed seat types |
 | Enterprise | Custom | Pooled | Invoicing, SCIM, spend and group controls, access controls, audit logs, priority support |
 
+- Rechecked 2026-11-09: the prices did not change. Plus is Grok only, with fixed settings: Fast
+  off, medium effort, 256k context.
 - One **weekly** pool shared by Cursor and Grok (Chat, Imagine, Voice, Bot). Top-ups after that.
 - Third-party models are **not** in the pool; they bill at API list price from prepaid credit.
 - x.ai says Premium bundles SuperGrok, Cursor Pro, and X Premium+ benefits, and that each plan has

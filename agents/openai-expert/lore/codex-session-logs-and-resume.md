@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "Codex 0.160.0 session logs and resume: rollout records, what persists, app-server history and live events, subagent records, discovery and status, agent messages, and resume limits; checked 2026-11-07."
+summary: "Codex 0.160.0 session logs and resume: rollout records, what persists, app-server history and live events, subagent records, discovery and status, agent messages, token usage records and cost fields, and resume limits; checked 2026-11-09."
 parent: lore/openai-apps-and-surfaces.md
 ---
 
@@ -100,6 +100,27 @@ Codex CLI 0.160.0 rollouts (**observed locally**) and the protocol source at tag
   message to an agent that is already running (`send_message`, from the parent or from a peer).
 - A tool that reads transcripts must not count a MESSAGE as a new turn. Peer-message test:
   [Codex multi-agent coordination](codex-multi-agent-coordination.md).
+
+## Usage records (checked 2026-11-09)
+
+Codex 0.160.0 rollouts and app-server schema (**observed locally**, 103 rollout files) and the
+openai/codex source on `main` (**documented in source**). Prices to apply to these records:
+[plans and pricing](plans-and-pricing.md), "Codex credits rate card".
+
+- **Use `token_usage_record`.** There is one per model response, with `thread_id`, `turn_id`,
+  `response_id` and `usage`. Sum these records for a session total.
+- **Do not use `event_msg token_count` as the session total.** It is not one per response, and it
+  was missing in 13 of 103 local files. Its last cumulative value can be lower than the real total.
+- **Model and effort per turn** are in `turn_context` (`model`, `effort`). It has no service tier.
+  The tier is only in `thread_settings_applied`. App-server `model/list` names the Fast tier
+  `id: "priority"` (the old name of Fast).
+- **App-server cost estimate.** `account/usage/read` returns `threadUsage`
+  (`estimatedUsageCreditsMicros`, `estimatedUsageUsdMicros`, groups by model, effort and speed).
+  It is gated to Business and Enterprise credit or usage-based plans
+  (`thread_usage_is_available()` in the TUI source). It is `null` on Plus, and it is not available
+  with API-key or Bedrock auth. On other plans, compute the cost from `token_usage_record`.
+- **Tool-billed items persist.** `web_search_call` and `image_generation_call` items are in the
+  rollout, so web-search calls can be counted for the per-call charge.
 
 ## Resume
 

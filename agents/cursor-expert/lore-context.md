@@ -52,6 +52,9 @@ below. Product facts here were checked on 2026-10-14 unless a line says otherwis
   The **Cursor plans** in the docs (Hobby, Start, Pro, Pro+, Ultra, Teams, Enterprise; monthly
   pools) stay for existing customers. Always say which family a plan fact belongs to
   ([plans and pricing](lore/plans-and-pricing.md)).
+- Model rates are per million tokens at https://cursor.com/docs/models. Cursor models (Grok,
+  Composer) have no cache-write price and no Cursor Token Rate; third-party models bill at the
+  vendor API list price. Prices rechecked 2026-11-09 ([models lineup](lore/models-lineup.md)).
 
 ## Product family
 
@@ -72,7 +75,7 @@ From the docs index and the docs home page:
 - **Origin** (early beta): Cursor's own git forge, with a CLI, an API, and an MCP server.
 - **Extension platform**: the Customize page, the Cursor Marketplace, team marketplaces, plugins,
   rules, skills, subagents, commands, hooks, and MCP.
-- **Developer surfaces**: Cloud Agents API, TypeScript and Python SDKs (`@cursor/sdk` 1.3.1 local runtime tested 2026-11-08; cloud runtime unverified), SDK Bridge, Admin and
+- **Developer surfaces**: Cloud Agents API, TypeScript and Python SDKs (`@cursor/sdk` 1.3.1 local runtime tested 2026-11-08, usage and cost fields 2026-11-09; cloud runtime unverified), SDK Bridge, Admin and
   Analytics APIs, ACP (JetBrains), and the Xcode MCP bridge.
 - **Business**: Teams and Enterprise (SSO, SCIM, audit logs, MCP allowlist, model access control,
   Cursor Blame, OpenTelemetry export).

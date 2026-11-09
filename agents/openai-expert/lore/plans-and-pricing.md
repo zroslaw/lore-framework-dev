@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "ChatGPT plans as of 2026-10-14: Free, Go $8, Plus $20, Pro $100/$200/$500, Business $20-25 (Premium seat $100-125), Enterprise and Edu; shared Work and Codex usage, local message estimates, credits, speed multipliers."
+summary: "ChatGPT plans (2026-10-14): Free, Go $8, Plus $20, Pro $100-500, Business, Enterprise, Edu; shared Work and Codex usage, Codex credits rate card (2026-11-09; 1 credit = $0.04 API price, inference), speeds."
 parent: lore/plans-and-models.md
 ---
 
@@ -47,10 +47,8 @@ prices in USD; recheck before use.
   apply. Pro has no five-hour limit.
 - Enterprise and Edu with flexible pricing: no fixed limits; usage draws credits. Without flexible
   pricing: about Plus limits per seat.
-- Speed multipliers on included usage: Fast 2.5x, Ultrafast 8x (credits: 2x and 6x).
-- Credit rates per 1M tokens (input / cached / output): GPT-6 Astra 250 / 25 / 1,250; GPT-6.1 Sol
-  50 / 2.5 / 250; GPT-6 Luna 2.5 / 0.25 / 12.5. GPT-5.6 Sol promotional pricing runs at least to
-  2026-11-21.
+- Speed multipliers on included usage: Fast 2.5x, Ultrafast 8x (credits: 2x and 6x). See the
+  credits rate card below.
 - Desktop ChatGPT Voice: $0.05 per minute of Codex budget (1.25 credits per minute on credit
   plans). Image generation uses limits 3–5x faster. Sites is included during the public beta.
 - When the limit is reached mid-turn, the turn finishes. Plus and Pro can buy credits; any user can
@@ -60,7 +58,42 @@ prices in USD; recheck before use.
   [Local Codex quota probe](local-codex-quota-probe.md).
 - Every enabled MCP server adds context and uses more of the limit.
 
-Sources: https://learn.chatgpt.com/docs/pricing ; https://learn.chatgpt.com/docs/dots ;
+## Codex credits rate card (checked 2026-11-09)
+
+Source: https://learn.chatgpt.com/docs/pricing (documented). The help-center rate-card article
+still returns HTTP 403 to fetches.
+
+Credits per 1M tokens, Standard speed (input / cached input / output):
+
+| Model | Credits |
+|---|---|
+| gpt-6-astra | 250 / 25 / 1,250 |
+| gpt-6.1-sol | 50 / 2.5 / 250 |
+| gpt-6.1-terra | 25 / 1.25 / 125 |
+| gpt-6-sol | 50 / 5 / 250 |
+| gpt-6-luna | 2.5 / 0.25 / 12.5 |
+| gpt-5.6-sol | 100 / 10 / 500 |
+| gpt-5.6-terra | 50 / 5 / 300 |
+| gpt-5.6-luna | 5 / 0.5 / 30 |
+
+- **1 credit = $0.04 of API list price (inference).** Every row equals the API Standard price
+  ([models lineup](models-lineup.md)) divided by $0.04, and voice agrees ($0.05 per minute =
+  1.25 credits). OpenAI publishes no credit purchase price: it "depends on your plan or
+  agreement". Use $0.04 only to convert credits to an API-equivalent cost, not as a bill.
+- **Credits have no cache-write charge.** The API has one (see models lineup). So a
+  credit-to-dollar conversion of a cache-heavy session is not the same as its API cost.
+- Speed multipliers on credits and the API: **Fast** 2x (the tier was called **Priority** until
+  the rename on 2026-07-30), **Ultrafast** 6x (only gpt-6-astra and gpt-6.1-sol). On included plan
+  usage: Fast 2.5x, Ultrafast 8x. Batch and Flex: 0.5x (API).
+- Extras: web search $10 per 1,000 calls; data residency and FedRAMP add 10%.
+- GPT-5.6 Sol promotion: the pricing page said at least to 2026-11-21 (checked 2026-10-14); the
+  API pricing page says until 2026-11-30 (checked 2026-11-09). The newer date is from the API page;
+  recheck both after 2026-11-21.
+- Per-session usage and cost data in local Codex records:
+  [Codex session logs and resume](codex-session-logs-and-resume.md), "Usage records".
+
+Sources: https://learn.chatgpt.com/docs/pricing ; https://developers.openai.com/api/docs/pricing ;
+https://learn.chatgpt.com/docs/dots ;
 https://openai.com/index/premium-seats-chatgpt-business (search snippet) ; third-party:
 https://letsdatascience.com/news/openai-introduces-500-chatgpt-pro-500-tier-329fe640 ;
 https://www.cometapi.com/chatgpt-pricing-2026-free-vs-go-vs-plus-vs-pro/

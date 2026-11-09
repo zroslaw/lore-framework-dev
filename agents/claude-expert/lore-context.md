@@ -88,11 +88,13 @@ The most common confusion. Where a session runs decides what it can reach:
 - [Memory and personalization](lore/memory-and-personalization.md) — memory topics, search past
   chats, instructions, and projects.
 - [Plans and models](lore/plans-and-models.md) — plan tiers and prices, plan-gated features, the
-  model lineup, and which tools may use a subscription login (Claude Code and claude.ai only, by
+  model lineup with the full API price table (cache writes and reads, fast mode, US-only), and
+  which tools may use a subscription login (Claude Code and claude.ai only, by
   third-party report; products for other users need API keys).
 - [Developer platform](lore/developer-platform.md) — the four ways to build an agent on the API
   (manual loop, Tool Runner, Managed Agents, Agent SDK), how to pick one, Managed Agents
-  sandboxes and pricing, and observability, cost tracking, and subagent monitoring.
+  sandboxes and pricing, and observability, cost tracking (including Claude Code cache TTL and
+  cost from transcripts), and subagent monitoring.
 
 Subagent rules (tested 2026-10-25, Claude Code 2.1.309; detail in
 [subagents tested](lore/claude-code-subagents-tested.md)): the `name` on an `Agent` call plus

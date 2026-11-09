@@ -1,14 +1,15 @@
 ---
 lore: 1
 type: topic
-summary: "Cursor models as of 2026-10-14: own models (Grok 4.7, 4.6, 4.5 with SpaceXAI; Composer 2.5) with prices and effort levels, Auto and Cursor Router modes, the visible third-party models with per-token prices, Fast mode, and long context."
+summary: "Cursor models (2026-10-14, prices rechecked 2026-11-09): own models (Grok 4.7, 4.6, 4.5; Composer 2.5) with prices, modifiers and effort, Auto and Cursor Router, third-party models with per-token prices, Fast mode, long context."
 parent: lore/plans-and-models.md
 ---
 
 # Models lineup
 
-Source: https://cursor.com/docs/models-and-pricing.md and model pages, checked 2026-10-14
-(documented). Prices are per million tokens: input / cache read / output.
+Source: https://cursor.com/docs/models-and-pricing.md (now also at https://cursor.com/docs/models)
+and model pages, checked 2026-10-14 (documented). Prices are per million tokens: input / cache
+read / output. **Rechecked 2026-11-09**: Grok 4.7 and Composer 2.5 rates did not change.
 
 ## Cursor's own models (Cursor Models pool)
 
@@ -19,6 +20,9 @@ Source: https://cursor.com/docs/models-and-pricing.md and model pages, checked 2
 | Grok 4.5 | $2 / $0.50 / $6 | $4 / $1 / $18 | 256k | |
 | **Composer 2.5** | $0.50 / $0.20 / $2.50 | $3 / $0.50 / $15 | 200k | Cursor's own fast coding model; Fast is the default in the product; no Cursor Token Rate |
 
+- Cursor models have **no cache-write price** (the table shows "–"). Grok 4.7 modifiers
+  (2026-11-09): Fast 2x, input above 256k 2x, Fast and above 256k together 3x.
+- On The X Subscription these rates apply to usage after the weekly pool is used up.
 - The Grok models are "jointly trained by Cursor and SpaceXAI" and are served in the Cursor vendor
   catalog, so teams that block the xAI provider can still allow them.
 - Fast is the default speed on Pro and higher. On Start: fixed medium effort, standard speed.
@@ -39,7 +43,9 @@ Source: https://cursor.com/docs/models-and-pricing.md and model pages, checked 2
 
 ## Third-party models shown by default
 
-Other Models pool; API prices plus the Cursor Token Rate on Teams and Enterprise:
+Other Models pool; API prices plus the Cursor Token Rate on Teams and Enterprise. The docs table
+also gives a cache-write price for third-party models (2026-11-09: Claude Sonnet 5.5 $2.50,
+GPT-5.6 Terra $2.50). On The X Subscription they bill from prepaid credit (Premium and up):
 
 | Model | In / cache read / out | Notes |
 |---|---|---|
@@ -62,6 +68,8 @@ Kimi). The Auto-review classifier uses Gemini 3.5 Flash Lite with Claude 4.5 Hai
   Grok long context costs more.
 - Regional or US-only endpoints cost 10% more for some Claude models.
 - Hobby users see a smaller set of models; paid plans unlock all.
+- In the SDK, Fast, context, and effort are **model parameters**, not separate model IDs (example:
+  `fast: true`, `context: "500k"`). See [integrations and public API](integrations-and-public-api.md).
 
 Sources: https://cursor.com/docs/models-and-pricing.md ; https://cursor.com/docs.md ;
 https://cursor.com/docs/models/grok-4-7.md ; https://cursor.com/help/models-and-usage/grok-4-7.md ;

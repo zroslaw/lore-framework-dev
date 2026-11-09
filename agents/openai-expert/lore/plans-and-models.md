@@ -37,7 +37,8 @@ Collected across areas, checked 2026-10-14 (documented unless marked):
 
 ## Children
 
-- [Plans and pricing](plans-and-pricing.md) — each plan's price, Work and Codex usage, credits,
+- [Plans and pricing](plans-and-pricing.md) — each plan's price, Work and Codex usage, the Codex
+  credits rate card (1 credit = $0.04 of API price, inference), credits,
   speed multipliers, Business seats.
 - [Local Codex quota probe](local-codex-quota-probe.md) — inference: local `auth.json` fields and
   `GET …/wham/usage` headers/response shape for rate-limit windows (method only).

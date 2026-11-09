@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "OpenAI models as of 2026-10-14: GPT-6 Astra, GPT-6.1 Sol, GPT-6 Sol, GPT-6 Luna, GPT-5.6 family; where each runs (Chat, Work, Codex, API), API IDs and prices, reasoning levels, and retirements."
+summary: "OpenAI models (2026-10-14; API prices rechecked 2026-11-09): GPT-6 Astra, 6.1 Sol and Terra, 6 Sol, 6 Luna, GPT-5.6 family; surfaces, API IDs, prices, cache-write and long-context rules, retirements."
 parent: lore/plans-and-models.md
 ---
 
@@ -20,8 +20,18 @@ https://learn.chatgpt.com/docs/models (documented unless marked).
 | GPT-6 Luna | `gpt-6-luna` | $0.10 / $0.01 / $0.50 | 1.05M, 128K | 2026-05-18 |
 | GPT-5.6 Sol | `gpt-5.6-sol` | $4 / $0.40 / $20 | 1.05M, 128K | 2026-02-16 |
 
-- Prompts over 272K input tokens cost 2x input and 1.5x output. Cache writes cost 1.25x input.
-  Batch and Flex are 50% off; Fast mode is 2x. Ultrafast is a `service_tier` for Astra and 6.1 Sol.
+More Standard prices from https://developers.openai.com/api/docs/pricing (checked 2026-11-09,
+per MTok in / cached / out, up to 272K input): `gpt-6.1-terra` $1 / $0.05 / $5; `gpt-5.6-terra`
+$2 / $0.20 / $12; `gpt-5.6-luna` $0.20 / $0.02 / $1.20. The `gpt-5.6-sol` price above is a
+promotion until 2026-11-30. The other rows above were unchanged on 2026-11-09.
+
+- A request with more than 272K input tokens is billed entirely at the long-context column
+  (2x input, 1.5x output) — the whole request, not only the tokens above 272K.
+- Cache writes: a 30-minute write costs 1.25x input; a 12-hour write costs 2.5x input. Codex
+  credits have no cache-write charge ([plans and pricing](plans-and-pricing.md)).
+- Batch and Flex are 50% off; Fast (named Priority until 2026-07-30) is 2x; Ultrafast is 6x and a
+  `service_tier` only for Astra and 6.1 Sol. Web search: $10 per 1,000 calls. Data residency and
+  FedRAMP: +10%.
 - `reasoning.effort`: `low` to `max` (Luna also `none`). GPT-6.1 Sol was released at DevDay
   2026-09-29; it supports Responses Multi-agent (beta) and EU data residency.
 - Others in the catalog: GPT-5.6 Terra and Luna, `chat-latest` (the Instant model used in ChatGPT),
@@ -46,8 +56,8 @@ https://learn.chatgpt.com/docs/models (documented unless marked).
   Luna).
 - Codex Cloud picks its model automatically.
 - Retirements with ChatGPT sign-in: `gpt-5.3-codex-spark` (2026-09-14), `gpt-5.4` and
-  `gpt-5.4-mini` (2026-08-31), **GPT-5.5 from ChatGPT, Work, and Codex on 2026-10-14** (today). The
+  `gpt-5.4-mini` (2026-08-31), **GPT-5.5 from ChatGPT, Work, and Codex on 2026-10-14**. The
   API is not affected; API-key Codex sessions follow API availability.
 
-Sources: https://developers.openai.com/api/docs/models ; https://learn.chatgpt.com/docs/models ;
+Sources: https://developers.openai.com/api/docs/models ; https://developers.openai.com/api/docs/pricing ; https://learn.chatgpt.com/docs/models ;
 https://learn.chatgpt.com/docs/whats-new ; https://help.openai.com/en/articles/20001354 (snippets)

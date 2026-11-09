@@ -33,7 +33,8 @@ Collected across areas, checked 2026-10-13 (documented):
 
 - [Plans and pricing](plans-and-pricing.md) — each plan's price and features, and the
   Enterprise-only list.
-- [Models lineup](models-lineup.md) — current models, API IDs, prices, and shared specs.
+- [Models lineup](models-lineup.md) — current models, API IDs, shared specs, and the full API
+  price table with cache writes and reads, fast mode, US-only, and tool fees (2026-11-09).
 - [Long-context cost](long-context-cost.md) — per-token price by context size (no premium except
   Haiku 5.5 over 100K), why big contexts cost more per turn, 1M plan access, and Claude Code
   context controls.

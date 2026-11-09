@@ -35,7 +35,8 @@ The phone is mainly a client. It reaches work that needs a computer only through
   server, versions, sign-in.
 - [Codex session logs and resume](codex-session-logs-and-resume.md) — where Codex CLI keeps
   session records, what is plain or encrypted, what persists, subagent records, discovery and
-  status, and how to resume a session or a multi-agent child (checked 2026-11-07).
+  status, token usage records and cost fields, and how to resume a session or a multi-agent
+  child (checked 2026-11-09).
 - [Codex multi-agent coordination](codex-multi-agent-coordination.md) — the boundary between
   same-session child messaging (including direct sibling `send_message`), Desktop's app-managed
   concurrency, and configurable Agents API sessions (checked 2026-10-24).

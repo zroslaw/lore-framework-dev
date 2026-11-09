@@ -1,7 +1,7 @@
 ---
 lore: 1
 type: topic
-summary: "How Cursor bills usage (2026-10-14): Cursor Models vs Other Models pools, on-demand usage, the Cursor Token Rate on Teams and Enterprise, BYOK, Auto billing, subagent billing, Max Mode on legacy request plans, and Bugbot billing."
+summary: "How Cursor bills usage (2026-10-14, modifiers 2026-11-09): Cursor Models vs Other Models pools, on-demand, Cursor Token Rate and its exemptions, BYOK, Auto and subagent billing, legacy Max Mode, Bugbot billing."
 parent: lore/plans-and-models.md
 ---
 
@@ -34,12 +34,14 @@ in the docs. The X Subscription uses one weekly pool shared with Grok
 
 - $0.25 per million tokens (input, output, and cached) on top of the API price for **third-party**
   model requests: included, on-demand, and BYOK usage, and when Auto routes to a third-party model.
-- Cursor's own models (Grok, Composer) are exempt.
+- Exempt (rechecked 2026-11-09): Cursor's own models (Grok, Composer), Auto in Cost mode, and
+  models whose cache-read price is below $0.10 per million tokens.
 
 ## Auto, subagents, BYOK
 
 - All Auto modes (Cost, Balance, Intelligence) bill at the list price of the model each request is
-  routed to. A third-party route draws from Other Models.
+  routed to. A third-party route draws from Other Models. Exception (2026-11-09): Auto in **Cost**
+  mode bills as a Cursor-model request.
 - A subagent bills at the model that ran it; a named third-party model draws from Other Models
   even when the parent chat is on Auto, Grok, or Composer.
 - **BYOK** (own provider API key; AWS Bedrock via IAM role or `agent bedrock`): on individual plans
@@ -62,6 +64,12 @@ in the docs. The X Subscription uses one weekly pool shared with Grok
   renewal after 2026-06-08 ([Bugbot and Automations](bugbot-and-automations.md)).
 - **SDK**: same pools and rules as the IDE; shown under an SDK tag on the usage dashboard.
 - **Data residency**: 10% uplift on eligible model prices.
+
+## Price modifiers in one list (rechecked 2026-11-09)
+
+Legacy Max Mode +20% (legacy request-based plans only); Cursor Token Rate +$0.25/1M (Teams and
+Enterprise, eligible third-party models); data residency +10%; Grok 4.7 Fast 2x, long context
+above 256k 2x, both 3x ([models lineup](models-lineup.md)).
 
 Sources: https://cursor.com/docs/models-and-pricing.md ; https://cursor.com/help/models-and-usage/usage-limits.md ;
 https://cursor.com/help/models-and-usage/token-rate.md ; https://cursor.com/docs/cursor-router.md ;

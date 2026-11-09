@@ -81,8 +81,8 @@ The most common confusion. Where a session runs decides what it can reach:
   MCP per surface, Codex configuration and multi-agent v2 subagents, custom GPTs, admin controls.
 - [Memory and personalization](lore/memory-and-personalization.md) — ChatGPT memory, projects,
   custom instructions, Codex memories, Computer History.
-- [Plans and models](lore/plans-and-models.md) — plan prices, Codex usage, plan-gated features,
-  model lineup and API IDs.
+- [Plans and models](lore/plans-and-models.md) — plan prices, Codex usage, the Codex credits rate
+  card, plan-gated features, model lineup, API IDs and API prices.
 
 Root-level topics:
 

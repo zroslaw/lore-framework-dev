@@ -37,9 +37,10 @@ Worked example (inference, my arithmetic, Opus 5.5 list prices):
 - About 320K tokens of context → about $0.06 per turn in cache reads alone; about $0.01 at 50K.
 - A cache miss re-writes the whole context: 320K × $5/MTok ≈ $1.60 (5-minute write), ≈ $2.56
   (1-hour write).
-- In Claude Code, the main-conversation cache TTL is 5 minutes with an API key, and 1 hour on a
-  subscription within the plan's included usage (from the Agent SDK cost-tracking page, see
-  [observability and cost](agent-observability-and-cost.md)).
+- In Claude Code, only the main conversation within a subscription's included usage gets the
+  1-hour TTL. API keys, subagents, compaction, title requests, and a main conversation that draws
+  usage credits use 5 minutes (checked 2026-11-09; detail in
+  [observability and cost](agent-observability-and-cost.md#claude-code-cache-ttl)).
 - On Pro or Max there is no per-token bill, but bigger turns use more tokens, so limits are
   reached sooner (inference).
 
