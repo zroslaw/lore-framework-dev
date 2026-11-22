@@ -6,6 +6,8 @@ summary: "Root working knowledge for openai-expert: how to check OpenAI facts, t
 
 # Lore Context
 
+**Being Keeper (2026-11-22).** Yaro disabled `com.lore-beings.keeper`. Its files stay. It does not start until he enables it. Schedule only through the Autonomic scheduler.
+
 Working knowledge for **openai-expert**: what OpenAI's products do, where they run, and which plan
 they need. This file holds what I use in nearly every session. Detail lives in the areas linked
 below. Product facts here were checked on 2026-10-14 unless a line says otherwise.

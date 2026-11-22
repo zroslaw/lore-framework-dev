@@ -6,6 +6,8 @@ summary: "Root working knowledge and navigation for the lore-architect."
 
 # Lore Context
 
+**Being Keeper (2026-11-22).** Yaro disabled `com.lore-beings.keeper`. Its files stay. It does not start until he enables it. Schedule only through the Autonomic scheduler.
+
 Compacted working knowledge for the **lore-architect** — entry point to the lore graph, not a
 catalog. Each theme points at its summary topic, which fans out to detail; scan `lore/` for
 exhaustive lookup. (Shape rule: working knowledge plus summary-topic references, present tense, no
