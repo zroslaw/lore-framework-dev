@@ -308,6 +308,7 @@ the shipped prose states the limit rather than implying a guarantee. Neither blo
 
 - **Consult-feedback back-channel** — formal mechanism for the host to route newly-learned content back to the consultant's reflection queue after `/lr:consult`. Left out in v4 to keep consult lightweight. Revisit if users accumulate stale consultant lore relative to how it's actually used.
 - **Host-wins vs interactive conflict resolution for lore overlaps** — current rule is host-wins on lore conflicts during attach. Might want finer control. Not an active issue.
+- **Multi-agent boot request has no procedure (found 2026-11-24).** A user request such as "boot the lore architect and AI-EL architect agents" has no defined procedure: `/lr:boot` takes one agent, and `/lr:attach` adds guests later. The executor improvised. It ran `preflight` and `lore-map` for each agent, read both roles and contexts, and took the first agent as host. At finalize, the host moved to aiel-architect because the session work was AIEL, and lore-architect stayed as a guest with no framework work. Also, two full boot reports are too long. **Candidate:** let `/lr:boot` accept several names, defined as boot of the first name plus `/lr:attach` of each other name. This makes the host explicit and gives finalize a clear starting participant set. Print one compact report line per agent. Status: unranked, small; do when boot or attach changes next.
 
 ### `/lr:spawn-teammate` Beta Graduation
 
